@@ -1,4 +1,4 @@
 {
   "root": true,
-  "extends": ["next/core-web-vitals", "turbo"]
+  "extends": ["next/core-web-vitals"]
 }

@@ -1,6 +1,5 @@
 {
-  "repository": "https://github.com/vercel/examples.git",
-  "license": "MIT",
+  "repository": "https://github.com/riskymh/email.git",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -11,11 +10,13 @@
     "dev": "turbo run dev",
     "start": "turbo run start",
     "lint": "turbo run lint",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "db:push": "yarn workspace @email/db db:push"
   },
   "devDependencies": {
     "eslint": "^8.28.0",
     "eslint-config-turbo": "latest",
     "turbo": "^1.8.3"
-  }
+  },
+  "packageManager": "yarn@4.0.2"
 }
