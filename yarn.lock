@@ -28,6 +28,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cloudflare/workers-types@npm:^4.20231121.0":
+  version: 4.20231121.0
+  resolution: "@cloudflare/workers-types@npm:4.20231121.0"
+  checksum: 096729103bc02fed641a636bad501b8dd9b4f76ad25bd50b5ea32a2c4aa7d90f55c626a6abf86c20e13fe1398690667bd7428d07da972760c8d207dd8d16dcf5
+  languageName: node
+  linkType: hard
+
 "@email/db@workspace:*, @email/db@workspace:packages/db":
   version: 0.0.0-use.local
   resolution: "@email/db@workspace:packages/db"
@@ -63,6 +70,7 @@ __metadata:
     eslint: "npm:^8"
     eslint-config-next: "npm:14.0.3"
     next: "npm:14.0.3"
+    postal-mime: "npm:^2.0.1"
     postcss: "npm:^8"
     react: "npm:^18"
     react-dom: "npm:^18"
@@ -964,6 +972,14 @@ __metadata:
   checksum: 9d6cfd0c19e1c96a434605added99dff48482152af791ec4172fb912a71cff9027ff174efd8cdb2160cc7f377543e0537ffc462d4f279bc4701de3f2a3c4b358
   languageName: node
   linkType: hard
+
+"cloudflare-workers@workspace:apps/cloudflare-workers":
+  version: 0.0.0-use.local
+  resolution: "cloudflare-workers@workspace:apps/cloudflare-workers"
+  dependencies:
+    "@cloudflare/workers-types": "npm:^4.20231121.0"
+  languageName: unknown
+  linkType: soft
 
 "color-convert@npm:^2.0.1":
   version: 2.0.1
@@ -3095,6 +3111,13 @@ __metadata:
   version: 4.0.6
   resolution: "pirates@npm:4.0.6"
   checksum: 00d5fa51f8dded94d7429700fb91a0c1ead00ae2c7fd27089f0c5b63e6eca36197fe46384631872690a66f390c5e27198e99006ab77ae472692ab9c2ca903f36
+  languageName: node
+  linkType: hard
+
+"postal-mime@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "postal-mime@npm:2.0.1"
+  checksum: 0f43471d383ed9875d2b8a50d90c89e98065739547497b5491590ad5e10d2f62e8127448dc935b0c06bc0de39a0582b1f76eed411b6767f37043be06498665b5
   languageName: node
   linkType: hard
 
