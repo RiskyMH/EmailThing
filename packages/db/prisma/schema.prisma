@@ -101,7 +101,7 @@ model MailboxAlias {
 model MailboxForUser {
   mailboxId String
   mailbox   Mailbox @relation(fields: [mailboxId], references: [id])
-  userId    Int
+  userId    String
   user      User    @relation(fields: [userId], references: [id])
 
   @@id([mailboxId, userId])
@@ -110,7 +110,7 @@ model MailboxForUser {
 }
 
 model User {
-  id        Int              @id @default(autoincrement())
+  id        String           @id @default(cuid())
   username  String           @unique @db.VarChar(20)
   password  String           @db.VarChar(200)
   createdAt DateTime         @default(now())
