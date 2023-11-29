@@ -22,8 +22,8 @@ export default {
         if (request.method !== 'POST') {
             return new Response("POST required", { status: 400 })
         }
-
-        if (new URL(request.url).searchParams.get("auth") !== env['auth']) {
+        const authToken = request.headers.get("x-auth") || new URL(request.url).searchParams.get("auth")
+        if (authToken !== env.auth) {
             return new Response("Unauthorised", { status: 401 })
         }
 

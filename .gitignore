@@ -37,4 +37,6 @@ yarn-error.log*
 
 # Turborepo
 .turbo
+
 .yarn/install-state.gz
+.env
