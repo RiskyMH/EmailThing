@@ -60,10 +60,17 @@ export async function POST(request: Request) {
             },
             recipients: {
                 createMany: {
-                    data: email.to.map((to) => ({
-                        address: to.address,
-                        name: to.name,
-                    }))
+                    data: [
+                        ...email.to.map((to) => ({
+                            address: to.address,
+                            name: to.name,
+                        })),
+                        ...email.cc?.map((cc) => ({
+                            address: cc.address,
+                            name: cc.name,
+                            cc: true
+                        })) ?? [],
+                    ]
                 }
             },
             subject: email.subject,

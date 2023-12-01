@@ -2,26 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    /* light and dark mode available */
+    color-scheme: light dark;
+
+    --background: #ffffff;
+    --foreground: var(--primary);
+
+    --muted: var(--secondary);
+    --muted-foreground: #9995a9;
+
+    --popover: var(--secondary);
+    --popover-foreground: var(--primary);
+
+    --border: #9c9aac;
+    --input: var(--muted-foreground);
+
+    --card: var(--secondary);
+    --card-foreground: var(--primary);
+
+    --primary: #000000;
+    --primary-foreground: var(--secondary);
+
+    --secondary: #f1f0f5;
+    --secondary-foreground: var(--primary);
+
+    --accent: var(--secondary);
+    --accent-foreground: var(--primary);
+
+    --red: #ff4f4f;
+    --red-foreground: var(--secondary);
+
+    --blue: #1e75ff;
+    --blue-foreground: var(--primary);
+
+    --destructive: var(--red);
+    --destructive-foreground: var(--red-foreground);
+
+    --ring: var(--border);
+
+    --radius: 0.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #222229;
+      --foreground: var(--primary);
+
+      --muted: 224 6% 84%;
+      --muted-foreground: #909099;
+
+      --accent: var(--border);
+      --accent-foreground: #f1f0f5;
+
+      --popover: var(--secondary);
+      --popover-foreground: var(--primary);
+
+      --border: #2c2c34;
+      --input: #4e4e56;
+
+      --card: var(--secondary);
+      --card-foreground: var(--primary);
+
+      --primary: #efeff0;
+      --primary-foreground: var(--secondary);
+
+      --secondary: #2d2d35;
+      --secondary-foreground: var(--primary);
+
+      --red: #f35953;
+      --red-foreground: var(--primary);
+
+      --blue: #2d77ff;
+      --blue-foreground: var(--primary);
+
+      --destructive: var(--red);
+      --destructive-foreground: var(--red-foreground);
+
+      --ring: var(--input);
+
+    }
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }
