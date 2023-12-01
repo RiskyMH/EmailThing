@@ -117,6 +117,8 @@ model User {
   updatedAt DateTime         @updatedAt
   admin     Boolean          @default(false)
   mailboxes MailboxForUser[]
+
+  @@index([username])
 }
 
 model DraftEmail {

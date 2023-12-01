@@ -1,6 +1,6 @@
 module.exports = {
   plugins: {
-    "./postcss/hex-fix.js": {},
+    "@email/website/postcss/hex-fix.js": {},
     tailwindcss: {},
     autoprefixer: {},
   },
