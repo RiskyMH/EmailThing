@@ -3,8 +3,7 @@ import { cache } from "react";
 
 
 export const getMailbox = cache(async (mailboxId: string, userId: string) => {
-    if (!mailboxId || !userId) throw new Error("Missing required fields")
-    console.log(mailboxId, userId)
+    if (!mailboxId || !userId) return null;
     const mailbox = await prisma.mailbox.findUnique({
         where: {
             id: mailboxId,

@@ -6,9 +6,7 @@ import Sidebar from "./sidebar"
 
 export async function generateMetadata(props: { params: { mailbox: string } }): Promise<Metadata> {
     const userId = await getCurrentUser()
-    if (!userId) return redirect("/login?from=/mail/" + props.params.mailbox)
-
-    const mailbox = await getMailbox(props.params.mailbox, userId)
+    const mailbox = await getMailbox(props.params.mailbox, userId!)
     if (!mailbox) return notFound()
 
     return {
@@ -32,7 +30,9 @@ export default async function MailLayout({
     }
 }) {
     const userId = await getCurrentUser()
-    const mailbox = await getMailbox(params.mailbox, userId!)
+    if (!userId) return redirect("/login?from=/mail/" + params.mailbox)
+
+    const mailbox = await getMailbox(params.mailbox, userId)
     if (!mailbox) return notFound()
 
     return (

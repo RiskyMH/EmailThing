@@ -18,7 +18,7 @@ export function ClientStar({ action, enabled, className }: any) {
     }
 
     return (
-        <Button variant="ghost" size="auto" onClick={onClick as any} aria-disabled={isPending} className={className + " hover:bg-transparent"}>
+        <Button variant="ghost" size="auto" onClick={onClick as any} aria-disabled={isPending} className={className + " hover:bg-transparent rounded-full ring-offset-5"}>
             {isPending ?
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 : <StarIcon fill={enabled ? "currentColor" : "transparent"} className="h-5 w-5" />

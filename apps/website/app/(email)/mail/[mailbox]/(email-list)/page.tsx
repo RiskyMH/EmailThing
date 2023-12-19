@@ -2,20 +2,9 @@ import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
 import { getMailbox } from "../tools"
 import { prisma } from "@email/db"
-import Link from "next/link"
 import { Metadata } from "next"
 import EmailList from "./email-list"
 
-
-// export async function generateMetadata(props: { params: { mailbox: string } }): Promise<Metadata> {
-//     const userId = await getCurrentUser()
-//     const mailbox = await getMailbox(props.params.mailbox, userId!)
-//     if (!mailbox) return notFound()
-
-//     return {
-//         title: "Inbox",
-//     }
-// }
 
 export const metadata = {
     title: "Inbox",

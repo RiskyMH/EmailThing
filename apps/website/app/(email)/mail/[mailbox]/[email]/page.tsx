@@ -14,6 +14,28 @@ const getEmail = async (mailboxId: string, emailId: string, userId: string) => {
     const email = await prisma.email.findUnique({
         where: {
             id: emailId
+        },
+        select:{
+            id: true,
+            subject: true,
+            snippet: true,
+            body: true,
+            createdAt: true,
+            isRead: true,
+            isStarred: true,
+            category: {
+                select: {
+                    name: true,
+                    id: true,
+                    color: true
+                }
+            },
+            from: {
+                select: {
+                    name: true,
+                    address: true
+                }
+            }
         }
     })
 
@@ -77,7 +99,7 @@ export default async function Email({
         <div>
             {!mail.isRead && <MarkRead action={markRead} />}
             <h1>{mail.subject}</h1>
-            <p>{mail.snippet}</p>
+            <p>{mail.body}</p>
         </div>
 
     )

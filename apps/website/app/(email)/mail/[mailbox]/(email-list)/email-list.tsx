@@ -63,12 +63,12 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
 
 
     return (
-        <div className="flex flex-col space-y-3 p-5 w-full">
+        <div className="flex-col space-y-3 p-5 flex w-full min-w-0">
             {emails.map(email => (
                 <Link
                     key={email.id}
                     href={`/mail/${mailboxId}/${email.id}`}
-                    className={cn("rounded shadow-sm h-16 px-5 py-1.5 w-full flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}
+                    className={cn("rounded shadow-sm h-16 px-5 py-1.5 inline-flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}
                 >
                     <TooltipText text={email.category?.name ?? "No category"}>
                         <span
@@ -84,8 +84,8 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                     </TooltipText>
 
                     <span className="self-center w-64 sm:font-bold truncate">{email.subject}</span>
-                    
-                    <span className="self-center w-full hidden sm:flex gap-4">
+
+                    <span className="self-center w-full hidden sm:inline-flex gap-4 flex-shrink">
 
                         {!email.isRead && (
                             <span className="select-none bg-red self-center text-white text-xs rounded px-3 py-1 font-bold inline h-6">
@@ -96,7 +96,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                             {email.snippet}
                         </span>
                     </span>
-                    <ClientStar enabled={!!email.isStarred} action={starEmail.bind(null, email.id, !email.isStarred)} className="self-center text-muted-foreground hover:text-foreground flex-shrink-0 flex ml-auto -mr-2" />
+                    <ClientStar enabled={!!email.isStarred} action={starEmail.bind(null, email.id, !email.isStarred)} className="self-center text-muted-foreground hover:text-foreground flex-shrink-0 ml-auto -mr-2" />
                     <LocalTime type="hour-min" time={email.createdAt} className="float-right self-center text-muted-foreground text-sm flex-shrink-0 w-16 text-right" />
 
                 </Link>

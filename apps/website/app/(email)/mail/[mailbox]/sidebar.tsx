@@ -41,18 +41,18 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
     ]
 
     return (
-        <div className="h-auto min-h-screen bg-tertiary text-tertiary-foreground w-60 p-3 flex-shrink-0">
+        <div className="h-auto min-h-screen bg-tertiary text-tertiary-foreground lg:w-60 p-3 flex-shrink-0 hidden sm:inline">
             <br className="h-5" />
 
-            <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 font-bold my-3">
+            <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 px-4 lg:px-6 font-bold my-3">
                 <Link href="#new">
-                    <PenSquareIcon className="h-5 w-5" /> New Message
+                    <PenSquareIcon className="h-5 w-5" /> <span className="hidden lg:inline">New Message</span>
                 </Link>
             </Button>
 
             <br className="h-4" />
 
-            <div className="flex flex-col p-2 gap-2 text-sm">
+            <div className="flex flex-col gap-2 py-2 text-sm">
                 {items.map(item => (<LinkElement key={item.href} {...item} />))}
             </div>
         </div>
@@ -63,16 +63,16 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
 function LinkElement({ href, name, icon: Icon }: { href: string, name: string, icon: any }) {
 
     return (
-        // <Button asChild variant="ghost" className="rounded w-full gap-2 p-6 font-bold">
-        <SideBarLink href={href} className="flex py-3 gap-4 hover:text-foreground font-bold transition-colors">
-            <Icon className="h-6 w-6" /> <span className="self-center">{name}</span>
-            {(name === "Inbox") && (
-                <Suspense>
-                    <UnreadEmailsCount mailboxId={href.split("/")[2]} />
-                </Suspense>
-            )}
-        </SideBarLink>
-        // </Button>
+        <Button asChild variant="ghost" className="flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal self-center lg:self-auto">
+            <SideBarLink href={href} className="">
+                <Icon className="h-6 w-6" /> <span className="self-center hidden lg:inline">{name}</span>
+                {(name === "Inbox") && (
+                    <Suspense>
+                        <UnreadEmailsCount mailboxId={href.split("/")[2]} />
+                    </Suspense>
+                )}
+            </SideBarLink>
+        </Button>
     )
 }
 
@@ -91,7 +91,7 @@ async function UnreadEmailsCount({ mailboxId }: { mailboxId: string }) {
     }
 
     return (
-        <span className="bg-blue text-blue-foreground rounded font-bold px-3 py-1 text-xs ml-auto float-right self-center select-none">
+        <span className="bg-blue text-blue-foreground rounded font-bold px-3 py-1 text-xs ml-auto float-right self-center select-none hidden lg:inline">
             {unreadEmails}
         </span>
     )
