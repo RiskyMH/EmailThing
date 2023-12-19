@@ -45,7 +45,7 @@ const plugin = () => ({
 
         //  if there even is a value...
         //  ...and if it's not a url value
-        if (!value) return console.log('No value found for ' + decl.prop);
+        if (!value) return
 
         //  create a list of hexes in a given value
         const hexes = value.match(/#\w{3,6}/g) || [];

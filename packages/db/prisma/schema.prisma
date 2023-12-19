@@ -2,8 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
   // relationMode = "prisma"
 }
 
@@ -95,6 +95,8 @@ model MailboxAlias {
 
   @@unique([mailboxId, alias])
   @@index([mailboxId])
+  @@index([alias])
+  @@index([mailboxId, alias])
   @@index([default])
 }
 
@@ -125,9 +127,10 @@ model DraftEmail {
   id        String   @id @default(cuid())
   mailboxId String
   mailbox   Mailbox  @relation(fields: [mailboxId], references: [id])
-  title     String   @db.TinyText()
+  subject   String   @db.TinyText()
   body      String   @db.Text()
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   from String // EmailAlias
   to   DraftEmailRecipents[]

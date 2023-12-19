@@ -21,6 +21,7 @@ export async function POST(request: Request) {
 
     const parser = new PostalMime() as PostalMime
     const email = await parser.parse(rawEmail as string);
+    console.log(email.from)
 
     // work out which mailbox to put it in
     const mailbox = await prisma.mailbox.findFirst({
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
             recipients: {
                 createMany: {
                     data: [
+                        // @ts-expect-error i want the error here
                         ...email.to.map((to) => ({
                             address: to.address,
                             name: to.name,
@@ -75,7 +77,7 @@ export async function POST(request: Request) {
             },
             subject: email.subject,
             body: body,
-            snippet: body.slice(0, 100),
+            snippet: slice(body, 200),
             mailbox: {
                 connect: mailbox
             }
@@ -91,4 +93,8 @@ export async function POST(request: Request) {
         success: true,
         id: e.id,
     })
+}
+
+function slice(text: string, length: number) {
+    return text.slice(0, length) + (length < text.length ? '…' : '')
 }

@@ -7,7 +7,7 @@ import { redirect } from "next/navigation"
 
 const errorMsg = "Invalid username or password"
 
-export default async function signIn(username: string, password: string, callback?: string) {
+export default async function signIn(username: string, password: string, callback?: string | null) {
     const parsedData = userAuthSchema.parse({ username, password })
     // redirect(callback || "/dashboard")
 
@@ -35,6 +35,21 @@ export default async function signIn(username: string, password: string, callbac
 
     await addUserTokenToCookie(user)
 
-    redirect(callback || "/dashboard")
-    return {}
+    if (callback) redirect(callback)
+
+    // get the user's mailbox then redirect to it
+    const mailbox = await prisma.mailbox.findFirst({
+        where: {
+            users: {
+                some: {
+                    userId: user.id,
+                }
+            }
+        },
+        select: {
+            id: true,
+        }
+    })
+
+    redirect(`/mail/${mailbox?.id}`)
 }

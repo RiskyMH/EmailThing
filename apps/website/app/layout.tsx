@@ -12,7 +12,7 @@ const fontSans = FontSans({
 export const metadata = {
   title: {
     default: "EmailThing",
-    template: "%s | EmailThing",
+    template: "%s - EmailThing",
   },
   description: "An Email Client",
 } satisfies Metadata

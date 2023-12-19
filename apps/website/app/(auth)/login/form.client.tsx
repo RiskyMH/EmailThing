@@ -26,15 +26,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         resolver: zodResolver(userAuthSchema),
     })
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const getCallbackUrl = () => new URL(window.location.href).searchParams?.get("from") || "/"
+    const getCallbackUrl = () => new URL(window.location.href).searchParams?.get("from")
 
     async function onSubmit(data: AuthFormData) {
         setIsLoading(true)
         const signInResult = await signIn(data.username, data.password, getCallbackUrl())
 
-        setIsLoading(false)
         
         if (signInResult?.error) {
+            setIsLoading(false)
             return toast({
                 title: signInResult.error,
                 variant: "destructive",
