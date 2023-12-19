@@ -68,9 +68,8 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                 <Link
                     key={email.id}
                     href={`/mail/${mailboxId}/${email.id}`}
-                    prefetch={false}
                 >
-                    <span key={email.id} className={cn("rounded  shadow-sm h-16 pl-5 pr-5 py-2 w-full flex gap-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}>
+                    <span key={email.id} className={cn("rounded shadow-sm h-16 pl-5 pr-5 py-2 w-full flex gap-4", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}>
                         <span
                             className="self-center rounded-full h-3 w-3 m-2 inline-block mx-auto flex-shrink-0"
                             style={{ backgroundColor: email.category?.color ?? "grey" }}
@@ -91,7 +90,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                                 {email.snippet}
                             </span>
                         </span>
-                        <span className="self-center truncate text-muted-foreground hover:text-foreground mx-auto flex-shrink-0">
+                        <span className="self-center truncate text-muted-foreground hover:text-foreground mx-auto flex-shrink-0 flex">
                             <ClientStar enabled={!!email.isStarred} action={starEmail.bind(null, email.id, !email.isStarred)} />
                         </span>
                         <LocalTime type="hour-min" time={email.createdAt} className="float-right self-center text-muted-foreground text-sm flex-shrink-0 w-16 text-right" />
