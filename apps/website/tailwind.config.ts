@@ -32,6 +32,10 @@ const config = {
           DEFAULT: "rgba(var(--secondary))",
           foreground: "rgba(var(--secondary-foreground))",
         },
+        tertiary: {
+          DEFAULT: "rgba(var(--tertiary))",
+          foreground: "rgba(var(--tertiary-foreground))",
+        },
         red: {
           DEFAULT: "rgba(var(--red))",
           foreground: "rgba(var(--red-foreground))",

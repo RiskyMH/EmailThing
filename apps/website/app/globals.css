@@ -11,7 +11,7 @@
     --foreground: var(--primary);
 
     --muted: var(--secondary);
-    --muted-foreground: #9995a9;
+    --muted-foreground: #8f8ca2;
 
     --popover: var(--secondary);
     --popover-foreground: var(--primary);
@@ -31,11 +31,14 @@
     --accent: var(--secondary);
     --accent-foreground: var(--primary);
 
+    --tertiary: #white;
+    --tertiary-foreground: var(--muted-foreground);
+
     --red: #ff4f4f;
     --red-foreground: var(--secondary);
 
     --blue: #1e75ff;
-    --blue-foreground: var(--primary);
+    --blue-foreground: var(--primary-foreground);
 
     --destructive: var(--red);
     --destructive-foreground: var(--red-foreground);
@@ -71,11 +74,14 @@
       --secondary: #2d2d35;
       --secondary-foreground: var(--primary);
 
+      --tertiary: #1d1d23;
+      --tertiary-foreground: var(--muted-foreground);
+
       --red: #f35953;
       --red-foreground: var(--primary);
 
       --blue: #2d77ff;
-      --blue-foreground: var(--primary);
+      --blue-foreground: var(--secondary-foreground);
 
       --destructive: var(--red);
       --destructive-foreground: var(--red-foreground);

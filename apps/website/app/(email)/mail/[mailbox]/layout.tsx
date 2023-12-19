@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/app/utils/user"
 import { notFound, redirect } from "next/navigation"
 import { getMailbox } from "./tools"
 import { Metadata } from "next"
+import Sidebar from "./sidebar"
 
 export async function generateMetadata(props: { params: { mailbox: string } }): Promise<Metadata> {
     const userId = await getCurrentUser()
@@ -35,7 +36,8 @@ export default async function MailLayout({
     if (!mailbox) return notFound()
 
     return (
-        <div className="container">
+        <div className="flex">
+            <Sidebar mailbox={mailbox.id} />
             {children}
         </div>
     )
