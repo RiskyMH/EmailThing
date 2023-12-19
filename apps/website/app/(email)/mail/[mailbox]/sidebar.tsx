@@ -1,6 +1,6 @@
 import { Button } from "@/app/components/ui/button";
 import { prisma } from "@email/db";
-import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon } from "lucide-react";
+import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { SideBarLink } from "./sidebar.client";
 import { Suspense } from "react";
@@ -14,7 +14,7 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
             href: `/mail/${mailboxId}`
         },
         {
-            name: "Drafts",
+            name: "Draft",
             icon: FileIcon,
             href: `/mail/${mailboxId}/drafts`
         },
@@ -29,14 +29,19 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
             href: `/mail/${mailboxId}/sent`
         },
         {
-            name: "Bin",
-            icon: ShieldAlertIcon,
+            name: "Trash",
+            icon: Trash2Icon,
             href: `/mail/${mailboxId}/bin`
+        },
+        {
+            name: "Spam",
+            icon: ShieldAlertIcon,
+            href: `/mail/${mailboxId}/#spam`
         },
     ]
 
     return (
-        <div className="h-auto min-h-screen bg-tertiary text-tertiary-foreground w-64 p-3">
+        <div className="h-auto min-h-screen bg-tertiary text-tertiary-foreground w-60 p-3 flex-shrink-0">
             <br className="h-5" />
 
             <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 font-bold my-3">
@@ -47,7 +52,7 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
 
             <br className="h-4" />
 
-            <div className="flex flex-col p-2 gap-8 text-sm">
+            <div className="flex flex-col p-2 gap-2 text-sm">
                 {items.map(item => (<LinkElement key={item.href} {...item} />))}
             </div>
         </div>
@@ -59,7 +64,7 @@ function LinkElement({ href, name, icon: Icon }: { href: string, name: string, i
 
     return (
         // <Button asChild variant="ghost" className="rounded w-full gap-2 p-6 font-bold">
-        <SideBarLink href={href} className="flex gap-4 hover:text-foreground font-bold transition-colors">
+        <SideBarLink href={href} className="flex py-3 gap-4 hover:text-foreground font-bold transition-colors">
             <Icon className="h-6 w-6" /> <span className="self-center">{name}</span>
             {(name === "Inbox") && (
                 <Suspense>

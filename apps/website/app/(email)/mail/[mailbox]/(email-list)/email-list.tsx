@@ -1,12 +1,12 @@
 import LocalTime from "@/app/components/localtime";
-import { Card } from "@/app/components/ui/card";
 import { cn } from "@/app/utils/tw";
 import { getCurrentUser } from "@/app/utils/user";
 import { prisma } from "@email/db";
-import { StarIcon } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { ClientStar } from "./components.client";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/app/components/ui/tooltip";
+import TooltipText from "@/app/components/tooltip-text";
 
 
 interface EmailListProps {
@@ -63,22 +63,28 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
 
 
     return (
-        <div className="flex flex-col space-y-4 p-5 w-full">
+        <div className="flex flex-col space-y-3 p-5 w-full">
             {emails.map(email => (
                 <Link
                     key={email.id}
                     href={`/mail/${mailboxId}/${email.id}`}
-                    className={cn("rounded shadow-sm h-16 pl-5 pr-5 py-2 w-full flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}
+                    className={cn("rounded shadow-sm h-16 px-5 py-1.5 w-full flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}
                 >
-                    <span
-                        className="self-center rounded-full h-3 w-3 m-2 inline-block mx-auto flex-shrink-0"
-                        style={{ backgroundColor: email.category?.color ?? "grey" }}
-                        title={email.category?.name ?? "No category"}
-                    />
-                    <span className="self-center w-56 font-bold truncate" title={`${email.from?.name} (${email.from?.address})`}>
-                        {email.from?.name}
-                    </span>
-                    <span className="self-center w-56 sm:font-bold truncate">{email.subject}</span>
+                    <TooltipText text={email.category?.name ?? "No category"}>
+                        <span
+                            className="self-center rounded-full h-3 w-3 m-2 inline-block mx-auto flex-shrink-0"
+                            style={{ backgroundColor: email.category?.color ?? "grey" }}
+                        />
+                    </TooltipText>
+
+                    <TooltipText text={`${email.from?.name} (${email.from?.address})`}>
+                        <span className="self-center w-56 font-bold truncate">
+                            {email.from?.name}
+                        </span>
+                    </TooltipText>
+
+                    <span className="self-center w-64 sm:font-bold truncate">{email.subject}</span>
+                    
                     <span className="self-center w-full hidden sm:flex gap-4">
 
                         {!email.isRead && (
