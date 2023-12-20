@@ -36,7 +36,7 @@ export default async function MailLayout({
     if (!mailbox) return notFound()
 
     return (
-        <div className="flex">
+        <div className="flex w-screen max-w-full">
             <Sidebar mailbox={mailbox.id} />
             {children}
         </div>

@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/app/utils/user"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import { getMailbox } from "../tools"
 import { Metadata } from "next"
 import { prisma } from "@email/db"
@@ -15,7 +15,7 @@ const getEmail = async (mailboxId: string, emailId: string, userId: string) => {
         where: {
             id: emailId
         },
-        select:{
+        select: {
             id: true,
             subject: true,
             snippet: true,
@@ -96,10 +96,12 @@ export default async function Email({
 
 
     return (
-        <div>
+        <div className="min-w-0 p-5">
             {!mail.isRead && <MarkRead action={markRead} />}
-            <h1>{mail.subject}</h1>
-            <p>{mail.body}</p>
+            <h1 className="font-bold text-3xl">{mail.subject}</h1>
+            <p className="whitespace-pre-wrap break-words leading-normal">
+                {mail.body}
+            </p>
         </div>
 
     )
