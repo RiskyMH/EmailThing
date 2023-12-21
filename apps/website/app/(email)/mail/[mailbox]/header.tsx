@@ -68,7 +68,7 @@ async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
     const user = await getUser()!
     const mailbox = await getMailbox(mailboxId, user!.id)!
     return (
-        <UserNav user={{
+        <UserNav mailboxId={mailboxId} user={{
             id: mailbox!.id!,
             name: user!.username,
             secondary: mailbox!.primaryAlias!.alias!,

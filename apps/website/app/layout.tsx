@@ -15,6 +15,7 @@ export const metadata = {
     template: "%s - EmailThing",
   },
   description: "An Email Client",
+  manifest: "/manifest.json",
 } satisfies Metadata
 
 export default function RootLayout({

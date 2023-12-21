@@ -1,0 +1,17 @@
+{
+  "name": "EmailThing",
+  "short_name": "EmailThing",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "description": "An email client!",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "related_applications": []
+}

@@ -73,13 +73,14 @@ model MailboxCategory {
 }
 
 model Mailbox {
-  id        String            @id @default(cuid())
-  emails    Email[]
-  categorys MailboxCategory[]
-  users     MailboxForUser[]
-  drafts    DraftEmail[]
-  aliases   MailboxAlias[]
-  domain    String?           @db.TinyText() // "@riskymh.dev"
+  id            String                @id @default(cuid())
+  emails        Email[]
+  categorys     MailboxCategory[]
+  users         MailboxForUser[]
+  drafts        DraftEmail[]
+  aliases       MailboxAlias[]
+  domain        String?               @db.TinyText() // "@riskymh.dev"
+  notifications MailboxNotification[]
 
   @@index([id])
 }
@@ -109,6 +110,19 @@ model MailboxForUser {
   @@id([mailboxId, userId])
   @@index([mailboxId])
   @@index([userId])
+}
+
+model MailboxNotification {
+  id        String    @id @default(cuid())
+  mailboxId String
+  mailbox   Mailbox   @relation(fields: [mailboxId], references: [id])
+  endpoint  String    @unique @db.VarChar(500)
+  p256dh    String
+  auth      String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  @@index([mailboxId])
 }
 
 model User {

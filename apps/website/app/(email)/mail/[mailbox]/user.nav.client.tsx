@@ -20,7 +20,8 @@ interface UserProps {
         id: string,
         image?: string,
         secondary: string,
-    }
+    }, 
+    mailboxId: string
 }
 
 function getInitials(name: string) {
@@ -28,7 +29,7 @@ function getInitials(name: string) {
     return name.slice(0, 2).toUpperCase()
 }
 
-export function UserNav({ user }: UserProps) {
+export function UserNav({ user, mailboxId }: UserProps) {
 
     return (
         <DropdownMenu>
@@ -70,7 +71,7 @@ export function UserNav({ user }: UserProps) {
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="#config" className="cursor-pointer">
+                        <Link href={`/mail/${mailboxId}/config`} className="cursor-pointer">
                             Mailbox Config
                         </Link>
                     </DropdownMenuItem>
