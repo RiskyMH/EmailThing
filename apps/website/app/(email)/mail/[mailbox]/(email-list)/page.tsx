@@ -45,6 +45,7 @@ export default async function Mailbox({
             isRead: true,
             isStarred: true,
             raw: true,
+            binnedAt: true,
             category: {
                 select: {
                     name: true,

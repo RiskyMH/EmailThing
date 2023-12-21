@@ -29,6 +29,7 @@ export default async function Mailbox({
         where: {
             mailboxId: mailbox.id,
             isStarred: true,
+            binnedAt: null,
             category: searchParams?.category ? {
                 id: searchParams.category
             } : undefined
@@ -41,6 +42,7 @@ export default async function Mailbox({
             createdAt: true,
             isRead: true,
             isStarred: true,
+            binnedAt: true,
             category: {
                 select: {
                     name: true,

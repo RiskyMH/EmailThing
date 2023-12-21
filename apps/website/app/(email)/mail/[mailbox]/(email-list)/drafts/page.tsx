@@ -44,7 +44,8 @@ export default async function Mailbox({
         isStarred: null,
         isRead: null,
         from: null,
-        draft: true
+        draft: true,
+        binnedAt: null,
     }))
 
     return (

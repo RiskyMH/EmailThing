@@ -36,7 +36,8 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
         {
             name: "Spam",
             icon: ShieldAlertIcon,
-            href: `/mail/${mailboxId}/#spam`
+            href: `/mail/${mailboxId}/#spam`,
+            disabled: true
         },
     ]
 
@@ -59,11 +60,10 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
 
 }
 
-function LinkElement({ href, name, icon: Icon }: { href: string, name: string, icon: any }) {
-
+function LinkElement({ href, name, icon: Icon, disabled }: { href: string, name: string, icon: any, disabled?: boolean }) {
     return (
         <Button asChild variant="ghost" className="flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal self-center lg:self-auto">
-            <SidebarLink href={href} className="">
+            <SidebarLink href={href} className="" disabled={disabled}>
                 <Icon className="h-6 w-6" /> <span className="self-center hidden lg:inline">{name}</span>
                 {(name === "Inbox") && (
                     <Suspense>

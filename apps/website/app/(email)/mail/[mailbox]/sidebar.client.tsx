@@ -4,8 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PropsWithChildren } from "react";
 
-export function SidebarLink({ href, className, children }: PropsWithChildren<{ href: string, className: string}>) {
+export function SidebarLink({ href, className, children, disabled }: PropsWithChildren<{ href: string, className: string, disabled?: boolean}>) {
     const pathName = usePathname()
+
+    if (disabled) {
+        return (
+            <div className={cn(className, "relative group flex items-center h-10 w-full px-3 gap-2 rounded cursor-not-allowed opacity-50")}>
+                {children}
+            </div>
+        )
+    }
 
     return (
         <Link
