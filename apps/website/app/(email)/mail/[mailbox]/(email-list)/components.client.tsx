@@ -1,7 +1,8 @@
 'use client'
 
 import { Button } from "@/app/components/ui/button";
-import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon } from "lucide-react"
+import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon, MailOpenIcon } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import type { MouseEvent } from "react"
 import { useTransition } from 'react';
 
@@ -27,12 +28,16 @@ export function ClientStar({ action, enabled, className }: any) {
     )
 }
 
+const iconMap: Record<string, LucideIcon> = {
+    StarIcon: StarIcon,
+    BellDotIcon: BellDotIcon,
+    Trash2Icon: Trash2Icon,
+    ArchiveRestoreIcon: ArchiveRestoreIcon,
+    MailOpenIcon: MailOpenIcon
+}
+
 export function ContextMenuAction({ children, action, icon, fillIcon, ...props }: any) {
-    const Icon = icon === "StarIcon" ? StarIcon
-        : icon === "BellDotIcon" ? BellDotIcon
-            : icon === "Trash2Icon" ? Trash2Icon
-                : icon === "ArchiveRestoreIcon" ? ArchiveRestoreIcon 
-                : null;
+    const Icon: LucideIcon | null = iconMap[icon] ?? null;
 
     const [isPending, startTransition] = useTransition();
 
@@ -46,7 +51,7 @@ export function ContextMenuAction({ children, action, icon, fillIcon, ...props }
     return (
         <div {...props} onClick={onClick}>
             {Icon && !isPending && <Icon className="w-5 h-5 text-muted/50" fill={fillIcon ? "currentColor" : "transparent"} />}
-            {Icon && isPending && <Loader2 className="w-5 h-5 text-muted/50 animate-spin" />}
+            {!!Icon && isPending && <Loader2 className="w-5 h-5 text-muted/50 animate-spin" />}
             {children}
         </div>
 

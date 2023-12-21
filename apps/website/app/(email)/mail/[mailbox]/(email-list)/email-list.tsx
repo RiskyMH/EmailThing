@@ -100,7 +100,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                                 </span>
                             </TooltipText>
 
-                            <span className="self-center w-64 sm:font-bold truncate">{email.subject}</span>
+                            <span className="self-center w-72 sm:font-bold truncate">{email.subject}</span>
 
                             <span className="self-center w-full hidden sm:inline-flex gap-4 flex-shrink">
 
@@ -109,7 +109,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                                         NEW
                                     </span>
                                 )}
-                                <span className="text-muted-foreground line-clamp-2 text-sm">
+                                <span className="text-muted-foreground line-clamp-2 text-sm break-words">
                                     {email.snippet}
                                 </span>
                             </span>
@@ -144,7 +144,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                             </ContextMenuAction>
                         </ContextMenuItem>
                         <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
-                            <ContextMenuAction icon="BellDotIcon" fillIcon={!email.isRead} action={updateEmail.bind(null, email.id, { isRead: !email.isRead })}>
+                            <ContextMenuAction icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"} action={updateEmail.bind(null, email.id, { isRead: !email.isRead })}>
                                 {email.isRead ? "Mark as unread" : "Mark as read"}
                             </ContextMenuAction>
                         </ContextMenuItem>
