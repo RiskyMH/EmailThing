@@ -43,7 +43,9 @@ export default {
         const rawEmail = await streamToArrayBuffer(message.raw, message.rawSize);
         const raw = new TextDecoder("utf-8").decode(rawEmail);
 
-        fetch("https://email.riskymh.dev/api/recieve-email?zone=riskymh.dev", {
+        if (env.forward) await message.forward(env.forward);
+
+        const req = await fetch("https://emailthing.xyz/api/recieve-email?zone=riskymh.dev", {
             method: "POST",
             headers: {
                 "content-type": "application/json",
@@ -56,6 +58,8 @@ export default {
             })
         });
 
-        if (env.forward) await message.forward(env.forward);
+        if (!req.ok) {
+            throw new Error(await req.text());
+        }
     }
 };

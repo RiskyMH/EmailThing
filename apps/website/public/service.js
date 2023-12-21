@@ -6,6 +6,7 @@ self.addEventListener('push', async (event) => {
         self.registration.showNotification(eventData.title, {
             body: eventData.body,
             icon: '/favicon.ico',
+            timestamp: Date.now(),
             data: {
                 url: eventData.url || '/',
             },

@@ -16,13 +16,13 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                 <nav className="w-auto lg:w-[calc(15rem-1.75rem)]">
                     <Button asChild variant="ghost">
                         <Link
-                            className="flex items-center gap-2 hover:bg-transparent -ms-4 me-8 text-lg"
+                            className="flex items-center gap-2 hover:bg-transparent -ms-4 me-8"
                             href={"/mail/" + mailboxId}
                         >
                             <MailIcon />
-                            <span className="inline-block whitespace-nowrap font-bold">
+                            <h1 className="inline-block whitespace-nowrap font-bold text-lg">
                                 EmailThing
-                            </span>
+                            </h1>
                         </Link>
                     </Button>
 

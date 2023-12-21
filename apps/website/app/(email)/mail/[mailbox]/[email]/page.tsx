@@ -98,7 +98,7 @@ export default async function Email({
     return (
         <div className="min-w-0 p-5">
             {!mail.isRead && <MarkRead action={markRead} />}
-            <h1 className="font-bold text-3xl">{mail.subject}</h1>
+            <h1 className="font-bold text-3xl break-words">{mail.subject}</h1>
             <p className="whitespace-pre-wrap break-words leading-normal">
                 {mail.body}
             </p>
