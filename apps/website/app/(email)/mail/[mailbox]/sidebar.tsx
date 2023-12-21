@@ -2,7 +2,7 @@ import { Button } from "@/app/components/ui/button";
 import { prisma } from "@email/db";
 import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
-import { SideBarLink } from "./sidebar.client";
+import { SidebarLink } from "./sidebar.client";
 import { Suspense } from "react";
 
 export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
@@ -41,8 +41,7 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
     ]
 
     return (
-        <div className="h-auto min-h-screen bg-tertiary text-tertiary-foreground lg:w-60 p-3 flex-shrink-0 hidden sm:inline">
-            <br className="h-5" />
+        <div className="min-h-screen bg-tertiary text-tertiary-foreground lg:w-60 p-3 flex-shrink-0 hidden sm:inline">
 
             <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 px-4 lg:px-6 font-bold my-3">
                 <Link href="#new">
@@ -64,14 +63,14 @@ function LinkElement({ href, name, icon: Icon }: { href: string, name: string, i
 
     return (
         <Button asChild variant="ghost" className="flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal self-center lg:self-auto">
-            <SideBarLink href={href} className="">
+            <SidebarLink href={href} className="">
                 <Icon className="h-6 w-6" /> <span className="self-center hidden lg:inline">{name}</span>
                 {(name === "Inbox") && (
                     <Suspense>
                         <UnreadEmailsCount mailboxId={href.split("/")[2]} />
                     </Suspense>
                 )}
-            </SideBarLink>
+            </SidebarLink>
         </Button>
     )
 }
@@ -91,7 +90,7 @@ async function UnreadEmailsCount({ mailboxId }: { mailboxId: string }) {
     }
 
     return (
-        <span className="bg-blue text-blue-foreground rounded font-bold px-3 py-1 text-xs ml-auto float-right self-center select-none hidden lg:inline">
+        <span className="bg-blue text-blue-foreground rounded font-bold px-3 py-1 text-xs ms-auto float-right self-center select-none hidden lg:inline">
             {unreadEmails}
         </span>
     )

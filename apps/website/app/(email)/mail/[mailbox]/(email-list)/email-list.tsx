@@ -96,7 +96,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type }: EmailLis
                             {email.snippet}
                         </span>
                     </span>
-                    <ClientStar enabled={!!email.isStarred} action={starEmail.bind(null, email.id, !email.isStarred)} className="self-center text-muted-foreground hover:text-foreground flex-shrink-0 ml-auto -mr-2" />
+                    <ClientStar enabled={!!email.isStarred} action={starEmail.bind(null, email.id, !email.isStarred)} className="self-center text-muted-foreground hover:text-foreground flex-shrink-0 ms-auto -me-2" />
                     <LocalTime type="hour-min" time={email.createdAt} className="float-right self-center text-muted-foreground text-sm flex-shrink-0 w-16 text-right" />
 
                 </Link>

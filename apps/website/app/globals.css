@@ -13,7 +13,7 @@
     --muted: var(--secondary);
     --muted-foreground: #8f8ca2;
 
-    --popover: var(--secondary);
+    --popover: var(--tertiary);
     --popover-foreground: var(--primary);
 
     --border: #9c9aac;
@@ -31,7 +31,7 @@
     --accent: var(--secondary);
     --accent-foreground: var(--primary);
 
-    --tertiary: #white;
+    --tertiary: #ffffff;
     --tertiary-foreground: var(--muted-foreground);
 
     --red: #ff4f4f;
@@ -59,7 +59,7 @@
       --accent: var(--border);
       --accent-foreground: #f1f0f5;
 
-      --popover: var(--secondary);
+      --popover: var(--tertiary);
       --popover-foreground: var(--primary);
 
       --border: #2c2c34;
@@ -95,6 +95,7 @@
 @layer base {
   * {
     @apply border-border;
+    scroll-behavior: smooth;
   }
 
   body {

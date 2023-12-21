@@ -13,7 +13,7 @@ export default function Loading() {
                     <span className="self-center w-56 bg-muted-foreground/50 h-5 rounded" />
                     <span className="self-center w-64 bg-muted-foreground/50 h-5 rounded" />
                     <span className="self-center w-full hidden sm:flex gap-4 bg-muted-foreground/25 h-7 rounded-lg" />
-                    <span className="self-center truncate bg-muted-foreground/25 mx-auto inline-block flex-shrink-0 rounded-full h-5 w-5 -mr-2" />
+                    <span className="self-center truncate bg-muted-foreground/25 mx-auto inline-block flex-shrink-0 rounded-full h-5 w-5 -me-2" />
                     <span className="float-right self-center text-sm flex-shrink-0 w-16 bg-muted-foreground/25 h-4 rounded text-right" />
 
                 </div>
