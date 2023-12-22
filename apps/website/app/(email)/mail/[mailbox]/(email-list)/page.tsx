@@ -4,6 +4,7 @@ import { getMailbox } from "../tools"
 import { prisma } from "@email/db"
 import { Metadata } from "next"
 import EmailList from "./email-list"
+import { getEmailList } from "./tools"
 
 
 export const metadata = {
@@ -25,50 +26,12 @@ export default async function Mailbox({
     const userId = await getCurrentUser()
     const mailbox = await getMailbox(params.mailbox, userId!)
     if (!mailbox) return notFound()
+
     console.time("emailfetch")
-
-    const emails = await prisma.email.findMany({
-        where: {
-            mailboxId: mailbox.id,
-            binnedAt: null,
-            isSender: false,
-            category: searchParams?.category ? {
-                id: searchParams.category
-            } : undefined
-        },
-        select: {
-            id: true,
-            snippet: true,
-            subject: true,
-            body: true,
-            createdAt: true,
-            isRead: true,
-            isStarred: true,
-            raw: true,
-            binnedAt: true,
-            category: {
-                select: {
-                    name: true,
-                    id: true,
-                    color: true
-                }
-            },
-            from: {
-                select: {
-                    name: true,
-                    address: true
-                }
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        }
-    });
-
-
+    const [emails, categories, allCount] = await getEmailList(mailbox.id, userId!, { categoryId: searchParams?.category, isBinned: false, isSender: false })
     console.timeEnd("emailfetch")
 
     return (
-        <EmailList emails={emails} mailbox={mailbox.id} type="inbox"/>
+        <EmailList emails={emails} mailbox={mailbox.id} categories={categories} emailCount={allCount} type="inbox" />
     )
 }

@@ -48,7 +48,13 @@ export default async function Mailbox({
         binnedAt: null,
     }))
 
+    const allCount = await prisma.draftEmail.count({
+        where: {
+            mailboxId: mailbox.id,
+        }
+    })
+
     return (
-        <EmailList emails={emailsFormatted} mailbox={mailbox.id} type="drafts" />
+        <EmailList emails={emailsFormatted} mailbox={mailbox.id} emailCount={allCount} type="drafts" />
     )
 }

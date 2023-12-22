@@ -114,7 +114,7 @@ export async function POST(request: Request) {
 
     await Promise.all(notifications.map(async (n) => {
         const payload = JSON.stringify({
-            title: email.from,
+            title: email.from.address,
             body: email.subject ? slice(email.subject, 200) : undefined,
             url: `/mail/${mailbox.id}/${e.id}`,
         })
