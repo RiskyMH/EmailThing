@@ -4,12 +4,10 @@ import { userAuthSchema } from "@/app/validations/auth"
 import { prisma } from "@email/db"
 import { redirect } from "next/navigation"
 
-
 const errorMsg = "Invalid username or password"
 
 export default async function signIn(username: string, password: string, callback?: string | null) {
     const parsedData = userAuthSchema.parse({ username, password })
-    // redirect(callback || "/dashboard")
 
     // find user
     const user = await prisma.user.findFirst({

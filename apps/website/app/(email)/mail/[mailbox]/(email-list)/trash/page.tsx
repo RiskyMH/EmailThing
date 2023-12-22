@@ -1,13 +1,12 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
 import { getMailbox } from "../../tools"
-import { prisma } from "@email/db"
 import { Metadata } from "next"
 import EmailList from "../email-list"
 import { getEmailList } from "../tools"
 
 export const metadata = {
-    title: "Sent",
+    title: "Trash",
 } as Metadata
 
 

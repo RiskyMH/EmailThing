@@ -5,9 +5,9 @@ import { Metadata } from "next"
 import Sidebar from "./sidebar"
 import Header from "./header"
 
-export async function generateMetadata(props: { params: { mailbox: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { mailbox: string } }): Promise<Metadata> {
     const userId = await getCurrentUser()
-    const mailbox = await getMailbox(props.params.mailbox, userId!)
+    const mailbox = await getMailbox(params.mailbox, userId!)
     if (!mailbox) return notFound()
 
     return {
@@ -38,9 +38,9 @@ export default async function MailLayout({
 
     return (
         <div className="min-h-screen">
-            <Header mailbox={mailbox.id} />
+            <Header mailbox={params.mailbox} />
             <div className="flex w-screen max-w-full">
-                <Sidebar mailbox={mailbox.id} />
+                <Sidebar mailbox={params.mailbox} />
                 {children}
             </div>
         </div>

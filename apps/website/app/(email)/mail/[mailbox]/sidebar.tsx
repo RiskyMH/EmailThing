@@ -31,7 +31,7 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
         {
             name: "Trash",
             icon: Trash2Icon,
-            href: `/mail/${mailboxId}/bin`
+            href: `/mail/${mailboxId}/trash`
         },
         {
             name: "Spam",

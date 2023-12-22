@@ -2,7 +2,7 @@
 
 import { Button } from "@/app/components/ui/button";
 import { cn } from "@/app/utils/tw";
-import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon, MailOpenIcon, CheckIcon, RotateCcw, RotateCcwIcon } from "lucide-react"
+import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon, MailOpenIcon, CheckIcon, RotateCcwIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";

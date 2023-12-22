@@ -32,7 +32,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setIsLoading(true)
         const signInResult = await signIn(data.username, data.password, getCallbackUrl())
 
-        
         if (signInResult?.error) {
             setIsLoading(false)
             return toast({
