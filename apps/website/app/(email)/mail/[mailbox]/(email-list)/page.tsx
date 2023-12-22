@@ -28,7 +28,7 @@ export default async function Mailbox({
     if (!mailbox) return notFound()
 
     console.time("emailfetch")
-    const [emails, categories, allCount] = await getEmailList(mailbox.id, userId!, { categoryId: searchParams?.category, isBinned: false, isSender: false })
+    const [emails, categories, allCount] = await getEmailList(mailbox.id, { categoryId: searchParams?.category, isBinned: false, isSender: false })
     console.timeEnd("emailfetch")
 
     return (

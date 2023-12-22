@@ -8,7 +8,7 @@ interface EmailListFindOptions {
     isStarred?: boolean;
 }
 
-export async function getEmailList(mailboxId: string, userId: string, options: EmailListFindOptions = {}) {
+export async function getEmailList(mailboxId: string, options: EmailListFindOptions = {}) {
 
     const emails = prisma.email.findMany({
         where: {

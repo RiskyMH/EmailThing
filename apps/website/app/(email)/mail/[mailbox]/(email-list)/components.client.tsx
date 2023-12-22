@@ -89,10 +89,10 @@ export function RefreshButton({ className }: { className?: string }) {
         <Button
             variant="ghost"
             size="auto"
-            onClick={() => startTransition(router.refresh)}
+            onClick={() => { !isPending && startTransition(router.refresh) }}
             className={cn(className, "rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground ")}
         >
-            {isPending ? <RotateCcwIcon className="h-5 w-5 animate-reverse-spin text-muted-foreground" /> : <RotateCcwIcon className="h-5 w-5" />}
+            <RotateCcwIcon className={cn(isPending && "animate-reverse-spin", "h-5 w-5 text-muted-foreground")} />
         </Button>
     )
 }

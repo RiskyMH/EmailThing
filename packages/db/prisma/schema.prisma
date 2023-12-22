@@ -36,6 +36,7 @@ model Email {
 
   @@index([mailboxId])
   @@index([categoryId])
+  @@index([isSender])
   @@index([id])
   // @@index([perantEmailId])
   @@index([binnedAt])
