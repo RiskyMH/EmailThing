@@ -138,14 +138,18 @@ export default function EmailList({ emails, mailbox: mailboxId, type = "inbox", 
                                 </TooltipText>
 
                                 <TooltipText text={`${email.from?.name} (${email.from?.address})`}>
-                                    <span className="self-center w-56 font-bold truncate">
+                                    <span className="self-center w-56 truncate">
                                         {email.from?.name}
                                     </span>
                                 </TooltipText>
 
-                                <span className="self-center w-72 sm:font-bold truncate">{email.subject}</span>
+                                <TooltipText text={email.subject || "No subject was provided"}>
+                                    <span className={cn("self-center w-80 font-bold truncate", !email.subject && "italic")}>
+                                    {email.subject || "(no subject)"}
+                                </span>
+                                </TooltipText>
 
-                                <span className="self-center w-full hidden sm:inline-flex gap-4 flex-shrink">
+                                <span className="self-center w-full hidden sm:inline-flex gap-4 flex-shrink-[2]">
 
                                     {!email.isRead && (
                                         <span className="select-none bg-red self-center text-white text-xs rounded px-3 py-1 font-bold inline h-6">
@@ -156,7 +160,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type = "inbox", 
                                         {email.snippet}
                                     </span>
                                 </span>
-                                <ClientStar enabled={!!email.isStarred} action={updateEmail.bind(null, email.id, { isStarred: !email.isStarred })} className="self-center text-muted-foreground hover:text-foreground flex-shrink-0 ms-auto -me-2" />
+                                <ClientStar enabled={!!email.isStarred} action={updateEmail.bind(null, email.id, { isStarred: !email.isStarred })} className="self-center text-muted-foreground hover:text-foreground flex-shrink-0 ms-auto -me-2 hidden sm:inline-block" />
                                 <LocalTime type="hour-min" time={email.createdAt} className="float-right self-center text-muted-foreground text-sm flex-shrink-0 w-16 text-right" />
                             </Link>
                         </ContextMenuTrigger>
