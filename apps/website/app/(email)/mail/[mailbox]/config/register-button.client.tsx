@@ -5,7 +5,7 @@ import { resetServiceWorker } from '@/app/utils/service-worker'
 import { env } from '@/app/utils/env'
 import { Button } from '@/app/components/ui/button'
 import { saveSubscription } from './actions'
-import { toast } from '@/app/components/ui/use-toast'
+import { toast } from "sonner"
 import { Loader2 } from 'lucide-react'
 
 const notificationsSupported = () =>
@@ -21,17 +21,11 @@ export default function Notifications({ mailbox }: { mailbox: string }) {
 
     const requestPermission = async () => {
         if (!notificationsSupported()) {
-            return toast({
-                description: 'Notifications are not supported on this device',
-                variant: 'destructive',
-            });
+            return toast.error( 'Notifications are not supported on this device');
         }
 
         if (window?.Notification?.permission === "denied") {
-            return toast({
-                description: 'You have denied notifications',
-                variant: 'destructive',
-            });
+            return toast.error('You have denied notifications');
         }
 
         // @ts-ignore - the types seem to be wrong with async
@@ -69,16 +63,11 @@ const subscribe = async (mailbox: string) => {
 
         await saveSubscription(mailbox, subscription.toJSON())
 
-        toast({
-            description: 'You have successfully subscribed to notifications',
-        });
+        toast('You have successfully subscribed to notifications');
 
     } catch (err) {
         console.error('Error', err)
 
-        return toast({
-            description: 'Failed to subscribe to notifications',
-            variant: 'destructive',
-        });
+        return toast.error('Failed to subscribe to notifications');
     }
 }

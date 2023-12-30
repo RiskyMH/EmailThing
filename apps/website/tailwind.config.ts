@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import twAnimate from 'tailwindcss-animate'
+import typography from '@tailwindcss/typography'
 
 const config = {
   content: [
@@ -95,7 +96,8 @@ const config = {
     },
   },
   plugins: [
-    twAnimate
+    twAnimate,
+    typography
   ],
 } satisfies Config
 export default config

@@ -73,7 +73,7 @@ export function CategoryItem({ circleColor, name, count, link, category }: { cir
     const isCurrent = params.get("category") == category;
 
     return (
-        <Link href={link + (category ? "?category=" + category : "")} className={cn("group inline-flex items-center gap-1 px-1 max-w-fit w-auto font-bold border-b-3 border-transparent", isCurrent && "border-blue")}>
+        <Link href={link + (category ? "?category=" + category : "")} className={cn("group flex-shrink-0 inline-flex items-center gap-1 px-1 max-w-fit w-auto font-bold border-b-3 border-transparent", isCurrent && "border-blue")}>
             {circleColor && <div className="w-2.5 h-2.5 rounded-full mr-1" style={{ backgroundColor: circleColor }}></div>}
             <span className="font-medium group-hover:text-muted-foreground">{name}</span>
             <span className="text-sm text-muted-foreground group-hover:text-muted-foreground/50">({count})</span>

@@ -1,74 +1,53 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
 import { cn } from "@/app/utils/tw"
-import { userAuthSchema } from "@/app/validations/auth"
 import { Button } from "@/app/components/ui/button"
 import { Input } from "@/app/components/ui/input"
 import { Label } from "@/app/components/ui/label"
-import { toast } from "@/app/components/ui/use-toast"
+import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import signIn from "./action"
-import { useState } from "react"
+import { FormEvent, useTransition } from "react"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
-type AuthFormData = z.infer<typeof userAuthSchema>
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<AuthFormData>({
-        resolver: zodResolver(userAuthSchema),
-    })
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-    const getCallbackUrl = () => new URL(window.location.href).searchParams?.get("from")
+    const [isPending, startTransition] = useTransition();
 
-    async function onSubmit(data: AuthFormData) {
-        setIsLoading(true)
-        const signInResult = await signIn(data.username, data.password, getCallbackUrl())
+    async function onSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        // @ts-ignore - the types seem to be wrong with async
+        startTransition(async () => {
+            const formData = new FormData(event.target as HTMLFormElement)
+            const signInResult = await signIn(formData)
 
-        if (signInResult?.error) {
-            setIsLoading(false)
-            return toast({
-                title: signInResult.error,
-                variant: "destructive",
-            })
-        }
+            if (signInResult?.error) {
+                return toast.error(signInResult.error)
+            }
 
-        return toast({
-            title: "Success!",
-            description: "You have successfully signed in",
-        })
+            return toast("You have successfully signed in")
+        });
     }
 
     return (
         <div className={cn("grid gap-6", className)} {...props}>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form action={signIn} onSubmit={onSubmit}>
                 <div className="grid gap-2">
                     <div className="grid gap-1">
                         <Label className="sr-only" htmlFor="email">
-                            Username 
+                            Username
                         </Label>
                         <Input
                             id="username"
+                            name="username"
                             placeholder="Username"
                             type="text"
                             autoCapitalize="none"
                             autoComplete="username"
                             autoCorrect="off"
-                            disabled={isLoading}
-                            {...register("username")}
+                            disabled={isPending}
                         />
-                        {errors?.username && (
-                            <p className="px-1 text-xs text-red-600">
-                                {errors.username.message}
-                            </p>
-                        )}
                     </div>
                     <div className="grid gap-1">
                         <Label className="sr-only" htmlFor="email">
@@ -76,22 +55,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                         </Label>
                         <Input
                             id="password"
+                            name="password"
                             placeholder="*******"
                             type="password"
                             autoComplete="password"
                             autoCorrect="off"
-                            disabled={isLoading}
-                            {...register("password")}
+                            disabled={isPending}
                         />
-                        {errors?.password && (
-                            <p className="px-1 text-xs text-red-600">
-                                {errors.password.message}
-                            </p>
-                        )}
                     </div>
 
-                    <Button disabled={isLoading}>
-                        {isLoading && (
+                    <Button disabled={isPending}>
+                        {isPending && (
                             <Loader2 className="me-2 h-4 w-4 animate-spin" />
                         )}
                         Sign In

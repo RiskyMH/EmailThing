@@ -96,28 +96,29 @@ export default function EmailList({ emails, mailbox: mailboxId, type = "inbox", 
     return (
         <>
             <div className="flex-col gap-2 p-5 flex w-full min-w-0">
-                <div className="sm:flex flex-row w-full min-w-0 pb-3 border-b-2 -mt-1 gap-6 hidden">
-                    <input type="checkbox" disabled id="select" className="mr-2 self-start mt-1 h-4 w-4" />
-
-                    <CategoryItem
-                        circleColor={null}
-                        name="All"
-                        count={emailCount || 0}
-                        link={baseUrl}
-                        category={null}
-                    />
-                    {(categories || []).map(category => (
+                <div className="sm:flex flex-row w-full min-w-0 pb-3 border-b-2 -mt-4 pt-3 gap-6 hidden overflow-y-scroll">
+                    <input type="checkbox" disabled id="select" className="mr-2 self-start mt-1 h-4 w-4 flex-shrink-0" />
+                    <div className="flex flex-row w-full min-w-0 pb-3 -mb-3 gap-6 overflow-y-scroll">
                         <CategoryItem
-                            key={category.id}
-                            circleColor={category.color || "grey"}
-                            name={category.name}
-                            count={category._count.emails}
+                            circleColor={null}
+                            name="All"
+                            count={emailCount || 0}
                             link={baseUrl}
-                            category={category.id}
+                            category={null}
                         />
-                    ))}
+                        {(categories || []).map(category => (
+                            <CategoryItem
+                                key={category.id}
+                                circleColor={category.color || "grey"}
+                                name={category.name}
+                                count={category._count.emails}
+                                link={baseUrl}
+                                category={category.id}
+                            />
+                        ))}
+                    </div>
 
-                    <div className="ms-auto me-2">
+                    <div className="ms-auto me-2 flex-shrink-0">
                         <RefreshButton />
                     </div>
                 </div>

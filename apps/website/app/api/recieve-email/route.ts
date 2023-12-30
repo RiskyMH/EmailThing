@@ -87,6 +87,7 @@ export async function POST(request: Request) {
             },
             subject: email.subject,
             body: body,
+            html: email.html,
             snippet: slice(body, 200),
             mailbox: {
                 connect: mailbox

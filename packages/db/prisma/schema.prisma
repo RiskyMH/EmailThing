@@ -19,6 +19,7 @@ model Email {
   subject   String?  @db.TinyText()
   snippet   String   @db.TinyText()
   body      String   @db.Text()
+  html      String?  @db.MediumText()
   createdAt DateTime @default(now())
   raw       String   @db.LongText()
 

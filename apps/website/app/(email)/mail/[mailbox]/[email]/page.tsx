@@ -5,6 +5,9 @@ import { Metadata } from "next"
 import { prisma } from "@email/db"
 import { MarkRead } from "./components.client"
 import { revalidatePath } from "next/cache"
+import ParseHTML, { parseHTML } from "./parse-html"
+import { marked } from 'marked';
+import { TabsList, Tab } from "@/app/components/tabs-link"
 
 
 const getEmail = async (mailboxId: string, emailId: string, userId: string) => {
@@ -20,6 +23,7 @@ const getEmail = async (mailboxId: string, emailId: string, userId: string) => {
             subject: true,
             snippet: true,
             body: true,
+            html: true,
             createdAt: true,
             isRead: true,
             isStarred: true,
@@ -53,14 +57,16 @@ export async function generateMetadata(props: { params: { mailbox: string, email
     }
 }
 
-
-
 export default async function Email({
     params,
+    searchParams
 }: {
     params: {
         mailbox: string,
         email: string
+    },
+    searchParams: {
+        view?: "text" | "markdown" | "html"
     }
 }) {
     const userId = await getCurrentUser()
@@ -94,14 +100,22 @@ export default async function Email({
 
     }
 
+    const view = searchParams?.view || "markdown"
+
 
     return (
-        <div className="min-w-0 p-5">
+        <div className="min-w-0 p-5 w-full h-full space-y-2">
             {!mail.isRead && <MarkRead action={markRead} />}
             <h1 className="font-bold text-3xl break-words">{mail.subject}</h1>
-            <p className="whitespace-pre-wrap break-words leading-normal">
-                {mail.body}
-            </p>
+            <TabsList>
+                <Tab title="Text" href={`/mail/${params.mailbox}/${params.email}?view=text`} active={view === "text"} />
+                <Tab title="Markdown" href={`/mail/${params.mailbox}/${params.email}?view=markdown`} active={view === "markdown"} />
+                <Tab title="HTML" href={`/mail/${params.mailbox}/${params.email}?view=html`} active={view === "html"} disabled={!mail.html} />
+            </TabsList>
+            {view === "text" ? <p className="whitespace-pre-wrap break-words leading-normal">{mail.body}</p> : null}
+            {view === "markdown" ? <ParseHTML className="prose dark:prose-invert max-w-full break-words" body={await marked.parse(mail.body, { breaks: true })} /> : null}
+            {/* {view === "html" ? <ParseHTML className="rounded-lg" body={mail.html || mail.body} /> : null} */}
+            {view === "html" ? <iframe className="rounded-lg w-full h-screen" sandbox='allow-popups' srcDoc={await parseHTML(mail.html || mail.body, true)} /> : null}
         </div>
 
     )

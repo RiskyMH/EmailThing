@@ -3,6 +3,7 @@ import { Inter as FontSans } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/app/utils/tw"
 import { Toaster } from "@/app/components/ui/toaster"
+import { Toaster as Sonner } from "@/app/components/ui/sonner"
 import { ReactNode } from "react";
 
 const fontSans = FontSans({
@@ -31,6 +32,7 @@ export default function RootLayout({
       )}>
         {children}
         <Toaster />
+        <Sonner />
       </body>
     </html>
   )
