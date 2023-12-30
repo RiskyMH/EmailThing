@@ -10,8 +10,8 @@ const nextConfig = {
                 headers: [
                     {
                         key: 'Content-Security-Policy',
-                        value: `img-src https://emailthing.xyz/ ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`,
-                    },
+                        value: `default-src https://riskymh.dev https://emailthing.xyz/ ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'} ${process.env.VERCEL_URL || ''} ${process.env.VERCEL_BRANCH_URL || ''}`,
+                    }
 
                 ],
             },
