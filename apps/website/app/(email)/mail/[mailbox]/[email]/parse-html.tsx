@@ -62,6 +62,7 @@ export async function parseHTML(content: string, moreTrusted = false) {
             'u',
             'ul',
             'center',
+            'em',
             ...(moreTrusted ? ["style", 'body', 'head'] : []),
         ],
         ALLOWED_ATTR: [

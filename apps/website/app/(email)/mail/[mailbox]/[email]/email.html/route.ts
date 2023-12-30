@@ -35,7 +35,7 @@ export async function GET(
     if (!mail) return notFound()
 
     if (!mail.html) {
-        return redirect(`/mail/${params.mailbox}/${params.email}/text.txt`)
+        return redirect(`/mail/${params.mailbox}/${params.email}/email.txt`)
     }
 
     // return new Response(await parseHTML(mail.html), {

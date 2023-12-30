@@ -66,7 +66,7 @@ export function UserNav({ user, mailboxId }: UserProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
-                        <Link href={`#dashboard`} className="cursor-pointer">
+                        <Link href={`/mail/${mailboxId}`} className="cursor-pointer">
                             Dashboard
                         </Link>
                     </DropdownMenuItem>

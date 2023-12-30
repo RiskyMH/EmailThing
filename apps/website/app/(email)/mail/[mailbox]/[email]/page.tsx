@@ -115,7 +115,7 @@ export default async function Email({
             {view === "text" ? <p className="whitespace-pre-wrap break-words leading-normal">{mail.body}</p> : null}
             {view === "markdown" ? <ParseHTML className="prose dark:prose-invert max-w-full break-words" body={await marked.parse(mail.body, { breaks: true })} /> : null}
             {/* {view === "html" ? <ParseHTML className="rounded-lg" body={mail.html || mail.body} /> : null} */}
-            {view === "html" ? <iframe className="rounded-lg w-full h-screen" sandbox='allow-popups' srcDoc={await parseHTML(mail.html || mail.body, true)} /> : null}
+            {view === "html" ? <iframe className="rounded-lg w-full h-screen bg-card" sandbox='allow-popups' srcDoc={await parseHTML(mail.html || mail.body, true)} /> : null}
         </div>
 
     )
