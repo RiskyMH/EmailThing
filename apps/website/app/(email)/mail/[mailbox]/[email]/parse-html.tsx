@@ -18,7 +18,7 @@ export async function parseHTML(content: string, moreTrusted = false) {
     })
 
     let clean = sanitize(content, {
-        FORCE_BODY: moreTrusted,
+        WHOLE_DOCUMENT: moreTrusted,
         ALLOWED_TAGS: [
             'a',
             'b',
@@ -62,11 +62,10 @@ export async function parseHTML(content: string, moreTrusted = false) {
             'u',
             'ul',
             'center',
-            'head',
-            ...(moreTrusted ? ["style"] : []),
+            ...(moreTrusted ? ["style", 'body', 'head'] : []),
         ],
         ALLOWED_ATTR: [
-            ...(moreTrusted ? ['style', 'href'] : []),
+            ...(moreTrusted ? ['style', 'href', 'class'] : []),
             'align',
             'valign',
             'role',
