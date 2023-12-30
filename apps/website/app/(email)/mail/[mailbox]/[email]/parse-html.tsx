@@ -17,6 +17,8 @@ export async function parseHTML(content: string, moreTrusted = false) {
         }
     })
 
+    content = "<style>:root{color-scheme: light dark}</style>" + content
+
     let clean = sanitize(content, {
         WHOLE_DOCUMENT: moreTrusted,
         ALLOWED_TAGS: [
