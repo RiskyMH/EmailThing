@@ -11,7 +11,7 @@ const nextConfig = {
                 headers: [
                     {
                         key: 'Content-Security-Policy',
-                        value: `img-src ${domains}; font-src ${domains}; style-src ${domains};`,
+                        value: `img-src ${domains}; font-src ${domains} ${process.env.NODE_ENV === 'development' ? 'https://fonts.gstatic.com' : ''};`,
                     }
 
                 ],
