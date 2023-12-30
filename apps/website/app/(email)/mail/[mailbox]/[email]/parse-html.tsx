@@ -66,7 +66,8 @@ export async function parseHTML(content: string, moreTrusted = false) {
             ...(moreTrusted ? ["style", 'body', 'head'] : []),
         ],
         ALLOWED_ATTR: [
-            ...(moreTrusted ? ['style', 'href', 'class'] : []),
+            ...(moreTrusted ? ['style', 'class'] : []),
+            'href',
             'align',
             'valign',
             'role',
