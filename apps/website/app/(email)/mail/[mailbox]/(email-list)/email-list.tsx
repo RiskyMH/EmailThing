@@ -63,6 +63,20 @@ export default function EmailList({ emails, mailbox: mailboxId, type = "inbox", 
         const userId = await getCurrentUser()
         if (!userId) throw new Error()
 
+        if (type === "drafts") {
+            if (state.binned) {
+                await prisma.draftEmail.delete({
+                    where: {
+                        id: emailId,
+                        mailboxId: mailboxId
+                    }
+                })
+                return revalidatePath(baseUrl)
+
+            }
+            if (state.category) throw new Error("Cannot categorize drafts");
+        }
+
         await prisma.email.update({
             data: {
                 isStarred: state.isStarred,
@@ -127,7 +141,7 @@ export default function EmailList({ emails, mailbox: mailboxId, type = "inbox", 
                     <ContextMenu key={email.id}>
                         <ContextMenuTrigger asChild>
                             <Link
-                                href={`/mail/${mailboxId}/${email.id}`}
+                                href={`/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`}
                                 className={cn("rounded shadow-sm h-16 px-5 py-1.5 inline-flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}
                             >
                                 <TooltipText text={email.category?.name ?? "No category"}>
@@ -137,16 +151,16 @@ export default function EmailList({ emails, mailbox: mailboxId, type = "inbox", 
                                     />
                                 </TooltipText>
 
-                                <TooltipText text={`${email.from?.name} (${email.from?.address})`}>
+                                <TooltipText text={email.from?.name ? `${email.from?.name} (${email.from?.address})` : email.from?.address || ''}>
                                     <span className="self-center w-56 truncate">
-                                        {email.from?.name}
+                                        {email.from?.name || email.from?.address}
                                     </span>
                                 </TooltipText>
 
                                 <TooltipText text={email.subject || "No subject was provided"}>
                                     <span className={cn("self-center w-80 font-bold truncate", !email.subject && "italic")}>
-                                    {email.subject || "(no subject)"}
-                                </span>
+                                        {email.subject || "(no subject)"}
+                                    </span>
                                 </TooltipText>
 
                                 <span className="self-center w-full hidden sm:inline-flex gap-4 flex-shrink-[2]">
@@ -165,65 +179,77 @@ export default function EmailList({ emails, mailbox: mailboxId, type = "inbox", 
                             </Link>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
-                            {/* // TODO: implement sending emails */}
-                            <ContextMenuItem className="flex gap-2">
-                                <ReplyIcon className="w-5 h-5 text-muted/50" />
-                                Reply
-                            </ContextMenuItem>
-                            <ContextMenuItem className="flex gap-2">
-                                <ReplyAllIcon className="w-5 h-5 text-muted/50" />
-                                Reply to all
-                            </ContextMenuItem>
-                            <ContextMenuItem className="flex gap-2">
-                                <ForwardIcon className="w-5 h-5 text-muted/50" />
-                                Forward
-                            </ContextMenuItem>
-                            <ContextMenuSeparator />
 
-                            <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
-                                <ContextMenuAction icon="StarIcon" fillIcon={email.isStarred} action={updateEmail.bind(null, email.id, { isStarred: !email.isStarred })}>
-                                    {email.isStarred ? "Unstar" : "Star"}
-                                </ContextMenuAction>
-                            </ContextMenuItem>
-                            <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
-                                <ContextMenuAction icon={!email.binnedAt ? "Trash2Icon" : "ArchiveRestoreIcon"} action={updateEmail.bind(null, email.id, { binned: !email.binnedAt })}>
-                                    {!email.binnedAt ? "Delete" : "Restore to inbox"}
-                                </ContextMenuAction>
-                            </ContextMenuItem>
-                            <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
-                                <ContextMenuAction icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"} action={updateEmail.bind(null, email.id, { isRead: !email.isRead })}>
-                                    {email.isRead ? "Mark as unread" : "Mark as read"}
-                                </ContextMenuAction>
-                            </ContextMenuItem>
-                            <ContextMenuSeparator />
+                            {type !== "drafts" ? (
+                                <>
+                                    {/* // TODO: implement sending emails */}
+                                    <ContextMenuItem className="flex gap-2">
+                                        <ReplyIcon className="w-5 h-5 text-muted-foreground" />
+                                        Reply
+                                    </ContextMenuItem>
+                                    <ContextMenuItem className="flex gap-2">
+                                        <ReplyAllIcon className="w-5 h-5 text-muted-foreground" />
+                                        Reply to all
+                                    </ContextMenuItem>
+                                    <ContextMenuItem className="flex gap-2">
+                                        <ForwardIcon className="w-5 h-5 text-muted-foreground" />
+                                        Forward
+                                    </ContextMenuItem>
+                                    <ContextMenuSeparator />
 
-                            <ContextMenuSub>
-                                <ContextMenuSubTrigger className="flex gap-2 cursor-pointer">
-                                    <TagIcon className="w-5 h-5 text-muted/50" />
-                                    Categorize as
-                                </ContextMenuSubTrigger>
-                                <ContextMenuSubContent className="w-48">
-                                    {/* // TODO: implement categorizing */}
-                                    <ContextMenuItem asChild className="flex gap-2 cursor-pointer" >
-                                        <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, email.id, { category: null })}>
-                                            None
+                                    <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                                        <ContextMenuAction icon="StarIcon" fillIcon={email.isStarred} action={updateEmail.bind(null, email.id, { isStarred: !email.isStarred })}>
+                                            {email.isStarred ? "Unstar" : "Star"}
                                         </ContextMenuAction>
                                     </ContextMenuItem>
+                                    <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                                        <ContextMenuAction icon={!email.binnedAt ? "Trash2Icon" : "ArchiveRestoreIcon"} action={updateEmail.bind(null, email.id, { binned: !email.binnedAt })}>
+                                            {!email.binnedAt ? "Delete" : "Restore to inbox"}
+                                        </ContextMenuAction>
+                                    </ContextMenuItem>
+                                    <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                                        <ContextMenuAction icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"} action={updateEmail.bind(null, email.id, { isRead: !email.isRead })}>
+                                            {email.isRead ? "Mark as unread" : "Mark as read"}
+                                        </ContextMenuAction>
+                                    </ContextMenuItem>
+                                    <ContextMenuSeparator />
 
-                                    {categories?.map(category => (
-                                        <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer" >
-                                            <ContextMenuAction icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, email.id, { category: category.id })}>
-                                                {category.name}
-                                            </ContextMenuAction>
-                                        </ContextMenuItem>
-                                    ))}
-                                </ContextMenuSubContent>
-                            </ContextMenuSub>
+                                    <ContextMenuSub>
+                                        <ContextMenuSubTrigger className="flex gap-2 cursor-pointer">
+                                            <TagIcon className="w-5 h-5 text-muted-foreground" />
+                                            Categorize as
+                                        </ContextMenuSubTrigger>
+                                        <ContextMenuSubContent className="w-48">
+                                            {/* // TODO: implement categorizing */}
+                                            <ContextMenuItem asChild className="flex gap-2 cursor-pointer" >
+                                                <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, email.id, { category: null })}>
+                                                    None
+                                                </ContextMenuAction>
+                                            </ContextMenuItem>
+
+                                            {categories?.map(category => (
+                                                <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer" >
+                                                    <ContextMenuAction icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, email.id, { category: category.id })}>
+                                                        {category.name}
+                                                    </ContextMenuAction>
+                                                </ContextMenuItem>
+                                            ))}
+                                        </ContextMenuSubContent>
+                                    </ContextMenuSub>
+
+                                </>
+                            ) : (
+                                <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                                    <ContextMenuAction icon={"Trash2Icon"} action={updateEmail.bind(null, email.id, { binned: !email.binnedAt })}>
+                                        Delete
+                                    </ContextMenuAction>
+                                </ContextMenuItem>
+                            )}
                             <ContextMenuSeparator />
 
                             <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
-                                <Link href={`/mail/${mailboxId}/${email.id}`} target="_blank">
-                                    <ExternalLink className="w-5 h-5 text-muted/50" />
+                                <Link href={`/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`} target="_blank">
+                                    <ExternalLink className="w-5 h-5 text-muted-foreground" />
                                     Open in new tab
                                 </Link>
                             </ContextMenuItem>

@@ -6,7 +6,7 @@ import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon, MailOpe
 import type { LucideIcon } from "lucide-react"
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import type { MouseEvent } from "react"
+import type { MouseEvent, PropsWithChildren } from "react"
 import { useTransition } from 'react';
 
 
@@ -44,13 +44,19 @@ const iconMap: Record<string, LucideIcon> = {
     MailOpenIcon: MailOpenIcon,
     CheckIcon: CheckIcon,
 }
+interface ContextMenuActionProps {
+    action: () => void,
+    icon: keyof typeof iconMap | "EmptyIcon",
+    fillIcon?: boolean | null,
+    className?: string,
+}
 
-export function ContextMenuAction({ children, action, icon, fillIcon, ...props }: any) {
+export function ContextMenuAction({ children, action, icon, fillIcon, className, ...props }: PropsWithChildren<ContextMenuActionProps>) {
     const Icon: LucideIcon | null = iconMap[icon] ?? null;
 
     const [isPending, startTransition] = useTransition();
 
-    const onClick = (e: MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const onClick = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         e.preventDefault();
         if (isPending) return;
 
@@ -58,12 +64,12 @@ export function ContextMenuAction({ children, action, icon, fillIcon, ...props }
     }
 
     return (
-        <div {...props} onClick={onClick}>
-            {Icon && !isPending && <Icon className="w-5 h-5 text-muted/50" fill={fillIcon ? "currentColor" : "transparent"} />}
-            {icon === "EmptyIcon" && !isPending && <EmptyIcon className="w-5 h-5 text-muted/50" />}
-            {isPending && <Loader2 className="w-5 h-5 text-muted/50 animate-spin" />}
+        <button {...props} onClick={onClick} className={cn(className, "w-full")}>
+            {Icon && !isPending && <Icon className="w-5 h-5 text-muted-foreground" fill={fillIcon ? "currentColor" : "transparent"} />}
+            {icon === "EmptyIcon" && !isPending && <EmptyIcon className="w-5 h-5 text-muted-foreground" />}
+            {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
             {children}
-        </div>
+        </button>
 
     )
 }

@@ -53,7 +53,7 @@
       --background: #222229;
       --foreground: var(--primary);
 
-      --muted: 224 6% 84%;
+      --muted: var(--tertiary);
       --muted-foreground: #909099;
 
       --accent: var(--border);

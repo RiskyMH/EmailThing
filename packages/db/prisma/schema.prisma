@@ -143,24 +143,13 @@ model DraftEmail {
   id        String   @id @default(cuid())
   mailboxId String
   mailbox   Mailbox  @relation(fields: [mailboxId], references: [id])
-  subject   String   @db.TinyText()
-  body      String   @db.Text()
+  subject   String?  @db.TinyText()
+  body      String?  @db.Text()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  from String // EmailAlias
-  to   DraftEmailRecipents[]
+  from String? // EmailAlias
+  to   String? @db.MediumText() // JSON { address: string, name?: string, cc?: "cc" | "bcc" | null }[]
 
   @@index([mailboxId])
-}
-
-model DraftEmailRecipents {
-  id      String     @id @default(cuid())
-  address String
-  name    String?
-  emailId String
-  email   DraftEmail @relation(fields: [emailId], references: [id])
-  cc      Boolean    @default(false)
-
-  @@index([emailId])
 }

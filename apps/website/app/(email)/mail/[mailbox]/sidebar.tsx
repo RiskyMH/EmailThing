@@ -45,7 +45,7 @@ export default function Sidebar({ mailbox: mailboxId }: { mailbox: string }) {
         <div className="min-h-screen bg-tertiary text-tertiary-foreground lg:w-60 p-3 flex-shrink-0 hidden sm:inline">
 
             <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 px-4 lg:px-6 font-bold my-3">
-                <Link href="#new">
+                <Link href={`/mail/${mailboxId}/draft/new`}>
                     <PenSquareIcon className="h-5 w-5" /> <span className="hidden lg:inline">New Message</span>
                 </Link>
             </Button>

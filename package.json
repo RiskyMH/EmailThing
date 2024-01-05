@@ -15,8 +15,8 @@
   },
   "devDependencies": {
     "eslint": "^8.56.0",
-    "eslint-config-turbo": "^1.11.2",
-    "turbo": "^1.11.2"
+    "eslint-config-turbo": "^1.11.3",
+    "turbo": "^1.11.3"
   },
   "packageManager": "yarn@4.0.2"
 }

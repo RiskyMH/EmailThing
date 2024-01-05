@@ -53,7 +53,7 @@ const config = {
           foreground: "rgba(var(--destructive-foreground))",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
+          DEFAULT: "rgba(var(--muted))",
           foreground: "rgba(var(--muted-foreground))",
         },
         accent: {

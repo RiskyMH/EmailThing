@@ -42,8 +42,11 @@ export default async function Mailbox({
         snippet: email.body,
         createdAt: email.updatedAt,
         isStarred: null,
-        isRead: null,
-        from: null,
+        isRead: true,
+        from: {
+            address: email.from!,
+            name: null
+        },
         draft: true,
         binnedAt: null,
     }))

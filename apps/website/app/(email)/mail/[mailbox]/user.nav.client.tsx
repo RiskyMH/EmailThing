@@ -38,7 +38,7 @@ export function UserNav({ user, mailboxId }: UserProps) {
                     variant="ghost"
                     className="relative p-2 -m-2 gap-3 group dark:hover:bg-secondary hover:bg-background"
                 >
-                    <ChevronDownIcon className="h-5 w-5 text-muted/50 -me-2" />
+                    <ChevronDownIcon className="h-5 w-5 text-muted-foreground -me-2" />
                     {user.name}
                     <Avatar className="h-8 w-8 rounded-full">
                         <AvatarImage
