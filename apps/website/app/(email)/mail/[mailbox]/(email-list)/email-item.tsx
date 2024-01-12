@@ -90,7 +90,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         />
                     </TooltipText>
 
-                    <TooltipText text={email.from?.name ? `${email.from?.name} (${email.from?.address})` : email.from?.address || ''}>
+                    <TooltipText text={email.from?.name || email.from?.address || "There should be an email here"} subtext={email.from?.name && email.from?.address ? `(${email.from?.address})` : ''}>
                         <span className="self-center w-56 truncate">
                             {email.from?.name || email.from?.address}
                         </span>
