@@ -8,7 +8,7 @@ export interface EmailListFindOptions {
     isStarred?: boolean;
 }
 
-export async function getJustEmailsList(mailboxId: string, options: EmailListFindOptions = {}, userId?: string, startEmailId?: string) {
+export async function getJustEmailsList(mailboxId: string, options: EmailListFindOptions = {}, startEmailId?: string) {
     return prisma.email.findMany({
         where: {
             mailboxId: mailboxId,
@@ -20,13 +20,6 @@ export async function getJustEmailsList(mailboxId: string, options: EmailListFin
             category: options.categoryId ? {
                 id: options.categoryId
             } : undefined,
-            mailbox: userId ? {
-                users: {
-                    some: {
-                        userId
-                    }
-                }
-            } : undefined
         },
         select: {
             id: true,
@@ -105,17 +98,10 @@ export async function getEmailList(mailboxId: string, options: EmailListFindOpti
     return Promise.all([emails, categories, allCount])
 }
 
-export async function getDraftJustEmailsList(mailboxId: string, userId?: string, nextEmailId?: string) {
+export async function getDraftJustEmailsList(mailboxId: string, nextEmailId?: string) {
     const emails = await prisma.draftEmail.findMany({
         where: {
             mailboxId: mailboxId,
-            mailbox: userId ? {
-                users: {
-                    some: {
-                        userId
-                    }
-                }
-            } : undefined
         },
         select: {
             id: true,

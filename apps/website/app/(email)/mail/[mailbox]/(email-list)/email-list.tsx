@@ -3,6 +3,7 @@ import { CategoryItem, RefreshButton } from "./components.client";
 import { getDraftEmailList, getEmailList, getJustEmailsList, getDraftJustEmailsList } from "./tools"
 import LoadMore from "@/app/components/loadmore.client";
 import { EmailItem } from "./email-item";
+import { prisma } from "@email/db";
 
 interface EmailListProps {
     mailboxId: string;
@@ -29,10 +30,17 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
         'use server';
         const userId = await getCurrentUser()
         if (!userId) throw new Error()
+        const mailbox = prisma.mailboxForUser.findFirst({
+            where: {
+                mailboxId,
+                userId
+            }
+        })
+        if (!mailbox) throw new Error()
 
         const emails = (type !== "drafts")
-            ? await getJustEmailsList(mailboxId, emailFetchOptions, userId, nextEmailId)
-            : await getDraftJustEmailsList(mailboxId, userId, nextEmailId)
+            ? await getJustEmailsList(mailboxId, emailFetchOptions, nextEmailId)
+            : await getDraftJustEmailsList(mailboxId, nextEmailId)
 
         if (emails.length === 0) throw new Error("No more emails")
 
