@@ -46,8 +46,8 @@
   },
   "dependencies": {
     "@planetscale/database": "^1.13.0",
-    "@prisma/adapter-planetscale": "^5.7.1",
-    "@prisma/client": "^5.7.1",
-    "prisma": "^5.7.1"
+    "@prisma/adapter-planetscale": "^5.8.0",
+    "@prisma/client": "^5.8.0",
+    "prisma": "^5.8.0"
   }
 }

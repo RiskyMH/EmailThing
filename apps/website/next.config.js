@@ -19,6 +19,20 @@ const nextConfig = {
             },
         ];
     },
+    async redirects() {
+        return [
+            {
+                source: '/',
+                destination: '/login',
+                permanent: false,
+            },
+            {
+                source: '/mail/:mailbox/:email/raw',
+                destination: '/mail/:mailbox/:email/email.eml',
+                permanent: true,
+            },
+        ];
+    }
 };
 
 module.exports = nextConfig;

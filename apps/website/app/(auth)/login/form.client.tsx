@@ -26,7 +26,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 return toast.error(signInResult.error)
             }
 
-            return toast("You have successfully signed in")
+            return toast.success("Welcome back!")
         });
     }
 

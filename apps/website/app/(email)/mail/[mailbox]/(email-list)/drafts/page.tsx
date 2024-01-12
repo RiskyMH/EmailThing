@@ -21,43 +21,10 @@ export default async function Mailbox({
     const mailbox = await getMailbox(params.mailbox, userId!)
     if (!mailbox) return notFound()
 
-    const emails = await prisma.draftEmail.findMany({
-        where: {
-            mailboxId: mailbox.id,
-        },
-        select: {
-            id: true,
-            subject: true,
-            body: true,
-            updatedAt: true,
-            from: true,
-        },
-        orderBy: {
-            updatedAt: "desc"
-        }
-    });
-
-    const emailsFormatted = emails.map(email => ({
-        ...email,
-        snippet: email.body,
-        createdAt: email.updatedAt,
-        isStarred: null,
-        isRead: true,
-        from: {
-            address: email.from!,
-            name: null
-        },
-        draft: true,
-        binnedAt: null,
-    }))
-
-    const allCount = await prisma.draftEmail.count({
-        where: {
-            mailboxId: mailbox.id,
-        }
-    })
-
     return (
-        <EmailList emails={emailsFormatted} mailbox={mailbox.id} emailCount={allCount} type="drafts" />
+        <EmailList
+            mailboxId={mailbox.id}
+            type="drafts"
+        />
     )
 }
