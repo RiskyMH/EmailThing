@@ -8,9 +8,10 @@ import { revalidatePath } from "next/cache"
 import ParseHTML, { parseHTML } from "./parse-html"
 import { marked } from 'marked';
 import { TabsList, Tab } from "@/app/components/tabs-link"
+import { cache } from "react"
 
 
-const getEmail = async (mailboxId: string, emailId: string, userId: string) => {
+const getEmail = cache(async (mailboxId: string, emailId: string, userId: string) => {
     const mailbox = await getMailbox(mailboxId, userId)
     if (!mailbox) return notFound()
 
@@ -44,7 +45,7 @@ const getEmail = async (mailboxId: string, emailId: string, userId: string) => {
     })
 
     return email
-}
+})
 
 
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {

@@ -1,58 +1,46 @@
 "use client";
 import { Button } from "@/app/components/ui/button";
 import { Loader2 } from "lucide-react";
-import * as React from "react";
-
-type loadMoreAction<T extends string | number = any> = T extends number
-    ? (offset: T) => Promise<readonly [React.JSX.Element[], number | null]>
-    : T extends string
-    ? (offset: T) => Promise<readonly [React.JSX.Element[], string | null]>
-    : any;
+import { PropsWithChildren, useRef, useState, useCallback, useEffect, useTransition } from "react";
 
 const LoadMore = <T extends string | number = any>({
     children,
     startId,
     loadMoreAction,
-}: React.PropsWithChildren<{
+    refreshId
+}: PropsWithChildren<{
     startId: T;
-    loadMoreAction: loadMoreAction<T>;
+    loadMoreAction: (offset: T) => Promise<readonly [JSX.Element[], T | null]>;
+    refreshId?: any
 }>) => {
-    const ref = React.useRef<HTMLButtonElement>(null);
-    const [loadMoreNodes, setLoadMoreNodes] = React.useState<React.JSX.Element[]>(
-        []
-    );
+    const ref = useRef<HTMLButtonElement>(null);
+    const [loadMoreNodes, setLoadMoreNodes] = useState<JSX.Element[]>([]);
 
-    const [disabled, setDisabled] = React.useState(false);
-    const currentOffsetRef = React.useRef<number | string | undefined>(
-        startId
-    );
-    const [loading, setLoading] = React.useState(false);
+    const [disabled, setDisabled] = useState(false);
+    const currentOffsetRef = useRef<T | undefined>(startId);
+    const [isPending, startTransition] = useTransition();
 
-    const loadMore = React.useCallback(
-        async (abortController?: AbortController) => {
-            setLoading(true);
+    const loadMore = useCallback(
+        async (abortController?: AbortController) =>
+            startTransition(async () => {
+                if (currentOffsetRef.current === undefined) return;
 
-            // @ts-expect-error Can't yet figure out how to type this
-            loadMoreAction(currentOffsetRef.current)
-                .then(([node, next]) => {
-                    if (abortController?.signal.aborted) return;
+                const [node, next] = await loadMoreAction(currentOffsetRef.current)
+                if (abortController?.signal.aborted) return;
 
-                    setLoadMoreNodes((prev) => [...prev, ...node]);
-                    if (next === null) {
-                        currentOffsetRef.current ??= undefined;
-                        setDisabled(true);
-                        return;
-                    }
+                setLoadMoreNodes((prev) => [...prev, ...node]);
+                if (next === null) {
+                    currentOffsetRef.current ??= undefined;
+                    setDisabled(true);
+                    return;
+                }
 
-                    currentOffsetRef.current = next;
-                })
-                .catch(() => { })
-                .finally(() => setLoading(false));
-        },
+                currentOffsetRef.current = next;
+            }),
         [loadMoreAction]
     );
 
-    React.useEffect(() => {
+    useEffect(() => {
         const signal = new AbortController();
 
         const element = ref.current;
@@ -75,6 +63,12 @@ const LoadMore = <T extends string | number = any>({
         };
     }, [loadMore]);
 
+    useEffect(() => {
+        setLoadMoreNodes([]);
+        setDisabled(false);
+        currentOffsetRef.current = startId;
+    }, [startId, refreshId]);
+
     return (
         <>
             {children}
@@ -85,11 +79,11 @@ const LoadMore = <T extends string | number = any>({
                 className="flex gap-2"
                 size="lg"
                 ref={ref}
-                disabled={disabled || loading}
+                disabled={disabled || isPending}
                 onClick={() => loadMore()}
             >
-                {loading && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
-                {loading ? "Loading..." : disabled ? "You have reached the bottom" : "Load More"}
+                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                {isPending ? "Loading..." : disabled ? "You have reached the bottom" : "Load More"}
             </Button>
         </>
     );

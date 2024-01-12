@@ -92,7 +92,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
                     </div>
                 </div>
                 {nextEmailId ? (
-                    <LoadMore loadMoreAction={fetchMoreEmails} startId={nextEmailId} >
+                    <LoadMore loadMoreAction={fetchMoreEmails} startId={nextEmailId} refreshId={Date.now()} >
                         {emails.map(email => (
                             <EmailItem key={email.id} email={email} categories={categories} mailboxId={mailboxId} type={type} />
                         ))}
