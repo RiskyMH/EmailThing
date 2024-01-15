@@ -181,36 +181,6 @@ export default async function DraftPage({
         }
         if (!domainSettings.authKey || !domainSettings.emailSendUrl) throw new Error("Domain settings not found");
 
-        const b = {
-            personalizations: [
-                {
-                    to: to!.filter(({ cc }) => cc !== "cc" && cc !== "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                    cc: to!.filter(({ cc }) => cc === "cc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                    bcc: to!.filter(({ cc }) => cc === "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                },
-            ] as Record<string, any>[],
-            from: {
-                email: alias.alias,
-                name: alias.name ?? undefined
-            },
-            subject: subject || "(no subject)",
-            content: [
-                body ? ({
-                    type: "text/plain",
-                    value: body
-                }) : undefined,
-            ]
-        }
-
-        // add dkim signature
-        if (domainSettings.dkimPrivateKey && domainSettings.dkimSelector && domainSettings.dkimDomain) {
-            b.personalizations.push({
-                dkim_domain: domainSettings.dkimDomain,
-                dkim_private_key: domainSettings.dkimPrivateKey,
-                dkim_selector: domainSettings.dkimSelector,
-            })
-        }
-
         // now send email (via mailchannels)!
         const e = await fetch(domainSettings.emailSendUrl, {
             method: "POST",
@@ -218,7 +188,31 @@ export default async function DraftPage({
                 "Content-Type": "application/json",
                 "x-auth": domainSettings.authKey
             },
-            body: JSON.stringify(b),
+            body: JSON.stringify({
+                personalizations: [
+                    {
+                        to: to!.filter(({ cc }) => cc !== "cc" && cc !== "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
+                        cc: to!.filter(({ cc }) => cc === "cc").map(({ address, name }) => ({ email: address, name: name || undefined })),
+                        bcc: to!.filter(({ cc }) => cc === "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
+                        ...(domainSettings.dkimPrivateKey && domainSettings.dkimSelector && domainSettings.dkimDomain ? ({
+                            dkim_domain: domainSettings.dkimDomain,
+                            dkim_private_key: domainSettings.dkimPrivateKey,
+                            dkim_selector: domainSettings.dkimSelector,
+                        }) : []),
+                    },
+                ],
+                from: {
+                    email: alias.alias,
+                    name: alias.name ?? undefined
+                },
+                subject: subject || "(no subject)",
+                content: [
+                    body ? ({
+                        type: "text/plain",
+                        value: body
+                    }) : undefined,
+                ]
+            }),
         })
 
         if (!e.ok) {
