@@ -19,12 +19,32 @@ const nextConfig = {
             },
         ];
     },
+    async rewrites() {
+        return [
+            {
+                source: "/",
+                destination: "/home",
+                missing: [
+                    {
+                        type: 'cookie',
+                        key: 'token',
+                    },
+                ],
+            }
+        ];
+    },
     async redirects() {
         return [
             {
                 source: '/',
                 destination: '/login',
                 permanent: false,
+                has: [
+                    {
+                        type: 'cookie',
+                        key: 'token',
+                    },
+                ],
             },
             {
                 source: '/mail/:mailbox/:email/raw',

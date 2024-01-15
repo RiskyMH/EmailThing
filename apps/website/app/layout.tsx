@@ -20,17 +20,16 @@ export const metadata = {
     title: "EmailThing",
     description: "An Email Client",
     images: [
-      "/icon.png"
+      "/icon.png",
     ],
   },
   twitter: {
-    images: [
-      "/icon.png",
-    ],
     title: "EmailThing",
     description: "An Email Client",
     card: "summary",
-
+    images: [
+      "/icon.png",
+    ],
   }
 } satisfies Metadata
 

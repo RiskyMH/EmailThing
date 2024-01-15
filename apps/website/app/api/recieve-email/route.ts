@@ -3,8 +3,7 @@ import PostalMime from 'postal-mime';
 type PostalMime = import("../../../../../node_modules/postal-mime/postal-mime").default;
 import { prisma } from '@email/db';
 import { env } from '@/app/utils/env';
-import webpush, { PushSubscription } from 'web-push'
-
+import webpush from 'web-push';
 
 webpush.setVapidDetails(
     'mailto:test@example.com',
@@ -20,9 +19,9 @@ export async function POST(request: Request) {
     const zone = searchParams.get('zone')
 
     const auth = request.headers.get("x-auth")
-    if (auth !== env.EMAIL_AUTH_TOKEN) {
-        return Response.json({ error: 'unauthorized' }, { status: 401 })
-    }
+    // if (auth !== env.EMAIL_AUTH_TOKEN) {
+    //     return Response.json({ error: 'unauthorized' }, { status: 401 })
+    // }
 
     const { email: rawEmail, from, to } = await request.json() as Record<string, string>
     if (!rawEmail || !from || !to) {
@@ -31,7 +30,6 @@ export async function POST(request: Request) {
 
     const parser = new PostalMime() as PostalMime
     const email = await parser.parse(rawEmail as string);
-    console.log(email.from)
 
     // work out which mailbox to put it in
     const mailbox = await prisma.mailbox.findFirst({
@@ -43,9 +41,15 @@ export async function POST(request: Request) {
                             alias: to,
                         }
                     },
+
                 },
                 {
-                    domain: zone,
+                    mailboxCustomDomains: {
+                        some: {
+                            domain: zone!,
+                            authKey: auth!,
+                        }
+                    },
                 }
             ]
         },

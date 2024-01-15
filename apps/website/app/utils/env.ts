@@ -4,7 +4,6 @@ import { z } from "zod"
 export const env = createEnv({
     server: {
         DATABASE_URL: z.string().min(1),
-        EMAIL_AUTH_TOKEN: z.string().min(1),
         JWT_TOKEN: z.string().optional(),
         WEB_NOTIFICATIONS_PRIVATE_KEY: z.string().min(1),
     },
@@ -17,7 +16,6 @@ export const env = createEnv({
         NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
         NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: process.env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
         WEB_NOTIFICATIONS_PRIVATE_KEY: process.env.WEB_NOTIFICATIONS_PRIVATE_KEY,
-        EMAIL_AUTH_TOKEN: process.env.EMAIL_AUTH_TOKEN,
         JWT_TOKEN: process.env.JWT_TOKEN,
     },
 })

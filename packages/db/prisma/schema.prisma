@@ -75,14 +75,14 @@ model MailboxCategory {
 }
 
 model Mailbox {
-  id            String                @id @default(cuid())
-  emails        Email[]
-  categorys     MailboxCategory[]
-  users         MailboxForUser[]
-  drafts        DraftEmail[]
-  aliases       MailboxAlias[]
-  domain        String?               @db.TinyText() // "@riskymh.dev"
-  notifications MailboxNotification[]
+  id                   String                @id @default(cuid())
+  emails               Email[]
+  categorys            MailboxCategory[]
+  users                MailboxForUser[]
+  drafts               DraftEmail[]
+  aliases              MailboxAlias[]
+  notifications        MailboxNotification[]
+  mailboxCustomDomains MailboxCustomDomain[]
 
   @@index([id])
 }
@@ -101,6 +101,30 @@ model MailboxAlias {
   @@index([alias])
   @@index([mailboxId, alias])
   @@index([default])
+}
+
+model MailboxCustomDomain {
+  id             String   @id @default(cuid())
+  mailboxId      String
+  mailbox        Mailbox  @relation(fields: [mailboxId], references: [id])
+  domain         String   @unique
+  addedAt        DateTime @default(now())
+  dkimDomain     String?
+  dkimSelector   String?
+  dkimPrivateKey String?  @db.Text()
+  authKey        String
+  emailSendUrl   String
+
+  @@unique([mailboxId, domain])
+  @@index([mailboxId, domain])
+}
+
+model MailboxDefaultDomain {
+  id             String   @id @default(cuid())
+  domain         String   @unique
+  addedAt        DateTime @default(now())
+  dkimPrivateKey String?  @db.Text()
+  authKey        String
 }
 
 model MailboxForUser {
