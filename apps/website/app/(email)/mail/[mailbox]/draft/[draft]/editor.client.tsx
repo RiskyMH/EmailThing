@@ -89,7 +89,7 @@ interface FromInputProps {
 export function FromInput({ saveAction, savedAlias, aliases }: FromInputProps) {
     // on left of input, show send button and on right show dropdown
     return (
-        <Select defaultValue={savedAlias}>
+        <Select defaultValue={savedAlias} onValueChange={(v) => saveAction({ from: v })}>
             <SelectTrigger className='bg-card'>
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">From:</span>
@@ -100,7 +100,7 @@ export function FromInput({ saveAction, savedAlias, aliases }: FromInputProps) {
                 <SelectGroup>
                     {/* <SelectLabel>From:</SelectLabel> */}
                     {aliases.map(({ name, alias }) => (
-                        <SelectItem key={alias} value={alias} onClick={() => saveAction({ from: alias })}>
+                        <SelectItem key={alias} value={alias}>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-semibold">{name ?? alias}</span>
                                 {name && <span className="text-sm text-muted-foreground">{alias}</span>}
