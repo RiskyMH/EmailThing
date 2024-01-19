@@ -104,27 +104,29 @@ model MailboxAlias {
 }
 
 model MailboxCustomDomain {
-  id             String   @id @default(cuid())
-  mailboxId      String
-  mailbox        Mailbox  @relation(fields: [mailboxId], references: [id])
-  domain         String   @unique
-  addedAt        DateTime @default(now())
-  dkimDomain     String?
-  dkimSelector   String?
-  dkimPrivateKey String?  @db.Text()
-  authKey        String
-  emailSendUrl   String
+  id              String   @id @default(cuid())
+  mailboxId       String
+  mailbox         Mailbox  @relation(fields: [mailboxId], references: [id])
+  domain          String   @unique
+  addedAt         DateTime @default(now())
+  authKey         String
+  verificationKey String?
 
   @@unique([mailboxId, domain])
   @@index([mailboxId, domain])
+  @@index([domain, authKey])
 }
 
 model MailboxDefaultDomain {
-  id             String   @id @default(cuid())
-  domain         String   @unique
-  addedAt        DateTime @default(now())
-  dkimPrivateKey String?  @db.Text()
-  authKey        String
+  id        String   @id @default(cuid())
+  domain    String   @unique
+  addedAt   DateTime @default(now())
+  authKey   String
+  available Boolean? @default(true)
+
+  @@index([domain])
+  @@index([domain, authKey])
+  @@index([available])
 }
 
 model MailboxForUser {

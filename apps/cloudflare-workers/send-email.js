@@ -36,7 +36,7 @@ export default {
             body: request.body
         });
 
-        return new Response(proxiedReq.body, { status: proxiedReq.status });
+        return proxiedReq;
 
     },
 }

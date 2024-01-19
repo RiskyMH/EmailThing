@@ -132,61 +132,12 @@ export default async function DraftPage({
         })
         if (!alias) throw new Error("Alias not found")
 
-        // check if domain is a default one and get its dkim_private_key
-        let domainSettings = {
-            dkimPrivateKey: null as string | null,
-            dkimSelector: null as string | null,
-            dkimDomain: null as string | null,
-            authKey: null as string | null,
-            emailSendUrl: null as string | null,
-        }
-        const defaultDomain = await prisma.mailboxDefaultDomain.findFirst({
-            where: {
-                domain: alias.alias.split("@")[1]
-            },
-            select: {
-                authKey: true,
-                domain: true,
-                dkimPrivateKey: true,
-            }
-        })
-
-        if (defaultDomain) {
-            domainSettings = {
-                dkimPrivateKey: defaultDomain.dkimPrivateKey,
-                dkimSelector: "emailthing",
-                dkimDomain: defaultDomain.domain,
-                authKey: defaultDomain.authKey,
-                emailSendUrl: "https://email.riskymh.workers.dev"
-            }
-        } else {
-            const customDomain = await prisma.mailboxCustomDomain.findFirst({
-                where: {
-                    mailboxId: params.mailbox,
-                    domain: alias.alias.split("@")[1]
-                },
-                select: {
-                    authKey: true,
-                    dkimDomain: true,
-                    dkimPrivateKey: true,
-                    dkimSelector: true,
-                    emailSendUrl: true,
-                }
-            })
-            if (customDomain) {
-                domainSettings = customDomain
-            } else {
-                throw new Error("Alias domain not found")
-            }
-        }
-        if (!domainSettings.authKey || !domainSettings.emailSendUrl) throw new Error("Domain settings not found");
-
         // now send email (via mailchannels)!
-        const e = await fetch(domainSettings.emailSendUrl, {
+        const e = await fetch("https://email.riskymh.workers.dev", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "x-auth": domainSettings.authKey
+                "x-auth": env.EMAIL_AUTH_TOKEN
             },
             body: JSON.stringify({
                 personalizations: [
@@ -194,10 +145,10 @@ export default async function DraftPage({
                         to: to!.filter(({ cc }) => cc !== "cc" && cc !== "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
                         cc: to!.filter(({ cc }) => cc === "cc").map(({ address, name }) => ({ email: address, name: name || undefined })),
                         bcc: to!.filter(({ cc }) => cc === "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                        ...(domainSettings.dkimPrivateKey && domainSettings.dkimSelector && domainSettings.dkimDomain ? ({
-                            dkim_domain: domainSettings.dkimDomain,
-                            dkim_private_key: domainSettings.dkimPrivateKey,
-                            dkim_selector: domainSettings.dkimSelector,
+                        ...(env.EMAIL_DKIM_PRIVATE_KEY ? ({
+                            dkim_domain: "emailthing.xyz",
+                            dkim_private_key: env.EMAIL_DKIM_PRIVATE_KEY,
+                            dkim_selector: "emailthing",
                         }) : []),
                     },
                 ],
