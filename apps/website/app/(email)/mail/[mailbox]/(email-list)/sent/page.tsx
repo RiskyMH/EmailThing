@@ -28,7 +28,7 @@ export default async function Mailbox({
     return (
         <EmailList
             mailboxId={mailbox.id}
-            type="inbox"
+            type="sent"
             categoryId={searchParams?.category}
         />
     )

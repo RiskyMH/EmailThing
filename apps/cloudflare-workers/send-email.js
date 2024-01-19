@@ -27,16 +27,16 @@ export default {
             return new Response("Unauthorised", { status: 401 })
         }
 
-        const send_request = await fetch('https://api.mailchannels.net/tx/v1/send', {
+        const proxiedReq = await fetch('https://api.mailchannels.net/tx/v1/send', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
                 ...request.headers
             },
-            body: await request.text()
+            body: request.body
         });
 
-        return new Response(JSON.stringify(await send_request.json()), { status: send_request.status });
+        return new Response(proxiedReq.body, { status: proxiedReq.status });
 
     },
 }

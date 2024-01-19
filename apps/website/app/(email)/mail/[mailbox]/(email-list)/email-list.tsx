@@ -17,7 +17,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
     const emailFetchOptions = {
         isBinned: type === "bin",
         isSender: type === "sent",
-        isStarred: type === "starred",
+        isStarred: type === "starred" ? true : undefined,
         categoryId
     }
 

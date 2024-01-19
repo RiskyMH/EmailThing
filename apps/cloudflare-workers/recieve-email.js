@@ -59,7 +59,9 @@ export default {
         });
 
         if (!req.ok) {
-            throw new Error(await req.text());
+            const error = await req.text()
+            message.setReject(error);
+            throw new Error(error);
         }
     }
 };

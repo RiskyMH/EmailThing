@@ -17,7 +17,6 @@ export const revalidate = 0
 export async function POST(request: Request) {
     const { searchParams } = new URL(request.url)
     const zone = searchParams.get('zone')
-
     const auth = request.headers.get("x-auth")
     // if (auth !== env.EMAIL_AUTH_TOKEN) {
     //     return Response.json({ error: 'unauthorized' }, { status: 401 })
@@ -32,34 +31,52 @@ export async function POST(request: Request) {
     const email = await parser.parse(rawEmail as string);
 
     // work out which mailbox to put it in
-    const mailbox = await prisma.mailbox.findFirst({
-        where: {
-            OR: [
-                {
-                    aliases: {
-                        some: {
-                            alias: to,
-                        }
-                    },
+    let mailboxId: string | undefined = undefined
 
-                },
-                {
-                    mailboxCustomDomains: {
-                        some: {
-                            domain: zone!,
-                            authKey: auth!,
-                        }
-                    },
-                }
-            ]
+    // check if its a default domain first (and if so, check the alias and get the mailbox id)
+    const defaultDomain = await prisma.mailboxDefaultDomain.findFirst({
+        where: {
+            domain: zone!,
+            authKey: auth!,
         },
         select: {
             id: true,
         }
-    })
+    });
 
-    if (!mailbox) {
-        return Response.json({ error: 'mailbox not found' }, { status: 400 })
+    if (defaultDomain) {
+        const alias = await prisma.mailboxAlias.findFirst({
+            where: {
+                alias: from,
+            },
+            select: {
+                mailboxId: true,
+            }
+        })
+
+        if (alias) {
+            mailboxId = alias.mailboxId
+        }
+
+    } else {
+        // check if its a custom domain
+        const customDomain = await prisma.mailboxCustomDomain.findFirst({
+            where: {
+                domain: zone!,
+                authKey: auth!,
+            },
+            select: {
+                mailboxId: true,
+            }
+        });
+
+        if (customDomain) {
+            mailboxId = customDomain.mailboxId
+        }
+    }
+
+    if (!mailboxId) {
+        return new Response('Mailbox not found', { status: 400 })
     }
 
     const body = email.text || email.html || email.attachments.map((a) => a.content).join('\n')
@@ -94,7 +111,7 @@ export async function POST(request: Request) {
             html: email.html,
             snippet: slice(body, 200),
             mailbox: {
-                connect: mailbox
+                connect: { id: mailboxId }
             }
         },
         select: {
@@ -108,7 +125,7 @@ export async function POST(request: Request) {
     // send push notifications
     const notifications = await prisma.mailboxNotification.findMany({
         where: {
-            mailboxId: mailbox.id,
+            mailboxId,
         },
         select: {
             endpoint: true,
@@ -121,7 +138,7 @@ export async function POST(request: Request) {
         const payload = JSON.stringify({
             title: email.from.address,
             body: email.subject ? slice(email.subject, 200) : undefined,
-            url: `/mail/${mailbox.id}/${e.id}`,
+            url: `/mail/${mailboxId}/${e.id}`,
         })
 
         try {
