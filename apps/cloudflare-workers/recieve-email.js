@@ -61,7 +61,7 @@ export default {
         if (!req.ok) {
             const error = await req.text()
             message.setReject(error);
-            throw new Error(error);
+            console.error(error);
         }
     }
 };

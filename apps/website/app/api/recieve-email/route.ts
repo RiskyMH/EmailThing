@@ -44,10 +44,11 @@ export async function POST(request: Request) {
         }
     });
 
+
     if (defaultDomain) {
         const alias = await prisma.mailboxAlias.findFirst({
             where: {
-                alias: from,
+                alias: to
             },
             select: {
                 mailboxId: true,

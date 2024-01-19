@@ -110,7 +110,7 @@ model MailboxCustomDomain {
   domain          String   @unique
   addedAt         DateTime @default(now())
   authKey         String
-  verificationKey String?
+  // verificationKey String?
 
   @@unique([mailboxId, domain])
   @@index([mailboxId, domain])
