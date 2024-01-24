@@ -29,6 +29,13 @@ const getEmail = cache(async (mailboxId: string, emailId: string, userId: string
             createdAt: true,
             isRead: true,
             isStarred: true,
+            recipients: {
+                select: {
+                    address: true,
+                    name: true,
+                    cc: true
+                }
+            },
             category: {
                 select: {
                     name: true,

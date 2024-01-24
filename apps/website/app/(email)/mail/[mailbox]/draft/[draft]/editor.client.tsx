@@ -171,13 +171,13 @@ export function RecipientInput({ saveAction, savedTo }: RecipientInputProps) {
                     className="border border-input group w-full px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-card rounded-md flex self-center gap-2"
                 >
                     {to.filter(r => r.cc == (type === "to" ? null : type)).map(({ name, address }) => (
-                        <RecipientPill key={address} name={name ?? address} onRemove={async () => removeRecipient(type, address)} />
+                        <RecipientPill key={address} name={name ? `${name} <${address}>` : address} onRemove={async () => removeRecipient(type, address)} />
                     ))}
                     <input
                         className="text-sm w-full focus-visible:outline-none bg-transparent py-1 "
                         placeholder="Add recipients..."
                         type="email"
-                        onBlur={e => e.currentTarget.value = "" }
+                        onBlur={e => e.currentTarget.value = ""}
                         onKeyDown={e => {
                             if (e.key === "Enter" || e.key === " ") {
                                 validate(e.currentTarget, type)

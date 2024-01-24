@@ -74,17 +74,23 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                 {type !== "drafts" ? (
                     <>
                         {/* // TODO: implement sending emails */}
-                        <ContextMenuItem className="flex gap-2">
-                            <ReplyIcon className="w-5 h-5 text-muted-foreground" />
-                            Reply
+                        <ContextMenuItem className="flex gap-2" asChild>
+                            <Link href={`/mail/${mailboxId}/draft/new?reply=${emailId}`}>
+                                <ReplyIcon className="w-5 h-5 text-muted-foreground" />
+                                Reply
+                            </Link>
                         </ContextMenuItem>
-                        <ContextMenuItem className="flex gap-2">
-                            <ReplyAllIcon className="w-5 h-5 text-muted-foreground" />
-                            Reply to all
+                        <ContextMenuItem className="flex gap-2" asChild>
+                            <Link href={`/mail/${mailboxId}/draft/new?replyAll=${emailId}`}>
+                                <ReplyAllIcon className="w-5 h-5 text-muted-foreground" />
+                                Reply to all
+                            </Link>
                         </ContextMenuItem>
-                        <ContextMenuItem className="flex gap-2">
-                            <ForwardIcon className="w-5 h-5 text-muted-foreground" />
-                            Forward
+                        <ContextMenuItem className="flex gap-2" asChild>
+                            <Link href={`/mail/${mailboxId}/draft/new?forward=${emailId}`}>
+                                <ForwardIcon className="w-5 h-5 text-muted-foreground" />
+                                Forward
+                            </Link>
                         </ContextMenuItem>
                         <ContextMenuSeparator />
 
