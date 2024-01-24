@@ -21,7 +21,7 @@ export function BodyEditor({ saveAction, savedBody }: { saveAction: ({ body }: {
 
     return (
         <Textarea
-            className="h-full w-full bg-card block border-none min-h-64"
+            className="h-full w-full bg-card block border-none min-h-64 text-base"
             id="body"
             defaultValue={savedBody}
             placeholder="Write your email body here..."
@@ -175,7 +175,7 @@ export function RecipientInput({ saveAction, savedTo }: RecipientInputProps) {
                         <RecipientPill key={address} name={name} address={address} onRemove={() => removeRecipient(type, address)} />
                     ))}
                     <input
-                        className="text-sm flex-grow min-w-48 focus-visible:outline-none bg-transparent py-1"
+                        className="text-sm flex-grow sm:min-w-48 focus-visible:outline-none bg-transparent py-1"
                         placeholder="Add recipients..."
                         type="email"
                         onBlur={e => {
@@ -188,7 +188,7 @@ export function RecipientInput({ saveAction, savedTo }: RecipientInputProps) {
                             }
                         }}
                     />
-                    <div className="self-centre static flex">
+                    <div className="self-centre flex">
                         {
                             !showCC && type === "to" && (
                                 <Button variant="ghost" size="auto" className="self-centre rounded text-muted-foreground hover:text-white px-2" onClick={() => setShowCC(true)}>
