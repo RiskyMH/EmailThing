@@ -1,9 +1,8 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
-import { getMailbox } from "../../tools"
+import { userMailboxAccess } from "../../tools"
 import { Metadata } from "next"
 import EmailList from "../email-list"
-import { getEmailList } from "../tools"
 
 export const metadata = {
     title: "Starred",
@@ -22,12 +21,12 @@ export default async function Mailbox({
     }
 }) {
     const userId = await getCurrentUser()
-    const mailbox = await getMailbox(params.mailbox, userId!)
-    if (!mailbox) return notFound()
+    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
+    if (!userHasAccess) return notFound()
 
     return (
         <EmailList
-            mailboxId={mailbox.id}
+            mailboxId={params.mailbox}
             type="starred"
             categoryId={searchParams?.category}
         />

@@ -1,19 +1,21 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { notFound, redirect } from "next/navigation"
-import { getMailbox } from "./tools"
+import { userMailboxAccess, mailboxAliases } from "./tools"
 import { Metadata } from "next"
 import Sidebar from "./sidebar"
 import Header from "./header"
 
 export async function generateMetadata({ params }: { params: { mailbox: string } }): Promise<Metadata> {
     const userId = await getCurrentUser()
-    const mailbox = await getMailbox(params.mailbox, userId!)
-    if (!mailbox) return notFound()
+    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
+    if (!userHasAccess) return notFound()
+
+    const { default: defaultAlias } = await mailboxAliases(params.mailbox)
 
     return {
         title: {
-            default: `${mailbox.primaryAlias?.alias}`,
-            template: `%s - ${mailbox.primaryAlias?.alias} - EmailThing`,
+            default: `${defaultAlias?.alias}`,
+            template: `%s - ${defaultAlias?.alias} - EmailThing`,
         },
         robots: "noindex",
     }
@@ -33,8 +35,8 @@ export default async function MailLayout({
     const userId = await getCurrentUser()
     if (!userId) return redirect("/login?from=/mail/" + params.mailbox)
 
-    const mailbox = await getMailbox(params.mailbox, userId)
-    if (!mailbox) return notFound()
+    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
+    if (!userHasAccess) return notFound()
 
     return (
         <div className="min-h-screen">

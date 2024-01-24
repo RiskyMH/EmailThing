@@ -1,37 +1,87 @@
 import { prisma } from "@email/db";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
 
-export const getMailbox = cache(async (mailboxId: string, userId: string) => {
-    if (!mailboxId || !userId) return null;
-    const mailbox = await prisma.mailbox.findUnique({
-        where: {
-            id: mailboxId,
-            users: {
-                some: {
-                    userId
-                }
-            },
-        },
-        select: {
-            id: true,
-            aliases: {
+export const userMailboxAccess = cache((mailboxId: string, userId: string | null) => {
+    if (!userId) return false;
+
+    return unstable_cache(
+        async () => {
+            const mailbox = await prisma.mailboxForUser.findUnique({
                 where: {
-                    default: true,
+                    mailboxId_userId: {
+                        mailboxId,
+                        userId
+                    }
+                }
+            })
+
+            return !!mailbox;
+        },
+        [mailboxId, userId],
+        {
+            tags: [
+                `mailbox-${mailboxId}`,
+                `user-${userId}`,
+                `userMailboxAccess`,
+                `userMailboxAccess-${mailboxId}-${userId}`
+            ],
+            // revalidate after 7 days
+            revalidate: 60 * 60 * 24 * 7,
+        }
+    )()
+})
+export const mailboxCategories = cache((mailboxId: string) => {
+    return unstable_cache(
+        async () => {
+            const mailbox = await prisma.mailboxCategory.findMany({
+                where: {
+                    mailboxId,
                 },
                 select: {
-                    default: true,
+                    id: true,
                     name: true,
-                    alias: true,
+                    color: true,
                 }
-            }
+            })
+
+            return mailbox;
+        },
+        [mailboxId],
+        {
+            tags: [
+                `mailbox-${mailboxId}`,
+                `mailbox-categories-${mailboxId}`,
+            ],
+            // revalidate after 7 days
+            revalidate: 60 * 60 * 24 * 7,
         }
-    })
+    )()
+})
 
-    if (!mailbox) return null
+export const mailboxAliases = cache((mailboxId: string) => {
+    return unstable_cache(
+        async () => {
+            const aliases = await prisma.mailboxAlias.findMany({
+                where: {
+                    mailboxId,
+                }
+            })
 
-    return {
-        id: mailbox.id,
-        primaryAlias: mailbox.aliases.find((a) => a.default),
-    };
-});
+            return {
+                aliases,
+                default: aliases.find((a) => a.default)
+            };
+        },
+        [mailboxId],
+        {
+            tags: [
+                `mailbox-${mailboxId}`,
+                `mailbox-aliases-${mailboxId}`,
+            ],
+            // revalidate after 7 days
+            revalidate: 60 * 60 * 24 * 7,
+        }
+    )()
+})

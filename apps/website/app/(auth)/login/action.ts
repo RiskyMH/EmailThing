@@ -1,4 +1,4 @@
-'use server'
+"use server";
 import { addUserTokenToCookie, verifyPassword } from "@/app/utils/user"
 import { userAuthSchema } from "@/app/validations/auth"
 import { prisma } from "@email/db"

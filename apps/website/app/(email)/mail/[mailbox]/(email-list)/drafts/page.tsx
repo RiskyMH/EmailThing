@@ -1,7 +1,6 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
-import { getMailbox } from "../../tools"
-import { prisma } from "@email/db"
+import { userMailboxAccess } from "../../tools"
 import { Metadata } from "next"
 import EmailList from "../email-list"
 
@@ -18,12 +17,12 @@ export default async function Mailbox({
     }
 }) {
     const userId = await getCurrentUser()
-    const mailbox = await getMailbox(params.mailbox, userId!)
-    if (!mailbox) return notFound()
+    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
+    if (!userHasAccess) return notFound()
 
     return (
         <EmailList
-            mailboxId={mailbox.id}
+            mailboxId={params.mailbox}
             type="drafts"
         />
     )

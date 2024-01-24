@@ -1,6 +1,5 @@
 import { prisma } from "@email/db";
 
-
 export interface EmailListFindOptions {
     isBinned?: boolean;
     isSender?: boolean;

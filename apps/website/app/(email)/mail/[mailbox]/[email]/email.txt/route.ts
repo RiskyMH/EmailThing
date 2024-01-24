@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { prisma } from "@email/db"
 import { notFound } from "next/navigation"
+import { userMailboxAccess } from "../../tools"
 
 
 export async function GET(
@@ -15,17 +16,12 @@ export async function GET(
     }
 ) {
     const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(params.mailbox, userId)) return notFound();
+
     const mail = await prisma.email.findFirst({
         where: {
             id: params.email,
-            mailbox: {
-                id: params.mailbox,
-                users: {
-                    some: {
-                        userId: userId!
-                    }
-                }
-            }
+            mailboxId: params.mailbox,
         }, 
         select: {
             body: true

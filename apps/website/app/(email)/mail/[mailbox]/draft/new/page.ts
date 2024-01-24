@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/app/utils/user";
 import { prisma } from "@email/db";
 import { notFound, redirect } from "next/navigation";
-import { getMailbox } from "../../tools";
+import { mailboxAliases, userMailboxAccess } from "../../tools";
 
 
 export default async function Page({
@@ -14,15 +14,16 @@ export default async function Page({
 }) {
     // make new draft
     const userId = await getCurrentUser()
-    const mailbox = await getMailbox(params.mailbox, userId!)
+    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
+    if (!userHasAccess) return notFound()
 
-    if (!mailbox) return notFound()
+    const aliases = await mailboxAliases(params.mailbox)
 
     // create
     const draft = await prisma.draftEmail.create({
         data: {
-            mailboxId: mailbox.id,
-            from: mailbox.primaryAlias?.alias
+            mailboxId: params.mailbox,
+            from: aliases.default?.alias
         }
     })
 

@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/app/utils/user"
 import { prisma } from "@email/db"
 import { notFound, redirect } from "next/navigation"
 import { parseHTML } from "../parse-html"
+import { userMailboxAccess } from "../../tools"
 
 
 export async function GET(
@@ -16,24 +17,19 @@ export async function GET(
     }
 ) {
     const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(params.mailbox, userId)) return notFound();
+
     const mail = await prisma.email.findFirst({
         where: {
             id: params.email,
-            mailbox: {
-                id: params.mailbox,
-                users: {
-                    some: {
-                        userId: userId!
-                    }
-                }
-            }
+            mailboxId: params.mailbox,
         },
         select: {
             html: true
         }
     })
-    if (!mail) return notFound()
 
+    if (!mail) return notFound()
     if (!mail.html) {
         return redirect(`/mail/${params.mailbox}/${params.email}/email.txt`)
     }

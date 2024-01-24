@@ -1,80 +1,32 @@
 import LocalTime from "@/app/components/localtime";
 import TooltipText from "@/app/components/tooltip-text";
 import { cn } from "@/app/utils/tw";
-import { getCurrentUser } from "@/app/utils/user";
-import { prisma } from "@email/db";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/app/components/ui/context-menu";
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { ClientStar, ContextMenuAction } from "./components.client";
-import { getJustEmailsList, getDraftJustEmailsList, getEmailList } from "./tools";
+import { getJustEmailsList, getDraftJustEmailsList } from "./tools";
 import { ReplyIcon, ReplyAllIcon, ForwardIcon, TagIcon, ExternalLink } from "lucide-react";
+import { mailboxCategories } from "../tools";
+import { updateEmail as updateEmailAction } from "./actions"
 
-interface UpdatableEmailConfig {
+
+export interface UpdatableEmailConfig {
     isStarred?: boolean;
     isRead?: boolean;
     category?: string | null;
     binned?: boolean;
 }
 
-interface EmailItemProps {
+export interface EmailItemProps {
     email: Awaited<ReturnType<typeof getJustEmailsList>>[0] | Awaited<ReturnType<typeof getDraftJustEmailsList>>[0];
     mailboxId: string;
     type: "inbox" | "sent" | "drafts" | "bin" | "starred";
-    categories?: Awaited<ReturnType<typeof getEmailList>>[1] | null;
+    categories?: Awaited<ReturnType<typeof mailboxCategories>> | null;
 }
+
 export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps) {
     const emailId = email.id
-    const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`
-
-    async function updateEmail(state: UpdatableEmailConfig) {
-        "use server"
-        const userId = await getCurrentUser()
-        if (!userId) throw new Error()
-
-        if (type === "drafts") {
-            if (state.binned) {
-                await prisma.draftEmail.delete({
-                    where: {
-                        id: emailId,
-                        mailboxId: mailboxId
-                    }
-                })
-                return revalidatePath(baseUrl)
-
-            }
-            if (state.category) throw new Error("Cannot categorize drafts");
-        }
-
-        await prisma.email.update({
-            data: {
-                isStarred: state.isStarred,
-                isRead: state.isRead,
-                binnedAt: state.binned ? new Date() : (state.binned === false ? null : undefined),
-                category: state.category ? ({
-                    connect: {
-                        id: state.category
-                    }
-                }) : state.category === null ? ({
-                    disconnect: true
-                }) : undefined
-            },
-            where: {
-                id: emailId,
-                mailbox: {
-                    id: mailboxId,
-                    users: {
-                        some: {
-                            userId: userId
-                        }
-                    }
-                }
-            }
-
-        });
-
-        revalidatePath(baseUrl)
-    }
+    const updateEmail = updateEmailAction.bind(null, mailboxId, emailId, type)
 
     return (
         <ContextMenu>

@@ -4,6 +4,7 @@ import { getDraftEmailList, getEmailList, getJustEmailsList, getDraftJustEmailsL
 import LoadMore from "@/app/components/loadmore.client";
 import { EmailItem } from "./email-item";
 import { prisma } from "@email/db";
+import { mailboxCategories, userMailboxAccess } from "../tools";
 
 interface EmailListProps {
     mailboxId: string;
@@ -27,16 +28,10 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
     const nextEmailId = emails.length === 11 ? emails.pop()?.id : null
 
     async function fetchMoreEmails(nextEmailId: string) {
-        'use server';
+        "use server";;
         const userId = await getCurrentUser()
         if (!userId) throw new Error()
-        const mailbox = prisma.mailboxForUser.findFirst({
-            where: {
-                mailboxId,
-                userId
-            }
-        })
-        if (!mailbox) throw new Error()
+        if (!await userMailboxAccess(mailboxId, userId)) throw new Error()
 
         const emails = (type !== "drafts")
             ? await getJustEmailsList(mailboxId, emailFetchOptions, nextEmailId)
@@ -45,20 +40,19 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
         if (emails.length === 0) throw new Error("No more emails")
 
         const nextPageEmailId = emails.length === 11 ? emails.pop() : null
-        const categories1 = categories
+        const categories = await mailboxCategories(mailboxId)
 
         return [
             emails.map(email => (
                 <EmailItem
                     key={email.id}
                     email={email}
-                    categories={categories1}
+                    categories={categories}
                     mailboxId={mailboxId}
                     type={type}
                 />
             )),
             nextPageEmailId?.id ?? null,
-
         ] as const
     }
 

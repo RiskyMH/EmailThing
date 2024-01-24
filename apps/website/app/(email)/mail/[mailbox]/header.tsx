@@ -3,10 +3,10 @@ import { prisma } from "@email/db";
 import { Suspense } from "react";
 import { Search } from "./nav.search";
 import { UserNav } from "./user.nav.client";
-import { getMailbox } from "./tools";
 import Link from "next/link";
 import { MailIcon } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { mailboxAliases, userMailboxAccess } from "./tools";
 
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
@@ -43,18 +43,6 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
 
 
 async function getUser() {
-    const userId = await getCurrentUser()
-    if (!userId) return null;
-    const user = prisma.user.findUnique({
-        where: {
-            id: userId
-        },
-        select: {
-            username: true,
-            id: true
-        }
-    })
-    return user;
 
 }
 
@@ -65,13 +53,29 @@ function UserMenuFallback() {
 }
 
 async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
-    const user = await getUser()!
-    const mailbox = await getMailbox(mailboxId, user!.id)!
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("No access to mailbox");
+    }
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        select: {
+            username: true,
+            id: true
+        }
+    })
+    if (!user) throw new Error("No user found")
+
+    const { default: defaultAlias } = await mailboxAliases(mailboxId);
+
     return (
         <UserNav mailboxId={mailboxId} user={{
-            id: mailbox!.id!,
-            name: user!.username,
-            secondary: mailbox!.primaryAlias!.alias!,
+            id: mailboxId,
+            name: user.username,
+            secondary: defaultAlias!.alias!,
         }} />
     );
 }

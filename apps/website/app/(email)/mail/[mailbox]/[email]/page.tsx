@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
-import { getMailbox } from "../tools"
+import { userMailboxAccess } from "../tools"
 import { Metadata } from "next"
 import { prisma } from "@email/db"
 import { MarkRead } from "./components.client"
@@ -11,13 +11,14 @@ import { TabsList, Tab } from "@/app/components/tabs-link"
 import { cache } from "react"
 
 
-const getEmail = cache(async (mailboxId: string, emailId: string, userId: string) => {
-    const mailbox = await getMailbox(mailboxId, userId)
-    if (!mailbox) return notFound()
+const getEmail = cache(async (mailboxId: string, emailId: string, userId: string | null) => {
+    const userHasAccess = await userMailboxAccess(mailboxId, userId)
+    if (!userHasAccess) return notFound()
 
     const email = await prisma.email.findUnique({
         where: {
-            id: emailId
+            id: emailId,
+            mailboxId
         },
         select: {
             id: true,
@@ -50,7 +51,7 @@ const getEmail = cache(async (mailboxId: string, emailId: string, userId: string
 
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {
     const userId = await getCurrentUser()
-    const mail = await getEmail(props.params.mailbox, props.params.email, userId!)
+    const mail = await getEmail(props.params.mailbox, props.params.email, userId)
     if (!mail) return notFound()
 
     return {
@@ -71,13 +72,13 @@ export default async function Email({
     }
 }) {
     const userId = await getCurrentUser()
-    const mail = await getEmail(params.mailbox, params.email, userId!)
+    const mail = await getEmail(params.mailbox, params.email, userId)
     if (!mail) return notFound()
 
     async function markRead() {
         "use server"
         const userId = await getCurrentUser()
-        if (!userId) throw new Error()
+        if (!userId || !await userMailboxAccess(params.mailbox, userId)) throw new Error("No access to mailbox");
 
         await prisma.email.update({
             data: {
@@ -85,14 +86,7 @@ export default async function Email({
             },
             where: {
                 id: params.email,
-                mailbox: {
-                    id: params.mailbox,
-                    users: {
-                        some: {
-                            userId: userId
-                        }
-                    }
-                }
+                mailboxId: params.mailbox,
             }
 
         });

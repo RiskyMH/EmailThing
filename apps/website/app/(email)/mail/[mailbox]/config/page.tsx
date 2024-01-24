@@ -1,9 +1,8 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
-import { getMailbox } from "../tools"
 import { Metadata } from "next"
-import dynamic from "next/dynamic"
 import Notifications from "./register-button.client"
+import { userMailboxAccess } from "../tools"
 
 
 export const metadata: Metadata = {
@@ -20,9 +19,8 @@ export default async function Email({
     }
 }) {
     const userId = await getCurrentUser()
-    const mail = await getMailbox(params.mailbox, userId!)
-    if (!mail) return notFound()
-
+    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
+    if (!userHasAccess) return notFound()
 
     return (
         <div className="min-w-0 p-5">

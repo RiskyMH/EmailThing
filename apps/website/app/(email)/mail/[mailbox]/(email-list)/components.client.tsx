@@ -10,8 +10,7 @@ import type { MouseEvent, PropsWithChildren } from "react"
 import { useTransition } from 'react';
 
 
-export function ClientStar({ action, enabled, className }: any) {
-
+export function ClientStar({ action, enabled, className }: { action: () => void, enabled: boolean, className?: string }) {
     const [isPending, startTransition] = useTransition();
 
     const onClick = (e: MouseEvent<HTMLButtonElement, MouseEvent>) => {

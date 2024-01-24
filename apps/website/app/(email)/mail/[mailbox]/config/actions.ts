@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/app/utils/user";
 import { prisma } from "@email/db";
 import webpush from 'web-push';
 import { env } from '@/app/utils/env';
+import { userMailboxAccess } from "../tools";
 
 webpush.setVapidDetails(
     'mailto:test@example.com',
@@ -16,21 +17,7 @@ export async function saveSubscription(mailboxId: string, subscription: PushSubs
     if (!userId) throw new Error("User not found");
 
     // check if user has access to mailbox
-    const mailbox = await prisma.mailbox.findFirst({
-        where: {
-            id: mailboxId,
-            users: {
-                some: {
-                    userId,
-                }
-            }
-        },
-        select: {
-            id: true,
-        }
-    });
-
-    if (!mailbox) throw new Error("Mailbox not found");
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) throw new Error("Mailbox not found");
 
     // save subscription
     if (!subscription.keys) throw new Error("Subscription keys are missing");
@@ -45,13 +32,13 @@ export async function saveSubscription(mailboxId: string, subscription: PushSubs
     }, JSON.stringify({
         title: "Text Notification",
         body: "This is a test notification!",
-        url: `/mail/${mailbox.id}`,
+        url: `/mail/${mailboxId}`,
     }))
 
 
     await prisma.mailboxNotification.create({
         data: {
-            mailboxId: mailbox.id,
+            mailboxId,
             endpoint: subscription.endpoint,
             expiresAt: subscription.expirationTime ? new Date(subscription.expirationTime) : undefined,
             p256dh: subscription.keys.p256dh,
