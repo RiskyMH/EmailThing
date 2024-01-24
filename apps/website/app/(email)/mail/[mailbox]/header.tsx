@@ -7,16 +7,31 @@ import Link from "next/link";
 import { MailIcon } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { mailboxAliases, userMailboxAccess } from "./tools";
+import Sidebar from "./sidebar";
+import { MobileNav } from "./sidebar.client";
+import { ScrollArea } from "@/app/components/ui/scroll-area";
 
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
     return (
         <div className="sticky flex items-center justify-between border-b-2 top-0 z-40 bg-secondary dark:bg-tertiary px-7">
             <header className="flex h-16 w-full items-center">
-                <nav className="w-auto lg:w-[calc(15rem-1.75rem)]">
+                <MobileNav>
+                    <div className="flex gap-2 items-center">
+                        <MailIcon />
+                        <h1 className="inline-block whitespace-nowrap font-bold text-xl">
+                            EmailThing
+                        </h1>
+                    </div>
+                    {/* <ScrollArea> */}
+                        <Sidebar mailbox={mailboxId} />
+                    {/* </ScrollArea> */}
+                </MobileNav>
+
+                <nav className="w-auto lg:w-[calc(15rem-1.75rem)] mx-auto me-auto sm:ms-0">
                     <Button asChild variant="ghost">
                         <Link
-                            className="flex items-center gap-2 hover:bg-transparent -ms-4 me-8"
+                            className="flex items-center gap-2 hover:bg-transparent sm:-ms-4 sm:me-8"
                             href={"/mail/" + mailboxId}
                         >
                             <MailIcon />

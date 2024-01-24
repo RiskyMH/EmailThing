@@ -2,9 +2,20 @@
 import { cn } from "@/app/utils/tw";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/app/components/ui/sheet"
+import { Button } from "@/app/components/ui/button";
+import { MenuIcon } from "lucide-react";
+import { useMediaQuery, useWindowSize } from "usehooks-ts";
 
-export function SidebarLink({ href, className, children, disabled }: PropsWithChildren<{ href: string, className: string, disabled?: boolean}>) {
+export function SidebarLink({ href, className, children, disabled }: PropsWithChildren<{ href: string, className: string, disabled?: boolean }>) {
     const pathName = usePathname()
 
     if (disabled) {
@@ -25,5 +36,31 @@ export function SidebarLink({ href, className, children, disabled }: PropsWithCh
 
             {children}
         </Link>
+    )
+}
+
+export function MobileNav({ children }: PropsWithChildren<{}>) {
+    const [open, setOpen] = useState(false)
+    const windowSize = useWindowSize()
+    useEffect(() => setOpen(false), [windowSize])
+
+    return (
+        <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger className="inline sm:hidden me-auto">
+                {/* <Button asChild variant="ghost"> */}
+                <MenuIcon />
+                {/* </Button> */}
+            </SheetTrigger>
+            <SheetContent side="left" onClick={() => setOpen(false)}>
+                {children}
+                {/* <SheetHeader>
+                    <SheetTitle>Are you absolutely sure?</SheetTitle>
+                    <SheetDescription>
+                        This action cannot be undone. This will permanently delete your account
+                        and remove your data from our servers.
+                    </SheetDescription>
+                </SheetHeader> */}
+            </SheetContent>
+        </Sheet>
     )
 }

@@ -39,10 +39,10 @@ export default async function MailLayout({
     if (!userHasAccess) return notFound()
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-background" vaul-drawer-wrapper="">
             <Header mailbox={params.mailbox} />
             <div className="flex w-screen max-w-full">
-                <Sidebar mailbox={params.mailbox} />
+                <Sidebar mailbox={params.mailbox} className="hidden sm:inline" />
                 {children}
             </div>
         </div>
