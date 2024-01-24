@@ -21,9 +21,10 @@ export function BodyEditor({ saveAction, savedBody }: { saveAction: ({ body }: {
 
     return (
         <Textarea
-            className="h-full w-full bg-card block"
+            className="h-full w-full bg-card block border-none min-h-64"
             id="body"
             defaultValue={savedBody}
+            placeholder="Write your email body here..."
             required
             maxLength={4000}
             onChange={(e) => debounced({ body: e.target.value })}
@@ -36,7 +37,7 @@ export function Subject({ saveAction, savedSubject }: { saveAction: ({ subject }
 
     return (
         <Input
-            className="w-full bg-card text-lg"
+            className="w-full bg-card text-lg border-none"
             placeholder="Subject..."
             id="subject"
             defaultValue={savedSubject}
@@ -90,7 +91,7 @@ export function FromInput({ saveAction, savedAlias, aliases }: FromInputProps) {
     // on left of input, show send button and on right show dropdown
     return (
         <Select defaultValue={savedAlias} onValueChange={(v) => saveAction({ from: v })}>
-            <SelectTrigger className='bg-card'>
+            <SelectTrigger className='bg-card border-none'>
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">From:</span>
                     <SelectValue className="text-sm font-semibold">{savedAlias}</SelectValue>
@@ -148,13 +149,13 @@ export function RecipientInput({ saveAction, savedTo }: RecipientInputProps) {
         saveAction({ to: newTo });
     }
 
-    function validate(element: HTMLInputElement, type: typeof types[number]) {
+    function validate(element: HTMLInputElement, type: typeof types[number], toastOnError = true) {
         const emailRegex = /\S+@\S+\.\S+/;
 
         if (emailRegex.test(element.value)) {
             addRecipient(type, element.value)
             element.value = ""
-        } else {
+        } else if (toastOnError) {
             toast.error("Invalid email address")
         }
     }
@@ -168,36 +169,41 @@ export function RecipientInput({ saveAction, savedTo }: RecipientInputProps) {
 
                 <div
                     id={type}
-                    className="border border-input group w-full px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-card rounded-md flex self-center gap-2"
+                    className="group w-full px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-card rounded-md flex self-center gap-2 flex-wrap"
                 >
                     {to.filter(r => r.cc == (type === "to" ? null : type)).map(({ name, address }) => (
-                        <RecipientPill key={address} name={name ? `${name} <${address}>` : address} onRemove={async () => removeRecipient(type, address)} />
+                        <RecipientPill key={address} name={name} address={address} onRemove={() => removeRecipient(type, address)} />
                     ))}
                     <input
-                        className="text-sm w-full focus-visible:outline-none bg-transparent py-1 "
+                        className="text-sm flex-grow min-w-48 focus-visible:outline-none bg-transparent py-1"
                         placeholder="Add recipients..."
                         type="email"
-                        onBlur={e => e.currentTarget.value = ""}
+                        onBlur={e => {
+                            validate(e.currentTarget, type, false);
+                            e.currentTarget.value = "";
+                        }}
                         onKeyDown={e => {
                             if (e.key === "Enter" || e.key === " ") {
-                                validate(e.currentTarget, type)
+                                validate(e.currentTarget, type);
                             }
                         }}
                     />
-                    {
-                        !showCC && type === "to" && (
-                            <Button variant="ghost" size="auto" className="self-centre rounded text-muted-foreground hover:text-white px-2" onClick={() => setShowCC(true)}>
-                                Cc
-                            </Button>
-                        )
-                    }
-                    {
-                        !showBCC && type === "to" && (
-                            <Button variant="ghost" size="auto" className="self-centre rounded text-muted-foreground hover:text-white px-2" onClick={() => setShowBCC(true)}>
-                                Bcc
-                            </Button>
-                        )
-                    }
+                    <div className="self-centre static flex">
+                        {
+                            !showCC && type === "to" && (
+                                <Button variant="ghost" size="auto" className="self-centre rounded text-muted-foreground hover:text-white px-2" onClick={() => setShowCC(true)}>
+                                    Cc
+                                </Button>
+                            )
+                        }
+                        {
+                            !showBCC && type === "to" && (
+                                <Button variant="ghost" size="auto" className="self-centre rounded text-muted-foreground hover:text-white px-2" onClick={() => setShowBCC(true)}>
+                                    Bcc
+                                </Button>
+                            )
+                        }
+                    </div>
 
                 </div>
             </div>
@@ -208,11 +214,13 @@ export function RecipientInput({ saveAction, savedTo }: RecipientInputProps) {
 
 }
 
-function RecipientPill({ name, onRemove }: { name: string, onRemove: () => Promise<void> }) {
+function RecipientPill({ name, address, onRemove }: { name: string | null, address: string, onRemove: () => Promise<void> | void }) {
     return (
-        <div className="bg-tertiary text-sm px-2 py-1 rounded flex items-center gap-1">
-            <span>{name}</span>
-            <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-muted-foreground bg-tertiary hover:bg-tertiary hover:text-black dark:hover:text-white" asChild onClick={onRemove}>
+        <div className="bg-tertiary text-sm px-2 py-1 rounded flex items-center gap-1 break-all">
+            <span>{name || address}</span>
+            {name && <span className="text-muted-foreground">{`<${address}>`}</span>}
+
+            <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-muted-foreground bg-tertiary hover:bg-tertiary hover:text-black dark:hover:text-white flex-shrink-0" onClick={onRemove}>
                 {/* <XIcon  /> */}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zM6.707 6.707a1 1 0 011.414 0L10 8.586l1.879-1.88a1 1 0 011.414 1.414L11.414 10l1.88 1.879a1 1 0 01-1.414 1.414L10 11.414l-1.879 1.88a1 1 0 01-1.414-1.414L8.586 10 6.707 8.121a1 1 0 010-1.414z" clipRule="evenodd" />

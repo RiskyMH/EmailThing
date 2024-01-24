@@ -64,8 +64,10 @@ export function UserNav({ user, mailboxId }: UserProps) {
     if (!isDesktop) {
         return (
             <Drawer open={open} onOpenChange={setOpen}>
-                <DrawerTrigger>
-                    <UserIcon user={user} />
+                <DrawerTrigger className="inline sm:hidden ms-auto hover:bg-transparent p-1 rounded-full -me-2" asChild>
+                    <Button variant="ghost" size="icon">
+                        <UserIcon user={user} />
+                    </Button>
                 </DrawerTrigger>
                 <DrawerContent>
                     <DrawerHeader>

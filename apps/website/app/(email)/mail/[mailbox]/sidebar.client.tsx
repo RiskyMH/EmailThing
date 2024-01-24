@@ -6,14 +6,11 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import {
     Sheet,
     SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
     SheetTrigger,
 } from "@/app/components/ui/sheet"
-import { Button } from "@/app/components/ui/button";
 import { MenuIcon } from "lucide-react";
-import { useMediaQuery, useWindowSize } from "usehooks-ts";
+import { useWindowSize } from "usehooks-ts";
+import { Button } from "@/app/components/ui/button";
 
 export function SidebarLink({ href, className, children, disabled }: PropsWithChildren<{ href: string, className: string, disabled?: boolean }>) {
     const pathName = usePathname()
@@ -46,20 +43,13 @@ export function MobileNav({ children }: PropsWithChildren<{}>) {
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger className="inline sm:hidden me-auto">
-                {/* <Button asChild variant="ghost"> */}
-                <MenuIcon />
-                {/* </Button> */}
+            <SheetTrigger className="inline sm:hidden me-auto hover:bg-transparent p-2 -ms-2" asChild>
+                <Button variant="ghost" size="icon">
+                    <MenuIcon />
+                </Button>
             </SheetTrigger>
-            <SheetContent side="left" onClick={() => setOpen(false)}>
+            <SheetContent side="left" className="overflow-y-scroll" onClick={() => setOpen(false)}>
                 {children}
-                {/* <SheetHeader>
-                    <SheetTitle>Are you absolutely sure?</SheetTitle>
-                    <SheetDescription>
-                        This action cannot be undone. This will permanently delete your account
-                        and remove your data from our servers.
-                    </SheetDescription>
-                </SheetHeader> */}
             </SheetContent>
         </Sheet>
     )

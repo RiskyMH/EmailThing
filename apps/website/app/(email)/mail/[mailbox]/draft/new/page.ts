@@ -61,21 +61,27 @@ export default async function Page({
         let to = '[]'
 
         if (searchParams.reply) {
-            subject = `Re: ${subject}`
+            if (!subject?.startsWith("Re: ")) {
+                subject = `Re: ${subject}`
+            }
             to = JSON.stringify([{ name: email.from?.name, address: email.from?.address, cc: null }])
 
         } else if (searchParams.replyAll) {
-            subject = `Re: ${subject}`
+            if (!subject?.startsWith("Re: ")) {
+                subject = `Re: ${subject}`
+            }
             to = JSON.stringify([
                 { name: email.from?.name, address: email.from?.address, cc: null },
                 ...email.recipients.map(r => ({ name: r.name, address: r.address, cc: r.cc ? "cc" : null })),
             ].filter(r => r.address !== from))
 
         } else if (searchParams.forward) {
-            subject = `Fwd: ${subject}`
+            if (!subject?.startsWith("Fwd: ")) {
+                subject = `Fwd: ${subject}`
+            }
         }
 
-        const emailBody = `On ${email.createdAt.toLocaleString()}, ${email.from?.name ? `${email.from?.name} <${email.from?.address}>` : email.from?.name} wrote:\n>${email.body.split("\n").join("\n> ")}`
+        const emailBody = `On ${email.createdAt.toLocaleString()}, ${email.from?.name ? `${email.from?.name} <${email.from?.address}>` : email.from?.name} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`
 
         // create draft with reply
         const draft = await prisma.draftEmail.create({

@@ -9,7 +9,6 @@ import { Button } from "@/app/components/ui/button";
 import { mailboxAliases, userMailboxAccess } from "./tools";
 import Sidebar from "./sidebar";
 import { MobileNav } from "./sidebar.client";
-import { ScrollArea } from "@/app/components/ui/scroll-area";
 
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
@@ -23,9 +22,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                             EmailThing
                         </h1>
                     </div>
-                    {/* <ScrollArea> */}
-                        <Sidebar mailbox={mailboxId} />
-                    {/* </ScrollArea> */}
+                    <Sidebar mailbox={mailboxId} />
                 </MobileNav>
 
                 <nav className="w-auto lg:w-[calc(15rem-1.75rem)] mx-auto me-auto sm:ms-0">

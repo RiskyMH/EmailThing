@@ -22,7 +22,6 @@ export async function generateMetadata({ params }: { params: { mailbox: string }
 }
 
 
-
 export default async function MailLayout({
     children,
     params,
