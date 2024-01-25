@@ -1,5 +1,3 @@
-import { getCurrentUser } from "@/app/utils/user"
-import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import Notifications from "./register-button.client"
 import { pageMailboxAccess } from "../tools"
