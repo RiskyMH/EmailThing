@@ -25,6 +25,7 @@ import Link from "next/link"
 import { ChevronDownIcon } from "lucide-react"
 import { useMediaQuery } from "usehooks-ts";
 import { useState } from "react"
+import { logout } from "./actions"
 
 interface UserProps {
     user: {
@@ -84,9 +85,9 @@ export function UserNav({ user, mailboxId }: UserProps) {
                         </Button>
                         <Button variant="secondary" asChild>
                             <DrawerClose asChild>
-                                <Link href="/login" className="w-full">
-                                    Switch User
-                                </Link>
+                                <Button className="w-full" onClick={() => void logout()}>
+                                    Sign out
+                                </Button>
                             </DrawerClose>
                         </Button>
                     </div>
@@ -141,9 +142,9 @@ export function UserNav({ user, mailboxId }: UserProps) {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                    <Link href="/login" className="cursor-pointer">
+                    <button className="w-full cursor-pointer" onClick={() => void logout()}>
                         Sign out
-                    </Link>
+                    </button>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

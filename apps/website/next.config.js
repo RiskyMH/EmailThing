@@ -30,15 +30,10 @@ const nextConfig = {
                         key: 'token',
                     },
                 ],
-            }
-        ];
-    },
-    async redirects() {
-        return [
+            },
             {
                 source: '/',
-                destination: '/login',
-                permanent: false,
+                destination: '/login/cookie',
                 has: [
                     {
                         type: 'cookie',
@@ -46,6 +41,11 @@ const nextConfig = {
                     },
                 ],
             },
+
+        ];
+    },
+    async redirects() {
+        return [
             {
                 source: '/mail/:mailbox/:email/raw',
                 destination: '/mail/:mailbox/:email/email.eml',

@@ -2,7 +2,7 @@
 import { addUserTokenToCookie, verifyPassword } from "@/app/utils/user"
 import { userAuthSchema } from "@/app/validations/auth"
 import { prisma } from "@email/db"
-import { headers } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 const errorMsg = "Invalid username or password"
@@ -44,21 +44,29 @@ export default async function signIn(data: FormData, callback?: string | null): 
 
     await addUserTokenToCookie(user)
 
-    if (callback) redirect(callback)
-
-    // get the user's mailbox then redirect to it
-    const mailbox = await prisma.mailbox.findFirst({
-        where: {
-            users: {
-                some: {
-                    userId: user.id,
+    const possibleMailbox = cookies().get("mailboxId")?.value
+    let mailboxId = null
+    if (possibleMailbox) {
+        mailboxId = possibleMailbox
+    } else {
+        // get the user's mailbox then redirect to it
+        const mailbox = await prisma.mailbox.findFirst({
+            where: {
+                users: {
+                    some: {
+                        userId: user.id,
+                    }
                 }
+            },
+            select: {
+                id: true,
             }
-        },
-        select: {
-            id: true,
-        }
-    })
+        })
 
-    redirect(`/mail/${mailbox?.id}`)
+        mailboxId = mailbox?.id
+        if (mailboxId) cookies().set("mailboxId", mailboxId);
+    }
+
+    if (callback) redirect(callback)
+    redirect(`/mail/${mailboxId}`)
 }
