@@ -23,7 +23,7 @@ export default async function Mailbox({
     return (
         <EmailList
             mailboxId={params.mailbox}
-            type="bin"
+            type="trash"
             categoryId={searchParams?.category}
         />
     )

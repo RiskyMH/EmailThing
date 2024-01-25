@@ -20,7 +20,7 @@ export interface UpdatableEmailConfig {
 export interface EmailItemProps {
     email: Awaited<ReturnType<typeof getJustEmailsList>>[0] | Awaited<ReturnType<typeof getDraftJustEmailsList>>[0];
     mailboxId: string;
-    type: "inbox" | "sent" | "drafts" | "bin" | "starred";
+    type: "inbox" | "sent" | "drafts" | "trash" | "starred";
     categories?: Awaited<ReturnType<typeof mailboxCategories>> | null;
 }
 

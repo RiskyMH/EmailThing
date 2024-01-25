@@ -8,7 +8,7 @@ import { mailboxCategories, userMailboxAccess } from "../tools";
 
 interface EmailListProps {
     mailboxId: string;
-    type?: "inbox" | "sent" | "drafts" | "bin" | "starred";
+    type?: "inbox" | "sent" | "drafts" | "trash" | "starred";
     categoryId?: string;
 }
 
@@ -16,7 +16,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`
 
     const emailFetchOptions = {
-        isBinned: type === "bin",
+        isBinned: type === "trash",
         isSender: type === "sent",
         isStarred: type === "starred" ? true : undefined,
         categoryId
