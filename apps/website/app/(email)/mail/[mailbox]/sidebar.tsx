@@ -109,7 +109,7 @@ const getUnreadEmailsCount = cache(async ( mailboxId: string ) => {
 
 async function UnreadEmailsCount({ mailboxId }: { mailboxId: string }) {
     const unreadEmails = await getUnreadEmailsCount(mailboxId)
-    if (unreadEmails === 0) {
+    if (unreadEmails === 0 || !unreadEmails) {
         return null
     }
 

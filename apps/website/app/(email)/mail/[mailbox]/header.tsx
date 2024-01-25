@@ -53,11 +53,6 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
     )
 };
 
-
-async function getUser() {
-
-}
-
 function UserMenuFallback() {
     return (
         <div className="h-8 w-8 rounded-full bg-secondary animate-pulse" />
@@ -66,9 +61,7 @@ function UserMenuFallback() {
 
 async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
     const userId = await getCurrentUser()
-    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
-        throw new Error("No access to mailbox");
-    }
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) return null
 
     const user = await prisma.user.findUnique({
         where: {
@@ -79,7 +72,7 @@ async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
             id: true
         }
     })
-    if (!user) throw new Error("No user found")
+    if (!user) return null
 
     const { default: defaultAlias } = await mailboxAliases(mailboxId);
 
