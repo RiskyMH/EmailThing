@@ -46,6 +46,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             autoCapitalize="none"
                             autoComplete="username"
                             autoCorrect="off"
+                            className="bg-secondary border-none"
                             disabled={isPending}
                         />
                     </div>
@@ -60,6 +61,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             type="password"
                             autoComplete="password"
                             autoCorrect="off"
+                            className="bg-secondary border-none"
                             disabled={isPending}
                         />
                     </div>

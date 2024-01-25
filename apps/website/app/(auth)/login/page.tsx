@@ -7,7 +7,6 @@ import { ChevronLeft, MailIcon } from "lucide-react"
 import { UserAuthForm } from "./form.client"
 
 export default async function LoginPage() {
-
     return (
         <div className="container flex min-h-screen h-screen w-screen flex-col items-center justify-center bg-background">
             <Link
