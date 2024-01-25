@@ -1,8 +1,6 @@
-import { getCurrentUser } from "@/app/utils/user"
-import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import EmailList from "./email-list"
-import { userMailboxAccess } from "../tools"
+import { pageMailboxAccess } from "../tools"
 
 
 export const metadata = {
@@ -21,9 +19,7 @@ export default async function Mailbox({
         category?: string
     }
 }) {
-    const userId = await getCurrentUser()
-    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
-    if (!userHasAccess) return notFound()
+    await pageMailboxAccess(params.mailbox)
 
     return (
         <EmailList

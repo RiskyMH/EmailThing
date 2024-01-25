@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
-import { userMailboxAccess } from "../tools"
+import { pageMailboxAccess, userMailboxAccess } from "../tools"
 import { Metadata } from "next"
 import { prisma } from "@email/db"
 import { MarkRead } from "./components.client"
@@ -11,9 +11,7 @@ import { TabsList, Tab } from "@/app/components/tabs-link"
 import { cache } from "react"
 
 
-const getEmail = cache(async (mailboxId: string, emailId: string, userId: string | null) => {
-    const userHasAccess = await userMailboxAccess(mailboxId, userId)
-    if (!userHasAccess) return notFound()
+const getEmail = cache(async (mailboxId: string, emailId: string) => {
 
     const email = await prisma.email.findUnique({
         where: {
@@ -57,8 +55,8 @@ const getEmail = cache(async (mailboxId: string, emailId: string, userId: string
 
 
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {
-    const userId = await getCurrentUser()
-    const mail = await getEmail(props.params.mailbox, props.params.email, userId)
+    await pageMailboxAccess(props.params.mailbox)
+    const mail = await getEmail(props.params.mailbox, props.params.email)
     if (!mail) return notFound()
 
     return {
@@ -78,14 +76,15 @@ export default async function Email({
         view?: "text" | "markdown" | "html"
     }
 }) {
-    const userId = await getCurrentUser()
-    const mail = await getEmail(params.mailbox, params.email, userId)
+    await pageMailboxAccess(params.mailbox)
+    const mail = await getEmail(params.mailbox, params.email)
     if (!mail) return notFound()
 
     async function markRead() {
         "use server"
         const userId = await getCurrentUser()
-        if (!userId || !await userMailboxAccess(params.mailbox, userId)) throw new Error("No access to mailbox");
+        if (!userId || !await userMailboxAccess(params.mailbox, userId))
+            return "No access to mailbox";
 
         await prisma.email.update({
             data: {

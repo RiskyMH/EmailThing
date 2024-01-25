@@ -8,8 +8,7 @@ import { getCurrentUser } from "@/app/utils/user";
 import { revalidatePath } from "next/cache";
 import { SaveActionProps, Recipient } from "./types";
 
-export const sendEmailAction = async (mailboxId: string, draftId: string) => {
-    "use server";
+export async function sendEmailAction(mailboxId: string, draftId: string) {
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) {
         throw new Error("Mailbox not found");
@@ -139,7 +138,6 @@ export const sendEmailAction = async (mailboxId: string, draftId: string) => {
 
 
 export async function saveDraftAction(mailboxId: string, draftId: string, data: SaveActionProps) {
-    "use server";;
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) {
         throw new Error("Mailbox not found");

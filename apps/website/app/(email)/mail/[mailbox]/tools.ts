@@ -1,5 +1,7 @@
+import { getCurrentUser } from "@/app/utils/user";
 import { prisma } from "@email/db";
 import { unstable_cache } from "next/cache";
+import { redirect, notFound } from "next/navigation";
 import { cache } from "react";
 
 
@@ -85,3 +87,15 @@ export const mailboxAliases = cache((mailboxId: string) => {
         }
     )()
 })
+
+export async function pageMailboxAccess(mailboxId?: string | null) {
+    if (!mailboxId) return redirect('/login')
+
+    const userId = await getCurrentUser()
+    if (!userId) return redirect("/login?from=/mail/" + mailboxId)
+
+    const userHasAccess = await userMailboxAccess(mailboxId, userId)
+    if (!userHasAccess) return notFound()
+
+    return userId
+}

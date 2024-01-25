@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import Notifications from "./register-button.client"
-import { userMailboxAccess } from "../tools"
+import { pageMailboxAccess } from "../tools"
 
 
 export const metadata: Metadata = {
@@ -18,9 +18,7 @@ export default async function Email({
         email: string
     }
 }) {
-    const userId = await getCurrentUser()
-    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
-    if (!userHasAccess) return notFound()
+    await pageMailboxAccess(params.mailbox)
 
     return (
         <div className="min-w-0 p-5">

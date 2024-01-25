@@ -1,35 +1,24 @@
 import { prisma } from "@email/db"
 import { BodyEditor, FromInput, RecipientInput, SendButton, Subject } from "./editor.client"
-import { getCurrentUser } from "@/app/utils/user"
 import { notFound } from "next/navigation"
-import { mailboxAliases, userMailboxAccess } from "../../tools"
+import { mailboxAliases, pageMailboxAccess } from "../../tools"
 import { saveDraftAction, sendEmailAction } from "./actions"
 import { Recipient } from "./types"
+import { cache } from "react"
 
-// TODO: actually put title
-export const metadata = {
-    title: "Drafts",
+export async function generateMetadata(props: { params: { mailbox: string, draft: string } }) {
+    await pageMailboxAccess(props.params.mailbox)
+    const mail = await fetchDraft(props.params.mailbox, props.params.draft)
+    return {
+        title: mail?.subject || "(Unnamed draft)",
+    }
 }
 
-export default async function DraftPage({
-    params
-}: {
-    params: {
-        mailbox: string,
-        draft: string
-    }
-
-}) {
-    const userId = await getCurrentUser()
-    const userHasAccess = await userMailboxAccess(params.mailbox, userId)
-    if (!userHasAccess) return notFound()
-
-    const { aliases, default: defaultAlias } = await mailboxAliases(params.mailbox)
-
-    const mail = await prisma.draftEmail.findFirst({
+const fetchDraft = cache(async (mailboxId: string, draftId: string) => {
+    return await prisma.draftEmail.findFirst({
         where: {
-            id: params.draft,
-            mailboxId: params.mailbox,
+            id: draftId,
+            mailboxId: mailboxId,
         },
         select: {
             body: true,
@@ -38,6 +27,23 @@ export default async function DraftPage({
             to: true
         }
     })
+})
+
+
+
+export default async function DraftPage({
+    params
+}: {
+    params: {
+        mailbox: string,
+        draft: string
+    }
+}) {
+    await pageMailboxAccess(params.mailbox)
+
+    const { aliases, default: defaultAlias } = await mailboxAliases(params.mailbox)
+
+    const mail = await fetchDraft(params.mailbox, params.draft)
     if (!mail) return notFound()
 
 
