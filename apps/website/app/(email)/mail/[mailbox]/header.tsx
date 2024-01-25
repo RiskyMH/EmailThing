@@ -25,7 +25,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                     <Sidebar mailbox={mailboxId} />
                 </MobileNav>
 
-                <nav className="w-auto lg:w-[calc(15rem-1.75rem)] mx-auto me-auto sm:ms-0">
+                <nav className="w-auto lg:w-[calc(15rem-1.75rem)] mx-auto me-auto sm:ms-0 sm:mx-0">
                     <Button asChild variant="ghost">
                         <Link
                             className="flex items-center gap-2 hover:bg-transparent sm:-ms-4 sm:me-8"

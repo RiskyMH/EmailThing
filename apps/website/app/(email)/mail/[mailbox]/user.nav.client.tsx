@@ -41,31 +41,23 @@ function getInitials(name: string) {
     return name.slice(0, 2).toUpperCase()
 }
 
-function UserIcon({ user }: { user: UserProps["user"] }) {
-    return (
-        <Avatar className="h-8 w-8 rounded-full">
-            <AvatarImage
-                src={user.image}
-                alt={`${user.name}`}
-                className="group-hover:bg-secondary dark:group-hover:bg-tertiary bg-background dark:bg-secondary"
-            />
-            <AvatarFallback className="group-hover:bg-secondary dark:group-hover:bg-tertiary bg-background dark:bg-secondary">
-                {getInitials(user.name)}
-            </AvatarFallback>
-        </Avatar>
-
-    )
-}
-
 export function UserNav({ user, mailboxId }: UserProps) {
     const [open, setOpen] = useState(false)
     const isDesktop = useMediaQuery("(min-width: 640px)");
 
     const userIcon = (
-        <Button variant="ghost" className="gap-3 flex">
+        <Button
+            variant="ghost"
+            className="gap-3 flex ms-auto hover:bg-transparent p-1 rounded-full -me-2 relative sm:rounded-md sm:p-2 sm:-m-2 dark:sm:hover:bg-secondary sm:hover:bg-background"
+        >
             <ChevronDownIcon className="h-5 w-5 text-muted-foreground -me-2 hidden sm:inline" />
             <span className="hidden sm:inline">{user.name}</span>
-            <UserIcon user={user} />
+            <Avatar className="h-8 w-8 rounded-full">
+                <AvatarImage src={user.image} alt={user.name} className="bg-background dark:bg-secondary" />
+                <AvatarFallback className="bg-background dark:bg-secondary">
+                    {getInitials(user.name)}
+                </AvatarFallback>
+            </Avatar>
         </Button>
     )
 
@@ -73,7 +65,7 @@ export function UserNav({ user, mailboxId }: UserProps) {
     if (!isDesktop) {
         return (
             <Drawer open={open} onOpenChange={setOpen}>
-                <DrawerTrigger className="inline ms-auto hover:bg-transparent p-1 rounded-full -me-2" asChild>
+                <DrawerTrigger asChild>
                     {userIcon}
                 </DrawerTrigger>
                 <DrawerContent>
@@ -113,7 +105,7 @@ export function UserNav({ user, mailboxId }: UserProps) {
     // Desktop
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
-            <DropdownMenuTrigger asChild className="relative p-2 -m-2 group dark:hover:bg-secondary hover:bg-background flex group">
+            <DropdownMenuTrigger asChild>
                 {userIcon}
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
