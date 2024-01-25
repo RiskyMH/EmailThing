@@ -59,17 +59,22 @@ function UserIcon({ user }: { user: UserProps["user"] }) {
 
 export function UserNav({ user, mailboxId }: UserProps) {
     const [open, setOpen] = useState(false)
-    const isDesktop = useMediaQuery("(min-width: 768px)");
+    const isDesktop = useMediaQuery("(min-width: 640px)");
 
+    const userIcon = (
+        <Button variant="ghost" className="gap-3 flex">
+            <ChevronDownIcon className="h-5 w-5 text-muted-foreground -me-2 hidden sm:inline" />
+            <span className="hidden sm:inline">{user.name}</span>
+            <UserIcon user={user} />
+        </Button>
+    )
 
-    return (
-        <>
-            {/* Mobile */}
-            <Drawer open={!isDesktop && open} onOpenChange={setOpen}>
-                <DrawerTrigger className="inline sm:hidden ms-auto hover:bg-transparent p-1 rounded-full -me-2" asChild>
-                    <Button variant="ghost" size="icon" key="user-nav-mobile">
-                        <UserIcon user={user} />
-                    </Button>
+    // Mobile
+    if (!isDesktop) {
+        return (
+            <Drawer open={open} onOpenChange={setOpen}>
+                <DrawerTrigger className="inline ms-auto hover:bg-transparent p-1 rounded-full -me-2" asChild>
+                    {userIcon}
                 </DrawerTrigger>
                 <DrawerContent>
                     <DrawerHeader>
@@ -102,58 +107,53 @@ export function UserNav({ user, mailboxId }: UserProps) {
                 </DrawerContent>
             </Drawer>
 
-            {/* Desktop */}
-            <DropdownMenu open={isDesktop && open} onOpenChange={setOpen}>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="relative p-2 -m-2 gap-3 group dark:hover:bg-secondary hover:bg-background hidden sm:inline-flex"
-                    >
-                        <ChevronDownIcon className="h-5 w-5 text-muted-foreground -me-2" />
-                        {user.name}
-                        <UserIcon user={user} />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                            <h3 className="text-sm truncate font-medium">
-                                {user.name}
-                            </h3>
-                            <p className="text-xs truncate text-muted-foreground">
-                                {user.secondary}
-                            </p>
-                        </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                        <DropdownMenuItem asChild>
-                            <Link href={`/mail/${mailboxId}`} className="cursor-pointer">
-                                Dashboard
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link href={`/mail/${mailboxId}/config`} className="cursor-pointer">
-                                Mailbox Config
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                            <Link href="#settings" className="cursor-pointer">
-                                User Settings
-                            </Link>
-                        </DropdownMenuItem>
-                    </DropdownMenuGroup>
+        )
+    }
 
-                    <DropdownMenuSeparator />
-
+    // Desktop
+    return (
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+            <DropdownMenuTrigger asChild className="relative p-2 -m-2 group dark:hover:bg-secondary hover:bg-background flex group">
+                {userIcon}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <h3 className="text-sm truncate font-medium">
+                            {user.name}
+                        </h3>
+                        <p className="text-xs truncate text-muted-foreground">
+                            {user.secondary}
+                        </p>
+                    </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
-                        <Link href="/login" className="cursor-pointer">
-                            Sign out
+                        <Link href={`/mail/${mailboxId}`} className="cursor-pointer">
+                            Dashboard
                         </Link>
                     </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </>
+                    <DropdownMenuItem asChild>
+                        <Link href={`/mail/${mailboxId}/config`} className="cursor-pointer">
+                            Mailbox Config
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="#settings" className="cursor-pointer">
+                            User Settings
+                        </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuGroup>
 
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem asChild>
+                    <Link href="/login" className="cursor-pointer">
+                        Sign out
+                    </Link>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
