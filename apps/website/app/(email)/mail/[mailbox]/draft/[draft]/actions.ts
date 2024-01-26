@@ -4,7 +4,7 @@ import { prisma } from "@email/db";
 import { redirect } from "next/navigation";
 import { env } from "process";
 import { userMailboxAccess } from "../../tools";
-import { getCurrentUser } from "@/app/utils/user";
+import { getCurrentUser } from "@/app/utils/jwt";
 import { revalidatePath } from "next/cache";
 import { SaveActionProps, Recipient } from "./types";
 

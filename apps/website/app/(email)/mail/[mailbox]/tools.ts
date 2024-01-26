@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/app/utils/user";
+import { getCurrentUser } from "@/app/utils/jwt";
 import { prisma } from "@email/db";
 import { unstable_cache } from "next/cache";
 import { redirect, notFound } from "next/navigation";

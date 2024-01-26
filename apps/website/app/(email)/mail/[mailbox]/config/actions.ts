@@ -1,6 +1,6 @@
 "use server";
 
-import { getCurrentUser } from "@/app/utils/user";
+import { getCurrentUser } from "@/app/utils/jwt";
 import { prisma } from "@email/db";
 import webpush from 'web-push';
 import { env } from '@/app/utils/env';

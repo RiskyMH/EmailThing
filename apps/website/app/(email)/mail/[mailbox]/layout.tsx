@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/app/utils/user"
+import { getCurrentUser } from "@/app/utils/jwt"
 import { notFound, redirect } from "next/navigation"
 import { mailboxAliases, pageMailboxAccess } from "./tools"
 import { Metadata } from "next"

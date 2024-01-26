@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/app/utils/user"
+import { getCurrentUser } from "@/app/utils/jwt"
 import { prisma } from "@email/db"
 import { notFound } from "next/navigation"
 import { userMailboxAccess } from "../../../tools"

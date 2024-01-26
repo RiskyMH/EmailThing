@@ -6,7 +6,7 @@ export const env = createEnv({
         DATABASE_URL: z.string().min(1),
         EMAIL_AUTH_TOKEN: z.string().min(1),
         EMAIL_DKIM_PRIVATE_KEY: z.string().optional(),
-        JWT_TOKEN: z.string().optional(),
+        JWT_TOKEN: z.string(),
         WEB_NOTIFICATIONS_PRIVATE_KEY: z.string().min(1),
     },
     client: {
@@ -20,6 +20,6 @@ export const env = createEnv({
         WEB_NOTIFICATIONS_PRIVATE_KEY: process.env.WEB_NOTIFICATIONS_PRIVATE_KEY,
         EMAIL_AUTH_TOKEN: process.env.EMAIL_AUTH_TOKEN,
         EMAIL_DKIM_PRIVATE_KEY: process.env.EMAIL_DKIM_PRIVATE_KEY,
-        JWT_TOKEN: process.env.JWT_TOKEN,
+        JWT_TOKEN: process.env.JWT_TOKEN || Math.random().toString(20).substr(2, 16)
     },
 })

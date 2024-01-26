@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SidebarLink } from "./sidebar.client";
 import { Suspense, cache } from "react";
 import { cn } from "@/app/utils/tw";
-import { getCurrentUser } from "@/app/utils/user";
+import { getCurrentUser } from "@/app/utils/jwt";
 import { userMailboxAccess } from "./tools";
 
 export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string, className?: string }) => {

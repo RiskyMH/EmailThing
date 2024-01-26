@@ -20,29 +20,42 @@ const nextConfig = {
         ];
     },
     async rewrites() {
-        return [
-            {
-                source: "/",
-                destination: "/home",
-                missing: [
-                    {
-                        type: 'cookie',
-                        key: 'token',
-                    },
-                ],
-            },
-            {
-                source: '/',
-                destination: '/login/cookie',
-                has: [
-                    {
-                        type: 'cookie',
-                        key: 'token',
-                    },
-                ],
-            },
-
-        ];
+        return {
+            beforeFiles: [
+                {
+                    source: "/",
+                    destination: "/home",
+                    missing: [
+                        {
+                            type: 'cookie',
+                            key: 'token',
+                        },
+                    ],
+                },
+                {
+                    source: '/',
+                    destination: '/mail',
+                    has: [
+                        {
+                            type: 'cookie',
+                            key: 'token',
+                        },
+                    ],
+                },
+                {
+                    source: '/login',
+                    destination: '/mail',
+                    has: [
+                        {
+                            type: 'cookie',
+                            key: 'token',
+                        },
+                    ],
+                },
+            ],
+            afterFiles: [],
+            fallback: [],
+        };
     },
     async redirects() {
         return [

@@ -1,5 +1,5 @@
 "use server";
-import { getCurrentUser } from "@/app/utils/user";
+import { getCurrentUser } from "@/app/utils/jwt";
 import { prisma } from "@email/db";
 import { revalidatePath } from "next/cache";
 import { userMailboxAccess } from "../tools";

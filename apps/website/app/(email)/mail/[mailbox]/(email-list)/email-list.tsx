@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/app/utils/user";
+import { getCurrentUser } from "@/app/utils/jwt";
 import { CategoryItem, RefreshButton } from "./components.client";
 import { getDraftEmailList, getEmailList, getJustEmailsList, getDraftJustEmailsList } from "./tools"
 import LoadMore from "@/app/components/loadmore.client";
@@ -28,7 +28,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
     const nextEmailId = emails.length === 11 ? emails.pop()?.id : null
 
     async function fetchMoreEmails(nextEmailId: string) {
-        "use server";;
+        "use server";
         const userId = await getCurrentUser()
         if (!userId) throw new Error()
         if (!await userMailboxAccess(mailboxId, userId)) throw new Error()

@@ -1,7 +1,7 @@
-import crypto from "crypto"
+import { randomBytes } from "crypto"
 
 export const randomText = (size = 16) =>
-    crypto.randomBytes(size).toString("hex")
+    randomBytes(size).toString("hex")
 
 export function dateDay(date: Date, timeZone: string) {
     return date.toLocaleString("en-US", {
