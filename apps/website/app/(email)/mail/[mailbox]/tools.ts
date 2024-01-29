@@ -88,14 +88,14 @@ export const mailboxAliases = cache((mailboxId: string) => {
     )()
 })
 
-export async function pageMailboxAccess(mailboxId?: string | null) {
+export async function pageMailboxAccess(mailboxId?: string | null, throwOnFail = true) {
     if (!mailboxId) return redirect('/login')
 
     const userId = await getCurrentUser()
-    if (!userId) return redirect("/login?from=/mail/" + mailboxId)
+    if (!userId) return throwOnFail ? redirect("/login?from=/mail/" + mailboxId) : false
 
     const userHasAccess = await userMailboxAccess(mailboxId, userId)
-    if (!userHasAccess) return notFound()
+    if (!userHasAccess) return throwOnFail ? notFound(): false
 
     return userId
 }

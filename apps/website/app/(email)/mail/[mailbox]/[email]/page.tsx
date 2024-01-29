@@ -17,9 +17,9 @@ import LocalTime from "@/app/components/localtime"
 import { getEmail } from "./tools"
 
 
-
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {
-    await pageMailboxAccess(props.params.mailbox)
+    if (!await pageMailboxAccess(props.params.mailbox, false)) return {}
+    
     const mail = await getEmail(props.params.mailbox, props.params.email)
     if (!mail) return notFound()
 
@@ -40,7 +40,7 @@ export default async function Email({
         view?: "text" | "markdown" | "html"
     }
 }) {
-    await pageMailboxAccess(params.mailbox)
+    await pageMailboxAccess(params.mailbox, false)
     const email = await getEmail(params.mailbox, params.email)
     if (!email) return notFound()
 

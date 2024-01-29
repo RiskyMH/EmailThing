@@ -7,7 +7,8 @@ import { Recipient } from "./types"
 import { cache } from "react"
 
 export async function generateMetadata(props: { params: { mailbox: string, draft: string } }) {
-    await pageMailboxAccess(props.params.mailbox)
+    if (!await pageMailboxAccess(props.params.mailbox, false)) return {}
+
     const mail = await fetchDraft(props.params.mailbox, props.params.draft)
     return {
         title: mail?.subject || "(Unnamed draft)",
