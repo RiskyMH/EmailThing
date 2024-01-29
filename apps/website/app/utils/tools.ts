@@ -19,37 +19,28 @@ export function gravatar(email: string) {
     return `https://www.gravatar.com/avatar/${hash}?d=404`
 }
 
-export function relativeDate(date: Date) {
-    const diff = Math.round((Date.now() - date.valueOf()) / 1000);
 
-    const minute = 60;
-    const hour = minute * 60;
-    const day = hour * 24;
-    const week = day * 7;
-    const month = day * 30;
-    const year = month * 12;
+const formatter = new Intl.RelativeTimeFormat(undefined, {
+    numeric: "auto",
+})
 
-    if (diff < 30) {
-        return "just now";
-    } else if (diff < minute) {
-        return diff + " seconds ago";
-    } else if (diff < 2 * minute) {
-        return "a minute ago";
-    } else if (diff < hour) {
-        return Math.floor(diff / minute) + " minutes ago";
-    } else if (Math.floor(diff / hour) == 1) {
-        return "1 hour ago";
-    } else if (diff < day) {
-        return Math.floor(diff / hour) + " hours ago";
-    } else if (diff < day * 2) {
-        return "yesterday";
-    } else if (diff < week) {
-        return week + " days ago";
-    } else if (diff < month) {
-        return Math.floor(diff / week) + " weeks ago";
-    } else if (diff < year) {
-        return Math.floor(diff / month) + " months ago";
-    } else {
-        return Math.floor(diff / year) + " years ago";
+const DIVISIONS = [
+    { amount: 60, name: "seconds" },
+    { amount: 60, name: "minutes" },
+    { amount: 24, name: "hours" },
+    { amount: 7, name: "days" },
+    { amount: 4.34524, name: "weeks" },
+    { amount: 12, name: "months" },
+    { amount: Number.POSITIVE_INFINITY, name: "years" },
+]
+
+export function formatTimeAgo(date: Date) {
+    let duration = (date.valueOf() - Date.now()) / 1000
+
+    for (const division of DIVISIONS) {
+        if (Math.abs(duration) < division.amount) {
+            return formatter.format(Math.round(duration), division.name as any)
+        }
+        duration /= division.amount
     }
 }

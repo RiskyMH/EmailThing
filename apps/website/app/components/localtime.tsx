@@ -1,4 +1,4 @@
-import { dateDay, relativeDate } from "../utils/tools";
+import { dateDay, formatTimeAgo } from "../utils/tools";
 import TooltipText from "./tooltip-text";
 import { headers } from 'next/headers'
 
@@ -29,7 +29,7 @@ function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date" | 
     } else if (type === "hour-min/date") {
         return date.toLocaleDateString("en-US", { month: '2-digit', day: '2-digit', year: '2-digit', timeZone })
     } else if (type === "full") {
-        return date.toLocaleString("en-US", { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${relativeDate(date)})`
+        return date.toLocaleString("en-US", { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${formatTimeAgo(date)})`
     } else {
         return date.toLocaleDateString("en-US", { timeZone })
     }

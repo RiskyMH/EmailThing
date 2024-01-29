@@ -84,7 +84,7 @@ export default async function Email({
                     </Avatar>
 
                     <div className="flex flex-col overflow-hidden">
-                        <div className="flex gap-2 overflow-ellipsis">
+                        <div className="flex gap-2 overflow-ellipsis whitespace-nowrap">
                             <b className="font-bold">{email.from?.name || email.from!.address}</b>
                             {email.from?.name && <p className="text-muted-foreground text-sm">{`<${email.from.address}>`}</p>}
                         </div>
