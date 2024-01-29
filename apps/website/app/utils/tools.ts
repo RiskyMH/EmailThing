@@ -13,7 +13,9 @@ export function dateDay(date: Date, timeZone: string) {
 }
 
 export function gravatar(email: string) {
-    const hash = createHash("md5").update(email).digest("hex")
+    const hash = createHash("md5")
+        .update(email.toLowerCase())
+        .digest("hex")
     return `https://www.gravatar.com/avatar/${hash}?d=404`
 }
 
