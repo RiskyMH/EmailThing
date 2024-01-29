@@ -48,7 +48,7 @@ export function MobileNav({ children }: PropsWithChildren<{}>) {
                     <MenuIcon />
                 </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="overflow-y-scroll" onClick={() => setOpen(false)}>
+            <SheetContent side="left" className="overflow-y-auto" onClick={() => setOpen(false)}>
                 {children}
             </SheetContent>
         </Sheet>

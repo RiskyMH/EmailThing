@@ -100,7 +100,7 @@ export default async function Email({
                                     <div className="grid gap-2 text-sm">
                                         <div className="grid grid-cols-5 items-center gap-4">
                                             <p className="text-muted-foreground text-end">from:</p>
-                                            <p className="flex gap-1 overflow-y-scroll col-span-4 whitespace-nowrap ">
+                                            <p className="flex gap-1 overflow-y-auto col-span-4 whitespace-nowrap ">
                                                 {email.from?.name || email.from!.address}
                                                 {email.from?.name && <span className="text-muted-foreground"> &lt;{email.from.address}&gt;</span>}
                                             </p>
@@ -109,7 +109,7 @@ export default async function Email({
                                         {/* to */}
                                         <div className="grid grid-cols-5 items-center gap-4">
                                             <p className="text-muted-foreground text-end">to:</p>
-                                            <div className="overflow-y-scroll col-span-4">
+                                            <div className="overflow-y-auto col-span-4">
                                                 {email.recipients.filter(e => !e.cc).map(e => (
                                                     <p key={e.address} className="flex gap-1 whitespace-nowrap">
                                                         {e.name || e.address}
