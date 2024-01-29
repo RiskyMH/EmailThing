@@ -52,7 +52,7 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
             <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 px-4 lg:px-6 font-bold my-3">
                 <Link href={`/mail/${mailboxId}/draft/new`}>
                     <PenSquareIcon className="h-5 w-5" />
-                    <span className="sm:hidden lg:inline">New Message</span>
+                    <span className="sm:max-lg:hidden">New Message</span>
                 </Link>
             </Button>
 
@@ -62,7 +62,7 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
                 {items.map(item => (<LinkElement key={item.href} {...item} />))}
 
                 <hr className="bg-border w-full inline sm:hidden" />
-                <LinkElement 
+                <LinkElement
                     name="Mailbox Config"
                     icon={SettingsIcon}
                     href={`/mail/${mailboxId}/config`}
@@ -80,7 +80,8 @@ function LinkElement({ href, name, icon: Icon, disabled, className }: { href: st
     return (
         <Button asChild variant="ghost" className={cn("flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal sm:self-center w-full lg:self-auto", className)}>
             <SidebarLink href={href} className="" disabled={disabled}>
-                <Icon className="h-6 w-6" /> <span className="self-center inline sm:hidden lg:inline">{name}</span>
+                <Icon className="h-6 w-6" />
+                <span className="self-center sm:max-lg:hidden">{name}</span>
                 {(name === "Inbox") && (
                     <Suspense>
                         <UnreadEmailsCount mailboxId={href.split("/")[2]} />
@@ -91,7 +92,7 @@ function LinkElement({ href, name, icon: Icon, disabled, className }: { href: st
     )
 }
 
-const getUnreadEmailsCount = cache(async ( mailboxId: string ) => {
+const getUnreadEmailsCount = cache(async (mailboxId: string) => {
     const userId = await getCurrentUser()
     if (!await userMailboxAccess(mailboxId, userId)) return []
 
@@ -110,11 +111,11 @@ const getUnreadEmailsCount = cache(async ( mailboxId: string ) => {
 async function UnreadEmailsCount({ mailboxId }: { mailboxId: string }) {
     const unreadEmails = await getUnreadEmailsCount(mailboxId)
     if (unreadEmails === 0 || !unreadEmails) {
-        return null
+        return <></>
     }
 
     return (
-        <span className="bg-blue text-blue-foreground rounded font-bold px-3 py-1 text-xs ms-auto float-right self-center select-none inline sm:hidden lg:inline">
+        <span className="bg-blue text-blue-foreground rounded font-bold px-3 py-1 text-xs ms-auto float-right self-center select-none sm:max-lg:hidden">
             {unreadEmails}
         </span>
     )

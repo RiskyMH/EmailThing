@@ -17,7 +17,7 @@ export function SidebarLink({ href, className, children, disabled }: PropsWithCh
 
     if (disabled) {
         return (
-            <div className={cn(className, "relative group flex items-center h-10 w-full px-3 gap-2 rounded cursor-not-allowed opacity-50")}>
+            <div className={cn("relative group flex items-center h-10 w-full px-3 gap-4 rounded cursor-not-allowed opacity-50", className)}>
                 {children}
             </div>
         )
