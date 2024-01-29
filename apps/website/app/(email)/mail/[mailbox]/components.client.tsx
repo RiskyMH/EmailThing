@@ -1,11 +1,11 @@
 'use client'
 
+import TooltipText from "@/app/components/tooltip-text";
 import { Button } from "@/app/components/ui/button";
 import { cn } from "@/app/utils/tw";
 import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon, MailOpenIcon, CheckIcon, RotateCcwIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { MouseEvent, PropsWithChildren } from "react"
 import { useTransition } from 'react';
 
@@ -47,10 +47,10 @@ interface ContextMenuActionProps {
     action: () => void,
     icon: keyof typeof iconMap | "EmptyIcon",
     fillIcon?: boolean | null,
-    className?: string,
+    tooltip?: string,
 }
 
-export function ContextMenuAction({ children, action, icon, fillIcon, className, ...props }: PropsWithChildren<ContextMenuActionProps>) {
+export function ContextMenuAction({ children, action, icon, fillIcon, tooltip, ...props }: PropsWithChildren<ContextMenuActionProps>) {
     const Icon: LucideIcon | null = iconMap[icon] ?? null;
 
     const [isPending, startTransition] = useTransition();
@@ -62,28 +62,26 @@ export function ContextMenuAction({ children, action, icon, fillIcon, className,
         startTransition(action)
     }
 
-    return (
-        <button {...props} onClick={onClick} className={cn(className, "w-full")}>
+    const base = (
+        <button {...props} onClick={onClick}>
             {Icon && !isPending && <Icon className="w-5 h-5 text-muted-foreground" fill={fillIcon ? "currentColor" : "transparent"} />}
             {icon === "EmptyIcon" && !isPending && <EmptyIcon className="w-5 h-5 text-muted-foreground" />}
             {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
             {children}
         </button>
-
     )
-}
 
-export function CategoryItem({ circleColor, name, count, link, category }: { circleColor: string | null, name: string, count: number, link: string, category: string | null }) {
-    const params = useSearchParams();
-    const isCurrent = params.get("category") == category;
+    if (tooltip) {
+        return (
+            <TooltipText text={tooltip}>
+                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
+                    {base}
+                </Button>
+            </TooltipText>
+        )
+    }
 
-    return (
-        <Link href={link + (category ? "?category=" + category : "")} className={cn("group flex-shrink-0 inline-flex items-center gap-1 px-1 max-w-fit w-auto font-bold border-b-3 border-transparent", isCurrent && "border-blue")}>
-            {circleColor && <div className="w-2.5 h-2.5 rounded-full mr-1" style={{ backgroundColor: circleColor }}></div>}
-            <span className="font-medium group-hover:text-muted-foreground">{name}</span>
-            <span className="text-sm text-muted-foreground group-hover:text-muted-foreground/50">({count})</span>
-        </Link>
-    )
+    return base
 }
 
 export function RefreshButton({ className }: { className?: string }) {

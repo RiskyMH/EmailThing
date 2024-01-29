@@ -10,7 +10,7 @@ export default function TooltipText({ children, text, subtext }: PropsWithChildr
                     {children}
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p className="text-center">{text}</p>
+                    <p className="text-center text-foreground">{text}</p>
                     {subtext && <p className="text-muted-foreground text-center">{subtext}</p>}
                 </TooltipContent>
             </Tooltip>

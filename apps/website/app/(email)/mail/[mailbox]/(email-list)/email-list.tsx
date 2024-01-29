@@ -1,10 +1,11 @@
 import { getCurrentUser } from "@/app/utils/jwt";
-import { CategoryItem, RefreshButton } from "./components.client";
+import { RefreshButton } from "../components.client";
 import { getDraftEmailList, getEmailList, getJustEmailsList, getDraftJustEmailsList } from "./tools"
 import LoadMore from "@/app/components/loadmore.client";
 import { EmailItem } from "./email-item";
-import { prisma } from "@email/db";
 import { mailboxCategories, userMailboxAccess } from "../tools";
+import { cn } from "@/app/utils/tw";
+import Link from "next/link";
 
 interface EmailListProps {
     mailboxId: string;
@@ -68,9 +69,11 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
                             count={emailCount || 0}
                             link={baseUrl}
                             category={null}
+                            isCurrent={!categoryId}
                         />
                         {(categories || []).map(category => (
                             <CategoryItem
+                                isCurrent={category.id === categoryId}
                                 key={category.id}
                                 circleColor={category.color || "grey"}
                                 name={category.name}
@@ -99,5 +102,15 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
             </div>
         </>
 
+    )
+}
+
+export function CategoryItem({ circleColor, name, count, link, category, isCurrent = false }: { circleColor: string | null, name: string, count: number, link: string, category: string | null, isCurrent: boolean }) {
+    return (
+        <Link href={link + (category ? "?category=" + category : "")} className={cn("group flex-shrink-0 inline-flex items-center gap-1 px-1 max-w-fit w-auto font-bold border-b-3 border-transparent", isCurrent && "border-blue")}>
+            {circleColor && <div className="w-2.5 h-2.5 rounded-full mr-1" style={{ backgroundColor: circleColor }}></div>}
+            <span className="font-medium group-hover:text-muted-foreground">{name}</span>
+            <span className="text-sm text-muted-foreground group-hover:text-muted-foreground/50">({count})</span>
+        </Link>
     )
 }

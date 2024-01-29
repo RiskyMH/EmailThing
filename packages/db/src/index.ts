@@ -11,7 +11,7 @@ function getDB() {
   // Initialize Prisma Client with the PlanetScale serverless database driver
   const client = new Client({ url: process.env.DATABASE_URL });
   const adapter = new PrismaPlanetScale(client);
-  const prisma = new PrismaClient({ adapter, log: ["query"] });
+  const prisma = new PrismaClient({ adapter });
 
   return { client, prisma }
 }

@@ -1,13 +1,13 @@
-import { dateDay } from "../utils/tools";
+import { dateDay, relativeDate } from "../utils/tools";
 import TooltipText from "./tooltip-text";
 import { headers } from 'next/headers'
 
-export default function LocalTime({ time, className, type }: { time: Date, className?: string, type: "normal" | "hour-min" | "hour-min/date" }) {
+export default function LocalTime({ time, className, type }: { time: Date, className?: string, type: "normal" | "hour-min" | "hour-min/date" | "full" }) {
     const timeZone = headers().get("x-vercel-ip-timezone") || Intl.DateTimeFormat().resolvedOptions().timeZone
 
     return (
         <TooltipText
-            text={time.toLocaleString("en-US", { timeZone, day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+            text={time.toLocaleString("en-US", { timeZone, day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             subtext={`(${timeZone})`}
         >
             <time dateTime={time.toISOString()} className={className}>
@@ -17,7 +17,7 @@ export default function LocalTime({ time, className, type }: { time: Date, class
     )
 }
 
-function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date", timeZone: string) {
+function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date" | "full", timeZone: string) {
     const todayWithTz = dateDay(new Date(), timeZone)
 
     if (type === "normal") {
@@ -28,6 +28,8 @@ function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date", t
         return date.toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit', timeZone })
     } else if (type === "hour-min/date") {
         return date.toLocaleDateString("en-US", { month: '2-digit', day: '2-digit', year: '2-digit', timeZone })
+    } else if (type === "full") {
+        return date.toLocaleString("en-US", { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${relativeDate(date)})`
     } else {
         return date.toLocaleDateString("en-US", { timeZone })
     }

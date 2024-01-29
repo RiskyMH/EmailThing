@@ -50,6 +50,7 @@ export function UserNav({ user, mailboxId }: UserProps) {
         <Button
             variant="ghost"
             className="gap-3 flex ms-auto hover:bg-transparent p-1 rounded-full -me-2 relative sm:rounded-md sm:p-2 sm:-m-2 dark:sm:hover:bg-secondary sm:hover:bg-background"
+            suppressHydrationWarning // i give up with sanity
         >
             <ChevronDownIcon className="h-5 w-5 text-muted-foreground -me-2 hidden sm:inline" />
             <span className="hidden sm:inline">{user.name}</span>

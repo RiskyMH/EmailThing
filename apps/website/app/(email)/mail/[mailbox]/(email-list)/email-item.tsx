@@ -3,19 +3,11 @@ import TooltipText from "@/app/components/tooltip-text";
 import { cn } from "@/app/utils/tw";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/app/components/ui/context-menu";
 import Link from "next/link";
-import { ClientStar, ContextMenuAction } from "./components.client";
+import { ClientStar, ContextMenuAction } from "../components.client";
 import { getJustEmailsList, getDraftJustEmailsList } from "./tools";
 import { ReplyIcon, ReplyAllIcon, ForwardIcon, TagIcon, ExternalLink } from "lucide-react";
 import { mailboxCategories } from "../tools";
-import { updateEmail as updateEmailAction } from "./actions"
-
-
-export interface UpdatableEmailConfig {
-    isStarred?: boolean;
-    isRead?: boolean;
-    category?: string | null;
-    binned?: boolean;
-}
+import { updateEmail as updateEmailAction } from "../actions"
 
 export interface EmailItemProps {
     email: Awaited<ReturnType<typeof getJustEmailsList>>[0] | Awaited<ReturnType<typeof getDraftJustEmailsList>>[0];
@@ -94,17 +86,17 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         </ContextMenuItem>
                         <ContextMenuSeparator />
 
-                        <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                        <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
                             <ContextMenuAction icon="StarIcon" fillIcon={email.isStarred} action={updateEmail.bind(null, { isStarred: !email.isStarred })}>
                                 {email.isStarred ? "Unstar" : "Star"}
                             </ContextMenuAction>
                         </ContextMenuItem>
-                        <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                        <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
                             <ContextMenuAction icon={!email.binnedAt ? "Trash2Icon" : "ArchiveRestoreIcon"} action={updateEmail.bind(null, { binned: !email.binnedAt })}>
                                 {!email.binnedAt ? "Delete" : "Restore to inbox"}
                             </ContextMenuAction>
                         </ContextMenuItem>
-                        <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                        <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
                             <ContextMenuAction icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"} action={updateEmail.bind(null, { isRead: !email.isRead })}>
                                 {email.isRead ? "Mark as unread" : "Mark as read"}
                             </ContextMenuAction>
@@ -112,20 +104,19 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         <ContextMenuSeparator />
 
                         <ContextMenuSub>
-                            <ContextMenuSubTrigger className="flex gap-2 cursor-pointer">
+                            <ContextMenuSubTrigger className="flex gap-2 cursor-pointer w-full">
                                 <TagIcon className="w-5 h-5 text-muted-foreground" />
                                 Categorize as
                             </ContextMenuSubTrigger>
                             <ContextMenuSubContent className="w-48">
-                                {/* // TODO: implement categorizing */}
-                                <ContextMenuItem asChild className="flex gap-2 cursor-pointer" >
+                                <ContextMenuItem asChild className="flex gap-2 cursor-pointer w-full" >
                                     <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
                                         None
                                     </ContextMenuAction>
                                 </ContextMenuItem>
 
                                 {categories?.map(category => (
-                                    <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer" >
+                                    <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer w-full" >
                                         <ContextMenuAction icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: category.id })}>
                                             {category.name}
                                         </ContextMenuAction>
