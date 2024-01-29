@@ -122,9 +122,9 @@ export default async function Email({
                                         {/* cc */}
                                         {email.recipients.some(e => e.cc) && <div className="grid grid-cols-5 items-center gap-4">
                                             <p className="text-muted-foreground text-end">cc:</p>
-                                            <div>
+                                            <div className="overflow-y-auto col-span-4">
                                                 {email.recipients.filter(e => e.cc).map(e => (
-                                                    <p key={e.address} className="flex gap-1 col-span-4">
+                                                    <p key={e.address} className="flex gap-1 whitespace-nowrap">
                                                         {e.name || e.address}
                                                         {e.name && <span className="text-muted-foreground"> &lt;{e.address}&gt;</span>}
                                                     </p>
