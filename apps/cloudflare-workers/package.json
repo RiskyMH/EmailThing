@@ -1,6 +1,0 @@
-{
-  "name": "cloudflare-workers",
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240117.0"
-  }
-}
