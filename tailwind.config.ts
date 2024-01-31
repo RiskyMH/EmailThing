@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 import twAnimate from 'tailwindcss-animate'
 import typography from '@tailwindcss/typography'
+import { fontFamily } from "tailwindcss/defaultTheme"
 
 const config = {
   content: [
@@ -86,12 +87,15 @@ const config = {
         'reverse-spin': {
           from: { transform: 'rotate(360deg)' },
         }
-
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         'reverse-spin': 'reverse-spin 1s linear infinite'
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+        heading: ["var(--font-heading)", ...fontFamily.sans],
       },
     },
   },

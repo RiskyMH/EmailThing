@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Inter as FontSans } from "next/font/google"
+import localFont from "next/font/local"
 import "./globals.css"
 import { cn } from "@/app/utils/tw"
 import { Toaster } from "@/app/components/ui/toaster"
@@ -8,6 +9,12 @@ import { ReactNode } from "react";
 
 const fontSans = FontSans({
   subsets: ["latin"],
+  variable: "--font-sans",
+})
+
+const fontHeading = localFont({
+  src: "../public/CalSans-SemiBold.woff2",
+  variable: "--font-heading",
 })
 
 export const metadata = {
@@ -15,22 +22,41 @@ export const metadata = {
     default: "EmailThing",
     template: "%s - EmailThing",
   },
-  description: "An Email Client",
+  metadataBase: new URL("https://emailthing.xyz"),
+  description: "A modern email client designed for simplicity and the web.",
+  keywords: [
+    "email",
+    "email client",
+    "open source",
+    "email thing",
+    "riskymh"
+  ],
   openGraph: {
     title: "EmailThing",
-    description: "An Email Client",
+    description: "A modern email client designed for simplicity and the web.",
     images: [
       "/icon.png",
     ],
+    locale: "en_US",
+    url: "https://emailthing.xyz/home",
+    type: "website"
   },
+  authors: [
+    {
+      name: "RiskyMH",
+      url: "https://riskymh.dev",
+    },
+  ],
+  creator: "RiskyMH",
   twitter: {
     title: "EmailThing",
-    description: "An Email Client",
+    description: "A modern email client designed for simplicity and the web.",
     card: "summary",
     images: [
       "/icon.png",
     ],
-  }
+  },
+  generator: 'Next.js',
 } satisfies Metadata
 
 export const viewport: Viewport = {
@@ -45,8 +71,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(
-        "min-h-screen bg-background antialiased",
-        fontSans.className,
+        "min-h-screen bg-background font-sans antialiased",
+        fontSans.variable,
+        fontHeading.variable
       )}>
         {children}
         <Toaster />
