@@ -1,8 +1,8 @@
 'use client'
 
-import TooltipText from "@/app/components/tooltip-text";
-import { Button } from "@/app/components/ui/button";
-import { cn } from "@/app/utils/tw";
+import TooltipText from "@/components/tooltip-text";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/utils/tw";
 import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon, MailOpenIcon, CheckIcon, RotateCcwIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useRouter } from "next/navigation";

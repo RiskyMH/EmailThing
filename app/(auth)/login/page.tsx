@@ -1,8 +1,8 @@
 import { Metadata } from "next"
 import Link from "next/link"
-// import Logo from "@/app/icons/Logo"
-import { buttonVariants } from "@/app/components/ui/button"
-import { cn } from "@/app/utils/tw"
+// import Logo from "@/icons/Logo"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/utils/tw"
 import { ChevronLeft, MailIcon } from "lucide-react"
 import { UserAuthForm } from "./form.client"
 

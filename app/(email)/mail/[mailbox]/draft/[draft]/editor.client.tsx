@@ -1,7 +1,7 @@
 'use client'
 
-import { Input } from '@/app/components/ui/input';
-import { Textarea } from '@/app/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useDebouncedCallback } from 'use-debounce';
 import {
     Select,
@@ -10,8 +10,8 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/app/components/ui/select"
-import { Button } from '@/app/components/ui/button';
+} from "@/components/ui/select"
+import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Loader2, SendIcon } from 'lucide-react';

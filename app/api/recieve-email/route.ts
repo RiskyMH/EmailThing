@@ -1,8 +1,8 @@
 // @ts-ignore
 import PostalMime from 'postal-mime';
 type PostalMime = import("../../../node_modules/postal-mime/postal-mime").default;
-import { prisma } from '@/app/utils/prisma';
-import { env } from '@/app/utils/env';
+import { prisma } from '@/utils/prisma';
+import { env } from '@/utils/env';
 import webpush from 'web-push';
 
 webpush.setVapidDetails(

@@ -1,8 +1,8 @@
 "use server";
-import { addUserTokenToCookie } from "@/app/utils/jwt"
-import { verifyPassword } from "@/app/utils/password";
-import { userAuthSchema } from "@/app/validations/auth"
-import { prisma } from "@/app/utils/prisma"
+import { addUserTokenToCookie } from "@/utils/jwt"
+import { verifyPassword } from "@/utils/password";
+import { userAuthSchema } from "@/validations/auth"
+import { prisma } from "@/utils/prisma"
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 

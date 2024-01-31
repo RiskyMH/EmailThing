@@ -1,4 +1,4 @@
-import { prisma } from "@/app/utils/prisma"
+import { prisma } from "@/utils/prisma"
 import { BodyEditor, FromInput, RecipientInput, SendButton, Subject } from "./editor.client"
 import { notFound } from "next/navigation"
 import { mailboxAliases, pageMailboxAccess } from "../../tools"

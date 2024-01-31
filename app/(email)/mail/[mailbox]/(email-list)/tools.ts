@@ -1,4 +1,4 @@
-import { prisma } from "@/app/utils/prisma";
+import { prisma } from "@/utils/prisma";
 
 export interface EmailListFindOptions {
     isBinned?: boolean;

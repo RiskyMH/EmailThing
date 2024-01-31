@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { MailIcon } from "lucide-react"
 import { PropsWithChildren } from "react"
-import { buttonVariants } from "@/app/components/ui/button";
-import { cn } from "@/app/utils/tw";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/utils/tw";
 import { MainNavItem } from "./components.client";
 
 export default function HomeLayout({ children }: PropsWithChildren<{}>) {

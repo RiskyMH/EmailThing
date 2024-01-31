@@ -1,5 +1,5 @@
-import { getCurrentUser } from "@/app/utils/jwt";
-import { prisma } from "@/app/utils/prisma";
+import { getCurrentUser } from "@/utils/jwt";
+import { prisma } from "@/utils/prisma";
 import { notFound, redirect } from "next/navigation";
 import { mailboxAliases, pageMailboxAccess } from "../../tools";
 

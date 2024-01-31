@@ -1,4 +1,4 @@
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/app/components/ui/tooltip";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { PropsWithChildren } from "react";
 
 export default function TooltipText({ children, text, subtext }: PropsWithChildren<{ text: string, subtext?: string }>) {

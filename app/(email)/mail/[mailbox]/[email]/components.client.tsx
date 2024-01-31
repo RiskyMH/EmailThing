@@ -1,9 +1,9 @@
 'use client'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect } from "react";
 import Link from "next/link"
 import { useRouter } from "next/navigation";
-import { cn } from "@/app/utils/tw";
+import { cn } from "@/utils/tw";
 
 export function MarkRead({ action }: any) {
     useEffect(() => {

@@ -1,11 +1,11 @@
-import { getCurrentUser } from "@/app/utils/jwt";
-import { prisma } from "@/app/utils/prisma";
+import { getCurrentUser } from "@/utils/jwt";
+import { prisma } from "@/utils/prisma";
 import { Suspense } from "react";
 import { Search } from "./nav.search";
 import { UserNav } from "./user.nav.client";
 import Link from "next/link";
 import { MailIcon } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { mailboxAliases, userMailboxAccess } from "./tools";
 import Sidebar from "./sidebar";
 import { MobileNav } from "./sidebar.client";

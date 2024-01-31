@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { useSelectedLayoutSegment } from "next/navigation"
-import { cn } from "@/app/utils/tw"
+import { cn } from "@/utils/tw"
 import { PropsWithChildren } from "react"
 
 export function MainNavItem({ href, title, disabled = false, mobileShow = false }: PropsWithChildren<{ href: string, disabled?: boolean, title: string, mobileShow?: boolean }>) {

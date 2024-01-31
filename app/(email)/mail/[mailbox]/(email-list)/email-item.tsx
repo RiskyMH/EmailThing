@@ -1,7 +1,7 @@
-import LocalTime from "@/app/components/localtime";
-import TooltipText from "@/app/components/tooltip-text";
-import { cn } from "@/app/utils/tw";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/app/components/ui/context-menu";
+import LocalTime from "@/components/localtime";
+import TooltipText from "@/components/tooltip-text";
+import { cn } from "@/utils/tw";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/components/ui/context-menu";
 import Link from "next/link";
 import { ClientStar, ContextMenuAction } from "../components.client";
 import { getJustEmailsList, getDraftJustEmailsList } from "./tools";

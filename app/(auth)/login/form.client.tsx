@@ -1,9 +1,9 @@
 "use client"
 
-import { cn } from "@/app/utils/tw"
-import { Button } from "@/app/components/ui/button"
-import { Input } from "@/app/components/ui/input"
-import { Label } from "@/app/components/ui/label"
+import { cn } from "@/utils/tw"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import signIn from "./action"

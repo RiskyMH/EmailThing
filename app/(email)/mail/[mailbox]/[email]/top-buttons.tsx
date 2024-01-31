@@ -1,9 +1,9 @@
 import { ArrowLeftIcon, TagIcon, ReplyIcon, ReplyAllIcon, ForwardIcon } from "lucide-react"
-import { Button } from "@/app/components/ui/button"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ContextMenuAction } from "../components.client"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/app/components/ui/dropdown-menu"
-import TooltipText from "@/app/components/tooltip-text"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import TooltipText from "@/components/tooltip-text"
 import { mailboxCategories } from "../tools";
 import { getEmail } from "./tools";
 import { updateEmail as updateEmailAction } from "../actions"

@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
-import { resetServiceWorker } from '@/app/utils/service-worker'
-import { env } from '@/app/utils/env'
-import { Button } from '@/app/components/ui/button'
+import { resetServiceWorker } from '@/utils/service-worker'
+import { env } from '@/utils/env'
+import { Button } from '@/components/ui/button'
 import { saveSubscription } from './actions'
 import { toast } from "sonner"
 import { Loader2 } from 'lucide-react'

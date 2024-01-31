@@ -1,4 +1,4 @@
-import { prisma } from "@/app/utils/prisma"
+import { prisma } from "@/utils/prisma"
 import { cache } from "react"
 
 export const getEmail = cache(async (mailboxId: string, emailId: string) => {

@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { PropsWithChildren, useRef, useState, useCallback, useEffect, useTransition } from "react";
 

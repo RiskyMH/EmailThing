@@ -1,7 +1,7 @@
 import Link from "next/link"
 
-import { cn } from "@/app/utils/tw"
-import { buttonVariants } from "@/app/components/ui/button"
+import { cn } from "@/utils/tw"
+import { buttonVariants } from "@/components/ui/button"
 import { CheckIcon } from "lucide-react"
 
 export const metadata = {

@@ -1,5 +1,5 @@
-import { getCurrentUser } from "@/app/utils/jwt";
-import { prisma } from "@/app/utils/prisma";
+import { getCurrentUser } from "@/utils/jwt";
+import { prisma } from "@/utils/prisma";
 import { unstable_cache } from "next/cache";
 import { redirect, notFound } from "next/navigation";
 import { cache } from "react";

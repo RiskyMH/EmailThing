@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/app/utils/tw";
+import { cn } from "@/utils/tw";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PropsWithChildren, useEffect, useState } from "react";
@@ -7,10 +7,10 @@ import {
     Sheet,
     SheetContent,
     SheetTrigger,
-} from "@/app/components/ui/sheet"
+} from "@/components/ui/sheet"
 import { MenuIcon } from "lucide-react";
 import { useWindowSize } from "usehooks-ts";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export function SidebarLink({ href, className, children, disabled }: PropsWithChildren<{ href: string, className: string, disabled?: boolean }>) {
     const pathName = usePathname()

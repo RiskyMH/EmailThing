@@ -1,4 +1,4 @@
-import { cn } from "@/app/utils/tw";
+import { cn } from "@/utils/tw";
 import { SearchIcon, ChevronDownIcon } from "lucide-react";
 
 export function Search({ className }: { className?: string }) {

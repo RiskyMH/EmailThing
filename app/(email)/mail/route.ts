@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/app/utils/jwt";
+import { getCurrentUser } from "@/utils/jwt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 

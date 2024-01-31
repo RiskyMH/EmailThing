@@ -1,11 +1,11 @@
-import { Button } from "@/app/components/ui/button";
-import { prisma } from "@/app/utils/prisma";
+import { Button } from "@/components/ui/button";
+import { prisma } from "@/utils/prisma";
 import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { SidebarLink } from "./sidebar.client";
 import { Suspense, cache } from "react";
-import { cn } from "@/app/utils/tw";
-import { getCurrentUser } from "@/app/utils/jwt";
+import { cn } from "@/utils/tw";
+import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "./tools";
 
 export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string, className?: string }) => {

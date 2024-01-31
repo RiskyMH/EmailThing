@@ -1,9 +1,9 @@
 "use server";
 
-import { getCurrentUser } from "@/app/utils/jwt";
-import { prisma } from "@/app/utils/prisma";
+import { getCurrentUser } from "@/utils/jwt";
+import { prisma } from "@/utils/prisma";
 import webpush from 'web-push';
-import { env } from '@/app/utils/env';
+import { env } from '@/utils/env';
 import { userMailboxAccess } from "../tools";
 
 webpush.setVapidDetails(

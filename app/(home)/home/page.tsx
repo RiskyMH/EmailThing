@@ -1,5 +1,5 @@
-import { buttonVariants } from '@/app/components/ui/button'
-import { cn } from '@/app/utils/tw'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/utils/tw'
 import { ShieldAlertIcon, CloudCogIcon, UsersIcon, SmartphoneIcon, TimerIcon, LucideIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'

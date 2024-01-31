@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next"
 import { Inter as FontSans } from "next/font/google"
 import localFont from "next/font/local"
 import "./globals.css"
-import { cn } from "@/app/utils/tw"
-import { Toaster } from "@/app/components/ui/toaster"
-import { Toaster as Sonner } from "@/app/components/ui/sonner"
+import { cn } from "@/utils/tw"
+import { Toaster } from "@/components/ui/toaster"
+import { Toaster as Sonner } from "@/components/ui/sonner"
 import { ReactNode } from "react";
 
 const fontSans = FontSans({

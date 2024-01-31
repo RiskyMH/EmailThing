@@ -1,10 +1,10 @@
 "use server";
 
-import { prisma } from "@/app/utils/prisma";
+import { prisma } from "@/utils/prisma";
 import { redirect } from "next/navigation";
 import { env } from "process";
 import { userMailboxAccess } from "../../tools";
-import { getCurrentUser } from "@/app/utils/jwt";
+import { getCurrentUser } from "@/utils/jwt";
 import { revalidatePath } from "next/cache";
 import { SaveActionProps, Recipient } from "./types";
 

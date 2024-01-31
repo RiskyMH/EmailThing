@@ -1,6 +1,6 @@
 "use server";
-import { getCurrentUser } from "@/app/utils/jwt";
-import { prisma } from "@/app/utils/prisma";
+import { getCurrentUser } from "@/utils/jwt";
+import { prisma } from "@/utils/prisma";
 import { revalidatePath } from "next/cache";
 import { userMailboxAccess } from "./tools";
 import { cookies } from "next/headers";

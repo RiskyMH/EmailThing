@@ -1,10 +1,10 @@
-import { getCurrentUser } from "@/app/utils/jwt";
+import { getCurrentUser } from "@/utils/jwt";
 import { RefreshButton } from "../components.client";
 import { getDraftEmailList, getEmailList, getJustEmailsList, getDraftJustEmailsList } from "./tools"
-import LoadMore from "@/app/components/loadmore.client";
+import LoadMore from "@/components/loadmore.client";
 import { EmailItem } from "./email-item";
 import { mailboxCategories, userMailboxAccess } from "../tools";
-import { cn } from "@/app/utils/tw";
+import { cn } from "@/utils/tw";
 import Link from "next/link";
 
 interface EmailListProps {
