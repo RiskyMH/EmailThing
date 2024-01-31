@@ -25,6 +25,7 @@ model Email {
 
   from       EmailSender?
   recipients EmailRecipiant[]
+  replyTo    String?
   categoryId String?
   category   MailboxCategory? @relation(fields: [categoryId], references: [id])
 

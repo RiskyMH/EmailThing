@@ -113,7 +113,8 @@ export async function POST(request: Request) {
             snippet: slice(body, 200),
             mailbox: {
                 connect: { id: mailboxId }
-            }
+            },
+            replyTo: email.replyTo?.[0].address
         },
         select: {
             id: true,

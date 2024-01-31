@@ -36,7 +36,8 @@ export const getEmail = cache(async (mailboxId: string, emailId: string) => {
                     name: true,
                     address: true
                 }
-            }
+            },
+            replyTo: true,
         }
     })
 

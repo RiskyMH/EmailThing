@@ -19,7 +19,7 @@ import { getEmail } from "./tools"
 
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {
     if (!await pageMailboxAccess(props.params.mailbox, false)) return {}
-    
+
     const mail = await getEmail(props.params.mailbox, props.params.email)
     if (!mail) return notFound()
 
@@ -135,8 +135,6 @@ export default async function Email({
                                         {/* date */}
                                         <div className="grid grid-cols-5 items-center gap-4">
                                             <p className="text-muted-foreground text-end">date:</p>
-                                            {/* <p className="col-span-4">{email.createdAt.toLocaleString()}</p> */}
-                                            {/* above but always utc+0 */}
                                             <p className="col-span-4 flex gap-1">
                                                 {email.createdAt.toLocaleString('en-US', { timeZone: 'UTC' })}
                                                 <span className="text-muted-foreground">(UTC)</span>
@@ -148,6 +146,14 @@ export default async function Email({
                                             <p className="text-muted-foreground text-end">subject:</p>
                                             <p className="col-span-4">{email.subject}</p>
                                         </div>
+
+                                        {/* reply to */}
+                                        {email.replyTo && (
+                                            <div className="grid grid-cols-5 items-center gap-4">
+                                                <p className="text-muted-foreground text-end">reply to:</p>
+                                                <p className="col-span-4">{email.replyTo}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </PopoverContent>
                             </Popover>

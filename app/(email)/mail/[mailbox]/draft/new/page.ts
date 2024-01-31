@@ -45,8 +45,8 @@ export default async function Page({
                         name: true,
                         address: true
                     }
-                }
-
+                },
+                replyTo: true,
             }
         })
 
@@ -58,18 +58,20 @@ export default async function Page({
         let subject = email.subject
         let to = '[]'
 
+        const replyTo = email.replyTo ? { address: email.replyTo, name: null } : email.from
+
         if (searchParams.reply) {
             if (!subject?.startsWith("Re: ")) {
                 subject = `Re: ${subject}`
             }
-            to = JSON.stringify([{ name: email.from?.name, address: email.from?.address, cc: null }])
+            to = JSON.stringify([{ name: replyTo?.name, address: replyTo?.address, cc: null }])
 
         } else if (searchParams.replyAll) {
             if (!subject?.startsWith("Re: ")) {
                 subject = `Re: ${subject}`
             }
             to = JSON.stringify([
-                { name: email.from?.name, address: email.from?.address, cc: null },
+                { name: replyTo?.name, address: replyTo?.address, cc: null },
                 ...email.recipients.map(r => ({ name: r.name, address: r.address, cc: r.cc ? "cc" : null })),
             ].filter(r => r.address !== from))
 
