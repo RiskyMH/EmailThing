@@ -34,7 +34,8 @@ export default async function UserSettingsPage() {
     if (!user) return notFound();
 
     return (
-        <div className="container flex p-5 w-screen flex-col items-center justify-center bg-background">
+
+        <div className="container flex p-5 w-screen h-screen flex-col items-center bg-background" vaul-drawer-wrapper="">
             <Link
                 href="/home"
                 className={cn(
@@ -46,7 +47,7 @@ export default async function UserSettingsPage() {
                 Home
             </Link>
 
-            <div className="mx-auto flex w-full flex-col justify-center gap-3 sm:w-[350px] mt-16">
+            <div className="mx-auto flex w-full flex-col gap-3 sm:w-[350px] mt-16">
                 <h1 className="text-2xl">Settings</h1>
                 <SettingForm
                     buttonName="Change Username"

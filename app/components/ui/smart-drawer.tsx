@@ -19,16 +19,15 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ComponentProps, useState } from "react";
+import { ComponentProps } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
 const SmartDrawer = (props: ComponentProps<typeof Drawer>) => {
-    const [open, setOpen] = useState(false)
     const isDesktop = useMediaQuery("(min-width: 640px)");
     if (isDesktop) {
-        return <Dialog open={open} onOpenChange={setOpen} {...props} />;
+        return <Dialog {...props} />;
     }
-    return <Drawer open={open} onOpenChange={setOpen}{...props} />;
+    return <Drawer {...props} />;
 }
 SmartDrawer.displayName = "SmartDrawer";
 
