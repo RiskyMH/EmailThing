@@ -45,6 +45,10 @@ export default async function signIn(data: FormData, callback?: string | null): 
 
     await addUserTokenToCookie(user)
 
+    if (callback) {
+        redirect(callback)
+    }
+
     // get the user's mailbox then redirect to it
     const mailboxes = await prisma.mailboxForUser.findMany({
         where: {

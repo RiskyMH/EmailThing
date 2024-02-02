@@ -9,7 +9,7 @@ const pwdHash = (password: string, salt: string) =>
         .toString("hex")
 
 export const createPasswordHash = async (password: string) => {
-    const salt = await randomText(16)
+    const salt = randomText(16)
     const hash = pwdHash(password, salt)
 
     return `${algorithm}:${salt}:${hash}`

@@ -66,7 +66,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                         />
                     </div>
 
-                    <Button disabled={isPending}>
+                    <Button disabled={isPending} type="submit">
                         {isPending && (
                             <Loader2 className="me-2 h-4 w-4 animate-spin" />
                         )}

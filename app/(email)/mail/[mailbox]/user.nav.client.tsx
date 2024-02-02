@@ -79,7 +79,7 @@ export function UserNav({ user, mailboxId }: UserProps) {
                     <div className="mx-4 flex flex-col gap-2 pt-2">
                         <Button variant="secondary" asChild>
                             <DrawerClose asChild>
-                                <Link href="#settings" className="w-full">
+                                <Link href="/settings" className="w-full">
                                     User settings
                                 </Link>
                             </DrawerClose>
@@ -134,7 +134,7 @@ export function UserNav({ user, mailboxId }: UserProps) {
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="#settings" className="cursor-pointer">
+                        <Link href="/settings" className="cursor-pointer">
                             User Settings
                         </Link>
                     </DropdownMenuItem>
