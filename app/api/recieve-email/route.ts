@@ -125,9 +125,15 @@ export async function POST(request: Request) {
 
 
     // send push notifications
-    const notifications = await prisma.mailboxNotification.findMany({
+    const notifications = await prisma.userNotification.findMany({
         where: {
-            mailboxId,
+            user: {
+                mailboxes: {
+                    some: {
+                        mailboxId
+                    }
+                }
+            }
         },
         select: {
             endpoint: true,
@@ -155,7 +161,7 @@ export async function POST(request: Request) {
         } catch (e: any) {
             // delete the notification if it's no longer valid
             if (e.statusCode === 410) {
-                await prisma.mailboxNotification.delete({
+                await prisma.userNotification.delete({
                     where: {
                         endpoint: n.endpoint,
                     }

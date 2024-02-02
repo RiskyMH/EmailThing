@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import Notifications from "./register-button.client"
+import Notifications from "../../../../(auth)/settings/notifications.client"
 import { pageMailboxAccess } from "../tools"
 
 
@@ -20,7 +20,7 @@ export default async function Email({
 
     return (
         <div className="min-w-0 p-5">
-            <Notifications mailbox={params.mailbox} />
+            Config here
         </div>
 
     )

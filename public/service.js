@@ -8,7 +8,7 @@ self.addEventListener('push', async (event) => {
             icon: '/icon.png',
             timestamp: Date.now(),
             data: {
-                url: eventData.url || '/',
+                url: eventData.url,
             },
         });
     }
@@ -17,9 +17,12 @@ self.addEventListener('push', async (event) => {
 
 self.addEventListener('notificationclick', function (event) {
     event.notification.close();
-    event.waitUntil(
-        clients
-            .openWindow(event.notification.data.url)
-            .then((windowClient) => (windowClient ? windowClient.focus() : null))
-    );
+
+    if (event.notification.data.url) {
+        event.waitUntil(
+            clients
+                .openWindow(event.notification.data.url)
+                .then((windowClient) => (windowClient ? windowClient.focus() : null))
+        );
+    }
 });

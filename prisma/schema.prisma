@@ -82,7 +82,6 @@ model Mailbox {
   users                MailboxForUser[]
   drafts               DraftEmail[]
   aliases              MailboxAlias[]
-  notifications        MailboxNotification[]
   mailboxCustomDomains MailboxCustomDomain[]
 
   @@index([id])
@@ -105,12 +104,12 @@ model MailboxAlias {
 }
 
 model MailboxCustomDomain {
-  id              String   @id @default(cuid())
-  mailboxId       String
-  mailbox         Mailbox  @relation(fields: [mailboxId], references: [id])
-  domain          String   @unique
-  addedAt         DateTime @default(now())
-  authKey         String
+  id        String   @id @default(cuid())
+  mailboxId String
+  mailbox   Mailbox  @relation(fields: [mailboxId], references: [id])
+  domain    String   @unique
+  addedAt   DateTime @default(now())
+  authKey   String
   // verificationKey String?
 
   @@unique([mailboxId, domain])
@@ -141,29 +140,30 @@ model MailboxForUser {
   @@index([userId])
 }
 
-model MailboxNotification {
+model User {
+  id          String             @id @default(cuid())
+  username    String             @unique @db.VarChar(20)
+  password    String             @db.VarChar(200)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  admin       Boolean            @default(false)
+  mailboxes   MailboxForUser[]
+  notications UserNotification[]
+
+  @@index([username])
+}
+
+model UserNotification {
   id        String    @id @default(cuid())
-  mailboxId String
-  mailbox   Mailbox   @relation(fields: [mailboxId], references: [id])
   endpoint  String    @unique @db.VarChar(500)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
   p256dh    String
   auth      String
   createdAt DateTime  @default(now())
   expiresAt DateTime?
 
-  @@index([mailboxId])
-}
-
-model User {
-  id        String           @id @default(cuid())
-  username  String           @unique @db.VarChar(20)
-  password  String           @db.VarChar(200)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  admin     Boolean          @default(false)
-  mailboxes MailboxForUser[]
-
-  @@index([username])
+  @@index([userId])
 }
 
 model DraftEmail {

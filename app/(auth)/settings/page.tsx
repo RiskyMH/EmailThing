@@ -12,6 +12,7 @@ import { notFound, redirect } from "next/navigation";
 import { ChangePassword, ChangeSetting, SignOut } from "./components.client";
 import { changeUsername } from "./actions";
 import { ReactNode } from "react";
+import NotificationsButton from "./notifications.client";
 
 export const metadata = {
     title: "User Settings",
@@ -67,6 +68,7 @@ export default async function UserSettingsPage() {
                 >
                     <ChangePassword />
                 </SettingForm>
+                <NotificationsButton />
                 <SignOut />
             </div>
         </div>
