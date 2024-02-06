@@ -22,6 +22,7 @@ model Email {
   html      String?  @db.MediumText()
   createdAt DateTime @default(now())
   raw       String   @db.LongText()
+  size      Int      @default(0)
 
   from       EmailSender?
   recipients EmailRecipiant[]
@@ -83,6 +84,8 @@ model Mailbox {
   drafts               DraftEmail[]
   aliases              MailboxAlias[]
   mailboxCustomDomains MailboxCustomDomain[]
+  storageUsed          Int                   @default(0)
+  plan                 String                @default("FREE")
 
   @@index([id])
 }

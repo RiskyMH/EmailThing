@@ -80,6 +80,31 @@ export async function POST(request: Request) {
         return new Response('Mailbox not found', { status: 400 })
     }
 
+    const storageLimit = {
+        FREE: 100_000_000,
+        UNLIMITED: Infinity,
+    }
+
+    // get storage used and see if over limit
+    const mailbox = await prisma.mailbox.findUnique({
+        where: {
+            id: mailboxId
+        },
+        select: {
+            storageUsed: true,
+            plan: true,
+        }
+    })
+
+    const limit = storageLimit[mailbox!.plan as 'FREE' | 'UNLIMITED']
+    if (mailbox!.storageUsed > limit) {
+        // todo: send email to user to warn them about unreceived emails 
+        // (and they can upgrade to pro to get more storage or delete some emails to free up space)
+        return new Response('Mailbox over storage limit', { status: 400 })
+    }
+
+    const emailSize = new Blob([rawEmail]).size
+
     const body = email.text || email.html || email.attachments.map((a) => a.content).join('\n')
 
     const e = await prisma.email.create({
@@ -114,10 +139,22 @@ export async function POST(request: Request) {
             mailbox: {
                 connect: { id: mailboxId }
             },
-            replyTo: email.replyTo?.[0].address
+            replyTo: email.replyTo?.[0].address,
+            size: emailSize,
         },
         select: {
             id: true,
+        }
+    })
+
+    await prisma.mailbox.update({
+        where: {
+            id: mailboxId
+        },
+        data: {
+            storageUsed: {
+                increment: emailSize
+            }
         }
     })
 
