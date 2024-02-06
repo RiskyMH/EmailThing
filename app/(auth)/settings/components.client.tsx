@@ -60,7 +60,7 @@ export function ChangePassword() {
     return (
         <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit} >
             <div className="grid gap-2">
-                <Label htmlFor="username">Current password</Label>
+                <Label htmlFor="password">Current password</Label>
                 <Input
                     className="bg-secondary border-none"
                     name="password"
@@ -72,7 +72,7 @@ export function ChangePassword() {
                     autoComplete="password"
                 />
 
-                <Label htmlFor="username">New password</Label>
+                <Label htmlFor="newPassword">New password</Label>
                 <Input
                     className="bg-secondary border-none"
                     name="newPassword"
@@ -80,7 +80,7 @@ export function ChangePassword() {
                     disabled={isPending}
                     type="password"
                     required
-                    autoComplete="none"
+                    autoComplete="new-password"
                 />
             </div>
             <Button type="submit" disabled={isPending} className="gap-2">

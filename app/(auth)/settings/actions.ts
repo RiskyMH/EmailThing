@@ -45,6 +45,8 @@ export async function changePassword(oldPassword: string, newPassword: string) {
     const validPassword = verifyPassword(oldPassword, user.password)
     if (!validPassword) return { error: 'Current password is not correct' }
 
+    if (newPassword.length < 8) return { error: 'Password needs to be at least 8 characters' }
+
     // update password
     await prisma.user.update({
         where: { id: userId },

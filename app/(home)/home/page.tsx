@@ -24,7 +24,7 @@ export default function Home() {
             I didn&apos;t like options for custom domains and email, so I decided to build an email app and make it open source.
           </p>
           <div className="space-x-4">
-            <Link href="/login" className={cn(buttonVariants({ size: "lg" }))}>
+            <Link href="/register" className={cn(buttonVariants({ size: "lg" }))}>
               Get Started
             </Link>
             <Link

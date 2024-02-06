@@ -30,6 +30,7 @@ export default async function UserSettingsPage() {
         select: {
             id: true,
             username: true,
+            email: true
         }
     });
     if (!user) return notFound();
@@ -50,6 +51,7 @@ export default async function UserSettingsPage() {
 
             <div className="mx-auto flex w-full flex-col gap-3 sm:w-[350px] mt-16">
                 <h1 className="text-2xl">Settings</h1>
+                {user.email}
                 <SettingForm
                     buttonName="Change Username"
                     header={{

@@ -57,6 +57,16 @@ const nextConfig = {
                         },
                     ],
                 },
+                {
+                    source: '/register',
+                    destination: '/mail',
+                    has: [
+                        {
+                            type: 'cookie',
+                            key: 'token',
+                        },
+                    ],
+                },
             ],
             afterFiles: [],
             fallback: [],

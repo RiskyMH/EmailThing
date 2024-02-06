@@ -25,30 +25,30 @@ export default async function LoginPage() {
                     {/* <Logo className="mx-auto h-6 w-6" /> */}
                     <MailIcon className="mx-auto h-6 w-6" />
                     <h1 className="text-2xl font-semibold tracking-tight">
-                        Welcome back
+                        Welcome to EmailThing
                     </h1>
+                    {/* <p className="text-sm text-muted-foreground">
+                        Choose an username and password to create an account
+                    </p> */}
                     <p className="text-sm text-muted-foreground">
-                        Enter your username to sign in to your email
+                        Currently you need an invite code, please {" "}
+                        <a href="mailto:emailthing@riskymh.dev" className="font-bold hover:underline" target="_blank" rel="noreferrer">email me</a>
+                        {" "} or ask on{" "}
+                        <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank" rel="noreferrer">Discord</a>
+                        {" "} for an invite code.
                     </p>
                 </div>
 
-                {/* the actual login part */}
+                {/* the actual form part */}
                 <UserAuthForm />
 
                 <p className="px-8 text-center text-sm text-muted-foreground flex flex-col gap-2">
                     <Link
-                        href="/register"
-                        className="hover:text-muted-foreground underline underline-offset-4"
+                        href="/login"
+                        className="hover:text-brand underline underline-offset-4"
                     >
-                        Don&apos;t have an account? Sign Up
+                        Already have an account? Sign In
                     </Link>
-                    {/* <Link
-                            // href="/login/forgot"
-                            href="#forgot"
-                            className="hover:text-brand underline underline-offset-4"
-                        >
-                            Forgot password?
-                        </Link> */}
 
                 </p>
             </div>
@@ -57,8 +57,8 @@ export default async function LoginPage() {
 }
 
 export const metadata = {
-    title: "Login",
-    description: "Login to your account",
+    title: "Register",
+    description: "Register for an account",
     robots: {
         index: false,
         follow: false,

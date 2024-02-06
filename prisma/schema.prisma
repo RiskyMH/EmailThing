@@ -147,6 +147,7 @@ model User {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   admin       Boolean            @default(false)
+  email       String
   mailboxes   MailboxForUser[]
   notications UserNotification[]
 
@@ -179,4 +180,17 @@ model DraftEmail {
   to   String? @db.MediumText() // JSON { address: string, name?: string, cc?: "cc" | "bcc" | null }[]
 
   @@index([mailboxId])
+}
+
+model InviteCode {
+  code      String    @id @default(cuid())
+  createdBy String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+  usedBy    String?
+  usedAt    DateTime?
+
+  @@index([createdBy])
+  @@index([usedBy])
+  @@index([usedAt])
 }
