@@ -115,11 +115,23 @@ export async function sendEmailAction(mailboxId: string, draftId: string) {
                 },
                 isRead: true,
                 isSender: true,
+                size: body?.length ?? 0
             },
             select: {
                 id: true
             }
 
+        }),
+
+        prisma.mailbox.update({
+            where: {
+                id: mailboxId
+            },
+            data: {
+                storageUsed: {
+                    increment: body?.length ?? 0
+                }
+            }
         }),
 
         // delete draft
