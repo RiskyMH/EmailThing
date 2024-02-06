@@ -6,16 +6,15 @@ export async function GET() {
     const currentUser = await getCurrentUser()
     const user = await prisma.user.findUnique({
         where: {
-            id: currentUser || ''
+            id: currentUser || '',
+            admin: true
         },
         select: {
-            admin: true,
             id: true
         }
     })
-    console.log(user, currentUser)
 
-    if (!user || !user.admin) {
+    if (!user) {
         return new Response('Unauthorized', { status: 401 })
     }
 

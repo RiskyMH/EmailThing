@@ -7,7 +7,7 @@ export default function LocalTime({ time, className, type }: { time: Date, class
 
     return (
         <TooltipText
-            text={time.toLocaleString("en-US", { timeZone, day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            text={time.toLocaleString([], { timeZone, day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             subtext={`(${timeZone})`}
         >
             <time dateTime={time.toISOString()} className={className}>
@@ -23,14 +23,14 @@ function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date" | 
     if (type === "normal") {
         return date.toLocaleTimeString()
     } else if (type === "hour-min") {
-        return date.toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit', timeZone })
+        return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone })
     } else if (type === "hour-min/date" && dateDay(date, timeZone) === todayWithTz) {
-        return date.toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit', timeZone })
+        return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone })
     } else if (type === "hour-min/date") {
-        return date.toLocaleDateString("en-US", { month: '2-digit', day: '2-digit', year: '2-digit', timeZone })
+        return date.toLocaleDateString([], { month: '2-digit', day: '2-digit', year: '2-digit', timeZone })
     } else if (type === "full") {
-        return date.toLocaleString("en-US", { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${formatTimeAgo(date)})`
+        return date.toLocaleString([], { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${formatTimeAgo(date)})`
     } else {
-        return date.toLocaleDateString("en-US", { timeZone })
+        return date.toLocaleDateString([], { timeZone })
     }
 }

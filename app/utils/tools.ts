@@ -4,7 +4,7 @@ export const randomText = (size = 16) =>
     randomBytes(size).toString("hex")
 
 export function dateDay(date: Date, timeZone: string) {
-    return date.toLocaleString("en-US", {
+    return date.toLocaleString([], {
         timeZone,
         month: "2-digit",
         day: "2-digit",
