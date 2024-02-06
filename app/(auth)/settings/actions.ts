@@ -8,6 +8,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import webpush from 'web-push';
 import { env } from '@/utils/env';
+import { userAuthSchema } from "@/validations/auth"
 
 export async function changeUsername(username: string) {
     const userId = await getCurrentUser()
@@ -24,6 +25,10 @@ export async function changeUsername(username: string) {
     })
 
     if (existingUser) return { error: 'Username already taken' }
+
+    // check schema
+    const validUsername = userAuthSchema.safeParse({ username, password: "password" })
+    if (!validUsername.success) return { error: validUsername.error.errors[0].message }
 
     // update username
     await prisma.user.update({
