@@ -117,11 +117,12 @@ export async function deleteSubscription(endpoint: string) {
     // delete subscription
     if (!endpoint) throw new Error("Subscription endpoint is missing");
 
-    await prisma.userNotification.delete({
+    await prisma.userNotification.deleteMany({
         where: {
             userId,
             endpoint: endpoint
-        }
+        },
+
     })
 
     revalidatePath('/settings')

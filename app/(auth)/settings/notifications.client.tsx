@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
-import { resetServiceWorker } from '@/utils/service-worker'
+import { registerServiceWorker, resetServiceWorker, unregisterServiceWorkers } from '@/utils/service-worker'
 import { env } from '@/utils/env'
 import { Button } from '@/components/ui/button'
 import { deleteSubscription, saveSubscription } from './actions'
@@ -52,11 +52,12 @@ export default function NotificationsButton() {
             }
         })
     }
-    
-    const subscribe = async () => {
-        const swRegistration = await resetServiceWorker()
+
+    const subscribe = async (tryAgain = true) => {
+        const swRegistration = await registerServiceWorker()
 
         try {
+            if (!swRegistration.active) return void await subscribe(false);
             const subscription = await swRegistration.pushManager.subscribe(options)
 
             await saveSubscription(subscription.toJSON())
@@ -64,7 +65,7 @@ export default function NotificationsButton() {
             toast('You have successfully subscribed to notifications');
 
         } catch (err) {
-            console.error('Error', err)
+            console.error('Error', err);
             return toast.error('Failed to subscribe to notifications');
         }
     }
@@ -80,6 +81,7 @@ export default function NotificationsButton() {
                 if (!subscription) return void toast('You are not subscribed to notifications');
 
                 await subscription.unsubscribe()
+                await unregisterServiceWorkers()
                 await deleteSubscription(subscription.endpoint)
                 setIsSubscribed(false)
                 toast('Unsubscribed from notifications');
@@ -92,15 +94,10 @@ export default function NotificationsButton() {
     }
 
     return (
-        <div className='flex gap-2'>
-            <Button onClick={requestPermission} disabled={isPending || !isLoaded} className='flex gap-2 w-full'>
-                {isPending && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
-                Subscribe to notifications
-            </Button>
-            <Button onClick={unSubscribe} variant="destructive" disabled={isPending || !isSubscribed}>
-                <Trash2 className="h-5 w-5" />
-            </Button>
-        </div>
+        <Button onClick={() => isSubscribed ? unSubscribe() : requestPermission()} disabled={isPending || !isLoaded} className='flex gap-2 w-full'>
+            {isPending && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+            {isSubscribed ? 'Disable notifications' : 'Enable notifications'}
+        </Button>
     )
 }
 

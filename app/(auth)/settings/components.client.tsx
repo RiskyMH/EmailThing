@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { changePassword, changeUsername, logout } from "./actions";
+import { changePassword, logout } from "./actions";
 import { FormEvent, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
