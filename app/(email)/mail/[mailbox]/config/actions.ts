@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "../tools";
 import prisma from "@/utils/prisma";
 import { aliasLimit, customDomainLimit } from "@/utils/limits";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
 import { createId } from '@paralleldrive/cuid2';
 
@@ -169,6 +169,8 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
             name
         }
     })
+
+    revalidateTag(`mailbox-aliases-${mailboxId}`)
 
     return revalidatePath(`/mail/${mailboxId}/config`);
 }

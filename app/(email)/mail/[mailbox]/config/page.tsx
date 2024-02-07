@@ -52,7 +52,7 @@ export default async function Email({
 
             <div>
                 <h2 className="text-lg font-semibold">Storage</h2>
-                <p>Used: {mailbox.storageUsed / 1e+6} / {(storageLimit as any)[mailbox.plan] / 1e+6}MB</p>
+                <p>Used: {Math.ceil(mailbox.storageUsed / 1e+6)}MB / {(storageLimit as any)[mailbox.plan] / 1e+6}MB</p>
             </div>
 
             <div>
