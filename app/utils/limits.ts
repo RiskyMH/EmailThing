@@ -10,7 +10,7 @@ export const storageLimit = {
 }
 
 export const customDomainLimit = {
-    [PlanType.FREE]: 1,
+    [PlanType.FREE]: 3,
     [PlanType.UNLIMITED]: Infinity,
 }
 
