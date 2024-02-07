@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2"
 import { createEnv } from "@t3-oss/env-nextjs"
 import { z } from "zod"
 
@@ -20,6 +21,6 @@ export const env = createEnv({
         WEB_NOTIFICATIONS_PRIVATE_KEY: process.env.WEB_NOTIFICATIONS_PRIVATE_KEY,
         EMAIL_AUTH_TOKEN: process.env.EMAIL_AUTH_TOKEN,
         EMAIL_DKIM_PRIVATE_KEY: process.env.EMAIL_DKIM_PRIVATE_KEY,
-        JWT_TOKEN: process.env.JWT_TOKEN || Math.random().toString(20).substr(2, 16)
+        JWT_TOKEN: process.env.JWT_TOKEN || createId()
     },
 })

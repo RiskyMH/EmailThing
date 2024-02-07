@@ -1,6 +1,6 @@
 import "server-only"
 import { pbkdf2Sync } from "node:crypto"
-import { randomText } from "./tools"
+import { createId } from "@paralleldrive/cuid2"
 
 const algorithm = "sha512"
 
@@ -9,7 +9,7 @@ const pwdHash = (password: string, salt: string) =>
         .toString("hex")
 
 export const createPasswordHash = async (password: string) => {
-    const salt = randomText(16)
+    const salt = createId()
     const hash = pwdHash(password, salt)
 
     return `${algorithm}:${salt}:${hash}`

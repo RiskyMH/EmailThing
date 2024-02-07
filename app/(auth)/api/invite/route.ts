@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/utils/jwt";
 import prisma from "@/utils/prisma";
-
+import { createId } from '@paralleldrive/cuid2';
 
 export async function GET() {
     const currentUser = await getCurrentUser()
@@ -20,7 +20,7 @@ export async function GET() {
 
     const invite = await prisma.inviteCode.create({
         data: {
-            code: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            code: createId(),
             expiresAt: new Date(Date.now() + 86400000),
             createdBy: user.id
         }
