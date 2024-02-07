@@ -59,7 +59,7 @@ export async function getEmailList(mailboxId: string, options: EmailListFindOpti
 
     const categories = prisma.mailboxCategory.findMany({
         where: {
-            mailboxId: mailboxId,
+            mailboxId,
         },
         select: {
             id: true,
@@ -69,13 +69,12 @@ export async function getEmailList(mailboxId: string, options: EmailListFindOpti
                 select: {
                     emails: {
                         where: {
-                            mailboxId: mailboxId,
+                            mailboxId,
                             binnedAt: options.isBinned ? {
                                 not: null
                             } : null,
                             isSender: options.isSender ? true : false,
                             isStarred: options.isStarred === undefined ? undefined : options.isStarred,
-
                         }
                     }
                 }

@@ -77,15 +77,15 @@ model MailboxCategory {
 }
 
 model Mailbox {
-  id                   String                @id @default(cuid())
-  emails               Email[]
-  categorys            MailboxCategory[]
-  users                MailboxForUser[]
-  drafts               DraftEmail[]
-  aliases              MailboxAlias[]
-  mailboxCustomDomains MailboxCustomDomain[]
-  storageUsed          Int                   @default(0)
-  plan                 String                @default("FREE")
+  id            String                @id @default(cuid())
+  emails        Email[]
+  categorys     MailboxCategory[]
+  users         MailboxForUser[]
+  drafts        DraftEmail[]
+  aliases       MailboxAlias[]
+  customDomains MailboxCustomDomain[]
+  storageUsed   Int                   @default(0)
+  plan          String                @default("FREE")
 
   @@index([id])
 }

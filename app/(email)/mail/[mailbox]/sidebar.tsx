@@ -98,9 +98,7 @@ const getUnreadEmailsCount = cache(async (mailboxId: string) => {
 
     const unreadEmails = await prisma.email.count({
         where: {
-            mailbox: {
-                id: mailboxId
-            },
+            mailboxId,
             isRead: false,
         }
     })

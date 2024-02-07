@@ -4,6 +4,7 @@ type PostalMime = import("../../../node_modules/postal-mime/postal-mime").defaul
 import { prisma } from '@/utils/prisma';
 import { env } from '@/utils/env';
 import webpush from 'web-push';
+import { storageLimit } from '@/utils/limits';
 
 webpush.setVapidDetails(
     'mailto:test@example.com',
@@ -78,11 +79,6 @@ export async function POST(request: Request) {
 
     if (!mailboxId) {
         return new Response('Mailbox not found', { status: 400 })
-    }
-
-    const storageLimit = {
-        FREE: 100_000_000,
-        UNLIMITED: Infinity,
     }
 
     // get storage used and see if over limit

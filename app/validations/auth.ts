@@ -9,3 +9,8 @@ export const userAuthSchema = z.object({
     password: z.string()
         .min(8, "Password needs to be at least 8 characters"),
 })
+export const emailSchema = z.object({
+    email: z.string()
+        .email("Invalid email")
+        .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Email can only contain letters and numbers"),
+})
