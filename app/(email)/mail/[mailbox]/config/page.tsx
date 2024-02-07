@@ -23,15 +23,6 @@ export default async function Email({
 }) {
     await pageMailboxAccess(params.mailbox)
 
-    await prisma.mailbox.update({
-        where: {
-            id: params.mailbox
-        },
-        data: {
-            plan: "UNLIMITED"
-        }
-    })
-
     const mailbox = await prisma.mailbox.findUnique({
         where: {
             id: params.mailbox
