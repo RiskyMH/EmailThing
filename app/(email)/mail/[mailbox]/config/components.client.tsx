@@ -48,33 +48,35 @@ export function AddCustomDomainForm({ mailboxId }: { mailboxId: string }) {
                 </form>
             </>
         ) : (
-            <div className="grid items-start gap-4 px-4 sm:px-0">
+            <>
                 <SmartDrawerHeader>
                     <SmartDrawerTitle>Add Custom Domain</SmartDrawerTitle>
                     <SmartDrawerDescription>Now create a new DNS record</SmartDrawerDescription>
                 </SmartDrawerHeader>
 
-                <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input className="bg-secondary border-none" value={`_emailthing.${domain}`} id="name" readOnly />
+                <div className="grid items-start gap-4 px-4 sm:px-0">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input className="bg-secondary border-none" value={`_emailthing.${domain}`} id="name" readOnly />
 
-                    <Label htmlFor="type">Type</Label>
-                    <Input className="bg-secondary border-none" value="TXT" id="type" readOnly />
+                        <Label htmlFor="type">Type</Label>
+                        <Input className="bg-secondary border-none" value="TXT" id="type" readOnly />
 
-                    <Label htmlFor="value">Value</Label>
-                    <Input className="bg-secondary border-none" value={`mailbox=${mailboxId}`} id="value" readOnly />
+                        <Label htmlFor="value">Value</Label>
+                        <Input className="bg-secondary border-none" value={`mailbox=${mailboxId}`} id="value" readOnly />
+                    </div>
+
+                    <div className="flex gap-2 sm:gap-4">
+                        {/* <Button onClick={() => setPage("form")} className="gap-2" variant="secondary">
+                            Back
+                        </Button> */}
+                        <Button onClick={verify} disabled={isPending} className="gap-2 w-full">
+                            {isPending && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
+                            Verify domain
+                        </Button>
+                    </div>
                 </div>
-
-                <div className="flex gap-2 sm:gap-4">
-                    <Button onClick={() => setPage("form")} className="gap-2" variant="secondary">
-                        Back
-                    </Button>
-                    <Button onClick={verify} disabled={isPending} className="gap-2 w-full">
-                        {isPending && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
-                        Verify domain
-                    </Button>
-                </div>
-            </div>
+            </>
         )
     );
 }
