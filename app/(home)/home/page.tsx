@@ -95,7 +95,7 @@ export default function Home() {
           <Feature
             icon={SmartphoneIcon}
             title="Mobile support"
-            description="Emailthing is mobile friendly, so you can use it on the go."
+            description="EmailThing is mobile friendly, so you can use it on the go."
           />
         </div>
         <div className="mx-auto text-center md:max-w-[58rem]">
@@ -133,7 +133,7 @@ export const metadata: Metadata = {
     canonical: "https://emailthing.xyz/home",
   },
   title: {
-    absolute: "Emailthing",
+    absolute: "EmailThing",
   }
 }
 
