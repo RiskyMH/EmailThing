@@ -135,7 +135,7 @@ export async function POST(request: Request) {
             mailbox: {
                 connect: { id: mailboxId }
             },
-            replyTo: email.replyTo?.[0].address,
+            replyTo: email.replyTo?.[0]?.address,
             size: emailSize,
         },
         select: {
