@@ -1,5 +1,8 @@
 /* eslint-disable */
 
+//Adjust to your usecase
+const zone = "your-domain.xyz"
+
 /**
  * 
  * @param {import("@cloudflare/workers-types").ReadableStream<any>} stream
@@ -26,6 +29,9 @@ export default {
      * 
      * @param {import("@cloudflare/workers-types").ForwardableEmailMessage} message 
      * @param {{auth: string, forward: string}} env 
+     * Add the auth value provided in the emailthing dashboard  to the cloudflare worker env.
+     * 
+     * Go to worker > your email worker > settings > variables > add new variable `auth`
      * @param {any} ctx 
      */
     async email(message, env, ctx) {
@@ -35,7 +41,7 @@ export default {
 
         if (env.forward) await message.forward(env.forward);
 
-        const req = await fetch("https://emailthing.xyz/api/recieve-email?zone=riskymh.dev", {
+        const req = await fetch(`https://emailthing.xyz/api/recieve-email?zone=${zone}`, {
             method: "POST",
             headers: {
                 "content-type": "application/json",
