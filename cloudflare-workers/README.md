@@ -14,6 +14,8 @@ For anyone curious, all this is doing is receiving the email and then sending th
 
 ## [Sending Emails](./sending-emails.js)
 
+> Only needed if you are selfhosting EmailThing
+
 This worker is responsible for sending emails. It uses the `fetch` API to send the email to the MailChannels API. You can think of this as a proxy as thats all it is doing. Make sure to add the `auth` environment variable to the worker with the same value as the `EMAIL_AUTH_TOKEN` in the front-end app.
 
 Refer to the [Mailchannels Transactional API documentation](https://api.mailchannels.net/tx/v1/documentation) for more information on how to send emails.
