@@ -4,24 +4,25 @@
   EmailThing
 </h1>
 
-<p align="center">A web app for receiving and sending your emails!</p>
+<p align="center">A web application for managing your emails with ease!</p>
 
 ## Getting Started
 
-This repo contains the code for front-end app that displays and sends emails.
+This repository contains the source code for a front-end application designed for displaying and managing emails.
 
-### Installing the dependencies
+### Installing Dependencies
+
+To install the required dependencies, execute the following command:
 
 ```sh
 bun install
 ```
 
-> **Note**: This project uses [Bun](https://bun.sh), so make sure you installed that first.
+> **Note**: This project utilizes [Bun](https://bun.sh) as its package manager. Ensure Bun is installed on your system before proceeding.
 
-### Configuring the env vars
+### Configuring Environment Variables
 
-If you are developing locally you need to create `.env` files. Refer to the table below for all the env vars in the project.
-
+For local development, it's necessary to create a`.env` file. The table below lists all the environment variables required for the project:
 
 | Name                                   | Description                                                                              | Required? |
 | -------------------------------------- | ---------------------------------------------------------------------------------------- | --------- |
@@ -33,45 +34,43 @@ If you are developing locally you need to create `.env` files. Refer to the tabl
 | `EMAIL_DKIM_PRIVATE_KEY`               | The DKIM private key                                                                     | ❌        |
 | `JWT_TOKEN`                            | The secret key for generating JWT tokens                                                 | ✔️        |
 
-### Running the development projects
+### Running the Development Environment
 
-To run the Next.js website and deploy database schema, use the following commands:
+To launch the Next.js website and deploy the database schema, utilize the following commands:
 
 ```sh
 bun db:push
 bun dev --turbo
 ```
 
-### How does this work?
+### How It Works
 
-EmailThing currently only deals with the front-end of the app. For actually sending or receiving emails, it makes use of [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) to receive emails, and [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) to send.
+EmailThing primarily handles the front-end aspect of the email management application. For sending and receiving emails, it relies on [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) for incoming emails and [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) for outgoing emails.
 
-To do this locally, refer to [./cloudflare-workers/README.md](./cloudflare-workers/README.md) for more information.
+For local development, consult the Cloudflare Workers [README](./cloudflare-workers/README.md) for detailed instructions.
 
 ## Why did you make this?
 
 I made this because I wanted to have a way to deal with my emails from a custom domain. The options from Gmail were too expensive, and I couldn't find a good alternative, so I made my own. I tried to make it in a way that gives you the most control over your emails (ie owning the worker receiving emails).
 
-### How to set up the database and app?
+### Setting Up the Database and Application
 
-There was a lot of hard-coding that I have done in this. However, after setting up the database, you will need to manual create yourself an account in the `User` table with admin access. This will allow you to create other users and manage the app. 
+Initial setup involves some manual configurations. After preparing the database, you must manually create an admin account in the `User` table. This enables the creation and management of other user accounts.
 
-Currently, there isn't a way to add default domains, so you will also need to manual add those using the `MailboxDefaultDomain` table. I also have hard coded the url to send emails through, so you will need to change that in the appropriate files.
+At present, the application does not support adding default domains automatically. You need to manually insert these into the `MailboxDefaultDomain` table. Additionally, the URL for sending emails is hardcoded within the project files, necessitating manual updates to reflect your specific configuration.
 
-## Credits
+## Acknowledgments
 
-There was lots of people/organizations that have helped make this possible. Here are some of them:
+Many individuals and organizations have contributed to the realization of this project. Special thanks to:
 
-* [Vercel](https://vercel.com) for providing the hosting of my app (and making Next.js).
-* [Cloudflare](https://cloudflare.com) for providing workers and email routing.
-* [MailChannels](https://mailchannels.com) for providing a simple transactional email API.
-* [Planetscale](https://planetscale.com) for providing a simple and easy to use database.
-* [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.
-* And one of the most important, [Dawid Jankowski](https://dribbble.com/shots/15142673-E-mail-Client-Inbox-Dark-Mode) for providing the design to base the app on.
-* *and many more that I can't possibly mention...*
+* [Vercel](https://vercel.com) for hosting the application and for developing Next.js.
+* [Cloudflare](https://cloudflare.com) for providing workers and email routing services.
+* [MailChannels](https://mailchannels.com) for offering a straightforward transactional email API.
+* [Planetscale](https://planetscale.com) for their user-friendly database services.
+* The Next.js Discord community ([Discord link](https://discord.gg/NextJS)) for their support and motivation.
+* Dawid Jankowski ([portfolio](https://dribbble.com/shots/15142673-E-mail-Client-Inbox-Dark-Mode)) for the design inspiration.
+* And many others whose contributions have been invaluable.
 
-### Im confused, how can I get help?
+### Need Help?
 
-If you are confused or have a bug, feel free to join the [Discord server](https://discord.gg/GT9Q2Yz4VS) and ask for help. I will be happy to help you out.
-
-I currently would prefer it to be done on Discord rather than opening an issue, as it allows me to chat better and understand the problem faster.
+If you encounter any issues or have questions, please join our [Discord server](https://discord.gg/GT9Q2Yz4VS) for assistance. I'm more than willing to help. For a quicker resolution, please seek support through Discord rather than opening an issue, as it facilitates better communication and understanding of your problem.
