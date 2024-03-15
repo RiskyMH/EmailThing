@@ -24,11 +24,12 @@ model Email {
   raw       String   @db.LongText()
   size      Int      @default(0)
 
-  from       EmailSender?
-  recipients EmailRecipiant[]
-  replyTo    String?
-  categoryId String?
-  category   MailboxCategory? @relation(fields: [categoryId], references: [id])
+  from        EmailSender?
+  recipients  EmailRecipiant[]
+  replyTo     String?
+  categoryId  String?
+  category    MailboxCategory?  @relation(fields: [categoryId], references: [id])
+  attachments EmailAttachment[]
 
   isSender  Boolean @default(false)
   isRead    Boolean @default(false)
@@ -60,6 +61,16 @@ model EmailRecipiant {
   email   Email?  @relation(fields: [emailId], references: [id])
 
   @@index([emailId])
+}
+
+model EmailAttachment {
+  id       String  @id @default(cuid())
+  emailId  String
+  email    Email   @relation(fields: [emailId], references: [id])
+  filename String
+  title    String?
+  mimeType String
+  size     Int
 }
 
 model MailboxCategory {

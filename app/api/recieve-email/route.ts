@@ -5,6 +5,10 @@ import { prisma } from '@/utils/prisma';
 import { env } from '@/utils/env';
 import webpush from 'web-push';
 import { storageLimit } from '@/utils/limits';
+import { Upload } from "@aws-sdk/lib-storage"
+import { S3Client } from "@aws-sdk/client-s3"
+import { createId } from '@paralleldrive/cuid2';
+
 
 webpush.setVapidDetails(
     'mailto:test@example.com',
@@ -105,7 +109,8 @@ export async function POST(request: Request) {
 
     const e = await prisma.email.create({
         data: {
-            raw: rawEmail,
+            // raw: rawEmail,
+            raw: env.S3_URL ? "Saved in s3" : rawEmail,
             from: {
                 create: {
                     address: email.from.address,
@@ -153,9 +158,58 @@ export async function POST(request: Request) {
             }
         }
     })
+    if (env.S3_KEY_ID && env.S3_SECRET_ACCESS_KEY && env.S3_URL) {
+        const s3 = new S3Client({
+            credentials: {
+                accessKeyId: env.S3_KEY_ID,
+                secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+            },
+            endpoint: env.S3_URL,
+            region: "auto"
+        })
+        // save the email to s3
+        const upload = new Upload({
+            client: s3,
+            params: {
+                Bucket: "email",
+                Key: `${mailboxId}/${e.id}/email.eml`,
+                Body: rawEmail,
+                ContentType: "message/rfc822",
+            }
+        })
 
-    // todo: attachments
+        await upload.done()
 
+        for (const attachment of email.attachments) {
+            const name = attachment.filename || attachment.mimeType || createId()
+
+            const attContent = Buffer.from(attachment.content)
+            const att = await prisma.emailAttachment.create({
+                data: {
+                    email: {
+                        connect: {
+                            id: e.id
+                        }
+                    },
+                    filename: encodeURIComponent(name),
+                    title: name,
+                    mimeType: attachment.mimeType,
+                    size: attContent.byteLength,
+                }
+            })
+
+            const upload = new Upload({
+                client: s3,
+                params: {
+                    Bucket: "email",
+                    Key: `${mailboxId}/${e.id}/${att.id}/${encodeURIComponent(name)}`,
+                    Body: attContent,
+                    ContentType: attachment.mimeType,
+                }
+            })
+            await upload.done()
+        }
+    }
 
     // send push notifications
     const notifications = await prisma.userNotification.findMany({
@@ -200,7 +254,7 @@ export async function POST(request: Request) {
                     }
                 })
             } else {
-                throw e
+                console.error(e)
             }
         }
     }))

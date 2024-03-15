@@ -38,6 +38,15 @@ export const getEmail = cache(async (mailboxId: string, emailId: string) => {
                 }
             },
             replyTo: true,
+            attachments: {
+                select: {
+                    filename: true,
+                    title: true,
+                    mimeType: true,
+                    size: true,
+                    id: true
+                }
+            }
         }
     })
 

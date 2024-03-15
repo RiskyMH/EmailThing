@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { gravatar } from "@/utils/tools"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, FileArchiveIcon, FileTextIcon, ImageIcon, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
 import LocalTime from "@/components/localtime"
 import { getEmail } from "./tools"
 
@@ -62,7 +62,6 @@ export default async function Email({
         });
 
         revalidatePath(`/mail/${params.mailbox}/${params.email}`)
-
     }
 
     const view = searchParams?.view || "markdown"
@@ -164,6 +163,24 @@ export default async function Email({
                     <ViewSelect selected={view} htmlValid={!!email.html} className="hidden md:flex ms-auto lg:ms-0" />
                 </div>
 
+                {/* attachments */}
+                {email.attachments.length > 0 && (
+                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        {email.attachments.map(a => (
+                            <a
+                                key={a.id}
+                                href={`/mail/${params.mailbox}/${params.email}/attachment/${a.id}`}
+                                target="_blank"
+                                className="flex gap-2 items-center p-2 rounded-md bg-background hover:bg-background/80"
+                            >
+                                {GetAttachmentIcon(a.filename.split('.').at(-1) || '')}
+                                <p className="flex-1 overflow-hidden whitespace-nowrap overflow-ellipsis">{a.title || a.filename}</p>
+                                <span className="text-muted-foreground text-sm">{size(a.size)}</span>
+                            </a>
+                        ))}
+                    </div>
+                )}
+
                 {view === "text" ? <p className="whitespace-pre-wrap break-words leading-normal">{email.body}</p> : null}
                 {view === "markdown" ? <ParseHTML className="prose dark:prose-invert max-w-full break-words" body={await marked.parse(email.body, { breaks: true })} /> : null}
                 {/* {view === "html" ? <ParseHTML className="rounded-lg" body={mail.html || mail.body} /> : null} */}
@@ -173,4 +190,39 @@ export default async function Email({
         </div>
 
     )
+}
+
+function size(bytes: number) {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 Byte';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+}
+
+const attachmentExtensionMap = {
+    // images
+    "png": ImageIcon,
+    "jpg": ImageIcon,
+    "jpeg": ImageIcon,
+    "gif": ImageIcon,
+
+    // videos
+    "mp4": VideoIcon,
+    "mov": VideoIcon,
+    "avi": VideoIcon,
+    "doc": VideoIcon,
+
+    // documents
+    "docx": FileTextIcon,
+    "pdf": FileTextIcon,
+
+    // zip
+    "zip": FileArchiveIcon,
+    "rar": FileArchiveIcon,
+    "7z": FileArchiveIcon,
+} as Record<string, LucideIcon>;
+
+function GetAttachmentIcon(extension: string) {
+    const ReturnIcon = attachmentExtensionMap[extension] || PaperclipIcon
+    return <ReturnIcon className="h-5 w-5 text-muted-foreground" />
 }

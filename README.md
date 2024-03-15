@@ -31,7 +31,9 @@ If you are developing locally you need to create `.env` files. Refer to the tabl
 | `WEB_NOTIFICATIONS_PRIVATE_KEY`        | The private key for sending notifications                                                | ✔️        |
 | `EMAIL_AUTH_TOKEN`                     | The secret key for sending through cloudflare worker (more on this below)                | ✔️        |
 | `EMAIL_DKIM_PRIVATE_KEY`               | The DKIM private key                                                                     | ❌        |
-| `JWT_TOKEN`                            | The secret key for generating JWT tokens                                                 | ✔️        |
+| `S3_KEY_ID`                            | The Access Key ID for S3                                                                 | ❌        |
+| `S3_SECRET_ACCESS_KEY`                 | The Secret Access Key for S3                                                             | ❌        |
+| `S3_URL`                               | The Client URL for S3                                                                    | ❌        |
 
 ### Running the development projects
 
