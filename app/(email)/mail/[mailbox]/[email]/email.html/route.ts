@@ -1,8 +1,8 @@
 import { getCurrentUser } from "@/utils/jwt"
-import { prisma } from "@/utils/prisma"
+import { db, Email } from "@/db";
 import { notFound, redirect } from "next/navigation"
-import { parseHTML } from "../parse-html"
 import { userMailboxAccess } from "../../tools"
+import { and, eq } from "drizzle-orm";
 
 
 export async function GET(
@@ -19,15 +19,16 @@ export async function GET(
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(params.mailbox, userId)) return notFound();
 
-    const mail = await prisma.email.findFirst({
-        where: {
-            id: params.email,
-            mailboxId: params.mailbox,
-        },
-        select: {
+    const mail = await db.query.Email.findFirst({
+        where: and(
+            eq(Email.id, params.email),
+            eq(Email.mailboxId, params.mailbox),
+        ),
+        columns: {
             html: true
         }
     })
+
 
     if (!mail) return notFound()
     if (!mail.html) {

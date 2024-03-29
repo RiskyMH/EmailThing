@@ -1,7 +1,6 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer";
 import { getCurrentUser } from "@/utils/jwt";
-import prisma from "@/utils/prisma";
 import { cn } from "@/utils/tw";
 import { ChevronLeft } from "lucide-react";
 import { Metadata } from "next";
@@ -11,6 +10,8 @@ import { ChangePassword, ChangeSetting, SignOut } from "./components.client";
 import { changeUsername } from "./actions";
 import { ReactNode } from "react";
 import NotificationsButton from "./notifications.client";
+import { eq } from "drizzle-orm";
+import { db, User } from "@/db";
 
 export const metadata = {
     title: "User Settings",
@@ -21,16 +22,14 @@ export default async function UserSettingsPage() {
     const userId = await getCurrentUser();
     if (!userId) return redirect("/login?from=/settings");
 
-    const user = await prisma.user.findUnique({
-        where: {
-            id: userId
-        },
-        select: {
+    const user = await db.query.User.findFirst({
+        where: eq(User.id, userId),
+        columns: {
             id: true,
             username: true,
             email: true
         }
-    });
+    })
     if (!user) return notFound();
 
     return (

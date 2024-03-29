@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { prisma } from "@/utils/prisma";
+import { db, Email } from "@/db";
 import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { SidebarLink } from "./sidebar.client";
@@ -7,6 +7,7 @@ import { Suspense, cache } from "react";
 import { cn } from "@/utils/tw";
 import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "./tools";
+import { and, count, eq } from "drizzle-orm";
 
 export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string, className?: string }) => {
 
@@ -96,14 +97,16 @@ const getUnreadEmailsCount = cache(async (mailboxId: string) => {
     const userId = await getCurrentUser()
     if (!await userMailboxAccess(mailboxId, userId)) return []
 
-    const unreadEmails = await prisma.email.count({
-        where: {
-            mailboxId,
-            isRead: false,
-        }
-    })
+    const unreadEmails = await db
+        .select({ count: count() })
+        .from(Email)
+        .where(and(
+            eq(Email.mailboxId, mailboxId),
+            eq(Email.isRead, false)
+        ))
+        .execute()
 
-    return unreadEmails
+    return unreadEmails[0].count
 })
 
 async function UnreadEmailsCount({ mailboxId }: { mailboxId: string }) {

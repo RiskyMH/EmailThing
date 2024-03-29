@@ -11,36 +11,43 @@ interface EmailListProps {
     mailboxId: string;
     type?: "inbox" | "sent" | "drafts" | "trash" | "starred";
     categoryId?: string;
+    initialTake?: string;
 }
 
-export default async function EmailList({ mailboxId, categoryId, type = "inbox" }: EmailListProps) {
+export default async function EmailList({ mailboxId, categoryId, type = "inbox", initialTake }: EmailListProps) {
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`
 
+    const take = initialTake ? parseInt(initialTake) : 10
     const emailFetchOptions = {
         isBinned: type === "trash",
         isSender: type === "sent",
         isStarred: type === "starred" ? true : undefined,
-        categoryId
+        categoryId,
+        take
     }
 
-    const [emails, categories, emailCount] = (type !== "drafts")
+
+    const [emails, categoryCounts, emailCount] = (type !== "drafts")
         ? await getEmailList(mailboxId, emailFetchOptions)
         : await getDraftEmailList(mailboxId)
-    const nextEmailId = emails.length === 11 ? emails.pop()?.id : null
 
-    async function fetchMoreEmails(nextEmailId: string) {
+    const categories = (type !== "drafts") && await mailboxCategories(mailboxId)
+
+    const nextEmail = emails.length === take + 1 ? emails.pop() : null
+
+    async function fetchMoreEmails(curser?: { emailId: string, createdAt: Date }) {
         "use server";
         const userId = await getCurrentUser()
         if (!userId) throw new Error()
         if (!await userMailboxAccess(mailboxId, userId)) throw new Error()
 
         const emails = (type !== "drafts")
-            ? await getJustEmailsList(mailboxId, emailFetchOptions, nextEmailId)
-            : await getDraftJustEmailsList(mailboxId, nextEmailId)
+            ? await getJustEmailsList(mailboxId, { ...emailFetchOptions, take: 10 }, curser)
+            : await getDraftJustEmailsList(mailboxId, {}, curser)
 
         if (emails.length === 0) throw new Error("No more emails")
 
-        const nextPageEmailId = emails.length === 11 ? emails.pop() : null
+        const nextPageEmail = emails.length >= 11 ? emails.pop() : null
         const categories = await mailboxCategories(mailboxId)
 
         return [
@@ -53,7 +60,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
                     type={type}
                 />
             )),
-            nextPageEmailId?.id ?? null,
+            nextPageEmail ? { emailId: nextPageEmail.id, createdAt: nextPageEmail.createdAt } : null,
         ] as const
     }
 
@@ -66,7 +73,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
                         <CategoryItem
                             circleColor={null}
                             name="All"
-                            count={emailCount || 0}
+                            count={emailCount[0].count || 0}
                             link={baseUrl}
                             category={null}
                             isCurrent={!categoryId}
@@ -77,7 +84,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
                                 key={category.id}
                                 circleColor={category.color || "grey"}
                                 name={category.name}
-                                count={category._count.emails}
+                                count={categoryCounts?.find(c => c.categoryId === category.id)?.count || 0}
                                 link={baseUrl}
                                 category={category.id}
                             />
@@ -88,15 +95,15 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox" 
                         <RefreshButton />
                     </div>
                 </div>
-                {nextEmailId ? (
-                    <LoadMore loadMoreAction={fetchMoreEmails} startId={nextEmailId} refreshId={Date.now()} >
+                {nextEmail ? (
+                    <LoadMore loadMoreAction={fetchMoreEmails} startId={{ emailId: nextEmail.id, createdAt: nextEmail.createdAt }} refreshId={Date.now()} initialLength={take} >
                         {emails.map(email => (
-                            <EmailItem key={email.id} email={email} categories={categories} mailboxId={mailboxId} type={type} />
+                            <EmailItem key={email.id} email={email} categories={categories || undefined} mailboxId={mailboxId} type={type} />
                         ))}
                     </LoadMore>
                 ) : (
                     emails.map(email => (
-                        <EmailItem key={email.id} email={email} categories={categories} mailboxId={mailboxId} type={type} />
+                        <EmailItem key={email.id} email={email} categories={categories || undefined} mailboxId={mailboxId} type={type} />
                     ))
                 )}
             </div>

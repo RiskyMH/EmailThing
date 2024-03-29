@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/utils/jwt";
-import { prisma } from "@/utils/prisma";
+import { db, Mailbox, User } from "@/db";
 import { Suspense } from "react";
 import { Search } from "./nav.search";
 import { UserNav } from "./user.nav.client";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { mailboxAliases, userMailboxAccess } from "./tools";
 import Sidebar from "./sidebar";
 import { MobileNav } from "./sidebar.client";
+import { eq } from "drizzle-orm";
 
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
@@ -63,13 +64,10 @@ async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) return null
 
-    const user = await prisma.user.findUnique({
-        where: {
-            id: userId
-        },
-        select: {
-            username: true,
-            id: true
+    const user = await db.query.User.findFirst({
+        where: eq(User.id, userId),
+        columns: {
+            username: true
         }
     })
     if (!user) return null
@@ -80,7 +78,7 @@ async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
         <UserNav mailboxId={mailboxId} user={{
             id: mailboxId,
             name: user.username,
-            secondary: defaultAlias!.alias!,
+            secondary: defaultAlias?.alias ?? "email@email.?",
         }} />
     );
 }

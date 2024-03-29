@@ -1,10 +1,12 @@
 "use server";
 import { getCurrentUser } from "@/utils/jwt";
-import { prisma } from "@/utils/prisma";
 import { revalidatePath } from "next/cache";
 import { userMailboxAccess } from "./tools";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { db, DraftEmail, Email } from "@/db";
+import { and, eq } from "drizzle-orm";
+
 
 export async function logout() {
     const c = cookies()
@@ -31,32 +33,31 @@ export async function updateEmail(mailboxId: string, emailId: string, type: "inb
 
     if (type === "drafts") {
         if (state.binned) {
-            await prisma.draftEmail.delete({
-                where: {
-                    id: emailId,
-                    mailboxId: mailboxId
-                }
-            })
-            return revalidatePath(baseUrl)
+            await db.delete(DraftEmail)
+                .where(and(
+                    eq(DraftEmail.id, emailId),
+                    eq(DraftEmail.mailboxId, mailboxId),
+                ))
+                .execute()
 
+            return revalidatePath(baseUrl)
         }
         if (state.category) throw new Error("Cannot categorize drafts");
         return "Can only delete drafts for now";
     }
 
-    await prisma.email.update({
-        data: {
+    await db.update(Email)
+        .set({
             isStarred: state.isStarred,
             isRead: state.isRead,
             binnedAt: state.binned ? new Date() : (state.binned === false ? null : undefined),
             categoryId: state.category
-        },
-        where: {
-            id: emailId,
-            mailboxId,
-        }
-
-    });
+        })
+        .where(and(
+            eq(Email.id, emailId),
+            eq(Email.mailboxId, mailboxId),
+        ))
+        .execute()
 
     revalidatePath(baseUrl)
 }

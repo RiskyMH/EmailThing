@@ -1,10 +1,11 @@
 import { getCurrentUser } from "@/utils/jwt"
-import { prisma } from "@/utils/prisma"
+import { db, EmailAttachments } from "@/db";
 import { notFound } from "next/navigation"
 import { userMailboxAccess } from "../../../tools"
 import { env } from "@/utils/env"
 import { S3, S3Client, GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { and, eq } from "drizzle-orm";
 
 
 export async function GET(
@@ -22,14 +23,12 @@ export async function GET(
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(params.mailbox, userId)) return notFound();
 
-    if (!env.S3_KEY_ID || !env.S3_SECRET_ACCESS_KEY || !env.S3_URL) return notFound()
-
-    const attachment = await prisma.emailAttachment.findFirst({
-        where: {
-            id: params.attachment,
-            emailId: params.email,
-        },
-        select: {
+    const attachment = await db.query.EmailAttachments.findFirst({
+        where: and(
+            eq(EmailAttachments.id, params.attachment),
+            eq(EmailAttachments.emailId, params.email),
+        ),
+        columns: {
             filename: true,
             id: true
         }

@@ -1,15 +1,17 @@
 import { getCurrentUser } from "@/utils/jwt";
-import prisma from "@/utils/prisma";
 import { createId } from '@paralleldrive/cuid2';
+import { db, InviteCode, User } from "@/db";
+import { and, eq } from "drizzle-orm";
 
 export async function GET() {
     const currentUser = await getCurrentUser()
-    const user = await prisma.user.findUnique({
-        where: {
-            id: currentUser || '',
-            admin: true
-        },
-        select: {
+
+    const user = await db.query.User.findFirst({
+        where: and(
+            eq(User.id, currentUser || ''),
+            eq(User.admin, true)
+        ),
+        columns: {
             id: true
         }
     })
@@ -18,16 +20,15 @@ export async function GET() {
         return new Response('Unauthorized', { status: 401 })
     }
 
-    const invite = await prisma.inviteCode.create({
-        data: {
-            code: createId(),
+    const inviteCode = createId()
+
+    await db.insert(InviteCode)
+        .values({
+            code: inviteCode,
             expiresAt: new Date(Date.now() + 86400000),
             createdBy: user.id
-        }
-    })
+        })
+        .execute()
 
-    return Response.json({
-        ...invite,
-        url: `https://emailthing.xyz/register?invite=${invite.code}`
-    }, { status: 200 })
+    return new Response(`https://emailthing.xyz/register?invite=${inviteCode}`, { status: 200, headers: { 'Content-Type': 'text/plain' } })
 }

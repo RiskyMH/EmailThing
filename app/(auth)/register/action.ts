@@ -1,12 +1,13 @@
 "use server";
+import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User } from "@/db";
 import { addUserTokenToCookie } from "@/utils/jwt"
 import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth"
-import { prisma } from "@/utils/prisma"
+import { createId } from "@paralleldrive/cuid2";
+import { and, eq, gte, isNotNull } from "drizzle-orm";
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
-const errorMsg = "Invalid username or password"
 const noInvite = "You need an invite code to signup right now"
 
 export default async function signUp(data: FormData): Promise<{ error?: string | null }> {
@@ -24,12 +25,15 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
     if (!inviteCode) return { error: noInvite }
 
     // check if invite code is valid
-    const invite = await prisma.inviteCode.findFirst({
-        where: {
-            code: inviteCode,
-            expiresAt: {
-                gte: new Date()
-            }
+    const invite = await db.query.InviteCode.findFirst({
+        where: and(
+            eq(InviteCode.code, inviteCode),
+            gte(InviteCode.expiresAt, new Date()),
+            isNotNull(InviteCode.usedAt)
+        ),
+        columns: {
+            expiresAt: true,
+            usedAt: true,
         }
     })
 
@@ -37,11 +41,8 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
         return { error: "Invalid invite code" }
     }
 
-    // check if username used
-    const existingUser = await prisma.user.findFirst({
-        where: {
-            username: parsedData.data.username
-        }
+    const existingUser = await db.query.User.findFirst({
+        where: eq(User.username, parsedData.data.username)
     })
 
     if (existingUser) {
@@ -49,10 +50,8 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
     }
 
     // check email alaises to
-    const existingEmail = await prisma.mailboxAlias.findFirst({
-        where: {
-            alias: parsedData.data.username + "@emailthing.xyz"
-        }
+    const existingEmail = await db.query.MailboxAlias.findFirst({
+        where: eq(MailboxAlias.alias, parsedData.data.username + "@emailthing.xyz")
     })
 
     if (existingEmail) {
@@ -60,49 +59,51 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
     }
 
     // create user and their mailbox
-    const user = await prisma.user.create({
-        data: {
-            username: parsedData.data.username,
-            password: await createPasswordHash(parsedData.data.password),
-            email: parsedData.data.username + "@emailthing.xyz"
-        }
-    })
+    const userId = createId()
+    const mailboxId = createId()
 
-    const mailbox = await prisma.mailbox.create({
-        data: {
-            aliases: {
-                create: {
-                    alias: parsedData.data.username + "@emailthing.xyz",
-                    default: true,
-                    name: parsedData.data.username
-                }
-            },
-        }
-    })
+    await db.batch([
+        db.insert(User)
+            .values({
+                id: userId,
+                username: parsedData.data.username,
+                password: await createPasswordHash(parsedData.data.password),
+                email: parsedData.data.username + "@emailthing.xyz",
+            }),
 
-    await prisma.mailboxForUser.create({
-        data: {
-            mailboxId: mailbox.id,
-            userId: user.id,
-        }
-    })
+        db.insert(Mailbox)
+            .values({
+                id: createId(),
+            }),
 
-    // invalidate invite code
-    await prisma.inviteCode.update({
-        where: {
-            code: invite.code
-        },
-        data: {
-            usedAt: new Date(),
-            usedBy: user.id
-        }
-    })
+        db.insert(MailboxForUser)
+            .values({
+                mailboxId,
+                userId,
+            }),
 
-    // add user token to cookie
-    await addUserTokenToCookie(user)
-    // add mailboxId to cookie
-    cookies().set("mailboxId", mailbox.id)
+        db.insert(MailboxAlias)
+            .values({
+                mailboxId,
+                alias: parsedData.data.username + "@emailthing.xyz",
+                default: true,
+                name: parsedData.data.username
+            }),
+
+        // invalidate invite code
+        db.update(InviteCode)
+            .set({
+                usedAt: new Date(),
+                usedBy: userId
+            })
+            .where(eq(InviteCode.code, inviteCode))
+    ])
+
+
+    // add user token to cookie 
+    await addUserTokenToCookie({ id: userId })
+    cookies().set("mailboxId", mailboxId)
 
     // redirect to mail
-    redirect(`/mail/${mailbox.id}`)
+    redirect(`/mail/${mailboxId}`)
 }

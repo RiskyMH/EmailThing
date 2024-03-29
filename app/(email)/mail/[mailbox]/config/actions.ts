@@ -2,11 +2,12 @@
 
 import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "../tools";
-import prisma from "@/utils/prisma";
+import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCustomDomain } from "@/db";
 import { aliasLimit, customDomainLimit } from "@/utils/limits";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
 import { createId } from '@paralleldrive/cuid2';
+import { and, count, eq } from "drizzle-orm";
 
 export async function verifyDomain(mailboxId: string, customDomain: string) {
     const userId = await getCurrentUser()
@@ -15,38 +16,35 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
     }
 
     // check if mailbox plan allows for more than 1 custom domain
-    const [mailbox, customDomains, exists] = await Promise.all([
-        prisma.mailbox.findUnique({
-            where: {
-                id: mailboxId
-            },
-            select: {
+    const [mailbox, customDomains, exists] = await db.batch([
+        db.query.Mailbox.findFirst({
+            where: eq(Mailbox.id, mailboxId),
+            columns: {
                 plan: true,
-            },
-        }),
-
-        prisma.mailboxCustomDomain.count({
-            where: {
-                mailboxId
             }
         }),
 
-        prisma.mailboxCustomDomain.findFirst({
-            where: {
-                domain: customDomain,
-                mailboxId,
-            }, 
-            select: {
-                id: true,
+        db.select({count: count()})
+            .from(MailboxCustomDomain)
+            .where(eq(MailboxCustomDomain.mailboxId, mailboxId)),
+
+        db.query.MailboxCustomDomain.findFirst({
+            where: and(
+                eq(MailboxCustomDomain.domain, customDomain),
+                eq(MailboxCustomDomain.mailboxId, mailboxId)
+            ),
+            columns: {
+                id: true
             }
         })
+
     ]);
 
     if (!mailbox) {
         throw new Error("Mailbox not found");
     }
 
-    if ((customDomainLimit as any)[mailbox.plan] <= customDomains) {
+    if (customDomainLimit[mailbox.plan] <= customDomains[0].count) {
         return { error: "Custom domain limit reached" }
     }
 
@@ -88,13 +86,13 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
     }
 
     // make domain
-    await prisma.mailboxCustomDomain.create({
-        data: {
+    await db.insert(MailboxCustomDomain)
+        .values({
             domain: customDomain,
             mailboxId,
             authKey: createId(),
-        }
-    })    
+        })
+        .execute()
 
     return revalidatePath(`/mail/${mailboxId}/config`);
 }
@@ -112,10 +110,8 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
     }
 
     // check if alias exists
-    const existingAlias = await prisma.mailboxAlias.findFirst({
-        where: {
-            alias
-        }
+    const existingAlias = await db.query.MailboxAlias.findFirst({
+        where: eq(MailboxAlias.alias, alias)
     })
 
     if (existingAlias) {
@@ -123,52 +119,47 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
     }
 
     // check if domain is a custom domain (and they have access to it) or just a default domain
-    const [defaultDomain, customDomain, aliasCount, mailbox] = await Promise.all([
-        prisma.mailboxDefaultDomain.findFirst({
-            where: {
-                domain: alias.split("@")[1],
-            }
+    const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batch([
+        db.query.DefaultDomain.findFirst({
+            where: eq(DefaultDomain.domain, alias.split("@")[1])
         }),
 
-        prisma.mailboxCustomDomain.findFirst({
-            where: {
-                domain: alias.split("@")[1],
-                mailboxId,
-            }
+        db.query.MailboxCustomDomain.findFirst({
+            where: and(
+                eq(MailboxCustomDomain.mailboxId, mailboxId),
+                eq(MailboxCustomDomain.domain, alias.split("@")[1])
+            )
         }),
 
-        prisma.mailboxAlias.count({
-            where: {
-                mailboxId
-            }
-        }),
+        db.select({count: count()})
+            .from(MailboxAlias)
+            .where(eq(MailboxAlias.mailboxId, mailboxId)),
 
-        prisma.mailbox.findUnique({
-            where: {
-                id: mailboxId
-            },
-            select: {
+        db.query.Mailbox.findFirst({
+            where: eq(Mailbox.id, mailboxId),
+            columns: {
                 plan: true
             }
         })
+
     ])
 
     if (!defaultDomain && !customDomain) {
         return { error: "You don't have access to this domain, please add it as custom domain." }
     }
 
-    if (aliasCount >= (aliasLimit as any)[mailbox?.plan ?? "FREE"]) {
+    if (aliasCount[0].count >= aliasLimit[mailbox?.plan ?? "FREE"]) {
         return { error: "Alias limit reached" }
     }
 
     // add alias
-    await prisma.mailboxAlias.create({
-        data: {
+    await db.insert(MailboxAlias)
+        .values({
             mailboxId,
             alias,
             name
-        }
-    })
+        })
+        .execute()
 
     revalidateTag(`mailbox-aliases-${mailboxId}`)
 

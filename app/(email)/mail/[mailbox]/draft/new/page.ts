@@ -1,7 +1,9 @@
-import { getCurrentUser } from "@/utils/jwt";
-import { prisma } from "@/utils/prisma";
+import { db, DraftEmail } from "@/db";
 import { notFound, redirect } from "next/navigation";
 import { mailboxAliases, pageMailboxAccess } from "../../tools";
+import { and, eq } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
+import type { Recipient } from "../[draft]/types";
 
 
 export default async function Page({
@@ -23,30 +25,33 @@ export default async function Page({
     const { aliases, default: defaultAlias } = await mailboxAliases(params.mailbox)
 
     if (searchParams.reply || searchParams.replyAll || searchParams.forward) {
-        const email = await prisma.email.findUnique({
-            where: {
-                id: searchParams.reply || searchParams.replyAll || searchParams.forward,
-                mailboxId: params.mailbox,
-            },
-            select: {
+        const email = await db.query.Email.findFirst({
+            where: and(
+                eq(DraftEmail.id, searchParams.reply || searchParams.replyAll || searchParams.forward || ''),
+                eq(DraftEmail.mailboxId, params.mailbox),
+            ),
+            columns: {
                 id: true,
                 subject: true,
                 body: true,
                 createdAt: true,
+                replyTo: true,
+            },
+            with: {
                 recipients: {
-                    select: {
+                    columns: {
                         address: true,
                         name: true,
                         cc: true
                     }
                 },
                 from: {
-                    select: {
+                    columns: {
                         name: true,
                         address: true
                     }
                 },
-                replyTo: true,
+
             }
         })
 
@@ -56,7 +61,7 @@ export default async function Page({
         const from = email.recipients.find(r => aliasesList.includes(r.address))?.address || defaultAlias?.alias
 
         let subject = email.subject
-        let to = '[]'
+        let to = [] as Recipient[]
 
         const replyTo = email.replyTo ? { address: email.replyTo, name: null } : email.from
 
@@ -64,16 +69,16 @@ export default async function Page({
             if (!subject?.startsWith("Re: ")) {
                 subject = `Re: ${subject}`
             }
-            to = JSON.stringify([{ name: replyTo?.name, address: replyTo?.address, cc: null }])
+            to = [{ name: replyTo?.name, address: replyTo?.address, cc: null }]
 
         } else if (searchParams.replyAll) {
             if (!subject?.startsWith("Re: ")) {
                 subject = `Re: ${subject}`
             }
-            to = JSON.stringify([
+            to = [
                 { name: replyTo?.name, address: replyTo?.address, cc: null },
-                ...email.recipients.map(r => ({ name: r.name, address: r.address, cc: r.cc ? "cc" : null })),
-            ].filter(r => r.address !== from))
+                ...email.recipients.map(r => ({ name: r.name, address: r.address, cc: (r.cc ? "cc" : null) as "cc" | null })),
+            ].filter(r => r.address !== from)
 
         } else if (searchParams.forward) {
             if (!subject?.startsWith("Fwd: ")) {
@@ -84,28 +89,31 @@ export default async function Page({
         const emailBody = `On ${email.createdAt.toLocaleString()}, ${email.from?.name ? `${email.from?.name} <${email.from?.address}>` : email.from?.name} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`
 
         // create draft with reply
-        const draft = await prisma.draftEmail.create({
-            data: {
+        const draftId = createId()
+        await db.insert(DraftEmail)
+            .values({
+                id: draftId,
                 mailboxId: params.mailbox,
                 from,
                 body: emailBody,
                 subject,
                 to
-            }
-        })
+            })
+            .execute()
 
-        return redirect(`/mail/${params.mailbox}/draft/${draft.id}`)
+        return redirect(`/mail/${params.mailbox}/draft/${draftId}`)
     }
 
-
     // create basic draft
-    const draft = await prisma.draftEmail.create({
-        data: {
+    const draftId = createId()
+    await db.insert(DraftEmail)
+        .values({
+            id: draftId,
             mailboxId: params.mailbox,
             from: defaultAlias?.alias
-        }
-    })
+        })
+        .execute()
 
-    return redirect(`/mail/${params.mailbox}/draft/${draft.id}`)
+    return redirect(`/mail/${params.mailbox}/draft/${draftId}`)
 
 }

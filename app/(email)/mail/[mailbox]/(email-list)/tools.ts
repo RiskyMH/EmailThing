@@ -1,26 +1,28 @@
-import { prisma } from "@/utils/prisma";
+import { db, DraftEmail, Email } from "@/db";
+import { and, count, desc, eq, isNotNull, isNull, lt } from "drizzle-orm";
 
 export interface EmailListFindOptions {
     isBinned?: boolean;
     isSender?: boolean;
     categoryId?: string;
     isStarred?: boolean;
+    take?: number;
 }
+type Curser = { emailId: string, createdAt: Date } | { offset: number }
 
-export async function getJustEmailsList(mailboxId: string, options: EmailListFindOptions = {}, startEmailId?: string) {
-    return prisma.email.findMany({
-        where: {
-            mailboxId: mailboxId,
-            binnedAt: options.isBinned ? {
-                not: null
-            } : null,
-            isStarred: options.isStarred === undefined ? undefined : options.isStarred,
-            isSender: options.isSender ? true : false,
-            category: options.categoryId ? {
-                id: options.categoryId
-            } : undefined,
-        },
-        select: {
+export function getJustEmailsList(mailboxId: string, options: EmailListFindOptions = {}, curser?: Curser) {
+    return db.query.Email.findMany({
+        where: and(
+            eq(Email.mailboxId, mailboxId),
+            options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
+            eq(Email.isSender, options.isSender || false),
+            options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined,
+            options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
+
+            // cursor pagination
+            (curser && 'emailId' in curser) ? lt((Email.createdAt, Email.id), (curser.createdAt, curser.emailId)) : undefined,
+        ),
+        columns: {
             id: true,
             snippet: true,
             subject: true,
@@ -30,92 +32,75 @@ export async function getJustEmailsList(mailboxId: string, options: EmailListFin
             isStarred: true,
             raw: true,
             binnedAt: true,
+        },
+        with: {
             category: {
-                select: {
+                columns: {
                     name: true,
                     id: true,
                     color: true
                 }
             },
             from: {
-                select: {
+                columns: {
                     name: true,
                     address: true
                 }
             }
         },
-        orderBy: {
-            createdAt: "desc"
-        },
-        take: 11,
-        cursor: startEmailId ? {
-            id: startEmailId
-        } : undefined
-    });
-}
-
-export async function getEmailList(mailboxId: string, options: EmailListFindOptions = {}) {
-    const emails = getJustEmailsList(mailboxId, options)
-
-    const categories = prisma.mailboxCategory.findMany({
-        where: {
-            mailboxId,
-        },
-        select: {
-            id: true,
-            name: true,
-            color: true,
-            _count: {
-                select: {
-                    emails: {
-                        where: {
-                            mailboxId,
-                            binnedAt: options.isBinned ? {
-                                not: null
-                            } : null,
-                            isSender: options.isSender ? true : false,
-                            isStarred: options.isStarred === undefined ? undefined : options.isStarred,
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    const allCount = prisma.email.count({
-        where: {
-            mailboxId: mailboxId,
-            binnedAt: options.isBinned ? {
-                not: null
-            } : null,
-            isSender: options.isSender ? true : false,
-            isStarred: options.isStarred === undefined ? undefined : options.isStarred,
-        }
+        orderBy: desc(Email.createdAt),
+        limit: options.take ? options.take + 1 : 11,
+        offset: (curser && 'offset' in curser) ? curser.offset : undefined
     })
 
-    return Promise.all([emails, categories, allCount])
 }
 
-export async function getDraftJustEmailsList(mailboxId: string, nextEmailId?: string) {
-    const emails = await prisma.draftEmail.findMany({
-        where: {
-            mailboxId: mailboxId,
-        },
-        select: {
+export function getEmailList(mailboxId: string, options: EmailListFindOptions = {}, curser?: Curser) {
+    return db.batch([
+        getJustEmailsList(mailboxId, options, curser),
+
+        db
+            .select({ count: count(), categoryId: Email.categoryId })
+            .from(Email)
+            .where(and(
+                eq(Email.mailboxId, mailboxId),
+                options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
+                eq(Email.isSender, options.isSender || false),
+                options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
+            )).groupBy(Email.categoryId),
+
+        db
+            .select({ count: count() })
+            .from(Email)
+            .where(and(
+                eq(Email.mailboxId, mailboxId),
+                options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
+                eq(Email.isSender, options.isSender || false),
+                options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
+            ))
+
+
+    ])
+
+}
+
+export async function getDraftJustEmailsList(mailboxId: string, options?: { take?: number }, curser?: Curser) {
+    const emails = await db.query.DraftEmail.findMany({
+        where: and(
+            eq(DraftEmail.mailboxId, mailboxId),
+            (curser && 'emailId' in curser) ? lt((DraftEmail.updatedAt, DraftEmail.id), (curser.createdAt, curser.emailId)) : undefined
+        ),
+        columns: {
             id: true,
             subject: true,
             body: true,
             updatedAt: true,
             from: true,
         },
-        orderBy: {
-            updatedAt: "desc"
-        },
-        take: 11,
-        cursor: nextEmailId ? {
-            id: nextEmailId
-        } : undefined
-    });
+        orderBy: desc(DraftEmail.updatedAt),
+        limit: options?.take ? options.take + 1 : 11,
+        offset: (curser && 'offset' in curser) ? curser.offset : undefined
+    })
 
     const emailsFormatted = emails.map(email => ({
         ...email,
@@ -138,11 +123,9 @@ export async function getDraftJustEmailsList(mailboxId: string, nextEmailId?: st
 export async function getDraftEmailList(mailboxId: string) {
     const emails = getDraftJustEmailsList(mailboxId);
 
-    const allCount = prisma.draftEmail.count({
-        where: {
-            mailboxId: mailboxId,
-        }
-    })
+    const allCount = db.select({ count: count() })
+        .from(DraftEmail)
+        .where(eq(DraftEmail.mailboxId, mailboxId))
 
     return Promise.all([emails, null, allCount])
 }

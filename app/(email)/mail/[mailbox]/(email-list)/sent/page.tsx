@@ -12,10 +12,11 @@ export default async function Mailbox({
     searchParams
 }: {
     params: {
-        mailbox: string
+        mailbox: string,
     },
     searchParams?: {
-        category?: string
+        category?: string,
+        take?: string
     }
 }) {
     await pageMailboxAccess(params.mailbox)
@@ -23,6 +24,7 @@ export default async function Mailbox({
     return (
         <EmailList
             mailboxId={params.mailbox}
+            initialTake={searchParams?.take}
             type="sent"
             categoryId={searchParams?.category}
         />

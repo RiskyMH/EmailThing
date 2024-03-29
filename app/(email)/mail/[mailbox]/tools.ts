@@ -1,8 +1,9 @@
 import { getCurrentUser } from "@/utils/jwt";
-import { prisma } from "@/utils/prisma";
 import { unstable_cache } from "next/cache";
 import { redirect, notFound } from "next/navigation";
 import { cache } from "react";
+import { db, MailboxForUser, MailboxAlias, MailboxCategory } from "@/db";
+import { and, eq } from "drizzle-orm";
 
 
 export const userMailboxAccess = cache((mailboxId: string, userId: string | null) => {
@@ -10,13 +11,11 @@ export const userMailboxAccess = cache((mailboxId: string, userId: string | null
 
     return unstable_cache(
         async () => {
-            const mailbox = await prisma.mailboxForUser.findUnique({
-                where: {
-                    mailboxId_userId: {
-                        mailboxId,
-                        userId
-                    }
-                }
+            const mailbox = await db.query.MailboxForUser.findFirst({
+                where: and(
+                    eq(MailboxForUser.mailboxId, mailboxId),
+                    eq(MailboxForUser.userId, userId)
+                )
             })
 
             return !!mailbox;
@@ -37,18 +36,16 @@ export const userMailboxAccess = cache((mailboxId: string, userId: string | null
 export const mailboxCategories = cache((mailboxId: string) => {
     return unstable_cache(
         async () => {
-            const mailbox = await prisma.mailboxCategory.findMany({
-                where: {
-                    mailboxId,
-                },
-                select: {
+            const categories = await db.query.MailboxCategory.findMany({
+                where: eq(MailboxCategory.mailboxId, mailboxId),
+                columns: {
                     id: true,
                     name: true,
                     color: true,
                 }
             })
 
-            return mailbox;
+            return categories;
         },
         [mailboxId],
         {
@@ -65,9 +62,13 @@ export const mailboxCategories = cache((mailboxId: string) => {
 export const mailboxAliases = cache((mailboxId: string) => {
     return unstable_cache(
         async () => {
-            const aliases = await prisma.mailboxAlias.findMany({
-                where: {
-                    mailboxId,
+            const aliases = await db.query.MailboxAlias.findMany({
+                where: eq(MailboxAlias.mailboxId, mailboxId),
+                columns: {
+                    id: true,
+                    name: true,
+                    default: true,
+                    alias: true,
                 }
             })
 
@@ -95,7 +96,7 @@ export async function pageMailboxAccess(mailboxId?: string | null, throwOnFail =
     if (!userId) return throwOnFail ? redirect("/login?from=/mail/" + mailboxId) : false
 
     const userHasAccess = await userMailboxAccess(mailboxId, userId)
-    if (!userHasAccess) return throwOnFail ? notFound(): false
+    if (!userHasAccess) return throwOnFail ? notFound() : false
 
     return userId
 }

@@ -1,13 +1,14 @@
-import { prisma } from "@/utils/prisma"
+import { db, Email } from "@/db";
+import { and, eq } from "drizzle-orm";
 import { cache } from "react"
 
 export const getEmail = cache(async (mailboxId: string, emailId: string) => {
-    const email = await prisma.email.findUnique({
-        where: {
-            id: emailId,
-            mailboxId
-        },
-        select: {
+    return db.query.Email.findFirst({
+        where: and(
+            eq(Email.id, emailId),
+            eq(Email.mailboxId, mailboxId)
+        ),
+        columns: {
             id: true,
             subject: true,
             snippet: true,
@@ -17,39 +18,39 @@ export const getEmail = cache(async (mailboxId: string, emailId: string) => {
             isRead: true,
             isStarred: true,
             binnedAt: true,
-            recipients: {
-                select: {
-                    address: true,
-                    name: true,
-                    cc: true
-                }
-            },
+            replyTo: true,
+        },
+        with: {
             category: {
-                select: {
+                columns: {
                     name: true,
                     id: true,
                     color: true
                 }
             },
             from: {
-                select: {
+                columns: {
                     name: true,
                     address: true
                 }
             },
-            replyTo: true,
+            recipients: {
+                columns: {
+                    name: true,
+                    address: true,
+                    cc: true
+                }
+            },
             attachments: {
-                select: {
+                columns: {
                     filename: true,
-                    title: true,
-                    mimeType: true,
                     size: true,
-                    id: true
+                    mimeType: true,
+                    id: true,
+                    title: true
                 }
             }
         }
     })
-
-    return email
 })
 

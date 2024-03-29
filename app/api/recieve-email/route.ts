@@ -1,13 +1,14 @@
 // @ts-ignore
 import PostalMime from 'postal-mime';
 type PostalMime = import("../../../node_modules/postal-mime/postal-mime").default;
-import { prisma } from '@/utils/prisma';
+import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification } from "@/db";
 import { env } from '@/utils/env';
 import webpush from 'web-push';
 import { storageLimit } from '@/utils/limits';
 import { Upload } from "@aws-sdk/lib-storage"
 import { S3Client } from "@aws-sdk/client-s3"
 import { createId } from '@paralleldrive/cuid2';
+import { and, eq, sql } from "drizzle-orm";
 
 
 webpush.setVapidDetails(
@@ -39,24 +40,21 @@ export async function POST(request: Request) {
     let mailboxId: string | undefined = undefined
 
     // check if its a default domain first (and if so, check the alias and get the mailbox id)
-    const defaultDomain = await prisma.mailboxDefaultDomain.findFirst({
-        where: {
-            domain: zone!,
-            authKey: auth!,
-        },
-        select: {
-            id: true,
+    const defaultDomain = await db.query.DefaultDomain.findFirst({
+        where: and(
+            eq(DefaultDomain.domain, zone!),
+            eq(DefaultDomain.authKey, auth!)
+        ),
+        columns: {
+            id: true
         }
-    });
-
+    })
 
     if (defaultDomain) {
-        const alias = await prisma.mailboxAlias.findFirst({
-            where: {
-                alias: to
-            },
-            select: {
-                mailboxId: true,
+        const alias = await db.query.MailboxAlias.findFirst({
+            where: eq(MailboxAlias.alias, to),
+            columns: {
+                mailboxId: true
             }
         })
 
@@ -66,15 +64,15 @@ export async function POST(request: Request) {
 
     } else {
         // check if its a custom domain
-        const customDomain = await prisma.mailboxCustomDomain.findFirst({
-            where: {
-                domain: zone!,
-                authKey: auth!,
-            },
-            select: {
-                mailboxId: true,
+        const customDomain = await db.query.MailboxCustomDomain.findFirst({
+            where: and(
+                eq(MailboxCustomDomain.domain, zone!),
+                eq(MailboxCustomDomain.authKey, auth!)
+            ),
+            columns: {
+                mailboxId: true
             }
-        });
+        })
 
         if (customDomain) {
             mailboxId = customDomain.mailboxId
@@ -86,17 +84,15 @@ export async function POST(request: Request) {
     }
 
     // get storage used and see if over limit
-    const mailbox = await prisma.mailbox.findUnique({
-        where: {
-            id: mailboxId
-        },
-        select: {
+    const mailbox = await db.query.Mailbox.findFirst({
+        where: eq(Mailbox.id, mailboxId),
+        columns: {
             storageUsed: true,
             plan: true,
         }
     })
 
-    const limit = storageLimit[mailbox!.plan as 'FREE' | 'UNLIMITED']
+    const limit = storageLimit[mailbox!.plan]
     if (mailbox!.storageUsed > limit) {
         // todo: send email to user to warn them about unreceived emails 
         // (and they can upgrade to pro to get more storage or delete some emails to free up space)
@@ -107,134 +103,110 @@ export async function POST(request: Request) {
 
     const body = email.text || email.html || email.attachments.map((a) => a.content).join('\n')
 
-    const e = await prisma.email.create({
-        data: {
-            // raw: rawEmail,
-            raw: env.S3_URL ? "Saved in s3" : rawEmail,
-            from: {
-                create: {
-                    address: email.from.address,
-                    name: email.from.name,
-                }
-            },
-            recipients: {
-                createMany: {
-                    data: [
-                        // @ts-expect-error i want the error here
-                        ...email.to.map((to) => ({
-                            address: to.address,
-                            name: to.name,
-                        })),
-                        ...email.cc?.map((cc) => ({
-                            address: cc.address,
-                            name: cc.name,
-                            cc: true
-                        })) ?? [],
-                    ]
-                }
-            },
-            subject: email.subject,
-            body: body,
-            html: email.html,
-            snippet: slice(body, 200),
-            mailbox: {
-                connect: { id: mailboxId }
-            },
-            replyTo: email.replyTo?.[0]?.address,
-            size: emailSize,
+    const emailId = createId()
+    await db.batch([
+        db.insert(Email)
+            .values({
+                id: emailId,
+                raw: 's3',
+                subject: email.subject,
+                body: body,
+                html: email.html,
+                snippet: slice(body, 200),
+                mailboxId,
+                replyTo: email.replyTo?.[0]?.address,
+                size: emailSize,
+            }),
+
+        db.insert(EmailRecipient)
+            .values(
+                email.to?.map((to) => ({
+                    emailId: emailId,
+                    address: to.address,
+                    name: to.name,
+                    cc: false,
+                })) ?? []
+            ),
+
+        db.insert(EmailSender)
+            .values({
+                emailId: emailId,
+                address: email.from.address,
+                name: email.from.name,
+            }),
+
+        // increment the mailbox storage used
+        db.update(Mailbox)
+            .set({
+                storageUsed: sql`${Mailbox.storageUsed} + ${emailSize}`
+            })
+            .where(eq(Mailbox.id, mailboxId))
+    ])
+
+    const s3 = new S3Client({
+        credentials: {
+            accessKeyId: env.S3_KEY_ID,
+            secretAccessKey: env.S3_SECRET_ACCESS_KEY,
         },
-        select: {
-            id: true,
+        endpoint: env.S3_URL,
+        region: "auto"
+    })
+    // save the email to s3
+    const upload = new Upload({
+        client: s3,
+        params: {
+            Bucket: "email",
+            Key: `${mailboxId}/${emailId}/email.eml`,
+            Body: rawEmail,
+            ContentType: "message/rfc822",
         }
     })
 
-    await prisma.mailbox.update({
-        where: {
-            id: mailboxId
-        },
-        data: {
-            storageUsed: {
-                increment: emailSize
-            }
-        }
-    })
-    if (env.S3_KEY_ID && env.S3_SECRET_ACCESS_KEY && env.S3_URL) {
-        const s3 = new S3Client({
-            credentials: {
-                accessKeyId: env.S3_KEY_ID,
-                secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-            },
-            endpoint: env.S3_URL,
-            region: "auto"
-        })
-        // save the email to s3
+    await upload.done()
+
+    for (const attachment of email.attachments) {
+        const name = attachment.filename || attachment.mimeType || createId()
+
+        const attContent = Buffer.from(attachment.content)
+        const attId = createId()
+        await db.insert(EmailAttachments)
+            .values({
+                id: attId,
+                emailId: emailId,
+                filename: encodeURIComponent(name),
+                title: name,
+                mimeType: attachment.mimeType,
+                size: attContent.byteLength,
+            })
+
         const upload = new Upload({
             client: s3,
             params: {
                 Bucket: "email",
-                Key: `${mailboxId}/${e.id}/email.eml`,
-                Body: rawEmail,
-                ContentType: "message/rfc822",
+                Key: `${mailboxId}/${emailId}/${attId}/${encodeURIComponent(name)}`,
+                Body: attContent,
+                ContentType: attachment.mimeType,
             }
         })
-
         await upload.done()
-
-        for (const attachment of email.attachments) {
-            const name = attachment.filename || attachment.mimeType || createId()
-
-            const attContent = Buffer.from(attachment.content)
-            const att = await prisma.emailAttachment.create({
-                data: {
-                    email: {
-                        connect: {
-                            id: e.id
-                        }
-                    },
-                    filename: encodeURIComponent(name),
-                    title: name,
-                    mimeType: attachment.mimeType,
-                    size: attContent.byteLength,
-                }
-            })
-
-            const upload = new Upload({
-                client: s3,
-                params: {
-                    Bucket: "email",
-                    Key: `${mailboxId}/${e.id}/${att.id}/${encodeURIComponent(name)}`,
-                    Body: attContent,
-                    ContentType: attachment.mimeType,
-                }
-            })
-            await upload.done()
-        }
     }
 
+
     // send push notifications
-    const notifications = await prisma.userNotification.findMany({
-        where: {
-            user: {
-                mailboxes: {
-                    some: {
-                        mailboxId
-                    }
-                }
-            }
-        },
-        select: {
-            endpoint: true,
-            p256dh: true,
-            auth: true,
-        }
-    });
+    const notifications = await db
+        .select({ endpoint: UserNotification.endpoint, p256dh: UserNotification.p256dh, auth: UserNotification.auth })
+        .from(UserNotification)
+        .leftJoin(MailboxForUser, eq(UserNotification.userId, MailboxForUser.userId))
+        .where(eq(MailboxForUser.mailboxId, mailboxId))
+        .execute()
 
     await Promise.all(notifications.map(async (n) => {
         const payload = JSON.stringify({
             title: email.from.address,
             body: email.subject ? slice(email.subject, 200) : undefined,
-            url: `/mail/${mailboxId}/${e.id}`,
+            url: `/mail/${mailboxId}/${emailId}`,
         })
+        if (!n.endpoint || !n.p256dh || !n.auth) return console.error('missing notification data', n)
 
         try {
             await webpush.sendNotification({
@@ -248,11 +220,9 @@ export async function POST(request: Request) {
         } catch (e: any) {
             // delete the notification if it's no longer valid
             if (e.statusCode === 410) {
-                await prisma.userNotification.delete({
-                    where: {
-                        endpoint: n.endpoint,
-                    }
-                })
+                await db.delete(UserNotification)
+                    .where(eq(UserNotification.endpoint, n.endpoint))
+                    .execute()
             } else {
                 console.error(e)
             }
@@ -262,7 +232,7 @@ export async function POST(request: Request) {
 
     return Response.json({
         success: true,
-        id: e.id,
+        id: emailId,
     })
 }
 

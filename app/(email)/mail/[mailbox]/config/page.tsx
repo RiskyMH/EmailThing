@@ -1,11 +1,12 @@
 import { Metadata } from "next"
 import { pageMailboxAccess } from "../tools"
-import prisma from "@/utils/prisma"
+import { db, Mailbox } from "@/db";
 import { notFound } from "next/navigation"
 import { customDomainLimit, storageLimit, aliasLimit } from "@/utils/limits"
 import { AddAliasForm, AddCustomDomainForm } from "./components.client"
 import { Button } from "@/components/ui/button"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
+import { eq } from "drizzle-orm";
 
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 }
 
 
-export default async function Email({
+export default async function EmailConfig({
     params,
 }: {
     params: {
@@ -23,15 +24,26 @@ export default async function Email({
 }) {
     await pageMailboxAccess(params.mailbox)
 
-    const mailbox = await prisma.mailbox.findUnique({
-        where: {
-            id: params.mailbox
-        },
-        select: {
+    const mailbox = await db.query.Mailbox.findFirst({
+        where: eq(Mailbox.id, params.mailbox),
+        columns: {
             storageUsed: true,
-            aliases: true,
             plan: true,
-            customDomains: true,
+        },
+        with: {
+            aliases: {
+                columns: {
+                    alias: true,
+                    name: true,
+                    default: true,
+                }
+            },
+            customDomains: {
+                columns: {
+                    domain: true,
+                    authKey: true,
+                }
+            }
         }
     })
 

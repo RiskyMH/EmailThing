@@ -1,12 +1,14 @@
 "use server";
 
-import { prisma } from "@/utils/prisma";
+import { db, DraftEmail, Email, EmailRecipient, EmailSender, Mailbox, MailboxAlias } from "@/db";
 import { redirect } from "next/navigation";
 import { env } from "process";
 import { userMailboxAccess } from "../../tools";
 import { getCurrentUser } from "@/utils/jwt";
 import { revalidatePath } from "next/cache";
 import { SaveActionProps, Recipient } from "./types";
+import { and, eq, sql } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
 
 export async function sendEmailAction(mailboxId: string, draftId: string) {
     const userId = await getCurrentUser()
@@ -14,12 +16,12 @@ export async function sendEmailAction(mailboxId: string, draftId: string) {
         throw new Error("Mailbox not found");
     }
 
-    const mail = await prisma.draftEmail.findFirst({
-        where: {
-            id: draftId,
-            mailboxId: mailboxId,
-        },
-        select: {
+    const mail = await db.query.DraftEmail.findFirst({
+        where: and(
+            eq(DraftEmail.id, draftId),
+            eq(DraftEmail.mailboxId, mailboxId),
+        ),
+        columns: {
             body: true,
             subject: true,
             from: true,
@@ -28,17 +30,16 @@ export async function sendEmailAction(mailboxId: string, draftId: string) {
     })
     if (!mail) throw new Error("Mail not found")
 
-    const { body, subject, from, to: toString } = mail
-    const to = toString ? JSON.parse(toString) as Recipient[] : null
+    const { body, subject, from, to } = mail
     if (!to) throw new Error("No recipients")
 
     // verify alias is valid (and user has access to it)
-    const alias = await prisma.mailboxAlias.findFirst({
-        where: {
-            mailboxId: mailboxId,
-            alias: from!
-        },
-        select: {
+    const alias = await db.query.MailboxAlias.findFirst({
+        where: and(
+            eq(MailboxAlias.mailboxId, mailboxId),
+            eq(MailboxAlias.alias, from!)
+        ),
+        columns: {
             name: true,
             alias: true
         }
@@ -84,65 +85,52 @@ export async function sendEmailAction(mailboxId: string, draftId: string) {
         throw new Error("Failed to send email")
     }
 
+    // const emailId = createId()
+    const emailId = draftId // could also make new id here
+
     // add to sent folder
-    await Promise.all([
-        prisma.email.create({
-            data: {
-                body: body ?? "",
+    await db.batch([
+        db.insert(Email)
+            .values({
+                id: emailId,
+                body: body || "",
                 subject,
                 snippet: body ? (body.slice(0, 200) + (200 < body.length ? '…' : '')) : '',
-                from: {
-                    create: {
-                        name: alias.name ?? undefined,
-                        address: alias.alias
-                    }
-                },
-                recipients: {
-                    createMany: {
-                        data: to!.map(({ address, name, cc }) => ({
-                            name: name ?? undefined,
-                            address,
-                            cc: !!cc ?? undefined
-                        }))
-                    }
-                },
-                // todo: proper 
-                raw: "CREATED IN DRAFTS",
-                mailbox: {
-                    connect: {
-                        id: mailboxId
-                    }
-                },
+                raw: "draft",
+                mailboxId,
                 isRead: true,
                 isSender: true,
-                size: body?.length ?? 0
-            },
-            select: {
-                id: true
-            }
+                size: body?.length ?? 0,
+                createdAt: new Date(),
+            }),
 
-        }),
+        db.insert(EmailRecipient)
+            .values(to!.map(({ address, name, cc }) => ({
+                emailId,
+                name: name ?? undefined,
+                address,
+                cc: !!cc ?? undefined
+            }))),
 
-        prisma.mailbox.update({
-            where: {
-                id: mailboxId
-            },
-            data: {
-                storageUsed: {
-                    increment: body?.length ?? 0
-                }
-            }
-        }),
+        db.insert(EmailSender)
+            .values({
+                emailId,
+                name: alias.name ?? undefined,
+                address: alias.alias
+            }),
+
+        db.update(Mailbox)
+            .set({
+                storageUsed: sql`${Mailbox.storageUsed} + ${body?.length ?? 0}`,
+            })
+            .where(eq(Mailbox.id, mailboxId)),
 
         // delete draft
-        prisma.draftEmail.delete({
-            where: {
-                id: draftId
-            },
-            select: {
-                id: true
-            }
-        })
+        db.delete(DraftEmail)
+            .where(and(
+                eq(DraftEmail.id, draftId),
+                eq(DraftEmail.mailboxId, mailboxId)
+            ))
     ])
 
     redirect(`/mail/${mailboxId}`)
@@ -155,21 +143,18 @@ export async function saveDraftAction(mailboxId: string, draftId: string, data: 
         throw new Error("Mailbox not found");
     }
 
-    await prisma.draftEmail.update({
-        where: {
-            id: draftId,
-            mailboxId,
-        },
-        data: {
+    await db.update(DraftEmail)
+        .set({
             body: data.body,
             subject: data.subject,
             from: data.from,
-            to: data.to ? JSON.stringify(data.to.map(({ name, address, cc }) => ({ name, address, cc }))) : undefined
-        },
-        select: {
-            id: true
-        }
-    })
+            to: data.to?.map(({ name, address, cc }) => ({ name, address, cc }))
+        })
+        .where(and(
+            eq(DraftEmail.id, draftId),
+            eq(DraftEmail.mailboxId, mailboxId)
+        ))
+        .execute()
 
     revalidatePath(`/mail/${mailboxId}/draft/${draftId}`)
 };

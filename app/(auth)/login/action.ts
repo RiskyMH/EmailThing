@@ -1,8 +1,9 @@
 "use server";
+import { db, MailboxForUser, User } from "@/db";
 import { addUserTokenToCookie } from "@/utils/jwt"
 import { verifyPassword } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth"
-import { prisma } from "@/utils/prisma"
+import { eq } from "drizzle-orm";
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
@@ -22,14 +23,12 @@ export default async function signIn(data: FormData, callback?: string | null): 
     }
 
     // find user
-    const user = await prisma.user.findFirst({
-        where: {
-            username: parsedData.data.username,
-        },
-        select: {
+    const user = await db.query.User.findFirst({
+        where: eq(User.username, parsedData.data.username),
+        columns: {
             id: true,
             password: true,
-        },
+        }
     })
 
     if (!user) {
@@ -50,11 +49,9 @@ export default async function signIn(data: FormData, callback?: string | null): 
     }
 
     // get the user's mailbox then redirect to it
-    const mailboxes = await prisma.mailboxForUser.findMany({
-        where: {
-            userId: user.id,
-        },
-        select: {
+    const mailboxes = await db.query.MailboxForUser.findMany({
+        where: eq(MailboxForUser.userId, user.id),
+        columns: {
             mailboxId: true,
         }
     })

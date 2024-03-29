@@ -9,9 +9,13 @@ export const metadata = {
 
 export default async function Mailbox({
     params,
+    searchParams
 }: {
     params: {
-        mailbox: string
+        mailbox: string,
+    },
+    searchParams: {
+        take?: string
     }
 }) {
     await pageMailboxAccess(params.mailbox)
@@ -19,6 +23,7 @@ export default async function Mailbox({
     return (
         <EmailList
             mailboxId={params.mailbox}
+            initialTake={searchParams?.take}
             type="drafts"
         />
     )

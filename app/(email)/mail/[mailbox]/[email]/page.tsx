@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/utils/jwt"
 import { notFound } from "next/navigation"
 import { pageMailboxAccess, userMailboxAccess } from "../tools"
 import { Metadata } from "next"
-import { prisma } from "@/utils/prisma"
+import { db, Email } from "@/db";
 import { MarkRead, ViewSelect } from "./components.client"
 import { revalidatePath } from "next/cache"
 import ParseHTML, { parseHTML } from "./parse-html"
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronDown, FileArchiveIcon, FileTextIcon, ImageIcon, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
 import LocalTime from "@/components/localtime"
 import { getEmail } from "./tools"
+import { and, eq } from "drizzle-orm";
 
 
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {
@@ -28,7 +29,7 @@ export async function generateMetadata(props: { params: { mailbox: string, email
     }
 }
 
-export default async function Email({
+export default async function EmailPage({
     params,
     searchParams
 }: {
@@ -50,16 +51,13 @@ export default async function Email({
         if (!userId || !await userMailboxAccess(params.mailbox, userId))
             return "No access to mailbox";
 
-        await prisma.email.update({
-            data: {
-                isRead: true
-            },
-            where: {
-                id: params.email,
-                mailboxId: params.mailbox,
-            }
-
-        });
+        await db.update(Email)
+            .set({ isRead: true })
+            .where(and(
+                eq(Email.id, params.email),
+                eq(Email.mailboxId, params.mailbox)
+            ))
+            .execute()
 
         revalidatePath(`/mail/${params.mailbox}/${params.email}`)
     }

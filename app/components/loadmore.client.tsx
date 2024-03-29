@@ -3,15 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { PropsWithChildren, useRef, useState, useCallback, useEffect, useTransition } from "react";
 
-const LoadMore = <T extends string | number = any>({
+const LoadMore = <T extends string | number | Record<string, any> = any>({
     children,
     startId,
     loadMoreAction,
-    refreshId
+    refreshId,
+    initialLength = 0,
 }: PropsWithChildren<{
     startId: T;
     loadMoreAction: (offset: T) => Promise<readonly [JSX.Element[], T | null]>;
-    refreshId?: any
+    refreshId?: any;
+    initialLength?: number;
 }>) => {
     const ref = useRef<HTMLButtonElement>(null);
     const [loadMoreNodes, setLoadMoreNodes] = useState<JSX.Element[]>([]);
@@ -68,6 +70,15 @@ const LoadMore = <T extends string | number = any>({
         setDisabled(false);
         currentOffsetRef.current = startId;
     }, [startId, refreshId]);
+
+    useEffect(() => {
+        const num = loadMoreNodes.length + initialLength
+        if (num === 0 || (initialLength === 10 && loadMoreNodes.length === 0)) return;
+        
+        const urlparams = new URLSearchParams(window.location.search);
+        urlparams.set('take', num.toString());
+        window.history.replaceState(null, '', '?' + urlparams.toString());
+    }, [loadMoreNodes, initialLength]);
 
     return (
         <>

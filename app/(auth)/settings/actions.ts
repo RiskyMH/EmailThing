@@ -2,7 +2,8 @@
 
 import { getCurrentUser } from "@/utils/jwt"
 import { createPasswordHash, verifyPassword } from "@/utils/password"
-import prisma from "@/utils/prisma"
+import { db, User, UserNotification } from "@/db";
+import { and, eq, not } from "drizzle-orm";
 import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
@@ -15,13 +16,11 @@ export async function changeUsername(username: string) {
     if (!userId) return
 
     // check if taken (but not by the user)
-    const existingUser = await prisma.user.findFirst({
-        where: {
-            username,
-            NOT: {
-                id: userId
-            }
-        }
+    const existingUser = await db.query.User.findFirst({
+        where: and(
+            eq(User.username, username),
+            not(eq(User.id, userId))
+        )
     })
 
     if (existingUser) return { error: 'Username already taken' }
@@ -31,10 +30,10 @@ export async function changeUsername(username: string) {
     if (!validUsername.success) return { error: validUsername.error.errors[0].message }
 
     // update username
-    await prisma.user.update({
-        where: { id: userId },
-        data: { username }
-    })
+    await db.update(User)
+        .set({ username })
+        .where(eq(User.id, userId))
+        .execute()
 
     revalidatePath('/settings')
 }
@@ -44,7 +43,13 @@ export async function changePassword(oldPassword: string, newPassword: string) {
     if (!userId) return
 
     // check old password
-    const user = await prisma.user.findUnique({ where: { id: userId } })
+    const user = await db.query.User.findFirst({
+        where: eq(User.id, userId),
+        columns: {
+            password: true
+        }
+    })
+
     if (!user) return { error: 'User not found' }
 
     const validPassword = verifyPassword(oldPassword, user.password)
@@ -53,12 +58,12 @@ export async function changePassword(oldPassword: string, newPassword: string) {
     if (newPassword.length < 8) return { error: 'Password needs to be at least 8 characters' }
 
     // update password
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
+    await db.update(User)
+        .set({
             password: await createPasswordHash(newPassword)
-        }
-    })
+        })
+        .where(eq(User.id, userId))
+        .execute()
 
     revalidatePath('/settings')
 }
@@ -98,16 +103,15 @@ export async function saveSubscription(subscription: PushSubscriptionJSON) {
         body: "This is a test notification!",
     }))
 
-
-    await prisma.userNotification.create({
-        data: {
+    await db.insert(UserNotification)
+        .values({
             userId,
             endpoint: subscription.endpoint,
             expiresAt: subscription.expirationTime ? new Date(subscription.expirationTime) : undefined,
             p256dh: subscription.keys.p256dh,
-            auth: subscription.keys.auth
-        }
-    })
+            auth: subscription.keys.auth,
+        })
+        .execute()
 }
 
 export async function deleteSubscription(endpoint: string) {
@@ -117,13 +121,12 @@ export async function deleteSubscription(endpoint: string) {
     // delete subscription
     if (!endpoint) throw new Error("Subscription endpoint is missing");
 
-    await prisma.userNotification.deleteMany({
-        where: {
-            userId,
-            endpoint: endpoint
-        },
-
-    })
+    await db.delete(UserNotification)
+        .where(and(
+            eq(UserNotification.userId, userId),
+            eq(UserNotification.endpoint, endpoint)
+        ))
+        .execute()
 
     revalidatePath('/settings')
 }
