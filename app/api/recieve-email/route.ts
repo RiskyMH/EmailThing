@@ -83,6 +83,8 @@ export async function POST(request: Request) {
         return new Response('Mailbox not found', { status: 400 })
     }
 
+    console.log({ mailboxId })
+
     // get storage used and see if over limit
     const mailbox = await db.query.Mailbox.findFirst({
         where: eq(Mailbox.id, mailboxId),
@@ -143,6 +145,8 @@ export async function POST(request: Request) {
             .where(eq(Mailbox.id, mailboxId))
     ])
 
+    console.log("inserted email", emailId)
+
     const s3 = new S3Client({
         credentials: {
             accessKeyId: env.S3_KEY_ID,
@@ -191,6 +195,7 @@ export async function POST(request: Request) {
         await upload.done()
     }
 
+    console.log("saved email to s3", emailId)
 
     // send push notifications
     const notifications = await db
@@ -229,6 +234,7 @@ export async function POST(request: Request) {
         }
     }))
 
+    console.log("sent push notifications", emailId)
 
     return Response.json({
         success: true,

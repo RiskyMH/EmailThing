@@ -31,8 +31,9 @@ export const MailboxAlias = sqliteTable("mailbox_aliases", {
     default: int("default", { mode: "boolean" }).default(false).notNull()
 }, (table) => {
     return {
-        idx: index("idx").on(table.mailboxId, table.default),
-        unique: unique("unique").on(table.alias, table.mailboxId)
+        idx: index("mailbox_aliases_idx").on(table.mailboxId, table.default),
+        unique: unique("mailbox_aliases_unique").on(table.alias, table.mailboxId),
+        alias: unique("mailbox_aliases_alias").on(table.alias),
     }
 });
 
