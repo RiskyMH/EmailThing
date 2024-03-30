@@ -122,12 +122,21 @@ export async function POST(request: Request) {
 
         db.insert(EmailRecipient)
             .values(
-                email.to?.map((to) => ({
-                    emailId: emailId,
-                    address: to.address,
-                    name: to.name,
-                    cc: false,
-                })) ?? []
+                [
+                    ...email.to?.map((to) => ({
+                        emailId: emailId,
+                        address: to.address,
+                        name: to.name,
+                        cc: false,
+                    })) ?? [],
+
+                    ...email.cc?.map((cc) => ({
+                        emailId: emailId,
+                        address: cc.address,
+                        name: cc.name,
+                        cc: true,
+                    })) ?? []
+                ]
             ),
 
         db.insert(EmailSender)
