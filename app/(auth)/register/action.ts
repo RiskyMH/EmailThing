@@ -73,7 +73,7 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
 
         db.insert(Mailbox)
             .values({
-                id: createId(),
+                id: mailboxId,
             }),
 
         db.insert(MailboxForUser)
