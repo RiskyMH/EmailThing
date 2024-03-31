@@ -2,12 +2,13 @@ import { relations } from 'drizzle-orm';
 import { sqliteTable, int, integer, index, text } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
 import { MailboxForUser, Mailbox } from './mailbox';
+import { nocaseText } from './custom-drizzle';
 
 // The User
 export const User = sqliteTable("users", {
     id: text("id", { length: 24 }).unique().$defaultFn(() => createId()).primaryKey(),
     createdAt: int('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-    username: text("username", { length: 20 }).notNull(),
+    username: nocaseText("username", { length: 20 }).notNull(),
     password: text("password", { length: 200 }).notNull(),
     admin: int("admin", { mode: "boolean" }).default(false),
     email: text("email").notNull()

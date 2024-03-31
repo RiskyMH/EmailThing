@@ -3,6 +3,7 @@ import { sqliteTable, int, integer, index, text, unique, primaryKey } from 'driz
 import { createId } from '@paralleldrive/cuid2';
 import { User } from './user';
 import { Email } from './email';
+import { nocaseText } from './custom-drizzle';
 
 // The mailbox
 export const Mailbox = sqliteTable("mailboxes", {
@@ -25,7 +26,7 @@ export const MailboxAlias = sqliteTable("mailbox_aliases", {
     id: text("id", { length: 24 }).primaryKey().unique().$defaultFn(() => createId()),
     mailboxId: text("mailbox_id", { length: 24 }).notNull()
         .references(() => Mailbox.id, { onDelete: 'cascade' }),
-    alias: text("alias").notNull(),
+    alias: nocaseText("alias").notNull(),
     name: text("name"),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     default: int("default", { mode: "boolean" }).default(false).notNull()
@@ -51,7 +52,7 @@ export const MailboxCustomDomain = sqliteTable("mailbox_custom_domain", {
     mailboxId: text("mailbox_id", { length: 24 }).notNull()
         .references(() => Mailbox.id, { onDelete: 'cascade' }),
     addedAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-    domain: text("domain").notNull(),
+    domain: nocaseText("domain").notNull(),
     authKey: text("auth_key").notNull().$defaultFn(() => createId()),
 }, (table) => {
     return {

@@ -1,11 +1,12 @@
 import { sqliteTable, int, integer, index, text } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
+import { nocaseText } from './custom-drizzle';
 
 // Default Domains
 export const DefaultDomain = sqliteTable("default_domains", {
     id: text("id", { length: 24 }).primaryKey().unique().$defaultFn(() => createId()),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-    domain: text("domain").notNull().unique(),
+    domain: nocaseText("domain").notNull().unique(),
     authKey: text("auth_key", { length: 24 }).notNull().$defaultFn(() => createId()),
     available: int("available", { mode: "boolean" }).default(false),
 }, (table) => {
