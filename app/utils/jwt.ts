@@ -37,11 +37,12 @@ export const addUserTokenToCookie = async (user: { id: string }) => {
 
 export const getCurrentUser = (async () => {
     const token = cookies().get("token")
-    if (!token) return null
+    if (!token || !token.value) return null
     try {
         return await getUserByToken(token.value)
     } catch (e) {
-        console.log(e)
+        // console.log(e)
+        console.log("[JWT_ERROR] Token is invalid or expired. Redirecting to login.")
         return null
     }
 })
