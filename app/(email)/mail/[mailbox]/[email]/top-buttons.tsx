@@ -7,6 +7,7 @@ import TooltipText from "@/components/tooltip-text"
 import { mailboxCategories } from "../tools";
 import { getEmail } from "./tools";
 import { updateEmail as updateEmailAction } from "../actions"
+import { BackButton } from "./components.client"
 
 interface TopButtonsProps {
     mailboxId: string;
@@ -21,14 +22,7 @@ export default async function TopButtons({ mailboxId, emailId }: TopButtonsProps
 
     return (
         <div className="flex flex-row w-full min-w-0 pb-3 border-b-2 -mt-1 gap-6 text-muted-foreground">
-            <TooltipText text="Back">
-                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
-                    {/* TODO: make it actually go back in history */}
-                    <Link href={`/mail/${mailboxId}`}>
-                        <ArrowLeftIcon className="h-5 w-5" />
-                    </Link>
-                </Button>
-            </TooltipText>
+            <BackButton fallbackUrl={`/mail/${mailboxId}`} />
             <div className="border-e-2 -mx-2" />
 
             <ContextMenuAction
@@ -44,13 +38,13 @@ export default async function TopButtons({ mailboxId, emailId }: TopButtonsProps
             />
 
             <DropdownMenu>
-                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
-                    <TooltipText text="Categorize as">
-                        <DropdownMenuTrigger>
+                <TooltipText text="Categorize as">
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground">
                             <TagIcon className="h-5 w-5" />
-                        </DropdownMenuTrigger>
-                    </TooltipText>
-                </Button>
+                        </Button>
+                    </DropdownMenuTrigger>
+                </TooltipText>
                 <DropdownMenuContent>
                     <DropdownMenuItem asChild className="flex gap-2 cursor-pointer w-full">
                         <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
@@ -77,24 +71,20 @@ export default async function TopButtons({ mailboxId, emailId }: TopButtonsProps
                 </Button>
             </TooltipText>
             <TooltipText text="Reply All">
-                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground">
-                    <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
-                        <Link href={`/mail/${mailboxId}/draft/new?replyAll=${emailId}`}>
-                            <ReplyAllIcon className="h-5 w-5" />
-                        </Link>
-                    </Button>
+                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
+                    <Link href={`/mail/${mailboxId}/draft/new?replyAll=${emailId}`}>
+                        <ReplyAllIcon className="h-5 w-5" />
+                    </Link>
                 </Button>
             </TooltipText>
             <TooltipText text="Forward">
-                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground">
-                    <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
-                        <Link href={`/mail/${mailboxId}/draft/new?forward=${emailId}`}>
-                            <ForwardIcon className="h-5 w-5" />
-                        </Link>
-                    </Button>
+                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
+                    <Link href={`/mail/${mailboxId}/draft/new?forward=${emailId}`}>
+                        <ForwardIcon className="h-5 w-5" />
+                    </Link>
                 </Button>
             </TooltipText>
-        </div>
+        </div >
 
     )
 }

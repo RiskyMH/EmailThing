@@ -35,17 +35,18 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
                 `/mail/${mailboxId}/starred`
             ]
             if (!validPaths.includes(pathname)) {
-                router.push(`/mail/${mailboxId}?q=${q}`)
+                router.push(`/mail/${mailboxId}?q=${encodeURIComponent(q)}`)
             }
 
-            else router.push(`?q=${q}`)
+            else router.push(`?q=${encodeURIComponent(q)}`)
 
         })
     }
 
     return (
         <form
-            onSubmit={onSubmit} className={cn(className, "group h-10 w-full py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-background dark:bg-secondary rounded flex self-center px-1 gap-2")}
+            onSubmit={onSubmit} 
+            className={cn("group h-10 w-full py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-background dark:bg-secondary rounded flex self-center px-1 gap-2", className)}
         >
             <Button size="icon-sm" variant="ghost" className="self-center text-muted-foreground rounded-full flex-shrink-0 m-0.5 p-1.5 focus-visible:ring-offset-0 focus-visible:ring-1" type="submit">
                 {isPending ? (
