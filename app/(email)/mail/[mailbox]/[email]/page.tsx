@@ -12,10 +12,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { gravatar } from "@/utils/tools"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, FileArchiveIcon, FileTextIcon, ImageIcon, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
+import { ChevronDown, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
 import LocalTime from "@/components/localtime"
 import { getEmail } from "./tools"
 import { and, eq } from "drizzle-orm";
+import { getSignedUrl } from "@/utils/s3";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { cn } from "@/utils/tw";
+import Link from "next/link";
 
 
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {
@@ -61,6 +65,13 @@ export default async function EmailPage({
 
         revalidatePath(`/mail/${params.mailbox}/${params.email}`)
     }
+
+    const attachmentsPresigned = await Promise.all(email.attachments.map(async a => {
+        const url = await getSignedUrl({
+            key: `${params.mailbox}/${params.email}/${a.id}/${a.filename}`
+        })
+        return { ...a, url }
+    }))
 
     const view = searchParams?.view || "markdown"
 
@@ -158,16 +169,43 @@ export default async function EmailPage({
 
                     </div>
                     <LocalTime className="text-muted-foreground text-sm ms-auto mt-2 hidden lg:inline" time={email.createdAt} type="full" />
-                    <ViewSelect selected={view} htmlValid={!!email.html} className="hidden md:flex ms-auto lg:ms-0" />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button className='rounded-full p-2 hover:bg-background flex ms-auto lg:ms-0' variant="ghost" size="icon">
+                                <EllipsisVerticalIcon className="w-6 h-6" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="min-w-[10rem] ">
+
+                            <ViewSelect selected={view} htmlValid={!!email.html} />
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
+                                <Link target="_blank" href={email.raw === "s3" ? await getSignedUrl({
+                                    key: `${params.mailbox}/${params.email}/email.eml`,
+                                    responseContentType: "text/plain"
+                                }) : `/mail/${params.mailbox}/${params.email}/raw`}>
+                                    <CodeIcon className="h-5 w-5 text-muted-foreground" />
+                                    View original
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
+                                <Link download href={email.raw === "s3" ? await getSignedUrl({ key: `${params.mailbox}/${params.email}/email.eml` }) : `/mail/${params.mailbox}/${params.email}/raw`}>
+                                    <DownloadIcon className="h-5 w-5 text-muted-foreground" />
+                                    Download message
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                 </div>
 
                 {/* attachments */}
-                {email.attachments.length > 0 && (
+                {attachmentsPresigned.length > 0 && (
                     <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                        {email.attachments.map(a => (
+                        {attachmentsPresigned.map(a => (
                             <a
                                 key={a.id}
-                                href={`/mail/${params.mailbox}/${params.email}/attachment/${a.id}`}
+                                href={a.url}
                                 target="_blank"
                                 className="flex gap-2 items-center p-2 rounded-md bg-background hover:bg-background/80"
                             >

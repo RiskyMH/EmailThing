@@ -19,6 +19,7 @@ export const getEmail = cache(async (mailboxId: string, emailId: string) => {
             isStarred: true,
             binnedAt: true,
             replyTo: true,
+            raw: true
         },
         with: {
             category: {
