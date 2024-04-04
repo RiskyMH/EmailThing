@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
 export function MarkRead({ action }: any) {
-    useEffect(() => action(), [action])
+    useEffect(() => {
+        action()
+    }, [action])
     return null
 }
 

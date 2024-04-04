@@ -12,9 +12,10 @@ interface EmailListProps {
     type?: "inbox" | "sent" | "drafts" | "trash" | "starred";
     categoryId?: string;
     initialTake?: string;
+    search?: string
 }
 
-export default async function EmailList({ mailboxId, categoryId, type = "inbox", initialTake }: EmailListProps) {
+export default async function EmailList({ mailboxId, categoryId, type = "inbox", initialTake, search }: EmailListProps) {
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`
 
     const take = initialTake ? parseInt(initialTake) : 10
@@ -23,15 +24,16 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
         isSender: type === "sent",
         isStarred: type === "starred" ? true : undefined,
         categoryId,
-        take
+        take,
+        search,
+        selectCategories: !search && type !== "drafts"
     }
-
 
     const [emails, categoryCounts, emailCount] = (type !== "drafts")
         ? await getEmailList(mailboxId, emailFetchOptions)
-        : await getDraftEmailList(mailboxId)
+        : await getDraftEmailList(mailboxId, emailFetchOptions)
 
-    const categories = (type !== "drafts") && await mailboxCategories(mailboxId)
+    const categories = emailFetchOptions.selectCategories && await mailboxCategories(mailboxId)
 
     const nextEmail = emails.length === take + 1 ? emails.pop() : null
 
@@ -72,7 +74,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
                     <div className="flex flex-row w-full min-w-0 pb-3 -mb-3 gap-6 overflow-y-auto">
                         <CategoryItem
                             circleColor={null}
-                            name="All"
+                            name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
                             count={emailCount[0].count || 0}
                             link={baseUrl}
                             category={null}
@@ -95,6 +97,15 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
                         <RefreshButton />
                     </div>
                 </div>
+                {emails.length === 0 && (
+                    <div className="text-center text-muted-foreground">
+                        {
+                            search ? `Couldn't find any emails matching "${search}"`
+                                : type === "drafts" ? "No drafts"
+                                    : "No emails"
+                        }
+                    </div>
+                )}
                 {nextEmail ? (
                     <LoadMore loadMoreAction={fetchMoreEmails} startId={{ emailId: nextEmail.id, createdAt: nextEmail.createdAt }} refreshId={Date.now()} initialLength={take} >
                         {emails.map(email => (

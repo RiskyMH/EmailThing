@@ -1,5 +1,5 @@
 import { db, DraftEmail, Email } from "@/db";
-import { and, count, desc, eq, isNotNull, isNull, lt } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull, like, lt } from "drizzle-orm";
 
 export interface EmailListFindOptions {
     isBinned?: boolean;
@@ -7,6 +7,8 @@ export interface EmailListFindOptions {
     categoryId?: string;
     isStarred?: boolean;
     take?: number;
+    search?: string;
+    selectCategories?: boolean;
 }
 type Curser = { emailId: string, createdAt: Date } | { offset: number }
 
@@ -21,6 +23,7 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
 
             // cursor pagination
             (curser && 'emailId' in curser) ? lt((Email.createdAt, Email.id), (curser.createdAt, curser.emailId)) : undefined,
+            options.search ? like(Email.subject, `%${options.search}%`) : undefined
         ),
         columns: {
             id: true,
@@ -56,10 +59,10 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
 }
 
 export function getEmailList(mailboxId: string, options: EmailListFindOptions = {}, curser?: Curser) {
-    return db.batch([
+    return Promise.all([
         getJustEmailsList(mailboxId, options, curser),
 
-        db
+        options.selectCategories ? db
             .select({ count: count(), categoryId: Email.categoryId })
             .from(Email)
             .where(and(
@@ -67,7 +70,8 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
                 options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
                 eq(Email.isSender, options.isSender || false),
                 options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
-            )).groupBy(Email.categoryId),
+                options.search ? like(Email.subject, `%${options.search}%`) : undefined
+            )).groupBy(Email.categoryId) : null,
 
         db
             .select({ count: count() })
@@ -77,18 +81,19 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
                 options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
                 eq(Email.isSender, options.isSender || false),
                 options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
+                options.search ? like(Email.subject, `%${options.search}%`) : undefined
             ))
-
 
     ])
 
 }
 
-export async function getDraftJustEmailsList(mailboxId: string, options?: { take?: number }, curser?: Curser) {
+export async function getDraftJustEmailsList(mailboxId: string, options?: { take?: number, search?: string }, curser?: Curser) {
     const emails = await db.query.DraftEmail.findMany({
         where: and(
             eq(DraftEmail.mailboxId, mailboxId),
-            (curser && 'emailId' in curser) ? lt((DraftEmail.updatedAt, DraftEmail.id), (curser.createdAt, curser.emailId)) : undefined
+            (curser && 'emailId' in curser) ? lt((DraftEmail.updatedAt, DraftEmail.id), (curser.createdAt, curser.emailId)) : undefined,
+            options?.search ? like(DraftEmail.subject, `%${options.search}%`) : undefined
         ),
         columns: {
             id: true,
@@ -120,12 +125,16 @@ export async function getDraftJustEmailsList(mailboxId: string, options?: { take
     return emailsFormatted;
 }
 
-export async function getDraftEmailList(mailboxId: string) {
-    const emails = getDraftJustEmailsList(mailboxId);
+export async function getDraftEmailList(mailboxId: string, options?: { take?: number, search?: string}) {
+    const emails = getDraftJustEmailsList(mailboxId, options);
 
     const allCount = db.select({ count: count() })
         .from(DraftEmail)
-        .where(eq(DraftEmail.mailboxId, mailboxId))
+        .where(and(
+            eq(DraftEmail.mailboxId, mailboxId),
+            options?.search ? like(DraftEmail.subject, `%${options.search}%`) : undefined
+        ))
+        .execute()
 
     return Promise.all([emails, null, allCount])
 }

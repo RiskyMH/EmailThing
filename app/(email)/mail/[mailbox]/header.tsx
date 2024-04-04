@@ -42,7 +42,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                 </nav>
 
                 <div className="hidden md:flex me-auto">
-                    <Search className="relative w-full lg:w-96" />
+                    <Search className="relative w-full lg:w-96" mailboxId={mailboxId} />
                 </div>
                 <div className="flex justify-end ms-auto">
                     <Suspense fallback={<UserMenuFallback />}>
