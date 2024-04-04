@@ -13,10 +13,8 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
 
     const ref = useRef<HTMLInputElement>(null)
     useEffect(() => {
-        if (searchParams.has("q") && ref.current) {
+        if (ref.current) {
             ref.current.value = searchParams.get("q") || ""
-        } else if (ref.current) {
-            ref.current.value = ""
         }
     }, [searchParams, pathname])
 
@@ -27,22 +25,20 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
         const q = form.q.value
 
         startTransition(() => {
-            if (!q) router.push("./")
-            else {
-                const validPaths = [
-                    `/${mailboxId}`,
-                    // `/${mailboxId}/inbox`,
-                    `/${mailboxId}/sent`,
-                    `/${mailboxId}/drafts`,
-                    `/${mailboxId}/trash`,
-                    `/${mailboxId}/starred`
-                ]
-                if (!validPaths.includes(pathname)) {
-                    router.push(`/mail/${mailboxId}?q=${q}`)
-                }
-
-                else router.push(`?q=${q}`)
+            if (!q) return router.push(pathname)
+            const validPaths = [
+                `/mail/${mailboxId}`,
+                // `/mail/${mailboxId}/inbox`,
+                `/mail/${mailboxId}/sent`,
+                `/mail/${mailboxId}/drafts`,
+                `/mail/${mailboxId}/trash`,
+                `/mail/${mailboxId}/starred`
+            ]
+            if (!validPaths.includes(pathname)) {
+                router.push(`/mail/${mailboxId}?q=${q}`)
             }
+
+            else router.push(`?q=${q}`)
 
         })
     }
