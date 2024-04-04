@@ -38,7 +38,7 @@ const nextConfig = {
                     ],
                 },
                 {
-                    source: '/',
+                    source: '/(login|register)?',
                     destination: '/mail',
                     has: [
                         {
@@ -46,27 +46,14 @@ const nextConfig = {
                             key: 'token',
                         },
                     ],
-                },
-                {
-                    source: '/login',
-                    destination: '/mail',
-                    has: [
+                    missing: [
                         {
                             type: 'cookie',
-                            key: 'token',
+                            key: 'mailboxId',
                         },
-                    ],
+                    ]
                 },
-                {
-                    source: '/register',
-                    destination: '/mail',
-                    has: [
-                        {
-                            type: 'cookie',
-                            key: 'token',
-                        },
-                    ],
-                },
+
             ],
             afterFiles: [],
             fallback: [],
@@ -78,6 +65,33 @@ const nextConfig = {
                 source: '/mail/:mailbox/:email/raw',
                 destination: '/mail/:mailbox/:email/email.eml',
                 permanent: true,
+            },
+            {
+                source: "/mail/:path*",
+                destination: "/login?from=/mail/:path*",
+                missing: [
+                    {
+                        type: 'cookie',
+                        key: 'token',
+                    },
+                ],
+                permanent: false,
+            },
+            {
+                source: '/(login|register)?',
+                has: [
+                    {
+                        type: 'cookie',
+                        key: 'token',
+                    },
+                    {
+                        type: 'cookie',
+                        key: 'mailboxId',
+                        value: '(?<mailbox>.*)'
+                    },
+                ],
+                destination: '/mail/:mailbox',
+                permanent: false,
             },
         ];
     }

@@ -19,8 +19,16 @@ export default async function signIn(data: FormData, callback?: string | null): 
 
     if (!callback) {
         const referer = headers().get("referer")
-        if (referer) callback = new URL(referer).searchParams?.get("from")
+        if (referer) {
+            callback = new URL(referer).searchParams?.get("from")
+        } else {
+            const mailboxId = cookies().get("mailboxId")
+            if (mailboxId) {
+                callback = `/mail/${mailboxId.value}`
+            }
+        }
     }
+
 
     // find user
     const user = await db.query.User.findFirst({
