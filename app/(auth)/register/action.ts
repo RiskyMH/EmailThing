@@ -102,7 +102,10 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
 
     // add user token to cookie 
     await addUserTokenToCookie({ id: userId })
-    cookies().set("mailboxId", mailboxId)
+    cookies().set("mailboxId", mailboxId, {
+        path: "/",
+        expires: new Date("2038-01-19 04:14:07")
+    })
 
     // redirect to mail
     redirect(`/mail/${mailboxId}`)
