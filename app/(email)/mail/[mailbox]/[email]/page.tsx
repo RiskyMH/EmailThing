@@ -217,8 +217,8 @@ export default async function EmailPage({
                     </div>
                 )}
 
-                {view === "text" ? <p className="whitespace-pre-wrap break-words leading-normal">{email.body}</p> : null}
-                {view === "markdown" ? <ParseHTML className="prose dark:prose-invert max-w-full break-words" body={await marked.parse(email.body, { breaks: true })} /> : null}
+                {view === "text" ? <p className="whitespace-pre-wrap break-words leading-normal overflow-auto">{email.body}</p> : null}
+                {view === "markdown" ? <ParseHTML className="prose dark:prose-invert max-w-full break-words overflow-auto" body={await marked.parse(email.body, { breaks: true })} /> : null}
                 {/* {view === "html" ? <ParseHTML className="rounded-lg" body={mail.html || mail.body} /> : null} */}
                 {view === "html" ? <iframe className="rounded-lg w-full h-screen bg-card" sandbox='allow-popups' srcDoc={await parseHTML(email.html || email.body, true)} /> : null}
             </div>

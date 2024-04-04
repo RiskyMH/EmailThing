@@ -21,6 +21,5 @@ export function ViewSelect({ selected, htmlValid = false }: { selected: "text" |
             <DropdownMenuRadioItem value="markdown">Markdown</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="html" disabled={!htmlValid}>HTML</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
-
     )
 }
