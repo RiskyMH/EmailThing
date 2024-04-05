@@ -18,4 +18,6 @@ This worker is responsible for sending emails. It uses the `fetch` API to send t
 
 Refer to the [Mailchannels Transactional API documentation](https://api.mailchannels.net/tx/v1/documentation) for more information on how to send emails.
 
+As you have full control with the emails, you can decide which mailbox to send to (if any). This means you can have multiple mailboxes for one domain.
+
 > **Note**: This is more or less abusing the [free deal](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) that was given to Cloudflare workers.

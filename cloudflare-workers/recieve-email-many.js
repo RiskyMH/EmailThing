@@ -1,13 +1,7 @@
-// Adjust to your use case
-// * The domain must the the same as the one you have set up in the dashboard
-const zone = "your-domain.xyz";
-
-// Don't forget to add the `auth` token to your environment variables
-// * Go to worker > your email worker > settings > variables > add new variable `auth` with the value provided in the dashboard.
-// * If you would like to forward the email to another address, add a new variable `forward` with the value of the email you would like to forward to.
-
-
 /* eslint-disable */
+
+// This is an example worker for many mailboxes or domains
+
 
 /**
  * 
@@ -34,7 +28,7 @@ export default {
     /**
      * 
      * @param {import("@cloudflare/workers-types").ForwardableEmailMessage} message 
-     * @param {{auth: string, forward?: string}} env 
+     * @param {{auth1: string, auth2: string, forward?: string}} env 
      * @param {any} ctx 
      */
     async email(message, env, ctx) {
@@ -43,12 +37,21 @@ export default {
         const raw = new TextDecoder("utf-8").decode(rawEmail);
 
         if (env.forward) await message.forward(env.forward);
+        
+        const data = {zone: "", auth: ""};
+        if (message.to === "me@domain1.com") {
+            data.zone = "domain1.com";
+            data.auth = env.auth1;
+        } else if (message.to === "you@domain2.com") {
+            data.zone = "domain2.com";
+            data.auth = env.auth2;
+        }
 
-        const req = await fetch(`https://emailthing.xyz/api/recieve-email?zone=${zone}`, {
+        const req = await fetch(`https://emailthing.xyz/api/recieve-email?zone=${data.zone}`, {
             method: "POST",
             headers: {
                 "content-type": "application/json",
-                "x-auth": env.auth
+                "x-auth": data.auth
             },
             body: JSON.stringify({
                 email: raw,
