@@ -10,6 +10,7 @@ import { mailboxAliases, userMailboxAccess } from "./tools";
 import Sidebar from "./sidebar";
 import { MobileNav } from "./sidebar.client";
 import { eq } from "drizzle-orm";
+import { gravatar } from "@/utils/tools";
 
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
@@ -79,6 +80,7 @@ async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
             id: mailboxId,
             name: user.username,
             secondary: defaultAlias?.alias ?? "email@email.?",
+            image: defaultAlias?.alias ? await gravatar(defaultAlias.alias) : undefined
         }} />
     );
 }

@@ -1,7 +1,7 @@
 "use server";
 import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User } from "@/db";
 import { addUserTokenToCookie } from "@/utils/jwt"
-import { createPasswordHash, verifyPassword } from "@/utils/password";
+import { createPasswordHash } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth"
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq, gte, isNotNull } from "drizzle-orm";

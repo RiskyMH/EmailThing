@@ -2,10 +2,10 @@ import { getCurrentUser } from "@/utils/jwt"
 import { db, Email } from "@/db";
 import { notFound } from "next/navigation"
 import { userMailboxAccess } from "../../tools"
-import { env } from "@/utils/env"
 import { getSignedUrl } from "@/utils/s3";
 import { and, eq } from "drizzle-orm";
 
+// export const runtime = 'edge'
 
 export async function GET(
     request: Request,

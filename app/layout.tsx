@@ -17,6 +17,8 @@ const fontHeading = localFont({
   variable: "--font-heading",
 })
 
+// export const runtime = 'edge';
+
 export const metadata = {
   title: {
     default: "EmailThing",

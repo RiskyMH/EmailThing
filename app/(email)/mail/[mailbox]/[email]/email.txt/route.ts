@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { userMailboxAccess } from "../../tools"
 import { and, eq } from "drizzle-orm";
 
+// export const runtime = 'edge'
 
 export async function GET(
     request: Request,

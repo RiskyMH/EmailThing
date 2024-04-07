@@ -1,23 +1,26 @@
 
-import { sanitize, addHook } from "isomorphic-dompurify";
+import createDOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
+
+const DOMPurify = createDOMPurify((globalThis as any).window || new JSDOM('').window);
+
+DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+    // set all elements owning target to target=_blank
+    if ('target' in node) {
+        node.setAttribute('target', '_blank');
+        // prevent https://www.owasp.org/index.php/Reverse_Tabnabbing
+        node.setAttribute('rel', 'noopener noreferrer');
+    }
+    // set non-HTML/MathML links to xlink:show=new
+    if (!node.hasAttribute('target')
+        && (node.hasAttribute('xlink:href')
+            || node.hasAttribute('href'))) {
+        node.setAttribute('xlink:show', 'new');
+    }
+})
 
 export async function parseHTML(content: string, moreTrusted = false) {
-    addHook('afterSanitizeAttributes', function (node) {
-        // set all elements owning target to target=_blank
-        if ('target' in node) {
-            node.setAttribute('target', '_blank');
-            // prevent https://www.owasp.org/index.php/Reverse_Tabnabbing
-            node.setAttribute('rel', 'noopener noreferrer');
-        }
-        // set non-HTML/MathML links to xlink:show=new
-        if (!node.hasAttribute('target')
-            && (node.hasAttribute('xlink:href')
-                || node.hasAttribute('href'))) {
-            node.setAttribute('xlink:show', 'new');
-        }
-    })
-
-    let clean = sanitize(content, {
+    let clean = DOMPurify.sanitize(content, {
         WHOLE_DOCUMENT: moreTrusted,
         ALLOWED_TAGS: [
             'a',

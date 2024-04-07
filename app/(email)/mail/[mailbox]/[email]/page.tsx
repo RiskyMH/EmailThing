@@ -85,7 +85,7 @@ export default async function EmailPage({
                 {/* from info and gravatar */}
                 <div className="flex gap-2">
                     <Avatar className="h-12 w-12">
-                        <AvatarImage className="bg-tertiary rounded-full" src={gravatar(email.from!.address)} />
+                        <AvatarImage className="bg-tertiary rounded-full" src={await gravatar(email.from!.address)} />
                         <AvatarFallback className="bg-tertiary rounded-full">
                             {(email.from?.name || email.from!.address).slice(0, 2).toUpperCase()}
                         </AvatarFallback>

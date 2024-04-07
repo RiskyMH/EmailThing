@@ -2,13 +2,12 @@
 
 import { db, DraftEmail, Email, EmailRecipient, EmailSender, Mailbox, MailboxAlias } from "@/db";
 import { redirect } from "next/navigation";
-import { env } from "process";
+import { env } from "@/utils/env";
 import { userMailboxAccess } from "../../tools";
 import { getCurrentUser } from "@/utils/jwt";
 import { revalidatePath } from "next/cache";
-import { SaveActionProps, Recipient } from "./types";
+import { SaveActionProps } from "./types";
 import { and, eq, sql } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
 
 export async function sendEmailAction(mailboxId: string, draftId: string) {
     const userId = await getCurrentUser()

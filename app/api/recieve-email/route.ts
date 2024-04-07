@@ -2,23 +2,15 @@
 import PostalMime from 'postal-mime';
 type PostalMime = import("../../../node_modules/postal-mime/postal-mime").default;
 import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification } from "@/db";
-import { env } from '@/utils/env';
-import webpush from 'web-push';
 import { storageLimit } from '@/utils/limits';
-import { Upload } from "@aws-sdk/lib-storage"
 import { createId } from '@paralleldrive/cuid2';
 import { and, eq, sql } from "drizzle-orm";
-import { s3 } from '@/utils/s3';
-
-
-webpush.setVapidDetails(
-    'mailto:test@example.com',
-    env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
-    env.WEB_NOTIFICATIONS_PRIVATE_KEY
-)
-
+import { uploadFile } from '@/utils/s3';
+import { sendNotification } from '@/utils/web-push';
 
 export const revalidate = 0
+// export const runtime = 'edge';
+
 
 export async function POST(request: Request) {
     const { searchParams } = new URL(request.url)
@@ -157,17 +149,15 @@ export async function POST(request: Request) {
     console.log("inserted email", emailId)
 
     // save the email to s3
-    const upload = new Upload({
-        client: s3,
-        params: {
-            Bucket: "email",
-            Key: `${mailboxId}/${emailId}/email.eml`,
-            Body: rawEmail,
-            ContentType: "message/rfc822",
-        }
+    const upload = await uploadFile({
+        key: `${mailboxId}/${emailId}/email.eml`,
+        buffer: Buffer.from(rawEmail),
+        contentType: "message/rfc822"
     })
 
-    await upload.done()
+    if (!upload.ok) {
+        console.error(await upload.text())
+    }
 
     for (const attachment of email.attachments) {
         const name = attachment.filename || attachment.mimeType || createId()
@@ -184,23 +174,27 @@ export async function POST(request: Request) {
                 size: attContent.byteLength,
             })
 
-        const upload = new Upload({
-            client: s3,
-            params: {
-                Bucket: "email",
-                Key: `${mailboxId}/${emailId}/${attId}/${encodeURIComponent(name)}`,
-                Body: attContent,
-                ContentType: attachment.mimeType,
-            }
+        const upload = await uploadFile({
+            key: `${mailboxId}/${emailId}/${attId}/${encodeURIComponent(name)}`,
+            buffer: attContent,
+            contentType: attachment.mimeType
         })
-        await upload.done()
+
+        if (!upload.ok) {
+            console.error(await upload.text())
+        }
     }
 
     console.log("saved email to s3", emailId)
 
     // send push notifications
     const notifications = await db
-        .select({ endpoint: UserNotification.endpoint, p256dh: UserNotification.p256dh, auth: UserNotification.auth })
+        .select({
+            endpoint: UserNotification.endpoint,
+            p256dh: UserNotification.p256dh,
+            auth: UserNotification.auth,
+            expiresAt: UserNotification.expiresAt,
+        })
         .from(UserNotification)
         .leftJoin(MailboxForUser, eq(UserNotification.userId, MailboxForUser.userId))
         .where(eq(MailboxForUser.mailboxId, mailboxId))
@@ -214,24 +208,26 @@ export async function POST(request: Request) {
         })
         if (!n.endpoint || !n.p256dh || !n.auth) return console.error('missing notification data', n)
 
-        try {
-            await webpush.sendNotification({
+        const res = await sendNotification({
+            subscription: {
                 endpoint: n.endpoint,
                 keys: {
                     p256dh: n.p256dh,
                     auth: n.auth,
-                }
-            }, payload)
+                },
+                expirationTime: n.expiresAt,
+            },
+            data: payload
+        })
 
-        } catch (e: any) {
+        if (!res.ok) {
             // delete the notification if it's no longer valid
-            if (e.statusCode === 410) {
+            if (res.status === 410) {
                 await db.delete(UserNotification)
                     .where(eq(UserNotification.endpoint, n.endpoint))
                     .execute()
-            } else {
-                console.error(e)
             }
+            console.error(await res.text())
         }
     }))
 

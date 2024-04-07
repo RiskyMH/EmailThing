@@ -44,10 +44,16 @@ export default async function signIn(data: FormData, callback?: string | null): 
     }
 
     // verify password
-    const verified = verifyPassword(parsedData.data.password, user.password)
+    const verified = await verifyPassword(parsedData.data.password, user.password)
 
     if (!verified) {
         return { error: errorMsg }
+    } else if (typeof verified === "string") {
+        // this is the new hash
+        await db.update(User)
+            .set({ password: verified })
+            .where(eq(User.id, user.id))
+            .execute()
     }
 
     await addUserTokenToCookie(user)

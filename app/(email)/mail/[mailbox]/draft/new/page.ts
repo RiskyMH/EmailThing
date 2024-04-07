@@ -5,7 +5,6 @@ import { and, eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import type { Recipient } from "../[draft]/types";
 
-
 export default async function Page({
     params,
     searchParams

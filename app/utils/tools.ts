@@ -1,7 +1,3 @@
-import { randomBytes, createHash } from "crypto"
-
-export const randomText = (size = 16) =>
-    randomBytes(size).toString("hex")
 
 export function dateDay(date: Date, timeZone: string) {
     return date.toLocaleString([], {
@@ -12,11 +8,12 @@ export function dateDay(date: Date, timeZone: string) {
     })
 }
 
-export function gravatar(email: string) {
-    const hash = createHash("md5")
-        .update(email.toLowerCase())
-        .digest("hex")
-    return `https://www.gravatar.com/avatar/${hash}?d=404`
+export async function gravatar(email: string) {
+    const myText = new TextEncoder().encode(email.toLowerCase());
+    const hashBuffer = await crypto.subtle.digest('SHA-256', myText);
+    const hashArray = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+    return `https://www.gravatar.com/avatar/${hashArray}?d=404`
 }
 
 

@@ -5,6 +5,7 @@ import { userMailboxAccess } from "../../../tools"
 import { and, eq } from "drizzle-orm";
 import { getSignedUrl } from "@/utils/s3";
 
+// export const runtime = 'edge'
 
 export async function GET(
     request: Request,

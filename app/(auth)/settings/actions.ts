@@ -7,9 +7,9 @@ import { and, eq, not } from "drizzle-orm";
 import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import webpush from 'web-push';
-import { env } from '@/utils/env';
+import { sendNotification } from "@/utils/web-push";
 import { userAuthSchema } from "@/validations/auth"
+
 
 export async function changeUsername(username: string) {
     const userId = await getCurrentUser()
@@ -52,7 +52,7 @@ export async function changePassword(oldPassword: string, newPassword: string) {
 
     if (!user) return { error: 'User not found' }
 
-    const validPassword = verifyPassword(oldPassword, user.password)
+    const validPassword = await verifyPassword(oldPassword, user.password)
     if (!validPassword) return { error: 'Current password is not correct' }
 
     if (newPassword.length < 8) return { error: 'Password needs to be at least 8 characters' }
@@ -78,12 +78,6 @@ export async function logout() {
 }
 
 
-webpush.setVapidDetails(
-    'mailto:test@example.com',
-    env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
-    env.WEB_NOTIFICATIONS_PRIVATE_KEY
-)
-
 export async function saveSubscription(subscription: PushSubscriptionJSON) {
     const userId = await getCurrentUser();
     if (!userId) throw new Error("User not found");
@@ -92,16 +86,16 @@ export async function saveSubscription(subscription: PushSubscriptionJSON) {
     if (!subscription.keys) throw new Error("Subscription keys are missing");
     if (!subscription.endpoint) throw new Error("Subscription endpoint is missing");
 
-    await webpush.sendNotification({
-        endpoint: subscription.endpoint,
-        keys: {
-            p256dh: subscription.keys.p256dh,
-            auth: subscription.keys.auth,
-        }
-    }, JSON.stringify({
-        title: "Text Notification",
-        body: "This is a test notification!",
-    }))
+    const res = await sendNotification({
+        subscription: subscription as any,
+        data: JSON.stringify({
+            title: "Text Notification",
+            body: "This is a test notification!",
+        })
+    })
+
+    if (!res.ok) throw new Error("Failed to send test notification: " + await res.text())
+
 
     await db.insert(UserNotification)
         .values({
