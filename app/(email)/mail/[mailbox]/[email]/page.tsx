@@ -152,22 +152,22 @@ export default async function EmailPage({
                                         {/* subject */}
                                         <div className="grid grid-cols-5 items-center gap-4">
                                             <p className="text-muted-foreground text-end">subject:</p>
-                                            <p className="col-span-4">{email.subject}</p>
+                                            <p className="col-span-4 overflow-y-auto">{email.subject}</p>
                                         </div>
 
                                         {/* reply to */}
                                         {email.replyTo && (
                                             <div className="grid grid-cols-5 items-center gap-4">
                                                 <p className="text-muted-foreground text-end">reply to:</p>
-                                                <p className="col-span-4">{email.replyTo}</p>
+                                                <p className="col-span-4 overflow-y-auto">{email.replyTo}</p>
                                             </div>
                                         )}
                                     </div>
                                 </PopoverContent>
                             </Popover>
                         </div>
-
                     </div>
+
                     <LocalTime className="text-muted-foreground text-sm ms-auto mt-2 hidden lg:inline" time={email.createdAt} type="full" />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -196,7 +196,6 @@ export default async function EmailPage({
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-
                 </div>
 
                 {/* attachments */}

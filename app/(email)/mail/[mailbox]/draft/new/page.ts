@@ -4,6 +4,7 @@ import { mailboxAliases, pageMailboxAccess } from "../../tools";
 import { and, eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import type { Recipient } from "../[draft]/types";
+import { headers } from "next/headers";
 
 export default async function Page({
     params,
@@ -50,7 +51,6 @@ export default async function Page({
                         address: true
                     }
                 },
-
             }
         })
 
@@ -85,7 +85,8 @@ export default async function Page({
             }
         }
 
-        const emailBody = `On ${email.createdAt.toLocaleString()}, ${email.from?.name ? `${email.from?.name} <${email.from?.address}>` : email.from?.name} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`
+        const timeZone = headers().get("x-vercel-ip-timezone") || undefined
+        const emailBody = `\n\nOn ${email.createdAt.toLocaleString([], { timeZone })}, ${email.from?.name ? `${email.from?.name} <${email.from?.address}>` : email.from?.name} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`
 
         // create draft with reply
         const draftId = createId()
