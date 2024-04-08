@@ -3,15 +3,10 @@
   "short_name": "EmailThing",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#222229",
+  "background_color": "#222229",
   "description": "An email client!",
   "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "256x256",
-      "type": "image/x-icon"
-    },
     {
       "src": "logo.png",
       "sizes": "512x512",
@@ -19,7 +14,7 @@
     },
     {
       "src": "logo.svg",
-      "sizes": "512x512",
+      "sizes": "any",
       "type": "image/svg+xml"
     }
   ],
