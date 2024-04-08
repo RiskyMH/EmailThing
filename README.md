@@ -1,5 +1,7 @@
 <h1 align="center">
-  <img src="https://emailthing.xyz/logo.png" alt="EmailThing Logo" width="84">
+  <a href="https://emailthing.xyz/home" target="_blank">
+    <img src="https://emailthing.xyz/logo.png" alt="EmailThing Logo" width="84">
+  </a>
   <br>
   EmailThing
 </h1>
@@ -45,13 +47,13 @@ bun db:push
 bun dev --turbo
 ```
 
-### How it works
+## How it works
 
 EmailThing primarily handles the front-end aspect of the email management application. For sending and receiving emails, it makes use of [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) to incoming emails, and [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) to outgoing emails.
 
 To do this locally, refer to [./cloudflare-workers/README.md](./cloudflare-workers/README.md) for more information.
 
-## Why did you make this?
+### Why did you make this?
 
 I made this because I wanted to have a way to deal with my emails from a custom domain. The options from Gmail were too expensive, and I couldn't find a good alternative, so I made my own. I tried to make it in a way that gives you the most control over your emails (ie owning the worker receiving emails).
 
@@ -73,7 +75,7 @@ Many individuals and organizations have contributed to the creation of this proj
 * And one of the most important, [Dawid Jankowski](https://dribbble.com/shots/15142673-E-mail-Client-Inbox-Dark-Mode) for providing the design to base the app on.
 * *and many more that I can't possibly mention...*
 
-### Need Help?
+## Need Help?
 
 If you encounter any issues or have questions, please join our [Discord server](https://discord.gg/GT9Q2Yz4VS) for assistance. I'm more than willing to help. Please seek support through Discord rather than opening an issue, as it facilitates better communication and understanding of your problem.
 
