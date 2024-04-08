@@ -5,7 +5,7 @@ self.addEventListener('push', async (event) => {
         const eventData = await event.data.json();
         self.registration.showNotification(eventData.title, {
             body: eventData.body,
-            icon: '/icon.png',
+            icon: '/logo.png',
             timestamp: Date.now(),
             data: {
                 url: eventData.url,

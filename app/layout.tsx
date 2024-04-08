@@ -37,7 +37,7 @@ export const metadata = {
     title: "EmailThing",
     description: "A modern email client designed for simplicity and the web.",
     images: [
-      "/icon.png",
+      "/logo.png",
     ],
     locale: "en_US",
     url: "https://emailthing.xyz/home",
@@ -55,7 +55,7 @@ export const metadata = {
     description: "A modern email client designed for simplicity and the web.",
     card: "summary",
     images: [
-      "/icon.png",
+      "/logo.png",
     ],
   },
   generator: 'Next.js',

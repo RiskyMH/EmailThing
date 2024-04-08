@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://emailthing.xyz/icon.png" alt="EmailThing Logo" width="84">
+  <img src="https://emailthing.xyz/logo.png" alt="EmailThing Logo" width="84">
   <br>
   EmailThing
 </h1>
