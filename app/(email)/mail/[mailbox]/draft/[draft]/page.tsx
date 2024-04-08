@@ -66,6 +66,9 @@ export default async function DraftPage({
         <div className="w-full p-4 md:p-8 gap-4 flex flex-col">
             <div className="flex items-center gap-4">
                 <SendButton sendAction={sendAction} isValid={isValid} />
+                {(mail.from?.includes("cheese") || mail.subject?.includes("cheese")) && (
+                    <SendButton className="bg-orange-500 hover:bg-orange-400" text="🧀" sendAction={sendAction.bind(null, true)} isValid={isValid} />
+                )}
                 <FromInput savedAlias={mail.from || defaultAlias?.alias} aliases={aliases} saveAction={saveAction} />
             </div>
 

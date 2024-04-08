@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Loader2, SendIcon } from 'lucide-react';
+import { cn } from '@/utils/tw';
 
 export function BodyEditor({ saveAction, savedBody }: { saveAction: ({ body }: { body: string }) => Promise<any>, savedBody?: string }) {
     const debounced = useDebouncedCallback(saveAction, 1000);
@@ -49,7 +50,7 @@ export function Subject({ saveAction, savedSubject }: { saveAction: ({ subject }
 }
 
 
-export function SendButton({ sendAction, isValid }: { sendAction: () => Promise<any>, isValid: string | null }) {
+export function SendButton({ sendAction, isValid, text, className }: { sendAction: () => Promise<any>, isValid: string | null, text?: string, className?: string }) {
     const [isPending, startTransition] = useTransition();
 
     const onClick = (e: any) => {
@@ -70,12 +71,15 @@ export function SendButton({ sendAction, isValid }: { sendAction: () => Promise<
     }
 
     return (
-        <Button onClick={onClick as any} aria-disabled={isPending} disabled={isPending} className="flex gap-2" type='submit'>
-            {isPending ?
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                : <SendIcon className="h-5 w-5" />
-            }
-            Send
+        <Button onClick={onClick as any} aria-disabled={isPending} disabled={isPending} className={cn("flex gap-2", className)} type='submit'>
+            {text || (
+                <>
+                    {isPending ?
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        : <SendIcon className="h-5 w-5" />}
+                    Send
+                </>
+            )}
         </Button>
     )
 }

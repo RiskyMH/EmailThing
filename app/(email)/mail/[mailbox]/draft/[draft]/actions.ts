@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { SaveActionProps } from "./types";
 import { and, eq, sql } from "drizzle-orm";
 
-export async function sendEmailAction(mailboxId: string, draftId: string) {
+export async function sendEmailAction(mailboxId: string, draftId: string, cheese?: boolean) {
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) {
         throw new Error("Mailbox not found");
@@ -29,7 +29,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string) {
     })
     if (!mail) throw new Error("Mail not found")
 
-    const { body, subject, from, to } = mail
+    let { body, subject, from, to } = mail
     if (!to) throw new Error("No recipients")
 
     // verify alias is valid (and user has access to it)
@@ -44,6 +44,13 @@ export async function sendEmailAction(mailboxId: string, draftId: string) {
         }
     })
     if (!alias) throw new Error("Alias not found")
+
+    // if cheese, replace some chars with cheese (~25% of chars)
+    const cheeseify = (str: string) => str.split("").map(char => Math.random() < 0.25 ? "🧀" : char).join("")
+    if (cheese) {
+        if (subject) subject = cheeseify(subject)
+        if (body) body = cheeseify(body)
+    }
 
     // now send email (via mailchannels)!
     const e = await fetch("https://email.riskymh.workers.dev", {
