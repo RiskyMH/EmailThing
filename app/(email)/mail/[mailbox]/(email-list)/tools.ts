@@ -1,5 +1,5 @@
 import { db, DraftEmail, Email } from "@/db";
-import { and, count, desc, eq, isNotNull, isNull, like, lt } from "drizzle-orm";
+import { and, bindIfParam, count, desc, eq, isNotNull, isNull, like, lt, sql } from "drizzle-orm";
 
 export interface EmailListFindOptions {
     isBinned?: boolean;
@@ -22,7 +22,7 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
             options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
 
             // cursor pagination
-            (curser && 'emailId' in curser) ? lt((Email.createdAt, Email.id), (curser.createdAt, curser.emailId)) : undefined,
+            (curser && 'emailId' in curser) ? sql`(${Email.createdAt}, ${Email.id}) < (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`: undefined,
             options.search ? like(Email.subject, `%${options.search}%`) : undefined
         ),
         columns: {
@@ -33,7 +33,6 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
             createdAt: true,
             isRead: true,
             isStarred: true,
-            raw: true,
             binnedAt: true,
         },
         with: {

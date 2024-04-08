@@ -44,8 +44,8 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
         if (!await userMailboxAccess(mailboxId, userId)) throw new Error()
 
         const emails = (type !== "drafts")
-            ? await getJustEmailsList(mailboxId, { ...emailFetchOptions, take: 10 }, curser)
-            : await getDraftJustEmailsList(mailboxId, {}, curser)
+            ? await getJustEmailsList(mailboxId, { ...emailFetchOptions, selectCategories: false, take: 10 }, curser)
+            : await getDraftJustEmailsList(mailboxId, { take: 10, search }, curser)
 
         if (emails.length === 0) throw new Error("No more emails")
 
