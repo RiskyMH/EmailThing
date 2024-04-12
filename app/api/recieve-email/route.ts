@@ -1,10 +1,10 @@
 // @ts-ignore
 import PostalMime from 'postal-mime';
 type PostalMime = import("../../../node_modules/postal-mime/postal-mime").default;
-import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification } from "@/db";
+import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification, TempAlias } from "@/db";
 import { storageLimit } from '@/utils/limits';
 import { createId } from '@paralleldrive/cuid2';
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gt, lt, sql } from "drizzle-orm";
 import { uploadFile } from '@/utils/s3';
 import { sendNotification } from '@/utils/web-push';
 
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
 
     // work out which mailbox to put it in
     let mailboxId: string | undefined = undefined
+    let tempId: string | undefined
 
     // check if its a default domain first (and if so, check the alias and get the mailbox id)
     const defaultDomain = await db.query.DefaultDomain.findFirst({
@@ -38,20 +39,36 @@ export async function POST(request: Request) {
             eq(DefaultDomain.authKey, auth!)
         ),
         columns: {
-            id: true
+            id: true,
+            tempDomain: true,
         }
     })
 
     if (defaultDomain) {
-        const alias = await db.query.MailboxAlias.findFirst({
-            where: eq(MailboxAlias.alias, to),
-            columns: {
-                mailboxId: true
-            }
-        })
+        const alias = defaultDomain.tempDomain ?
+            await db.query.TempAlias.findFirst({
+                where: and(
+                    eq(TempAlias.alias, to),
+                    gt(TempAlias.expiresAt, new Date()),
+                ),
+                columns: {
+                    mailboxId: true,
+                    id: true
+                }
+            })
+            : await db.query.MailboxAlias.findFirst({
+                where: eq(MailboxAlias.alias, to),
+                columns: {
+                    mailboxId: true,
+                    id: true
+                }
+            })
 
         if (alias) {
             mailboxId = alias.mailboxId
+            if (defaultDomain.tempDomain) {
+                tempId = alias.id
+            }
         }
 
     } else {
@@ -110,6 +127,7 @@ export async function POST(request: Request) {
                 mailboxId,
                 replyTo: email.replyTo?.[0]?.address,
                 size: emailSize,
+                tempId,
             }),
 
         db.insert(EmailRecipient)
@@ -117,14 +135,14 @@ export async function POST(request: Request) {
                 [
                     ...email.to?.map((to) => ({
                         emailId: emailId,
-                        address: to.address,
+                        address: to.address!,
                         name: to.name,
                         cc: false,
                     })) ?? [],
 
                     ...email.cc?.map((cc) => ({
                         emailId: emailId,
-                        address: cc.address,
+                        address: cc.address!,
                         name: cc.name,
                         cc: true,
                     })) ?? []
@@ -134,7 +152,7 @@ export async function POST(request: Request) {
         db.insert(EmailSender)
             .values({
                 emailId: emailId,
-                address: email.from.address,
+                address: email.from.address!,
                 name: email.from.name,
             }),
 

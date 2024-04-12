@@ -1,15 +1,23 @@
 import { getCurrentUser } from "@/utils/jwt";
 import { RefreshButton } from "../components.client";
-import { getDraftEmailList, getEmailList, getJustEmailsList, getDraftJustEmailsList } from "./tools"
+import { getDraftEmailList, getEmailList, getJustEmailsList, getDraftJustEmailsList, getTempAliases } from "./tools"
 import LoadMore from "@/components/loadmore.client";
 import { EmailItem } from "./email-item";
 import { mailboxCategories, userMailboxAccess } from "../tools";
 import { cn } from "@/utils/tw";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { SmartDrawer, SmartDrawerTrigger, SmartDrawerContent, SmartDrawerFooter, SmartDrawerClose } from "@/components/ui/smart-drawer";
+import { customDomainLimit, tempEmailsLimit } from "@/utils/limits";
+import { AddCustomDomainForm } from "../config/components.client";
+import { CreateTempEmailForm } from "./temp/modal";
+import db, { Mailbox } from "@/db";
+import { eq } from "drizzle-orm";
+import { formatTimeAgo } from "@/utils/tools";
 
 interface EmailListProps {
     mailboxId: string;
-    type?: "inbox" | "sent" | "drafts" | "trash" | "starred";
+    type?: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
     categoryId?: string;
     initialTake?: string;
     search?: string
@@ -26,16 +34,24 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
         categoryId,
         take,
         search,
-        selectCategories: !search && type !== "drafts"
+        selectCategories: !search && type !== "drafts",
+        isTemp: type === "temp"
     }
 
     const [emails, categoryCounts, emailCount] = (type !== "drafts")
         ? await getEmailList(mailboxId, emailFetchOptions)
         : await getDraftEmailList(mailboxId, emailFetchOptions)
 
-    const categories = emailFetchOptions.selectCategories && await mailboxCategories(mailboxId)
+    const categories = emailFetchOptions.selectCategories && await (type === "temp" ? getTempAliases : mailboxCategories)(mailboxId)
+    const mailboxPlan = type === "temp" ? await db.query.Mailbox.findFirst({
+        where: eq(Mailbox.id, mailboxId),
+        columns: {
+            plan: true
+        }
+    }) : undefined
 
     const nextEmail = emails.length === take + 1 ? emails.pop() : null
+    const currentCategory = categories && categories?.find(c => c.id === categoryId)
 
     async function fetchMoreEmails(curser?: { emailId: string, createdAt: Date }) {
         "use server";
@@ -50,7 +66,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
         if (emails.length === 0) throw new Error("No more emails")
 
         const nextPageEmail = emails.length >= 11 ? emails.pop() : null
-        const categories = await mailboxCategories(mailboxId)
+        const categories = type === "temp" ? undefined : await mailboxCategories(mailboxId)
 
         return [
             emails.map(email => (
@@ -92,11 +108,42 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
                             />
                         ))}
                     </div>
-
+                    {type === "temp" && (
+                        <SmartDrawer>
+                            <SmartDrawerTrigger asChild>
+                                <Button size="sm" className="h-auto py-1 -my-1" disabled={((categories && categories?.length) || 0) >= (tempEmailsLimit)[mailboxPlan?.plan ?? "FREE"]}>
+                                    Create email
+                                </Button>
+                            </SmartDrawerTrigger>
+                            <SmartDrawerContent className="sm:max-w-[425px]">
+                                <CreateTempEmailForm mailboxId={mailboxId} />
+                            </SmartDrawerContent>
+                        </SmartDrawer>
+                    )}
                     <div className="ms-auto me-2 flex-shrink-0">
                         <RefreshButton />
                     </div>
                 </div>
+                {type === "trash" && (
+                    <div className="text-muted-foreground text-center font-bold">
+                        Messages that have been in the Bin for more than 30 days will be deleted automatically
+                    </div>
+                )}
+                {type === "temp" && (
+                    <div className="text-muted-foreground text-center font-bold">
+                        {categoryId
+                            // @ts-expect-error types are boring
+                            ? `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
+                            : `Email addresses will be automatically deleted in 24 hours after creation.`
+                        }
+                        {categoryId && (
+                            <p className="pt-1 font-normal">
+                                {/* @ts-expect-error types are boring */}
+                                {currentCategory?.alias}
+                            </p>
+                        )}
+                    </div>
+                )}
                 {emails.length === 0 && (
                     <div className="text-center text-muted-foreground">
                         {

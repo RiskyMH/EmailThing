@@ -7,7 +7,7 @@ import { aliasLimit, customDomainLimit } from "@/utils/limits";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
 import { createId } from '@paralleldrive/cuid2';
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, not } from "drizzle-orm";
 
 export async function verifyDomain(mailboxId: string, customDomain: string) {
     const userId = await getCurrentUser()
@@ -121,7 +121,10 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
     // check if domain is a custom domain (and they have access to it) or just a default domain
     const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batch([
         db.query.DefaultDomain.findFirst({
-            where: eq(DefaultDomain.domain, alias.split("@")[1])
+            where: and(
+                eq(DefaultDomain.domain, alias.split("@")[1]),
+                not(eq(DefaultDomain.tempDomain, true))
+            )
         }),
 
         db.query.MailboxCustomDomain.findFirst({

@@ -36,3 +36,9 @@ export async function uploadFile({ key, buffer, contentType }: { key: string, bu
         body: buffer
     })
 }
+
+export async function deleteFile(key: string) {
+    return aws.fetch(`${s3Url}/${key}`, {
+        method: 'DELETE',
+    })
+}

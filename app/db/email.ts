@@ -1,7 +1,7 @@
 import { relations } from 'drizzle-orm';
 import { sqliteTable, int, integer, index, text, } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
-import { Mailbox, MailboxCategory } from './mailbox';
+import { Mailbox, MailboxCategory, TempAlias } from './mailbox';
 
 // The Email
 export const Email = sqliteTable("emails", {
@@ -20,6 +20,8 @@ export const Email = sqliteTable("emails", {
     replyTo: text("reply_to"),
     categoryId: text("category_id", { length: 24 })
         .references(() => MailboxCategory.id, { onDelete: 'set null' }),
+    tempId: text("temp_id", { length: 24 })
+        .references(() => TempAlias.id, { onDelete: 'cascade' }),
 
     isSender: int("is_sender", { mode: "boolean" }).default(false).notNull(),
     isRead: int("is_read", { mode: "boolean" }).default(false).notNull(),
@@ -34,6 +36,7 @@ export const Email = sqliteTable("emails", {
         isReadIdx: index("email_is_read_idx").on(table.isRead),
         isStarredIdx: index("email_is_starred_idx").on(table.isStarred),
         binnedAtIdx: index("email_binned_at_idx").on(table.binnedAt),
+        tempIdIdx: index("email_temp_id_idx").on(table.tempId),
 
         createdIdIdx: index("email_created_id_idx").on(table.createdAt, table.id),
     }
@@ -54,7 +57,12 @@ export const EmailRelations = relations(Email, ({ many, one }) => ({
         references: [MailboxCategory.id],
     }),
     attachments: many(EmailAttachments),
+    temp: one(TempAlias, {
+        fields: [Email.tempId],
+        references: [TempAlias.id],
+    }),
 }));
+
 
 // Email sender
 export const EmailSender = sqliteTable("email_senders", {

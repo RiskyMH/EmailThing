@@ -14,6 +14,11 @@ export const customDomainLimit = {
     [PlanType.UNLIMITED]: Infinity,
 }
 
+export const tempEmailsLimit = {
+    [PlanType.FREE]: 10,
+    [PlanType.UNLIMITED]: Infinity,
+}
+
 export const aliasLimit = {
     [PlanType.FREE]: 5,
     [PlanType.UNLIMITED]: Infinity,

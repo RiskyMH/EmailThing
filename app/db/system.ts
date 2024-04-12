@@ -9,6 +9,7 @@ export const DefaultDomain = sqliteTable("default_domains", {
     domain: nocaseText("domain").notNull().unique(),
     authKey: text("auth_key", { length: 24 }).notNull().$defaultFn(() => createId()),
     available: int("available", { mode: "boolean" }).default(false),
+    tempDomain: int("temp_domain", { mode: "boolean" }).default(false),
 }, (table) => {
     return {
         availableIdx: index("default_domain_available").on(table.available),

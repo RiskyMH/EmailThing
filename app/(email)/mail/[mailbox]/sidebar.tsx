@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { db, Email } from "@/db";
-import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon } from "lucide-react";
+import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon, TimerIcon } from "lucide-react";
 import Link from "next/link";
 import { SidebarLink } from "./sidebar.client";
 import { Suspense, cache } from "react";
@@ -36,6 +36,11 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
             name: "Trash",
             icon: Trash2Icon,
             href: `/mail/${mailboxId}/trash`
+        },
+        {
+            name: "Temporary Mail",
+            icon: TimerIcon,
+            href: `/mail/${mailboxId}/temp`,
         },
         {
             name: "Spam",

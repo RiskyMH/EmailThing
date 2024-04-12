@@ -1,5 +1,5 @@
-import { db, DraftEmail, Email } from "@/db";
-import { and, bindIfParam, count, desc, eq, isNotNull, isNull, like, lt, sql } from "drizzle-orm";
+import { db, DraftEmail, Email, TempAlias } from "@/db";
+import { and, bindIfParam, count, desc, eq, gt, isNotNull, isNull, like, lt, sql } from "drizzle-orm";
 
 export interface EmailListFindOptions {
     isBinned?: boolean;
@@ -9,6 +9,7 @@ export interface EmailListFindOptions {
     take?: number;
     search?: string;
     selectCategories?: boolean;
+    isTemp?: boolean;
 }
 type Curser = { emailId: string, createdAt: Date } | { offset: number }
 
@@ -18,11 +19,19 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
             eq(Email.mailboxId, mailboxId),
             options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
             eq(Email.isSender, options.isSender || false),
-            options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined,
             options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
+            options.isTemp ?
+                and(
+                    isNotNull(Email.tempId),
+                    options.categoryId ? eq(Email.tempId, options.categoryId) : undefined
+                ) :
+                and(
+                    isNull(Email.tempId),
+                    options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined
+                ),
 
             // cursor pagination
-            (curser && 'emailId' in curser) ? sql`(${Email.createdAt}, ${Email.id}) < (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`: undefined,
+            (curser && 'emailId' in curser) ? sql`(${Email.createdAt}, ${Email.id}) < (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})` : undefined,
             options.search ? like(Email.subject, `%${options.search}%`) : undefined
         ),
         columns: {
@@ -50,7 +59,7 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
                 }
             }
         },
-        orderBy: desc(Email.createdAt),
+        orderBy: options.isBinned ? desc(Email.binnedAt) : desc(Email.createdAt),
         limit: options.take ? options.take + 1 : 11,
         offset: (curser && 'offset' in curser) ? curser.offset : undefined
     })
@@ -62,15 +71,16 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
         getJustEmailsList(mailboxId, options, curser),
 
         options.selectCategories ? db
-            .select({ count: count(), categoryId: Email.categoryId })
+            .select({ count: count(), categoryId: options.isTemp ? Email.tempId : Email.categoryId })
             .from(Email)
             .where(and(
                 eq(Email.mailboxId, mailboxId),
                 options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
                 eq(Email.isSender, options.isSender || false),
                 options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
-                options.search ? like(Email.subject, `%${options.search}%`) : undefined
-            )).groupBy(Email.categoryId) : null,
+                options.search ? like(Email.subject, `%${options.search}%`) : undefined,
+                options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId)
+            )).groupBy(options.isTemp ? Email.tempId : Email.categoryId) : null,
 
         db
             .select({ count: count() })
@@ -80,7 +90,8 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
                 options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
                 eq(Email.isSender, options.isSender || false),
                 options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
-                options.search ? like(Email.subject, `%${options.search}%`) : undefined
+                options.search ? like(Email.subject, `%${options.search}%`) : undefined,
+                options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId)
             ))
 
     ])
@@ -124,7 +135,7 @@ export async function getDraftJustEmailsList(mailboxId: string, options?: { take
     return emailsFormatted;
 }
 
-export async function getDraftEmailList(mailboxId: string, options?: { take?: number, search?: string}) {
+export async function getDraftEmailList(mailboxId: string, options?: { take?: number, search?: string }) {
     const emails = getDraftJustEmailsList(mailboxId, options);
 
     const allCount = db.select({ count: count() })
@@ -136,4 +147,28 @@ export async function getDraftEmailList(mailboxId: string, options?: { take?: nu
         .execute()
 
     return Promise.all([emails, null, allCount])
+}
+
+export async function getTempAliases(mailboxId: string) {
+    const temps = await db.query.TempAlias.findMany({
+        where: and(
+            eq(TempAlias.mailboxId, mailboxId),
+            gt(TempAlias.expiresAt, new Date())
+        ),
+        columns: {
+            id: true,
+            alias: true,
+            name: true,
+            expiresAt: true,
+        },
+        orderBy: desc(TempAlias.createdAt)
+    })
+
+    return temps.map(temp => ({
+        id: temp.id,
+        name: temp.name || temp.alias,
+        color: "gray",
+        expiresAt: temp.expiresAt,
+        alias: temp.alias
+    }))
 }

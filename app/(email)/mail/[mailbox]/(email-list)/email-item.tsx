@@ -12,7 +12,7 @@ import { updateEmail as updateEmailAction } from "../actions"
 export interface EmailItemProps {
     email: Awaited<ReturnType<typeof getJustEmailsList>>[0] | Awaited<ReturnType<typeof getDraftJustEmailsList>>[0];
     mailboxId: string;
-    type: "inbox" | "sent" | "drafts" | "trash" | "starred";
+    type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
     categories?: Awaited<ReturnType<typeof mailboxCategories>> | null;
 }
 
@@ -63,7 +63,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
             </ContextMenuTrigger>
             <ContextMenuContent>
 
-                {type !== "drafts" ? (
+                {!["drafts", "temp"].includes(type) ? (
                     <>
                         {/* // TODO: implement sending emails */}
                         <ContextMenuItem className="flex gap-2" asChild>
@@ -96,40 +96,48 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                                 {!email.binnedAt ? "Delete" : "Restore to inbox"}
                             </ContextMenuAction>
                         </ContextMenuItem>
+                        {email.binnedAt && (
+                            <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
+                                <ContextMenuAction icon="Trash2Icon" action={updateEmail.bind(null, { binned: false, permDelete: true })}>
+                                    Delete forever
+                                </ContextMenuAction>
+                            </ContextMenuItem>
+                        )}
                         <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
                             <ContextMenuAction icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"} action={updateEmail.bind(null, { isRead: !email.isRead })}>
                                 {email.isRead ? "Mark as unread" : "Mark as read"}
                             </ContextMenuAction>
                         </ContextMenuItem>
                         <ContextMenuSeparator />
-
-                        <ContextMenuSub>
-                            <ContextMenuSubTrigger className="flex gap-2 cursor-pointer w-full">
-                                <TagIcon className="w-5 h-5 text-muted-foreground" />
-                                Categorize as
-                            </ContextMenuSubTrigger>
-                            <ContextMenuSubContent className="w-48">
-                                <ContextMenuItem asChild className="flex gap-2 cursor-pointer w-full" >
-                                    <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
-                                        None
-                                    </ContextMenuAction>
-                                </ContextMenuItem>
-
-                                {categories?.map(category => (
-                                    <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer w-full" >
-                                        <ContextMenuAction icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: category.id })}>
-                                            {category.name}
+                        {type !== "temp" && (
+                            <ContextMenuSub>
+                                <ContextMenuSeparator />
+                                <ContextMenuSubTrigger className="flex gap-2 cursor-pointer w-full">
+                                    <TagIcon className="w-5 h-5 text-muted-foreground" />
+                                    Categorize as
+                                </ContextMenuSubTrigger>
+                                <ContextMenuSubContent className="w-48">
+                                    <ContextMenuItem asChild className="flex gap-2 cursor-pointer w-full" >
+                                        <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
+                                            None
                                         </ContextMenuAction>
                                     </ContextMenuItem>
-                                ))}
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
 
+                                    {categories?.map(category => (
+                                        <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer w-full" >
+                                            <ContextMenuAction icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: category.id })}>
+                                                {category.name}
+                                            </ContextMenuAction>
+                                        </ContextMenuItem>
+                                    ))}
+                                </ContextMenuSubContent>
+                            </ContextMenuSub>
+                        )}
                     </>
                 ) : (
-                    <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
-                        <ContextMenuAction icon={"Trash2Icon"} action={updateEmail.bind(null, { binned: !email.binnedAt })}>
-                            Delete
+                    <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
+                        <ContextMenuAction icon="Trash2Icon" action={updateEmail.bind(null, { binned: false, permDelete: true })}>
+                            Delete forever
                         </ContextMenuAction>
                     </ContextMenuItem>
                 )}

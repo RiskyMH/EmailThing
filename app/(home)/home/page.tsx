@@ -90,7 +90,7 @@ export default function Home() {
           <Feature
             icon={TimerIcon}
             title="Temporary Email"
-            description="Incase you need a burner email, we got you covered. [coming soon]"
+            description="Incase you need a burner email, we got you covered."
           />
           <Feature
             icon={SmartphoneIcon}

@@ -18,6 +18,7 @@ export const MailboxRelations = relations(Mailbox, ({ many, one }) => ({
     customDomains: many(MailboxCustomDomain),
     categories: many(MailboxCategory),
     users: many(MailboxForUser),
+    tempAliases: many(TempAlias),
 }));
 
 
@@ -45,6 +46,29 @@ export const MailboxAliasRelations = relations(MailboxAlias, ({ many, one }) => 
     })
 }));
 
+// Temp Alias (for short lived email)
+export const TempAlias = sqliteTable("temp_aliases", {
+    id: text("id", { length: 24 }).primaryKey().unique().$defaultFn(() => createId()),
+    mailboxId: text("mailbox_id", { length: 24 }).notNull()
+        .references(() => Mailbox.id, { onDelete: 'cascade' }),
+    alias: nocaseText("alias").notNull(),
+    name: text("name"),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+}, (table) => {
+    return {
+        idx: index("temp_aliases_idx").on(table.mailboxId, table.alias),
+        unique: unique("temp_aliases_unique").on(table.alias, table.mailboxId),
+    }
+});
+
+export const TempAliasRelations = relations(TempAlias, ({ many, one }) => ({
+    mailbox: one(Mailbox, {
+        fields: [TempAlias.mailboxId],
+        references: [Mailbox.id],
+    }),
+    emails: many(Email),
+}));
 
 // Custom Domains
 export const MailboxCustomDomain = sqliteTable("mailbox_custom_domain", {

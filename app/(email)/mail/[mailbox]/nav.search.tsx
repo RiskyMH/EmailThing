@@ -32,7 +32,8 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
                 `/mail/${mailboxId}/sent`,
                 `/mail/${mailboxId}/drafts`,
                 `/mail/${mailboxId}/trash`,
-                `/mail/${mailboxId}/starred`
+                `/mail/${mailboxId}/starred`,
+                `/mail/${mailboxId}/temp`,
             ]
             if (!validPaths.includes(pathname)) {
                 router.push(`/mail/${mailboxId}?q=${encodeURIComponent(q)}`)
