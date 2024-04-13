@@ -1,7 +1,5 @@
 import { Metadata } from "next"
 import EmailList from "./email-list"
-import { pageMailboxAccess } from "../tools"
-
 
 export const metadata = {
     title: "Inbox",
@@ -21,8 +19,6 @@ export default async function Mailbox({
         q?: string
     }
 }) {
-    await pageMailboxAccess(params.mailbox)
-
     return (
         <EmailList
             mailboxId={params.mailbox}

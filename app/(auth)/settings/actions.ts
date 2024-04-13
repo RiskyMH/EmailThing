@@ -4,11 +4,12 @@ import { getCurrentUser } from "@/utils/jwt"
 import { createPasswordHash, verifyPassword } from "@/utils/password"
 import { db, User, UserNotification } from "@/db";
 import { and, eq, not } from "drizzle-orm";
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { sendNotification } from "@/utils/web-push";
 import { userAuthSchema } from "@/validations/auth"
+import { env } from "@/utils/env";
 
 
 export async function changeUsername(username: string) {
@@ -123,4 +124,73 @@ export async function deleteSubscription(endpoint: string) {
         .execute()
 
     revalidatePath('/settings')
+}
+
+export async function changeBackupEmail(email: string, redirectHome = false) {
+    const userId = await getCurrentUser()
+    if (!userId) return
+
+    const user = await db.query.User.findFirst({
+        where: eq(User.id, userId),
+        columns: {
+            id: true,
+            backupEmail: true,
+            username: true,
+            email: true
+        }
+    })
+
+    if (!user) throw new Error("User not found")
+
+    const e = await fetch("https://email.riskymh.workers.dev", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-auth": env.EMAIL_AUTH_TOKEN
+        } as Record<string, string>,
+        body: JSON.stringify({
+            personalizations: [
+                {
+                    to: [{ email }]
+                },
+            ],
+            from: {
+                email: "system@emailthing.xyz",
+                name: "EmailThing System"
+            },
+            subject: "Someone has added you as a backup email! 🎉",
+            content: [
+                {
+                    type: "text/plain",
+                    value:
+                        `Hello!
+
+${user.username} has added you as a backup email on EmailThing! 🎉
+
+This means that if they ever lose access to their account, they can use this email to recover it.
+
+If you did not expect this email or have any questions, please contact us at contact@emailthing.xyz
+`
+                }
+            ]
+        }),
+    })
+
+    if (!e.ok) {
+        console.error(await e.text())
+        return { error: "Failed to send email" }
+    }
+
+    await db.update(User)
+        .set({
+            backupEmail: email,
+            onboardingStatus: { initial: true }
+        })
+        .where(eq(User.id, userId))
+        .execute()
+
+    revalidateTag(`user-${userId}`)
+    revalidatePath('/settings')
+
+    if (redirectHome) redirect("/mail")
 }

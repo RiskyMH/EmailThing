@@ -38,7 +38,7 @@ const nextConfig = {
                     ],
                 },
                 {
-                    source: '/(login|register)?',
+                    source: '/(login|register|login\/reset)?',
                     destination: '/mail',
                     has: [
                         {

@@ -107,13 +107,12 @@ export const MailboxCategory = sqliteTable("mailbox_categories", {
 })
 
 export const MailboxCategoryRelations = relations(MailboxCategory, ({ many, one }) => ({
-    emails: many(Email),
     mailbox: one(Mailbox, {
         fields: [MailboxCategory.mailboxId],
         references: [Mailbox.id],
-    })
+    }),
+    emails: many(Email),
 }));
-
 
 
 // User mapping

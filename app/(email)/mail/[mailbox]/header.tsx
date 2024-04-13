@@ -11,6 +11,7 @@ import Sidebar from "./sidebar";
 import { MobileNav } from "./sidebar.client";
 import { eq } from "drizzle-orm";
 import { gravatar } from "@/utils/tools";
+import { redirect } from "next/navigation";
 
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
@@ -68,10 +69,12 @@ async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
     const user = await db.query.User.findFirst({
         where: eq(User.id, userId),
         columns: {
-            username: true
+            username: true,
+            onboardingStatus: true
         }
     })
     if (!user) return null
+    if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
 
     const { default: defaultAlias } = await mailboxAliases(mailboxId);
 

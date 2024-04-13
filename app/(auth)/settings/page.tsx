@@ -7,7 +7,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ChangePassword, ChangeSetting, SignOut } from "./components.client";
-import { changeUsername } from "./actions";
+import { changeUsername, changeBackupEmail } from "./actions";
 import { ReactNode } from "react";
 import NotificationsButton from "./notifications.client";
 import { eq } from "drizzle-orm";
@@ -27,7 +27,8 @@ export default async function UserSettingsPage() {
         columns: {
             id: true,
             username: true,
-            email: true
+            email: true,
+            backupEmail: true,
         }
     })
     if (!user) return notFound();
@@ -66,6 +67,15 @@ export default async function UserSettingsPage() {
                     }}
                 >
                     <ChangePassword />
+                </SettingForm>
+                <SettingForm
+                    buttonName="Change Backup Email"
+                    header={{
+                        title: "Edit backup email",
+                        description: "Make changes to your backup email here. Click save when you're done"
+                    }}
+                >
+                    <ChangeSetting current={user.backupEmail || ''} action={changeBackupEmail} />
                 </SettingForm>
                 <NotificationsButton />
                 <SignOut />

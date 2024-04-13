@@ -108,5 +108,5 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
     })
 
     // redirect to mail
-    redirect(`/mail/${mailboxId}`)
+    redirect(`/onboarding/welcome`)
 }
