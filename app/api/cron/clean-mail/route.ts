@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
             // get emails deleted more than 30 days ago
             lt(Email.binnedAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
             // or if its part of a expired temp alias
-            inArray(Email.tempId, tempAliases.map(temp => temp.id))
+            tempAliases.length ? inArray(Email.tempId, tempAliases.map(temp => temp.id)) : undefined
         ),
         columns: {
             id: true,
