@@ -75,6 +75,6 @@ export const InviteCode = sqliteTable("invite_codes", {
     createdBy: text("created_by", { length: 24 }).notNull(),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     expiresAt: integer('expires_at', { mode: 'timestamp' }),
-    usedBy: text("code", { length: 24 }),
-    usedAt: integer('created_at', { mode: 'timestamp' })
+    usedBy: text("used_by", { length: 24 }),
+    usedAt: integer('used_at', { mode: 'timestamp' })
 })
