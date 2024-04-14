@@ -34,7 +34,8 @@ export function Page({ githubStars, action }: any) {
     return (
         <>
             <div className="pt-4 flex flex-col gap-3">
-                If you would like to star this project on GitHub, please click the button below.
+                I made this for the myself but wanted to share it with others, 
+                so your support by starring my repo would mean lots to me.
                 <Link
                     className={buttonVariants({ variant: !show ? "default" : "secondary", className: "gap-2" })}
                     href="https://github.com/RiskyMH/Email" target="_blank"
@@ -45,8 +46,8 @@ export function Page({ githubStars, action }: any) {
                 </Link>
             </div>
 
-            <div className={cn("pt-4 flex flex-col gap-3 animate-out opacity-0", show && "opacity-100")}>
-                Once you&lsquo;ve starred the project, you can continue setting up your account.
+            <div className={cn("pt-4 flex flex-col gap-3 opacity-0", show && "opacity-100 animate-[fadeIn] duration-500")}>
+                Once you&lsquo;ve looked at my code and verified its sane, you can finish setting up your account.
                 <form className="grid items-start gap-4 px-4 sm:px-0" action={actionn} >
                     <Label htmlFor="email" className="text-secondary-foreground">What&apos;s your backup email?</Label>
                     <Input
@@ -59,7 +60,7 @@ export function Page({ githubStars, action }: any) {
                     />
 
                     <Button type="submit" disabled={pending} className="gap-2">
-                        Continue
+                        Open mailbox
                         {pending ? <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" /> : <ChevronRight className="w-5 h-5" />}
                     </Button>
                 </form>

@@ -11,7 +11,9 @@ import { Page } from "./components.client";
 import { changeBackupEmail } from "../../settings/actions";
 
 export const metadata = {
-    title: "Welcome to EmailThing",
+    title: {
+        absolute: "Welcome to EmailThing",
+    }
 } satisfies Metadata
 
 

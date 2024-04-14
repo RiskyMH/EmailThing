@@ -3,7 +3,6 @@ import { Inter as FontSans } from "next/font/google"
 import localFont from "next/font/local"
 import "./globals.css"
 import { cn } from "@/utils/tw"
-import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
 import { ReactNode } from "react";
 
@@ -78,8 +77,23 @@ export default function RootLayout({
         fontHeading.variable
       )}>
         {children}
-        <Toaster />
         <Sonner />
+        <script type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "EmailThing",
+              "author": {
+                "@type": "Person",
+                "name": "RiskyMH"
+              },
+              "description": "A modern email client designed for simplicity and the web.",
+              "logo": "https://emailthing.xyz/logo.png",
+              "email": "contact@emailthing.xyz",
+              "url": "https://emailthing.xyz/"
+            })
+          }} />
       </body>
     </html>
   )

@@ -178,7 +178,7 @@ If you did not expect this email or have any questions, please contact us at con
 
     if (!e.ok) {
         console.error(await e.text())
-        return { error: "Failed to send email" }
+        return { error: "Failed to send test email to your email address" }
     }
 
     await db.update(User)
