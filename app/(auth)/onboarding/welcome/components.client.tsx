@@ -15,7 +15,7 @@ export function Page({ githubStars, action }: any) {
     const [pending, startTransition] = useTransition();
 
     useEffect(() => {
-        setTimeout(() => setShow(true), 2500)
+        setTimeout(() => setShow(true), 1000)
     }, [])
 
     async function actionn(data: FormData) {
