@@ -1,5 +1,5 @@
 import { db, Email, Mailbox, TempAlias } from '@/db';
-import { lt, or, inArray, sql } from 'drizzle-orm';
+import { lt, or, inArray, sql, eq } from 'drizzle-orm';
 import type { NextRequest } from 'next/server';
 import { deleteFile } from '@/utils/s3';
 
@@ -45,7 +45,6 @@ export async function GET(request: NextRequest) {
         }
     });
 
-
     await Promise.all(emails.map(async (email) => {
         await deleteFile(`${email.mailboxId}/${email.id}`);
         await deleteFile(`${email.mailboxId}/${email.id}/email.eml`);
@@ -53,7 +52,7 @@ export async function GET(request: NextRequest) {
             await deleteFile(`${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`);
         }));
     }));
-    
+
     await db.batch([
         // delete from db
         db.delete(Email)
@@ -62,11 +61,13 @@ export async function GET(request: NextRequest) {
         db.delete(TempAlias)
             .where(inArray(TempAlias.id, tempAliases.map(temp => temp.id))),
 
-        db.update(Mailbox)
+        ...emails.map(email => db.update(Mailbox)
             .set({
-                storageUsed: sql`${Mailbox.storageUsed} - ${emails.reduce((acc, email) => acc + email.size!, 0)}`
+                storageUsed: sql`${Mailbox.storageUsed} - ${email.size}`
             })
+            .where(eq(Mailbox.id, email.mailboxId))
+        )
     ])
 
-    return Response.json({ success: true });
+    return Response.json({ success: true, message: `Deleted ${emails.length} emails and ${tempAliases.length} temp aliases` });
 }
