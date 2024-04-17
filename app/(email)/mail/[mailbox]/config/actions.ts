@@ -271,8 +271,18 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
         )
     })
 
+    const defaultAliasFromThis = await db.query.MailboxAlias.findFirst({
+        where: and(
+            eq(MailboxAlias.mailboxId, mailboxId),
+            like(MailboxAlias.alias, `%@${domain?.domain}`),
+            eq(MailboxAlias.default, true)
+        )
+    })
+
     if (!domain) {
         return { error: "Domain not found" }
+    } else if (defaultAliasFromThis) {
+        return { error: "Cannot delete domain with default alias" }
     }
 
     // also delete all aliases with that domain
@@ -283,9 +293,11 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
         db.delete(MailboxAlias)
             .where(and(
                 eq(MailboxAlias.mailboxId, mailboxId),
-                like(MailboxAlias.alias, `%@${domain.domain}`)
+                like(MailboxAlias.alias, `%@${domain.domain}`),
+                not(eq(MailboxAlias.default, true))
             ))
     ])
 
+    revalidateTag(`mailbox-aliases-${mailboxId}`)
     return revalidatePath(`/mail/${mailboxId}/config`);
 }
