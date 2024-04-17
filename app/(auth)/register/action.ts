@@ -4,7 +4,7 @@ import { addUserTokenToCookie } from "@/utils/jwt"
 import { createPasswordHash } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth"
 import { createId } from "@paralleldrive/cuid2";
-import { and, eq, gte, isNotNull } from "drizzle-orm";
+import { and, eq, gte, isNull } from "drizzle-orm";
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
@@ -29,7 +29,7 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
         where: and(
             eq(InviteCode.code, inviteCode),
             gte(InviteCode.expiresAt, new Date()),
-            isNotNull(InviteCode.usedAt)
+            isNull(InviteCode.usedAt)
         ),
         columns: {
             expiresAt: true,
