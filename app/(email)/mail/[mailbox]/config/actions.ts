@@ -274,8 +274,8 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
     const defaultAliasFromThis = await db.query.MailboxAlias.findFirst({
         where: and(
             eq(MailboxAlias.mailboxId, mailboxId),
-            like(MailboxAlias.alias, `%@${domain?.domain}`),
-            eq(MailboxAlias.default, true)
+            eq(MailboxAlias.default, true),
+            like(MailboxAlias.alias, `%@${domain?.domain}`)
         )
     })
 

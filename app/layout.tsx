@@ -56,6 +56,7 @@ export const metadata = {
     images: [
       "/logo.png",
     ],
+    creator: "EmailThing_"
   },
   generator: 'Next.js',
 } satisfies Metadata
