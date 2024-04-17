@@ -7,7 +7,7 @@ import { aliasLimit, customDomainLimit } from "@/utils/limits";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
 import { createId } from '@paralleldrive/cuid2';
-import { and, count, eq, not } from "drizzle-orm";
+import { and, count, eq, like, not } from "drizzle-orm";
 
 export async function verifyDomain(mailboxId: string, customDomain: string) {
     const userId = await getCurrentUser()
@@ -24,7 +24,7 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
             }
         }),
 
-        db.select({count: count()})
+        db.select({ count: count() })
             .from(MailboxCustomDomain)
             .where(eq(MailboxCustomDomain.mailboxId, mailboxId)),
 
@@ -111,7 +111,10 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
 
     // check if alias exists
     const existingAlias = await db.query.MailboxAlias.findFirst({
-        where: eq(MailboxAlias.alias, alias)
+        where: eq(MailboxAlias.alias, alias),
+        columns: {
+            id: true
+        }
     })
 
     if (existingAlias) {
@@ -134,7 +137,7 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
             )
         }),
 
-        db.select({count: count()})
+        db.select({ count: count() })
             .from(MailboxAlias)
             .where(eq(MailboxAlias.mailboxId, mailboxId)),
 
@@ -165,6 +168,124 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
         .execute()
 
     revalidateTag(`mailbox-aliases-${mailboxId}`)
+
+    return revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function editAlias(mailboxId: string, aliasId: string, name: string | null) {
+    // check if alias exists
+    const existingAlias = await db.query.MailboxAlias.findFirst({
+        where: eq(MailboxAlias.id, aliasId),
+        columns: {
+            id: true
+        }
+    })
+
+    if (!existingAlias) {
+        return { error: "Alias not found" }
+    }
+
+    // edit alias
+    await db.update(MailboxAlias)
+        .set({
+            name
+        })
+        .where(eq(MailboxAlias.id, aliasId))
+        .execute()
+
+    revalidateTag(`mailbox-aliases-${mailboxId}`)
+
+    return revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function changeDefaultAlias(mailboxId: string, defaultAliasId: string) {
+    // check if alias exists
+    const existingAlias = await db.query.MailboxAlias.findFirst({
+        where: eq(MailboxAlias.id, defaultAliasId),
+        columns: {
+            id: true
+        }
+    })
+
+    if (!existingAlias) {
+        return { error: "Alias not found" }
+    }
+
+    // edit alias
+    await db.batch([
+        db.update(MailboxAlias)
+            .set({
+                default: false
+            })
+            .where(and(
+                eq(MailboxAlias.mailboxId, mailboxId),
+                not(eq(MailboxAlias.id, defaultAliasId))
+            )),
+
+        db.update(MailboxAlias)
+            .set({
+                default: true
+            })
+            .where(and(
+                eq(MailboxAlias.mailboxId, mailboxId),
+                eq(MailboxAlias.id, defaultAliasId)
+            ))
+    ]);
+
+    revalidateTag(`mailbox-aliases-${mailboxId}`)
+
+    return revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function deleteAlias(mailboxId: string, aliasId: string) {
+    const alias = await db.query.MailboxAlias.findFirst({
+        where: and(
+            eq(MailboxAlias.id, aliasId),
+            eq(MailboxAlias.mailboxId, mailboxId),
+        ),
+        columns: {
+            default: true
+        }
+    })
+
+    if (!alias) {
+        return { error: "Alias not found" }
+    } else if (alias.default) {
+        return { error: "Cannot delete default alias" }
+    }
+
+    await db.delete(MailboxAlias)
+        .where(eq(MailboxAlias.id, aliasId))
+        .execute()
+
+    revalidateTag(`mailbox-aliases-${mailboxId}`)
+
+    return revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function deleteCustomDomain(mailboxId: string, customDomainId: string) {
+    const domain = await db.query.MailboxCustomDomain.findFirst({
+        where: and(
+            eq(MailboxCustomDomain.id, customDomainId),
+            eq(MailboxCustomDomain.mailboxId, mailboxId),
+        )
+    })
+
+    if (!domain) {
+        return { error: "Domain not found" }
+    }
+
+    // also delete all aliases with that domain
+    await db.batch([
+        db.delete(MailboxCustomDomain)
+            .where(eq(MailboxCustomDomain.id, customDomainId)),
+
+        db.delete(MailboxAlias)
+            .where(and(
+                eq(MailboxAlias.mailboxId, mailboxId),
+                like(MailboxAlias.alias, `%@${domain.domain}`)
+            ))
+    ])
 
     return revalidatePath(`/mail/${mailboxId}/config`);
 }

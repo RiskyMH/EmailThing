@@ -1,12 +1,18 @@
 import { Metadata } from "next"
 import { pageMailboxAccess } from "../tools"
-import { db, Mailbox } from "@/db";
+import { db, Mailbox, MailboxAlias, MailboxCustomDomain } from "@/db";
 import { notFound } from "next/navigation"
 import { customDomainLimit, storageLimit, aliasLimit } from "@/utils/limits"
-import { AddAliasForm, AddCustomDomainForm } from "./components.client"
-import { Button } from "@/components/ui/button"
+import { AddAliasForm, AddCustomDomainForm, DeleteButton, EditAliasForm } from "./components.client"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
-import { eq } from "drizzle-orm";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { asc, desc, eq } from "drizzle-orm";
+import { PlusIcon, MoreHorizontalIcon, CheckIcon, Trash2Icon, PencilIcon } from "lucide-react";
+import ToggleVisibilityToken from "@/components/token.client";
+import { ContextMenuAction } from "../components.client";
+import { changeDefaultAlias, deleteAlias, deleteCustomDomain } from "./actions";
 
 
 export const metadata: Metadata = {
@@ -36,13 +42,17 @@ export default async function EmailConfig({
                     alias: true,
                     name: true,
                     default: true,
-                }
+                    id: true,
+                },
+                orderBy: asc(MailboxAlias.createdAt)
             },
             customDomains: {
                 columns: {
                     domain: true,
                     authKey: true,
-                }
+                    id: true,
+                },
+                orderBy: desc(MailboxCustomDomain.addedAt)
             }
         }
     })
@@ -58,53 +68,166 @@ export default async function EmailConfig({
                 <p>Used: {Math.ceil(mailbox.storageUsed / 1e+6)}MB / {(storageLimit as any)[mailbox.plan] / 1e+6}MB</p>
             </div>
 
-            <div>
-                <h2 className="text-lg font-semibold">Aliases</h2>
-                {mailbox.aliases.map((alias, i) => (
-                    <div key={i} className="flex items-center">
-                        <p>{alias.alias} {alias.name && `(${alias.name})`} {alias.default && <span title="default">✅</span>}</p>
-                    </div>
-                ))}
-                <SmartDrawer>
-                    <SmartDrawerTrigger asChild>
-                        <Button disabled={mailbox.aliases.length >= (aliasLimit as any)[mailbox.plan]}>
-                            Add alias
-                        </Button>
-                    </SmartDrawerTrigger>
-                    <SmartDrawerContent className="sm:max-w-[425px]">
-                        <SmartDrawerHeader>
-                            <SmartDrawerTitle>Add Alias</SmartDrawerTitle>
-                            <SmartDrawerDescription>Enter your chosen email and name to create alias</SmartDrawerDescription>
-                        </SmartDrawerHeader>
-
-                        <AddAliasForm mailboxId={params.mailbox} />
-
-                        <SmartDrawerFooter className="pt-2 flex sm:hidden">
-                            <SmartDrawerClose asChild>
-                                <Button variant="secondary">Cancel</Button>
-                            </SmartDrawerClose>
-                        </SmartDrawerFooter>
-                    </SmartDrawerContent>
-                </SmartDrawer>
-
-            </div>
-
-            <div>
-                <h2 className="text-lg font-semibold">Custom domains</h2>
-                {mailbox.customDomains.map((domain, i) => (
-                    <div key={i} className="flex items-center">
-                        <p>{domain.domain}</p>
-                    </div>
-                ))}
-                <div>
+            <div className="mb-3 max-w-[40rem]">
+                <div className="flex pb-2">
+                    <h2 className="text-lg font-semibold">Aliases</h2>
                     <SmartDrawer>
                         <SmartDrawerTrigger asChild>
-                            <Button disabled={mailbox.customDomains.length >= (customDomainLimit as any)[mailbox.plan]}>
-                                Add custom domain
+                            <Button
+                                disabled={mailbox.aliases.length >= (aliasLimit as any)[mailbox.plan]}
+                                className="ms-auto flex gap-2"
+                                size="sm"
+                                variant="secondary"
+                            >
+                                <PlusIcon className='h-4 w-4' /> Create alias
                             </Button>
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
+                            <SmartDrawerHeader>
+                                <SmartDrawerTitle>Add Alias</SmartDrawerTitle>
+                                <SmartDrawerDescription>Enter your chosen email and name to create alias</SmartDrawerDescription>
+                            </SmartDrawerHeader>
 
+                            <AddAliasForm mailboxId={params.mailbox} />
+
+                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                                <SmartDrawerClose asChild>
+                                    <Button variant="secondary">Cancel</Button>
+                                </SmartDrawerClose>
+                            </SmartDrawerFooter>
+                        </SmartDrawerContent>
+                    </SmartDrawer>
+                </div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="bg-tertiary rounded-ss-md">
+                                    <p>Alias</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary">
+                                    <p>Name</p>
+                                </TableHead>
+                                <TableHead className="text-center bg-tertiary">
+                                    <p>Default</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary rounded-se-md" />
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mailbox.aliases.length ? (
+                                mailbox.aliases.map((row) => (
+                                    <TableRow key={row.alias}>
+                                        <TableCell className="font-medium py-3">
+                                            {row.alias}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            {row.name}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            {row.default ? <CheckIcon className="h-4 w-4 mx-auto" /> : null}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    {/* // todo: actions: */}
+                                                    <SmartDrawer>
+                                                        <DropdownMenuItem asChild>
+                                                            <SmartDrawerTrigger className="gap-2 w-full">
+                                                                <PencilIcon className="text-muted-foreground h-5 w-5" />
+                                                                Edit name
+                                                            </SmartDrawerTrigger>
+                                                        </DropdownMenuItem>
+                                                        <SmartDrawerContent className="sm:max-w-[425px]">
+                                                            <SmartDrawerHeader>
+                                                                <SmartDrawerTitle>Edit Alias</SmartDrawerTitle>
+                                                                <SmartDrawerDescription>Enter your chosen name to update alias</SmartDrawerDescription>
+                                                            </SmartDrawerHeader>
+
+                                                            <EditAliasForm mailboxId={params.mailbox} alias={row.alias} id={row.id} name={row.name} />
+
+                                                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                                                                <SmartDrawerClose asChild>
+                                                                    <Button variant="secondary">Cancel</Button>
+                                                                </SmartDrawerClose>
+                                                            </SmartDrawerFooter>
+                                                        </SmartDrawerContent>
+                                                    </SmartDrawer>
+
+                                                    <DropdownMenuItem disabled={row.default} className="flex gap-2" asChild>
+                                                        <ContextMenuAction
+                                                            icon="CheckIcon"
+                                                            action={changeDefaultAlias.bind(null, params.mailbox, row.id)}
+                                                        >
+                                                            Make default
+                                                        </ContextMenuAction>
+                                                    </DropdownMenuItem>
+
+                                                    <SmartDrawer>
+                                                        <DropdownMenuItem
+                                                            className="flex gap-2 w-full"
+                                                            disabled={row.default || mailbox.aliases.length <= 1}
+                                                            asChild
+                                                        >
+                                                            <SmartDrawerTrigger>
+                                                                <Trash2Icon className="text-muted-foreground h-5 w-5" />
+                                                                Delete alias
+                                                            </SmartDrawerTrigger>
+                                                        </DropdownMenuItem>
+
+                                                        <SmartDrawerContent className="sm:max-w-[425px]">
+                                                            <SmartDrawerHeader>
+                                                                <SmartDrawerTitle>Delete Alias</SmartDrawerTitle>
+                                                                <SmartDrawerDescription>
+                                                                    Are you sure you want to delete <strong>{row.alias}</strong>.
+                                                                </SmartDrawerDescription>
+                                                            </SmartDrawerHeader>
+                                                            <SmartDrawerFooter className="pt-2 flex">
+                                                                <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Cancel</SmartDrawerClose>
+                                                                <DeleteButton action={deleteAlias.bind(null, params.mailbox, row.id)} />
+                                                            </SmartDrawerFooter>
+                                                        </SmartDrawerContent>
+                                                    </SmartDrawer>
+
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell className="h-24 text-center" colSpan={4}>
+                                        No aliases yet.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+
+            <div className="max-w-[40rem]">
+                <div className="flex pb-2">
+                    <h2 className="text-lg font-semibold">Custom domains</h2>
+                    <SmartDrawer>
+                        <SmartDrawerTrigger asChild>
+                            <Button
+                                disabled={mailbox.customDomains.length >= (customDomainLimit as any)[mailbox.plan]}
+                                className="ms-auto flex gap-2"
+                                size="sm"
+                                variant="secondary"
+                            >
+                                <PlusIcon className='h-4 w-4' /> Add new domain
+                            </Button>
+                        </SmartDrawerTrigger>
+                        <SmartDrawerContent className="sm:max-w-[425px]">
                             <AddCustomDomainForm mailboxId={params.mailbox} />
 
                             <SmartDrawerFooter className="pt-2 flex sm:hidden">
@@ -115,48 +238,107 @@ export default async function EmailConfig({
                         </SmartDrawerContent>
                     </SmartDrawer>
                 </div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="rounded-t-lg">
+                                <TableHead className="bg-tertiary rounded-ss-md">
+                                    <p>Domain</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary">
+                                    <p>Auth Key</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary rounded-se-md" />
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mailbox.customDomains.length ? (
+                                mailbox.customDomains.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell className="font-medium py-3">
+                                            {row.domain}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <ToggleVisibilityToken code={row.authKey} />
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <SmartDrawer>
+                                                        <DropdownMenuItem className="flex gap-2 w-full" asChild>
+                                                            <SmartDrawerTrigger>
+                                                                <Trash2Icon className="text-muted-foreground h-5 w-5" />
+                                                                Delete domain
+                                                            </SmartDrawerTrigger>
+                                                        </DropdownMenuItem>
 
-                <div>
-                    <br />
+                                                        <SmartDrawerContent className="sm:max-w-[425px]">
+                                                            <SmartDrawerHeader>
+                                                                <SmartDrawerTitle>Delete Domain</SmartDrawerTitle>
+                                                                <SmartDrawerDescription>
+                                                                    Are you sure you want to delete <strong>{row.domain}</strong>.
+                                                                    This will also delete <strong>{mailbox.aliases.filter(alias => alias.alias.endsWith("@" + row.domain)).length}</strong> aliases.
+                                                                </SmartDrawerDescription>
+                                                            </SmartDrawerHeader>
+                                                            <SmartDrawerFooter className="pt-2 flex">
+                                                                <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Cancel</SmartDrawerClose>
+                                                                <DeleteButton action={deleteCustomDomain.bind(null, params.mailbox, row.id)} />
+                                                            </SmartDrawerFooter>
+                                                        </SmartDrawerContent>
+                                                    </SmartDrawer>
 
-                    {/* How to receive emails */}
-                    <h2 className="text-lg font-semibold">How to receive emails</h2>
-                    You need to setup Cloudflare Email Workers to receive emails. {" "}
-                    You can use this example script and add fill in the env vars and zone to get started.
-                    <br />
-                    Make sure to enable catch all for the worker so all emails come to your inbox.
-                    <br />
-                    <a href="https://github.com/RiskyMH/Email/blob/master/cloudflare-workers/recieve-email.js" target="_blank" rel="noreferrer" className="font-bold hover:underline">Click here for example script.</a> {" "}
-                    If you are confused, you can ask for help in the <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank" rel="noreferrer">Discord</a> server.
-                    <br />
-                    {mailbox.customDomains.length && (
-                        <div>
-                            <br />
-                            <p>The auth keys for your custom domains are:</p>
-                            <pre className="overflow-auto">
-                                {mailbox.customDomains.map((d) => (
-                                    `${d.domain}: ${d.authKey}\n`
-                                ))}
-                            </pre>
-                        </div>
-                    )}
-                    <br />
+                                                    {/* // todo: setup page/modal */}
+                                                    <DropdownMenuItem>Setup again</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
 
-                    {/* how to send emails */}
-                    <h2 className="text-lg font-semibold">How to send emails</h2>
-                    {/* user needs to authorize mailchannels SPF and cf worker */}
-                    You need to authorize MailChannels and Cloudflare Workers to send emails on your behalf. To do so, add these TXT records.
-                    <pre className="overflow-auto">
-                        {`_mailchannels.<domain> "v=mc1 cfid=riskymh.workers.dev"\n`}
-                        {`<domain>               "v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all"`}
-                    </pre>
-
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell className="h-24 text-center" colSpan={3}>
+                                        No domains yet.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
                 </div>
+            </div>
 
+            <div>
+                {/* How to receive emails */}
+                <h2 className="text-lg font-semibold">How to receive emails</h2>
+                You need to setup Cloudflare Email Workers to receive emails. {" "}
+                You can use this example script and fill in the env vars + zone to get started.
+                <br />
+                Make sure to enable catch all for the worker so all emails come to your inbox.
+                <br />
+                <a href="https://github.com/RiskyMH/Email/blob/master/cloudflare-workers/recieve-email.js" target="_blank" rel="noreferrer" className="font-bold hover:underline">Click here for example script.</a> {" "}
+                If you are confused, you can ask for help in the <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank" rel="noreferrer">Discord</a> server.
+                <br />
+                <br />
+
+                {/* how to send emails */}
+                <h2 className="text-lg font-semibold">How to send emails</h2>
+                {/* user needs to authorize mailchannels SPF and cf worker */}
+                You need to authorize MailChannels and Cloudflare Workers to send emails on your behalf. To do so, add these TXT records.
+                <pre className="overflow-auto">
+                    {`_mailchannels.<domain> "v=mc1 cfid=riskymh.workers.dev"\n`}
+                    {`<domain>               "v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all"`}
+                </pre>
+                <br />
 
             </div>
 
-        </div>
+        </div >
 
     )
 }

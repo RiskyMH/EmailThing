@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, type FormEvent } from "react";
-import { verifyDomain, addAlias } from "./actions";
+import { verifyDomain, addAlias, editAlias } from "./actions";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -114,5 +114,67 @@ export function AddAliasForm({ mailboxId }: { mailboxId: string }) {
                 Add alias
             </Button>
         </form>
+    );
+}
+export function EditAliasForm({ mailboxId, alias, name, id }: { mailboxId: string, alias: string, name: string | null, id: string }) {
+    const [isPending, startTransition] = useTransition();
+
+    const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isPending) return;
+
+        startTransition(async () => {
+            // @ts-expect-error
+            const res = await editAlias(mailboxId, id, event.target.name.value || null)
+            if (res?.error) {
+                toast.error(res.error)
+            } else {
+                document.getElementById("smart-drawer:close")?.click()
+            }
+        })
+
+    }
+
+    return (
+        <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+            <div className="grid gap-2">
+                <Label htmlFor="password">Alias</Label>
+                <Input className="bg-secondary border-none" name="alias" placeholder="me@example.com" id="alias" value={alias} readOnly disabled={true} />
+
+                <Label htmlFor="password">Name</Label>
+                <Input className="bg-secondary border-none" name="name" placeholder="John Doe" id="name" defaultValue={name || ''} disabled={isPending} autoFocus />
+            </div>
+            <Button type="submit" disabled={isPending} className="gap-2">
+                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                Edit alias
+            </Button>
+        </form>
+    );
+}
+
+
+export function DeleteButton({ action }: { action: () => Promise<any> }) {
+    const [isPending, startTransition] = useTransition();
+
+    const onClick = (event: any) => {
+        event.preventDefault();
+        if (isPending) return;
+
+        startTransition(async () => {
+            const res = await action()
+            if (res?.error) {
+                toast.error(res.error)
+            } else {
+                document.getElementById("smart-drawer:close")?.click()
+            }
+        })
+
+    }
+
+    return (
+        <Button type="submit" disabled={isPending} className="gap-2" variant="destructive" onClick={onClick} autoFocus>
+            {isPending && <Loader2 className="w-5 h-5  animate-spin" />}
+            Delete
+        </Button>
     );
 }
