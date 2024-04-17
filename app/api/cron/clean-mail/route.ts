@@ -56,10 +56,10 @@ export async function GET(request: NextRequest) {
     await db.batch([
         // delete from db
         db.delete(Email)
-            .where(inArray(Email.id, emails.map(email => email.id))),
+            .where(emails.length ? inArray(Email.id, emails.map(email => email.id)) : sql`1 = 0`),
 
         db.delete(TempAlias)
-            .where(inArray(TempAlias.id, tempAliases.map(temp => temp.id))),
+            .where(tempAliases.length ? inArray(TempAlias.id, tempAliases.map(temp => temp.id)) : sql`1 = 0`),
 
         ...emails.map(email => db.update(Mailbox)
             .set({
