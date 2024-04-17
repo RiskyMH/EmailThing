@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 
     const emailSize = new Blob([rawEmail]).size
 
-    const body = email.text || email.html || email.attachments.map((a) => a.content).join('\n')
+    const body = email.text || email.html || "(no body)";
 
     const emailId = createId()
     await db.batch([
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
                 subject: email.subject,
                 body: body,
                 html: email.html,
-                snippet: slice(body, 200),
+                snippet: email.text ? slice(email.text, 200) : null,
                 mailboxId,
                 replyTo: email.replyTo?.[0]?.address,
                 size: emailSize,
