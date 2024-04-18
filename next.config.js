@@ -67,6 +67,11 @@ const nextConfig = {
                 permanent: true,
             },
             {
+                source: '/api/recieve-email',
+                destination: '/api/v0/receive-email',
+                permanent: true,
+            },
+            {
                 source: "/mail/:path*",
                 destination: "/login?from=/mail/:path*",
                 missing: [

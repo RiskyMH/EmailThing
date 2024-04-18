@@ -1,7 +1,3 @@
-// Adjust to your use case
-// * The domain must the the same as the one you have set up in the dashboard
-const zone = "your-domain.xyz";
-
 // Don't forget to add the `auth` token to your environment variables
 // * Go to worker > your email worker > settings > variables > add new variable `auth` with the value provided in the dashboard.
 // * If you would like to forward the email to another address, add a new variable `forward` with the value of the email you would like to forward to.
@@ -44,11 +40,11 @@ export default {
 
         if (env.forward) await message.forward(env.forward);
 
-        const req = await fetch(`https://emailthing.xyz/api/recieve-email?zone=${zone}`, {
+        const req = await fetch("https://emailthing.xyz/api/v0/receive-email", {
             method: "POST",
             headers: {
                 "content-type": "application/json",
-                "x-auth": env.auth
+                "authorization": `Bearer ${env.auth}`
             },
             body: JSON.stringify({
                 email: raw,

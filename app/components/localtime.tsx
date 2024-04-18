@@ -2,7 +2,7 @@ import { dateDay, formatTimeAgo } from "../utils/tools";
 import TooltipText from "./tooltip-text";
 import { headers } from 'next/headers'
 
-export default function LocalTime({ time, className, type }: { time: Date, className?: string, type: "normal" | "hour-min" | "hour-min/date" | "full" }) {
+export default function LocalTime({ time, className, type = "date" }: { time: Date, className?: string, type?: "normal" | "hour-min" | "hour-min/date" | "full" | "date" }) {
     const timeZone = headers().get("x-vercel-ip-timezone") || Intl.DateTimeFormat().resolvedOptions().timeZone
 
     return (
@@ -17,7 +17,7 @@ export default function LocalTime({ time, className, type }: { time: Date, class
     )
 }
 
-function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date" | "full", timeZone: string) {
+function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date" | "full" | "date", timeZone: string) {
     const todayWithTz = dateDay(new Date(), timeZone)
 
     if (type === "normal") {
@@ -33,6 +33,8 @@ function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date" | 
         }
     } else if (type === "full") {
         return date.toLocaleString([], { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${formatTimeAgo(date)})`
+    } else if (type === "date") {
+        return date.toLocaleDateString([], { timeZone })
     } else {
         return date.toLocaleDateString([], { timeZone })
     }

@@ -2,12 +2,13 @@
 
 import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "../tools";
-import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCustomDomain } from "@/db";
+import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxTokens } from "@/db";
 import { aliasLimit, customDomainLimit } from "@/utils/limits";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
 import { createId } from '@paralleldrive/cuid2';
 import { and, count, eq, like, not } from "drizzle-orm";
+import { generateToken } from "@/utils/token";
 
 export async function verifyDomain(mailboxId: string, customDomain: string) {
     const userId = await getCurrentUser()
@@ -173,6 +174,11 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
 }
 
 export async function editAlias(mailboxId: string, aliasId: string, name: string | null) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
     // check if alias exists
     const existingAlias = await db.query.MailboxAlias.findFirst({
         where: eq(MailboxAlias.id, aliasId),
@@ -199,6 +205,11 @@ export async function editAlias(mailboxId: string, aliasId: string, name: string
 }
 
 export async function changeDefaultAlias(mailboxId: string, defaultAliasId: string) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
     // check if alias exists
     const existingAlias = await db.query.MailboxAlias.findFirst({
         where: eq(MailboxAlias.id, defaultAliasId),
@@ -238,6 +249,11 @@ export async function changeDefaultAlias(mailboxId: string, defaultAliasId: stri
 }
 
 export async function deleteAlias(mailboxId: string, aliasId: string) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
     const alias = await db.query.MailboxAlias.findFirst({
         where: and(
             eq(MailboxAlias.id, aliasId),
@@ -264,6 +280,11 @@ export async function deleteAlias(mailboxId: string, aliasId: string) {
 }
 
 export async function deleteCustomDomain(mailboxId: string, customDomainId: string) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
     const domain = await db.query.MailboxCustomDomain.findFirst({
         where: and(
             eq(MailboxCustomDomain.id, customDomainId),
@@ -300,4 +321,43 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
 
     revalidateTag(`mailbox-aliases-${mailboxId}`)
     return revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function makeToken(mailboxId: string, name: string | null) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    try {
+        const token = generateToken();
+        await db.insert(MailboxTokens)
+            .values({
+                token,
+                mailboxId,
+                name
+            })
+            .execute()
+
+        revalidatePath(`/mail/${mailboxId}/config`);
+        return { token }
+    } catch (e) {
+        return { error: "Failed to create token" }
+    }
+}
+
+export async function deleteToken(mailboxId: string, token: string) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    await db.delete(MailboxTokens)
+        .where(and(
+            eq(MailboxTokens.token, token),
+            eq(MailboxTokens.mailboxId, mailboxId)
+        ))
+        .execute()
+
+    revalidatePath(`/mail/${mailboxId}/config`);
 }

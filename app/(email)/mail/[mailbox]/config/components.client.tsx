@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useTransition, type FormEvent } from "react";
-import { verifyDomain, addAlias, editAlias } from "./actions";
+import { verifyDomain, addAlias, editAlias, makeToken } from "./actions";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronRightIcon, Loader2 } from "lucide-react";
+import { ChevronRightIcon, CopyIcon, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { SmartDrawerHeader, SmartDrawerTitle, SmartDrawerDescription } from "@/components/ui/smart-drawer";
+import { SmartDrawerHeader, SmartDrawerTitle, SmartDrawerDescription, SmartDrawerClose, SmartDrawerFooter } from "@/components/ui/smart-drawer";
+import CopyButton from "@/components/copy-button.client";
 
 
 export function AddCustomDomainForm({ mailboxId }: { mailboxId: string }) {
@@ -176,5 +177,79 @@ export function DeleteButton({ action }: { action: () => Promise<any> }) {
             {isPending && <Loader2 className="w-5 h-5  animate-spin" />}
             Delete
         </Button>
+    );
+}
+
+export function CreateTokenForm({ mailboxId}: { mailboxId: string }) {
+    const [isPending, startTransition] = useTransition();
+    const [token, setToken] = useState<string | null>(null);
+
+    const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isPending) return;
+
+        startTransition(async () => {
+            // @ts-expect-error
+            const res = await makeToken(mailboxId, event.target.name.value)
+            if (res?.error) {
+                toast.error(res.error)
+            } else {
+                setToken(res!.token!)
+            }
+        })
+
+    }
+
+    return (
+        token ? (
+            <>
+                <SmartDrawerHeader>
+                    <SmartDrawerTitle>Create Token</SmartDrawerTitle>
+                    <SmartDrawerDescription>A token to use with the API. This will only be shown once.</SmartDrawerDescription>
+                </SmartDrawerHeader>
+
+                <div className="grid items-start gap-4 px-4 sm:px-0">
+                    <Label htmlFor="alias">Your new token:</Label>
+                    <div className="flex items-center gap-2">
+                        <Input className="bg-secondary border-none font-mono" name="token" value={token} id="token" readOnly disabled={isPending} />
+                        <Button type="submit" size="sm" className="px-3" asChild>
+                            <CopyButton text={token}>
+                                <span className="sr-only">Copy</span>
+                                <CopyIcon className="h-4 w-4" />
+                            </CopyButton>
+                        </Button>
+                    </div>
+                </div>
+                <SmartDrawerFooter className="pt-2 flex">
+                    <SmartDrawerClose asChild>
+                        <Button variant="default" className="w-full">Close</Button>
+                    </SmartDrawerClose>
+                </SmartDrawerFooter>
+            </>
+        ) : (
+            <>
+                <SmartDrawerHeader>
+                    <SmartDrawerTitle>Create Token</SmartDrawerTitle>
+                    <SmartDrawerDescription>A token to use with the API.</SmartDrawerDescription>
+                </SmartDrawerHeader >
+
+                <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input className="bg-secondary border-none" autoFocus name="name" placeholder="Local dev" id="name" disabled={isPending} />
+                    </div>
+                    <Button type="submit" disabled={isPending} className="gap-2">
+                        {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                        Create
+                    </Button>
+                </form>
+
+                <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                    <SmartDrawerClose asChild>
+                        <Button variant="secondary" className="w-full">Cancel</Button>
+                    </SmartDrawerClose>
+                </SmartDrawerFooter>
+            </>
+        )
     );
 }

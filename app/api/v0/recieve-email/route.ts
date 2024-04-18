@@ -1,12 +1,13 @@
 // @ts-ignore
 import PostalMime from 'postal-mime';
-type PostalMime = import("../../../node_modules/postal-mime/postal-mime").default;
-import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification, TempAlias } from "@/db";
+type PostalMime = import("postal-mime").default;
+import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification, TempAlias, MailboxTokens } from "@/db";
 import { storageLimit } from '@/utils/limits';
 import { createId } from '@paralleldrive/cuid2';
 import { and, eq, gt, lt, sql } from "drizzle-orm";
 import { uploadFile } from '@/utils/s3';
 import { sendNotification } from '@/utils/web-push';
+import { getTokenMailbox } from '../tools';
 
 export const revalidate = 0
 // export const runtime = 'edge';
@@ -14,11 +15,7 @@ export const revalidate = 0
 
 export async function POST(request: Request) {
     const { searchParams } = new URL(request.url)
-    const zone = searchParams.get('zone')
-    const auth = request.headers.get("x-auth")
-    // if (auth !== env.EMAIL_AUTH_TOKEN) {
-    //     return Response.json({ error: 'unauthorized' }, { status: 401 })
-    // }
+    const internal = searchParams.has('internal')
 
     const { email: rawEmail, from, to } = await request.json() as Record<string, string>
     if (!rawEmail || !from || !to) {
@@ -32,19 +29,22 @@ export async function POST(request: Request) {
     let mailboxId: string | undefined = undefined
     let tempId: string | undefined
 
-    // check if its a default domain first (and if so, check the alias and get the mailbox id)
-    const defaultDomain = await db.query.DefaultDomain.findFirst({
-        where: and(
-            eq(DefaultDomain.domain, zone!),
-            eq(DefaultDomain.authKey, auth!)
-        ),
-        columns: {
-            id: true,
-            tempDomain: true,
+    if (internal) {
+        // check if its a default domain (and if so, check the alias and get the mailbox id)
+        const defaultDomain = await db.query.DefaultDomain.findFirst({
+            where: and(
+                eq(DefaultDomain.domain, searchParams.get('zone')!),
+                eq(DefaultDomain.authKey, request.headers.get("x-auth")!)
+            ),
+            columns: {
+                id: true,
+                tempDomain: true,
+            }
+        })
+        if (!defaultDomain) {
+            return new Response('Unauthorized', { status: 401 })
         }
-    })
 
-    if (defaultDomain) {
         const alias = defaultDomain.tempDomain ?
             await db.query.TempAlias.findFirst({
                 where: and(
@@ -72,19 +72,10 @@ export async function POST(request: Request) {
         }
 
     } else {
-        // check if its a custom domain
-        const customDomain = await db.query.MailboxCustomDomain.findFirst({
-            where: and(
-                eq(MailboxCustomDomain.domain, zone!),
-                eq(MailboxCustomDomain.authKey, auth!)
-            ),
-            columns: {
-                mailboxId: true
-            }
-        })
-
-        if (customDomain) {
-            mailboxId = customDomain.mailboxId
+        // it must be custom domain (so check the token)
+        mailboxId = await getTokenMailbox() || undefined
+        if (mailboxId) {
+            return new Response('Unauthorized', { status: 401 })
         }
     }
 

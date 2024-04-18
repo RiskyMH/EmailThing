@@ -19,6 +19,7 @@ export const MailboxRelations = relations(Mailbox, ({ many, one }) => ({
     categories: many(MailboxCategory),
     users: many(MailboxForUser),
     tempAliases: many(TempAlias),
+    tokens: many(MailboxTokens),
 }));
 
 
@@ -77,6 +78,7 @@ export const MailboxCustomDomain = sqliteTable("mailbox_custom_domain", {
         .references(() => Mailbox.id, { onDelete: 'cascade' }),
     addedAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     domain: nocaseText("domain").notNull(),
+    // TODO: remove, just keeping in case things fail
     authKey: text("auth_key").notNull().$defaultFn(() => createId()),
 }, (table) => {
     return {
@@ -88,6 +90,24 @@ export const MailboxCustomDomain = sqliteTable("mailbox_custom_domain", {
 export const MailboxCustomDomainRelations = relations(MailboxCustomDomain, ({ many, one }) => ({
     mailbox: one(Mailbox, {
         fields: [MailboxCustomDomain.mailboxId],
+        references: [Mailbox.id],
+    })
+}));
+
+// API Tokens
+export const MailboxTokens = sqliteTable("mailbox_token", {
+    id: text("id", { length: 50 }).primaryKey().unique().$defaultFn(() => createId()),
+    token: text("token", { length: 50 }).unique().notNull(),
+    mailboxId: text("mailbox_id", { length: 24 }).notNull()
+        .references(() => Mailbox.id, { onDelete: 'cascade' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    expiresAt: integer('expires_at', { mode: 'timestamp' }),
+    name: text("name"),
+});
+
+export const MailboxTokensRelations = relations(MailboxTokens, ({ many, one }) => ({
+    mailbox: one(Mailbox, {
+        fields: [MailboxTokens.mailboxId],
         references: [Mailbox.id],
     })
 }));

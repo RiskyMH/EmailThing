@@ -37,21 +37,19 @@ export default {
         const raw = new TextDecoder("utf-8").decode(rawEmail);
 
         if (env.forward) await message.forward(env.forward);
-        
-        const data = {zone: "", auth: ""};
+
+        let auth = null;
         if (message.to === "me@domain1.com") {
-            data.zone = "domain1.com";
-            data.auth = env.auth1;
+            auth = env.auth1;
         } else if (message.to === "you@domain2.com") {
-            data.zone = "domain2.com";
-            data.auth = env.auth2;
+            auth = env.auth2;
         }
 
-        const req = await fetch(`https://emailthing.xyz/api/recieve-email?zone=${data.zone}`, {
+        const req = await fetch("https://emailthing.xyz/api/v0/receive-email", {
             method: "POST",
             headers: {
                 "content-type": "application/json",
-                "x-auth": data.auth
+                "authorization": `Bearer ${auth}`
             },
             body: JSON.stringify({
                 email: raw,

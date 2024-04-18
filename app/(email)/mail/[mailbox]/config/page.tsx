@@ -1,9 +1,9 @@
 import { Metadata } from "next"
 import { pageMailboxAccess } from "../tools"
-import { db, Mailbox, MailboxAlias, MailboxCustomDomain } from "@/db";
+import { db, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxTokens } from "@/db";
 import { notFound } from "next/navigation"
 import { customDomainLimit, storageLimit, aliasLimit } from "@/utils/limits"
-import { AddAliasForm, AddCustomDomainForm, DeleteButton, EditAliasForm } from "./components.client"
+import { AddAliasForm, AddCustomDomainForm, CreateTokenForm, DeleteButton, EditAliasForm } from "./components.client"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -12,7 +12,10 @@ import { asc, desc, eq } from "drizzle-orm";
 import { PlusIcon, MoreHorizontalIcon, CheckIcon, Trash2Icon, PencilIcon } from "lucide-react";
 import ToggleVisibilityToken from "@/components/token.client";
 import { ContextMenuAction } from "../components.client";
-import { changeDefaultAlias, deleteAlias, deleteCustomDomain } from "./actions";
+import { changeDefaultAlias, deleteAlias, deleteCustomDomain, deleteToken } from "./actions";
+import { init } from "@paralleldrive/cuid2";
+import LocalTime from "@/components/localtime";
+import { generateToken } from "@/utils/token";
 
 
 export const metadata: Metadata = {
@@ -51,13 +54,25 @@ export default async function EmailConfig({
                     domain: true,
                     authKey: true,
                     id: true,
+                    addedAt: true
                 },
-                orderBy: desc(MailboxCustomDomain.addedAt)
+                orderBy: asc(MailboxCustomDomain.addedAt)
+            },
+            tokens: {
+                columns: {
+                    token: true,
+                    createdAt: true,
+                    name: true,
+                    expiresAt: true,
+                    id: true
+                },
+                orderBy: asc(MailboxTokens.createdAt)
             }
         }
     })
 
     if (!mailbox) return notFound()
+
 
     return (
         <div className="min-w-0 p-5 flex flex-col gap-5">
@@ -111,7 +126,7 @@ export default async function EmailConfig({
                                 <TableHead className="text-center bg-tertiary">
                                     <p>Default</p>
                                 </TableHead>
-                                <TableHead className="bg-tertiary rounded-se-md" />
+                                <TableHead className="bg-tertiary rounded-se-md w-1" />
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -245,10 +260,7 @@ export default async function EmailConfig({
                                 <TableHead className="bg-tertiary rounded-ss-md">
                                     <p>Domain</p>
                                 </TableHead>
-                                <TableHead className="bg-tertiary">
-                                    <p>Auth Key</p>
-                                </TableHead>
-                                <TableHead className="bg-tertiary rounded-se-md" />
+                                <TableHead className="bg-tertiary rounded-se-md w-1" />
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -257,9 +269,6 @@ export default async function EmailConfig({
                                     <TableRow key={row.id}>
                                         <TableCell className="font-medium py-3">
                                             {row.domain}
-                                        </TableCell>
-                                        <TableCell className="py-3">
-                                            <ToggleVisibilityToken code={row.authKey} />
                                         </TableCell>
                                         <TableCell className="py-3">
                                             <DropdownMenu>
@@ -313,15 +322,102 @@ export default async function EmailConfig({
                 </div>
             </div>
 
+            <div className="max-w-[40rem]">
+                <div className="flex pb-2">
+                    <h2 className="text-lg font-semibold">API Tokens</h2>
+                    <SmartDrawer>
+                        <SmartDrawerTrigger asChild>
+                            <Button className="ms-auto flex gap-2" size="sm" variant="secondary">
+                                <PlusIcon className='h-4 w-4' /> Create new token
+                            </Button>
+                        </SmartDrawerTrigger>
+                        <SmartDrawerContent className="sm:max-w-[425px]">
+                            <CreateTokenForm mailboxId={params.mailbox} />
+                        </SmartDrawerContent>
+                    </SmartDrawer>
+                </div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="rounded-t-lg">
+                                <TableHead className="bg-tertiary rounded-ss-md">
+                                    <p>Name</p>
+                                    {/* also includes somewhat token */}
+                                </TableHead>
+                                <TableHead className="bg-tertiary">
+                                    <p>Created</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary">
+                                    <p>Expires</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary rounded-se-md w-1" />
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mailbox.tokens.length ? (
+                                mailbox.tokens.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell className="font-medium py-3 flex flex-col">
+                                            {row.name ? (
+                                                <>
+                                                    <span>{row.name}</span>
+                                                    <code className="text-muted-foreground">{hideToken(row.token)}</code>
+                                                </>
+                                            ) : (
+                                                <code>{hideToken(row.token)}</code>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <LocalTime time={row.createdAt} />
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            {row.expiresAt ? <LocalTime time={row.expiresAt} /> : "Never"}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <SmartDrawer>
+                                                <SmartDrawerTrigger className={buttonVariants({ variant: "outline", size: "icon-sm", className: "text-muted-foreground hover:text-destructive hover:border-destructive" })}>
+                                                    <Trash2Icon className="h-5 w-5" />
+                                                </SmartDrawerTrigger>
+
+                                                <SmartDrawerContent className="sm:max-w-[425px]">
+                                                    <SmartDrawerHeader>
+                                                        <SmartDrawerTitle>Delete Token</SmartDrawerTitle>
+                                                        <SmartDrawerDescription>
+                                                            Are you sure you want to delete this token. This cannot be undone.
+                                                        </SmartDrawerDescription>
+                                                    </SmartDrawerHeader>
+                                                    <SmartDrawerFooter className="pt-2 flex">
+                                                        <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Cancel</SmartDrawerClose>
+                                                        <DeleteButton action={deleteToken.bind(null, params.mailbox, row.token)} />
+                                                    </SmartDrawerFooter>
+                                                </SmartDrawerContent>
+                                            </SmartDrawer>
+
+                                        </TableCell>
+
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell className="h-24 text-center" colSpan={3}>
+                                        No tokens yet.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+
             <div>
                 {/* How to receive emails */}
                 <h2 className="text-lg font-semibold">How to receive emails</h2>
                 You need to setup Cloudflare Email Workers to receive emails. {" "}
-                You can use this example script and fill in the env vars + zone to get started.
+                You can use this example script and fill in the <code>auth</code> env var to get started.
                 <br />
                 Make sure to enable catch all for the worker so all emails come to your inbox.
                 <br />
-                <a href="https://github.com/RiskyMH/Email/blob/master/cloudflare-workers/recieve-email.js" target="_blank" rel="noreferrer" className="font-bold hover:underline">Click here for example script.</a> {" "}
+                <a href="https://github.com/RiskyMH/Email/blob/main/cloudflare-workers/receive-email.js" target="_blank" rel="noreferrer" className="font-bold hover:underline">Click here for example script.</a> {" "}
                 If you are confused, you can ask for help in the <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank" rel="noreferrer">Discord</a> server.
                 <br />
                 <br />
@@ -341,4 +437,12 @@ export default async function EmailConfig({
         </div >
 
     )
+}
+
+
+function hideToken(token: string) {
+    const newToken = `et_`
+    if (!token.startsWith(newToken)) return token.slice(0, 4) + '......' + token.slice(-4)
+    // show first 4 and last 4 characters
+    return token.slice(0, newToken.length + 4) + '......' + token.slice(-4)
 }
