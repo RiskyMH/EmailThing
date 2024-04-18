@@ -399,7 +399,7 @@ export default async function EmailConfig({
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell className="h-24 text-center" colSpan={3}>
+                                    <TableCell className="h-24 text-center" colSpan={4}>
                                         No tokens yet.
                                     </TableCell>
                                 </TableRow>

@@ -34,7 +34,8 @@ function formatDate(date: Date, type: "normal" | "hour-min" | "hour-min/date" | 
     } else if (type === "full") {
         return date.toLocaleString([], { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${formatTimeAgo(date)})`
     } else if (type === "date") {
-        return date.toLocaleDateString([], { timeZone })
+        const local = timeZone === "Australia/Sydney" ? "en-GB" : "en-US";
+        return date.toLocaleDateString(local, { month: '2-digit', day: '2-digit', year: '2-digit', timeZone })
     } else {
         return date.toLocaleDateString([], { timeZone })
     }

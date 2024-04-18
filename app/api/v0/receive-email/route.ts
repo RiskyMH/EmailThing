@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     } else {
         // it must be custom domain (so check the token)
         mailboxId = await getTokenMailbox() || undefined
-        if (mailboxId) {
+        if (!mailboxId) {
             return new Response('Unauthorized', { status: 401 })
         }
     }

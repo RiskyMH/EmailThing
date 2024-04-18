@@ -1,5 +1,5 @@
 import db, { MailboxTokens } from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, and, or, isNull, gt } from "drizzle-orm";
 import { headers } from "next/headers";
 
 function getToken() {
@@ -14,7 +14,13 @@ export async function getTokenMailbox(): Promise<string | null> {
     if (!auth) return null
 
     const token = await db.query.MailboxTokens.findFirst({
-        where: eq(MailboxTokens.token, auth),
+        where: and(
+            eq(MailboxTokens.token, auth),
+            or(
+                isNull(MailboxTokens.expiresAt),
+                gt(MailboxTokens.expiresAt, new Date())
+            )
+        ),
         columns: {
             id: true,
             mailboxId: true
