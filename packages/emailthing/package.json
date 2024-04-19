@@ -1,6 +1,6 @@
 {
   "name": "emailthing",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A web app for receiving and sending your emails!",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "url": "https://github.com/RiskyMH/Email/issues"
   },
   "bin": {
-    "emailthing": "./cli.js"
+    "emailthing": "dist/cli.js"
   },
   "type": "module",
   "exports": {

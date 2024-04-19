@@ -1,6 +1,6 @@
 # EmailThing API
 
-https://api.emailthing.xyz/api/v0/
+https://emailthing.xyz/api/v0/
 
 JS SDK: https://www.npmjs.com/package/emailthing
 
