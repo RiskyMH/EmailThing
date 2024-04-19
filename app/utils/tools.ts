@@ -1,11 +1,35 @@
 
-export function dateDay(date: Date, timeZone: string) {
+export function dateDay(date: Date, timeZone: string | undefined) {
     return date.toLocaleString([], {
         timeZone,
         month: "2-digit",
         day: "2-digit",
         year: "numeric",
     })
+}
+
+export type DateStyle = "normal" | "hour-min" | "hour-min/date" | "full" | "date"
+export function formatDate(date: Date, type: DateStyle, timeZone: string | undefined) {
+    const todayWithTz = dateDay(new Date(), timeZone)
+
+    if (type === "normal") {
+        return date.toLocaleTimeString()
+    } else if (type === "hour-min") {
+        return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone }).toUpperCase()
+    } else if (type === "date") {
+        const local = timeZone ? (timeZone.includes("Australia") ? "en-GB" : "en-US") : [];
+        return date.toLocaleDateString(local, { month: '2-digit', day: '2-digit', year: '2-digit', timeZone })
+    } else if (type === "hour-min/date") {
+        if (dateDay(date, timeZone) === todayWithTz) {
+            return formatDate(date, "hour-min", timeZone)
+        } else {
+            return formatDate(date, "date", timeZone)
+        }
+    } else if (type === "full") {
+        return date.toLocaleString([], { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${formatTimeAgo(date)})`
+    } else {
+        return date.toLocaleDateString([], { timeZone })
+    }
 }
 
 export async function gravatar(email: string) {
