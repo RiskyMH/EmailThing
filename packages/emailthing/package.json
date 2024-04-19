@@ -1,0 +1,36 @@
+{
+  "name": "emailthing",
+  "version": "0.0.1",
+  "description": "A web app for receiving and sending your emails!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RiskyMH/Email.git"
+  },
+  "keywords": [
+    "cli",
+    "sdk",
+    "email"
+  ],
+  "author": "RiskyMH (https://riskymh.dev)",
+  "bugs": {
+    "url": "https://github.com/RiskyMH/Email/issues"
+  },
+  "bin": {
+    "emailthing": "./cli.js"
+  },
+  "type": "module",
+  "exports": {
+    "bun": "./src/sdk.ts",
+    "types": "./src/sdk.ts",
+    "import": "./dist/sdk.js"
+  },
+  "main": "./dist/sdk.js",
+  "module": "./dist/sdk.js",
+  "types": "./src/sdk.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "bun build src/cli.ts src/sdk.ts --outdir dist --splitting",
+    "prepublish": "rm -rf dist && bun run build"
+  },
+  "homepage": "https://emailthing.xyz/home"
+}

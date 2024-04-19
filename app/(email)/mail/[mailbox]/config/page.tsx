@@ -431,7 +431,8 @@ export default async function EmailConfig({
                     {`<domain>               "v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all"`}
                 </pre>
                 <br />
-
+                If you would like to send emails via the API, see the documentation here: <a href="https://github.com/RiskyMH/Email/blob/main/app/api/v0" target="_blank" rel="noreferrer" className="font-bold hover:underline">API Documentation</a>
+                <br />
             </div>
 
         </div >
