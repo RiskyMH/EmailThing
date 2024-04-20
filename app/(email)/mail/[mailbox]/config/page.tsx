@@ -417,7 +417,7 @@ export default async function EmailConfig({
                 <br />
                 Make sure to enable catch all for the worker so all emails come to your inbox.
                 <br />
-                <a href="https://github.com/RiskyMH/Email/blob/main/cloudflare-workers/receive-email.js" target="_blank" rel="noreferrer" className="font-bold hover:underline">Click here for example script.</a> {" "}
+                <a href="https://github.com/RiskyMH/EmailThing/blob/main/cloudflare-workers/receive-email.js" target="_blank" rel="noreferrer" className="font-bold hover:underline">Click here for example script.</a> {" "}
                 If you are confused, you can ask for help in the <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank" rel="noreferrer">Discord</a> server.
                 <br />
                 <br />
@@ -431,7 +431,7 @@ export default async function EmailConfig({
                     {`<domain>               "v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all"`}
                 </pre>
                 <br />
-                If you would like to send emails via the API, see the documentation here: <a href="https://github.com/RiskyMH/Email/tree/main/app/api/v0#readme" target="_blank" rel="noreferrer" className="font-bold hover:underline">API Documentation</a>
+                If you would like to send emails via the API, see the documentation here: <a href="https://github.com/RiskyMH/EmailThing/tree/main/app/api/v0#readme" target="_blank" rel="noreferrer" className="font-bold hover:underline">API Documentation</a>
                 <br />
             </div>
 

@@ -38,7 +38,7 @@ export function Page({ githubStars, action }: any) {
                 so your support by starring my repo would mean lots to me.
                 <Link
                     className={buttonVariants({ variant: !show ? "default" : "secondary", className: "gap-2" })}
-                    href="https://github.com/RiskyMH/Email" target="_blank"
+                    href="https://github.com/RiskyMH/EmailThing" target="_blank"
                     onClick={() => setShow(true)}
                 >
                     <Github className="h-4 w-4" />

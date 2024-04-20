@@ -60,7 +60,7 @@ function SiteFooter() {
                         </a>
                         . The source code is available on{" "}
                         <a
-                            href="https://github.com/RiskyMH/Email"
+                            href="https://github.com/RiskyMH/EmailThing"
                             target="_blank"
                             rel="noreferrer"
                             className="font-medium underline underline-offset-4"

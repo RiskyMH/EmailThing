@@ -4,7 +4,7 @@
   "description": "A web app for receiving and sending your emails!",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RiskyMH/Email.git"
+    "url": "git+https://github.com/RiskyMH/EmailThing.git"
   },
   "keywords": [
     "cli",
@@ -13,10 +13,10 @@
   ],
   "author": "RiskyMH (https://riskymh.dev)",
   "bugs": {
-    "url": "https://github.com/RiskyMH/Email/issues"
+    "url": "https://github.com/RiskyMH/EmailThing/issues"
   },
   "bin": {
-    "emailthing": "dist/cli.js"
+    "emailthing": "./dist/cli.js"
   },
   "type": "module",
   "exports": {

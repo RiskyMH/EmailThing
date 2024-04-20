@@ -28,7 +28,7 @@ export default function Home() {
               Get Started
             </Link>
             <Link
-              href="https://github.com/RiskyMH/Email"
+              href="https://github.com/RiskyMH/EmailThing"
               target="_blank"
               rel="noreferrer"
               className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
@@ -113,7 +113,7 @@ export default function Home() {
             EmailThing is open source and powered by open source software. <br />{" "}
             The code is available on{" "}
             <Link
-              href="https://github.com/RiskyMH/Email"
+              href="https://github.com/RiskyMH/EmailThing"
               target="_blank"
               rel="noreferrer"
               className="underline underline-offset-4"

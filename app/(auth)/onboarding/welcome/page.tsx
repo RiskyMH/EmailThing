@@ -33,7 +33,7 @@ export default async function WelcomePage() {
     if (!user) return notFound();
     if (user.onboardingStatus?.initial) return redirect("/mail");
 
-    const githubStars = (await (await fetch("https://api.github.com/repos/RiskyMH/Email", { next: { revalidate: 60 } })).json()).stargazers_count;
+    const githubStars = (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing", { next: { revalidate: 60 } })).json()).stargazers_count;
 
     return (
         <div className="container flex p-5 w-screen h-screen flex-col items-center bg-background" vaul-drawer-wrapper="">

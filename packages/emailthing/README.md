@@ -6,7 +6,7 @@
 
 ## SDK
 
-JavaScript library for the [EmailThing API](https://github.com/RiskyMH/Email/tree/main/app/api/v0#readme).
+JavaScript library for the [EmailThing API](https://github.com/RiskyMH/EmailThing/tree/main/app/api/v0#readme).
 
 ### Setup
 
