@@ -1,6 +1,6 @@
 {
   "name": "emailthing",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A web app for receiving and sending your emails!",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "bun build src/cli.ts src/sdk.ts --outdir dist --splitting",
-    "prepublish": "rm -rf dist && bun run build"
+    "prepack": "bun exec \"rm -rf dist && bun run build\""
   },
   "homepage": "https://emailthing.xyz/home"
 }

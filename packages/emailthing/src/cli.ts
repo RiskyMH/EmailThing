@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { EmailThing } from "./api"
 
 console.log("EmailThing!")
