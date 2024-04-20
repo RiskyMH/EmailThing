@@ -5,7 +5,7 @@ import { asc, eq } from "drizzle-orm";
 
 
 const GITHUB_KEYS_URI = "https://api.github.com/meta/public_keys/secret_scanning";
-
+export const revalidate = 0;
 
 // export const runtime = "edge"
 

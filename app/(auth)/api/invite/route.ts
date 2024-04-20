@@ -3,6 +3,8 @@ import { createId } from '@paralleldrive/cuid2';
 import { db, InviteCode, User } from "@/db";
 import { and, eq } from "drizzle-orm";
 
+export const revalidate = 0;
+
 export async function GET() {
     const currentUser = await getCurrentUser()
 
