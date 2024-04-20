@@ -2,7 +2,7 @@
 
 import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "../tools";
-import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxTokens } from "@/db";
+import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxTokens } from "@/db";
 import { aliasLimit, customDomainLimit } from "@/utils/limits";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
@@ -91,7 +91,6 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
         .values({
             domain: customDomain,
             mailboxId,
-            authKey: createId(),
         })
         .execute()
 
@@ -359,5 +358,72 @@ export async function deleteToken(mailboxId: string, token: string) {
         ))
         .execute()
 
+    revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+
+const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
+export async function createCategory(mailboxId: string, name: string, color: string | null) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    if (color && !categoryColorRegex.test(color)) {
+        return { error: "Invalid color" }
+    }
+
+    await db.insert(MailboxCategory)
+        .values({
+            mailboxId,
+            name,
+            color
+        })
+        .execute()
+
+    revalidateTag(`mailbox-categories-${mailboxId}`)
+    revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function editCategory(mailboxId: string, categoryId: string, name: string, color: string | null) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+    
+    if (color && !categoryColorRegex.test(color)) {
+        return { error: "Invalid color" }
+    }
+
+    await db.update(MailboxCategory)
+        .set({
+            name,
+            color
+        })
+        .where(and(
+            eq(MailboxCategory.id, categoryId),
+            eq(MailboxCategory.mailboxId, mailboxId)
+        ))
+        .execute()
+
+    revalidateTag(`mailbox-categories-${mailboxId}`)
+    revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function deleteCategory(mailboxId: string, categoryId: string) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    await db.delete(MailboxCategory)
+        .where(and(
+            eq(MailboxCategory.id, categoryId),
+            eq(MailboxCategory.mailboxId, mailboxId)
+        ))
+        .execute()
+
+    revalidateTag(`mailbox-categories-${mailboxId}`)
     revalidatePath(`/mail/${mailboxId}/config`);
 }

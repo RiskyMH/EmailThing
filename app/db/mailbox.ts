@@ -78,11 +78,8 @@ export const MailboxCustomDomain = sqliteTable("mailbox_custom_domain", {
         .references(() => Mailbox.id, { onDelete: 'cascade' }),
     addedAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     domain: nocaseText("domain").notNull(),
-    // TODO: remove, just keeping in case things fail
-    authKey: text("auth_key").notNull().$defaultFn(() => createId()),
 }, (table) => {
     return {
-        idx: index("mailbox_custom_domain_idx").on(table.authKey, table.domain),
         unique: unique("mailbox_custom_domain_unique").on(table.domain, table.mailboxId)
     }
 });
@@ -119,7 +116,8 @@ export const MailboxCategory = sqliteTable("mailbox_categories", {
     mailboxId: text("mailbox_id", { length: 24 }).notNull()
         .references(() => Mailbox.id, { onDelete: 'cascade' }),
     name: text("name").notNull(),
-    color: text("color")
+    color: text("color"),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 }, (table) => {
     return {
         mailboxIdx: index("mailbox_category_mailbox_idx").on(table.mailboxId),

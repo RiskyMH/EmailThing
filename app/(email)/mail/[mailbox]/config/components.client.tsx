@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, type FormEvent } from "react";
-import { verifyDomain, addAlias, editAlias, makeToken } from "./actions";
+import { verifyDomain, addAlias, editAlias, makeToken, createCategory, editCategory } from "./actions";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -251,5 +251,78 @@ export function CreateTokenForm({ mailboxId}: { mailboxId: string }) {
                 </SmartDrawerFooter>
             </>
         )
+    );
+}
+
+
+export function CreateCategoryForm({ mailboxId }: { mailboxId: string }) {
+    const [isPending, startTransition] = useTransition();
+
+    const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isPending) return;
+
+        startTransition(async () => {
+            // @ts-expect-error
+            const res = await createCategory(mailboxId, event.target.name.value, event.target.color?.value)
+            if (res?.error) {
+                toast.error(res.error)
+            } else {
+                document.getElementById("smart-drawer:close")?.click()
+            }
+        })
+
+    }
+
+    return (
+        <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+            <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input className="bg-secondary border-none" name="name" placeholder="Work" id="name" autoFocus disabled={isPending} required />
+
+                <Label htmlFor="name">Color</Label>
+                <Input className="bg-secondary border-none" name="color" placeholder="#000000" id="color" disabled={isPending} />
+            </div>
+            <Button type="submit" disabled={isPending} className="gap-2">
+                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                Create category
+            </Button>
+        </form>
+    );
+}
+
+export function EditCategoryForm({ mailboxId, id, name, color }: { mailboxId: string, id: string, name: string, color: string | null}) {
+    const [isPending, startTransition] = useTransition();
+
+    const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isPending) return;
+
+        startTransition(async () => {
+            // @ts-expect-error
+            const res = await editCategory(mailboxId, id, event.target.name.value, event.target.color?.value)
+            if (res?.error) {
+                toast.error(res.error)
+            } else {
+                document.getElementById("smart-drawer:close")?.click()
+            }
+        })
+
+    }
+
+    return (
+        <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+            <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input className="bg-secondary border-none" name="name" placeholder="Work" id="name" defaultValue={name} autoFocus disabled={isPending} required />
+
+                <Label htmlFor="name">Color</Label>
+                <Input className="bg-secondary border-none" name="color" placeholder="#000000" id="color" defaultValue={color || ''} disabled={isPending} />
+            </div>
+            <Button type="submit" disabled={isPending} className="gap-2">
+                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                Edit category
+            </Button>
+        </form>
     );
 }

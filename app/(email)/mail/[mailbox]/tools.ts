@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { redirect, notFound } from "next/navigation";
 import { cache } from "react";
 import { db, MailboxForUser, MailboxAlias, MailboxCategory, User } from "@/db";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 
 export const userMailboxAccess = cache((mailboxId: string, userId: string | null) => {
@@ -42,7 +42,8 @@ export const mailboxCategories = cache((mailboxId: string) => {
                     id: true,
                     name: true,
                     color: true,
-                }
+                },
+                orderBy: asc(MailboxCategory.createdAt)
             })
 
             return categories;

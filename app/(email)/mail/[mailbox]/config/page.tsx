@@ -1,21 +1,18 @@
 import { Metadata } from "next"
 import { pageMailboxAccess } from "../tools"
-import { db, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxTokens } from "@/db";
+import { db, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxTokens } from "@/db";
 import { notFound } from "next/navigation"
 import { customDomainLimit, storageLimit, aliasLimit } from "@/utils/limits"
-import { AddAliasForm, AddCustomDomainForm, CreateTokenForm, DeleteButton, EditAliasForm } from "./components.client"
+import { AddAliasForm, AddCustomDomainForm, CreateCategoryForm, CreateTokenForm, DeleteButton, EditAliasForm, EditCategoryForm } from "./components.client"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { PlusIcon, MoreHorizontalIcon, CheckIcon, Trash2Icon, PencilIcon } from "lucide-react";
-import ToggleVisibilityToken from "@/components/token.client";
 import { ContextMenuAction } from "../components.client";
-import { changeDefaultAlias, deleteAlias, deleteCustomDomain, deleteToken } from "./actions";
-import { init } from "@paralleldrive/cuid2";
+import { changeDefaultAlias, deleteAlias, deleteCategory, deleteCustomDomain, deleteToken } from "./actions";
 import LocalTime from "@/components/localtime";
-import { generateToken } from "@/utils/token";
 
 
 export const metadata: Metadata = {
@@ -52,7 +49,6 @@ export default async function EmailConfig({
             customDomains: {
                 columns: {
                     domain: true,
-                    authKey: true,
                     id: true,
                     addedAt: true
                 },
@@ -67,6 +63,14 @@ export default async function EmailConfig({
                     id: true
                 },
                 orderBy: asc(MailboxTokens.createdAt)
+            },
+            categories: {
+                columns: {
+                    id: true,
+                    name: true,
+                    color: true
+                },
+                orderBy: asc(MailboxCategory.createdAt)
             }
         }
     })
@@ -132,7 +136,7 @@ export default async function EmailConfig({
                         <TableBody>
                             {mailbox.aliases.length ? (
                                 mailbox.aliases.map((row) => (
-                                    <TableRow key={row.alias}>
+                                    <TableRow key={row.id}>
                                         <TableCell className="font-medium py-3">
                                             {row.alias}
                                         </TableCell>
@@ -151,7 +155,6 @@ export default async function EmailConfig({
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    {/* // todo: actions: */}
                                                     <SmartDrawer>
                                                         <DropdownMenuItem asChild>
                                                             <SmartDrawerTrigger className="gap-2 w-full">
@@ -220,6 +223,126 @@ export default async function EmailConfig({
                                 <TableRow>
                                     <TableCell className="h-24 text-center" colSpan={4}>
                                         No aliases yet.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+            <div className="mb-3 max-w-[40rem]">
+                <div className="flex pb-2">
+                    <h2 className="text-lg font-semibold">Categories</h2>
+                    <SmartDrawer>
+                        <SmartDrawerTrigger asChild>
+                            <Button
+                                disabled={mailbox.aliases.length >= (aliasLimit as any)[mailbox.plan]}
+                                className="ms-auto flex gap-2"
+                                size="sm"
+                                variant="secondary"
+                            >
+                                <PlusIcon className='h-4 w-4' /> Create category
+                            </Button>
+                        </SmartDrawerTrigger>
+                        <SmartDrawerContent className="sm:max-w-[425px]">
+                            <SmartDrawerHeader>
+                                <SmartDrawerTitle>Create Category</SmartDrawerTitle>
+                                <SmartDrawerDescription>Enter the category name and a hex color</SmartDrawerDescription>
+                            </SmartDrawerHeader>
+
+                            <CreateCategoryForm mailboxId={params.mailbox} />
+
+                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                                <SmartDrawerClose asChild>
+                                    <Button variant="secondary">Cancel</Button>
+                                </SmartDrawerClose>
+                            </SmartDrawerFooter>
+                        </SmartDrawerContent>
+                    </SmartDrawer>
+                </div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="bg-tertiary rounded-ss-md">
+                                    <p>Name</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary rounded-se-md w-1" />
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mailbox.categories.length ? (
+                                mailbox.categories.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell className="py-3 font-medium gap-2 h-full">
+                                            <span className="self-center rounded-full h-3 w-3 mr-2 inline-block flex-shrink-0" style={{backgroundColor: row.color || "grey"}} />
+                                            {row.name}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <SmartDrawer>
+                                                        <DropdownMenuItem asChild>
+                                                            <SmartDrawerTrigger className="gap-2 w-full">
+                                                                <PencilIcon className="text-muted-foreground h-5 w-5" />
+                                                                Edit name
+                                                            </SmartDrawerTrigger>
+                                                        </DropdownMenuItem>
+                                                        <SmartDrawerContent className="sm:max-w-[425px]">
+                                                            <SmartDrawerHeader>
+                                                                <SmartDrawerTitle>Edit Category</SmartDrawerTitle>
+                                                                <SmartDrawerDescription>Enter the new name and hex color</SmartDrawerDescription>
+                                                            </SmartDrawerHeader>
+
+                                                            <EditCategoryForm mailboxId={params.mailbox} name={row.name} id={row.id} color={row.color} />
+
+                                                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                                                                <SmartDrawerClose asChild>
+                                                                    <Button variant="secondary">Cancel</Button>
+                                                                </SmartDrawerClose>
+                                                            </SmartDrawerFooter>
+                                                        </SmartDrawerContent>
+                                                    </SmartDrawer>
+
+                                                    <SmartDrawer>
+                                                        <DropdownMenuItem className="flex gap-2 w-full" asChild>
+                                                            <SmartDrawerTrigger>
+                                                                <Trash2Icon className="text-muted-foreground h-5 w-5" />
+                                                                Delete category
+                                                            </SmartDrawerTrigger>
+                                                        </DropdownMenuItem>
+
+                                                        <SmartDrawerContent className="sm:max-w-[425px]">
+                                                            <SmartDrawerHeader>
+                                                                <SmartDrawerTitle>Delete Category</SmartDrawerTitle>
+                                                                <SmartDrawerDescription>
+                                                                    Are you sure you want to delete <strong>{row.name}</strong>.
+                                                                    This will NOT delete any emails in this category.
+                                                                </SmartDrawerDescription>
+                                                            </SmartDrawerHeader>
+                                                            <SmartDrawerFooter className="pt-2 flex">
+                                                                <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Cancel</SmartDrawerClose>
+                                                                <DeleteButton action={deleteCategory.bind(null, params.mailbox, row.id)} />
+                                                            </SmartDrawerFooter>
+                                                        </SmartDrawerContent>
+                                                    </SmartDrawer>
+
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell className="h-24 text-center" colSpan={2}>
+                                        No categories yet.
                                     </TableCell>
                                 </TableRow>
                             )}
