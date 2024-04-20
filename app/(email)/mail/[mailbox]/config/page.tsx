@@ -413,7 +413,7 @@ export default async function EmailConfig({
                 {/* How to receive emails */}
                 <h2 className="text-lg font-semibold">How to receive emails</h2>
                 You need to setup Cloudflare Email Workers to receive emails. {" "}
-                You can use this example script and fill in the <code>auth</code> env var to get started.
+                You can use this example script and fill in the <code>token</code> env var to get started.
                 <br />
                 Make sure to enable catch all for the worker so all emails come to your inbox.
                 <br />

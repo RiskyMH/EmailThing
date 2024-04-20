@@ -1,6 +1,8 @@
-// Don't forget to add the `auth` token to your environment variables
-// * Go to worker > your email worker > settings > variables > add new variable `auth` with the value provided in the dashboard.
+// Don't forget to add an API token to your environment variables
+// * Go to mailbox config -> create api token -> copy the token
+// * Go to worker > your email worker > settings > variables > add new variable `token` in the dashboard.
 // * If you would like to forward the email to another address, add a new variable `forward` with the value of the email you would like to forward to.
+//    - make sure you verify the email in cloudflare email routing first (otherwise it will be rejected)
 
 
 /* eslint-disable */
@@ -30,7 +32,7 @@ export default {
     /**
      * 
      * @param {import("@cloudflare/workers-types").ForwardableEmailMessage} message 
-     * @param {{auth: string, forward?: string}} env 
+     * @param {{token: string, forward?: string}} env 
      * @param {any} ctx 
      */
     async email(message, env, ctx) {
@@ -44,7 +46,7 @@ export default {
             method: "POST",
             headers: {
                 "content-type": "application/json",
-                "authorization": `Bearer ${env.auth}`
+                "authorization": `Bearer ${env.token}`
             },
             body: JSON.stringify({
                 email: raw,
