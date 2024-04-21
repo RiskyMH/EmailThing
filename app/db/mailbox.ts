@@ -139,6 +139,7 @@ export const MailboxForUser = sqliteTable("mailbox_for_user", {
         // .references(() => Mailbox.id, { onDelete: 'cascade' }),
     userId: text("user_id", { length: 24 }).notNull(),
         // .references(() => User.id, { onDelete: 'cascade' }),
+    joinedAt: integer('joined_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 }, (table) => {
     return {
         pk: primaryKey({ columns: [table.mailboxId, table.userId] })
