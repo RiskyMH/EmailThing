@@ -1,12 +1,12 @@
 import { getCurrentUser } from "@/utils/jwt";
-import { db, Mailbox, User } from "@/db";
+import { db, Mailbox, MailboxForUser, User, MailboxAlias } from "@/db";
 import { Suspense } from "react";
 import { Search } from "./nav.search";
 import { UserNav } from "./user.nav.client";
 import Link from "next/link";
 import { MailIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mailboxAliases, userMailboxAccess } from "./tools";
+import { mailboxAliases, userMailboxAccess, userMailboxes } from "./tools";
 import Sidebar from "./sidebar";
 import { MobileNav } from "./sidebar.client";
 import { eq } from "drizzle-orm";
@@ -77,13 +77,15 @@ async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
     if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
 
     const { default: defaultAlias } = await mailboxAliases(mailboxId);
+    const mailboxes = await userMailboxes(userId);
+
 
     return (
-        <UserNav mailboxId={mailboxId} user={{
+        <UserNav mailboxId={mailboxId} mailboxes={mailboxes} user={{
             id: mailboxId,
             name: user.username,
             secondary: defaultAlias?.alias ?? "email@email.?",
-            image: defaultAlias?.alias ? await gravatar(defaultAlias.alias) : undefined
+            image: defaultAlias?.alias ? await gravatar(defaultAlias.alias) : undefined,
         }} />
     );
 }

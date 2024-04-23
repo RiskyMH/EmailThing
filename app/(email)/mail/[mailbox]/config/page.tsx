@@ -370,12 +370,6 @@ export default async function EmailConfig({
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
                             <AddCustomDomainForm mailboxId={params.mailbox} cfWorkerCode={cfWorkerCode} />
-
-                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
-                                <SmartDrawerClose asChild>
-                                    <Button variant="secondary">Cancel</Button>
-                                </SmartDrawerClose>
-                            </SmartDrawerFooter>
                         </SmartDrawerContent>
                     </SmartDrawer>
                 </div>
@@ -437,12 +431,6 @@ export default async function EmailConfig({
                                                         </DropdownMenuItem>
                                                         <SmartDrawerContent className="sm:max-w-[425px]">
                                                             <AddCustomDomainForm mailboxId={params.mailbox} cfWorkerCode={cfWorkerCode} initialDomain={row.domain} />
-
-                                                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
-                                                                <SmartDrawerClose asChild>
-                                                                    <Button variant="secondary">Cancel</Button>
-                                                                </SmartDrawerClose>
-                                                            </SmartDrawerFooter>
                                                         </SmartDrawerContent>
                                                     </SmartDrawer>
 
@@ -578,7 +566,7 @@ const cfWorkerCode = (
             </CopyButton>
         </Button>
 
-        <pre className="overflow-auto max-h-52 bg-tertiary p-2 rounded-md" dangerouslySetInnerHTML={{
+        <div className="overflow-auto max-h-52 bg-tertiary p-2 rounded-md text-sm" dangerouslySetInnerHTML={{
             __html:
                 await codeToHtml(
                     cfWorkerCodeText,

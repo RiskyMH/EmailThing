@@ -67,12 +67,11 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
             <div className="flex flex-col gap-2 py-2 text-sm">
                 {items.map(item => (<LinkElement key={item.href} {...item} />))}
 
-                <hr className="bg-border w-full inline sm:hidden" />
+                <hr className="bg-border w-full" />
                 <LinkElement
                     name="Mailbox Config"
                     icon={SettingsIcon}
                     href={`/mail/${mailboxId}/config`}
-                    className="flex sm:hidden"
                 />
             </div>
         </div>

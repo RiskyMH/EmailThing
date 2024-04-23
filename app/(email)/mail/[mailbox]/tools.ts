@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { redirect, notFound } from "next/navigation";
 import { cache } from "react";
 import { db, MailboxForUser, MailboxAlias, MailboxCategory, User } from "@/db";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 
 
 export const userMailboxAccess = cache((mailboxId: string, userId: string | null) => {
@@ -101,3 +101,43 @@ export async function pageMailboxAccess(mailboxId?: string | null, throwOnFail =
 
     return userId
 }
+
+
+export const userMailboxes = cache((userId: string) => {
+    return unstable_cache(
+        async () => {
+            const mailboxes = await db.query.MailboxForUser.findMany({
+                where: eq(MailboxForUser.userId, userId),
+                columns: {
+                    mailboxId: true,
+                },
+                orderBy: asc(MailboxForUser.mailboxId)
+            })
+
+            const mailboxesAliases = await db.query.MailboxAlias.findMany({
+                where: and(
+                    inArray(MailboxAlias.mailboxId, mailboxes.map(m => m.mailboxId)),
+                    eq(MailboxAlias.default, true)
+                ),
+                columns: {
+                    mailboxId: true,
+                    alias: true
+                }
+            })
+
+            return mailboxes.map(m => ({
+                id: m.mailboxId,
+                name: mailboxesAliases.find(a => a.mailboxId === m.mailboxId)?.alias || null
+            }));
+        },
+        [userId],
+        {
+            tags: [
+                `user-${userId}`,
+                `user-mailboxes-${userId}`,
+            ],
+            // revalidate after 7 days
+            revalidate: 60 * 60 * 24 * 7,
+        }
+    )()
+});

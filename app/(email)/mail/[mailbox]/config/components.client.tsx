@@ -59,6 +59,12 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                         Next <ChevronRightIcon className="w-4 h-4" />
                     </Button>
                 </form>
+
+                <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                    <SmartDrawerClose asChild>
+                        <Button variant="secondary">Cancel</Button>
+                    </SmartDrawerClose>
+                </SmartDrawerFooter>
             </>
         ) : page === "verify" ? (
             <>
@@ -89,6 +95,12 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                         </Button>
                     </div>
                 </div>
+
+                <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                    <SmartDrawerClose asChild>
+                        <Button variant="secondary">Cancel</Button>
+                    </SmartDrawerClose>
+                </SmartDrawerFooter>
             </>
         ) : page === "spf" ? (
             <>
@@ -135,6 +147,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                         </Button>
                     </div>
                 </div>
+                <SmartDrawerFooter />
             </>
 
         ) : page === "cf-worker-code" ? (
@@ -161,7 +174,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                         </Button>
                     </div>
                 </div>
-
+                <SmartDrawerFooter />
             </>
         ) : page === "token" ? (
             <>
@@ -199,6 +212,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                         </Button>
                     </div>
                 </div>
+                <SmartDrawerFooter />
             </>
 
         ) : page === "finish" ? (
@@ -220,11 +234,13 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                         <Button onClick={() => setPage("token")} className="gap-2" variant="secondary">
                             <ChevronLeftIcon className="w-4 h-4" />
                         </Button>
-                        <Button onClick={() => document.getElementById("smart-drawer:close")?.click()} className="gap-2 w-full">
-                            Close
-                        </Button>
+
+                        <SmartDrawerClose asChild>
+                            <Button className="w-full">Close</Button>
+                        </SmartDrawerClose>
                     </div>
                 </div>
+                <SmartDrawerFooter />
             </>
 
         ) : (

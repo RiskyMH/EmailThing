@@ -8,7 +8,11 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuPortal,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -22,9 +26,9 @@ import {
     DrawerTrigger,
 } from "@/components/ui/drawer"
 import Link from "next/link"
-import { ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, PlusCircleIcon } from "lucide-react"
 import { useMediaQuery } from "usehooks-ts";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { logout } from "./actions"
 
 interface UserProps {
@@ -34,7 +38,11 @@ interface UserProps {
         image?: string,
         secondary: string,
     },
-    mailboxId: string
+    mailboxId: string,
+    mailboxes: {
+        id: string,
+        name: string | null,
+    }[]
 }
 
 function getInitials(name: string) {
@@ -42,9 +50,20 @@ function getInitials(name: string) {
     return name.slice(0, 2).toUpperCase()
 }
 
-export function UserNav({ user, mailboxId }: UserProps) {
+const changeMailboxCookie = (mailboxId: string) => {
+    document.cookie = `mailboxId=${mailboxId}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`
+}
+
+export function UserNav({ user, mailboxId, mailboxes }: UserProps) {
     const [open, setOpen] = useState(false)
     const isDesktop = useMediaQuery("(min-width: 640px)");
+    const [mobileSwitchMailbox, setMobileSwitchMailbox] = useState(false)
+
+    useEffect(() => {
+        if (open == false) {
+            setMobileSwitchMailbox(false)
+        }
+    }, [open])
 
     const userIcon = (
         <Button
@@ -73,33 +92,67 @@ export function UserNav({ user, mailboxId }: UserProps) {
                 <DrawerContent>
                     <DrawerHeader>
                         <DrawerTitle>{user.name}</DrawerTitle>
-                        <DrawerDescription>{user.secondary}</DrawerDescription>
+                        <DrawerDescription>{mobileSwitchMailbox ? "Switch Mailbox" : user.secondary}</DrawerDescription>
                     </DrawerHeader>
 
                     <div className="mx-4 flex flex-col gap-2 pt-2">
-                        <Button variant="secondary" asChild>
-                            <DrawerClose asChild>
-                                <Link href="/settings" className="w-full">
-                                    User settings
-                                </Link>
-                            </DrawerClose>
-                        </Button>
-                        <Button variant="secondary" asChild>
-                            <DrawerClose asChild>
-                                <Button className="w-full" onClick={() => void logout()}>
-                                    Sign out
+                        {mobileSwitchMailbox ? (
+                            <>
+                                {mailboxes.map(({ id, name }) => (
+                                    <Button key={id} variant="secondary" asChild>
+                                        <DrawerClose className="w-full" asChild>
+                                            <Link href={`/mail/${id}`} onClick={() => changeMailboxCookie(id)}>
+                                                {name || id}
+                                            </Link>
+                                        </DrawerClose>
+                                    </Button>
+                                ))}
+                                {/* + new */}
+                                <Button variant="secondary" asChild>
+                                    <DrawerClose className="w-full">
+                                        <PlusCircleIcon className="mr-2 h-4 w-4" />
+                                        New mailbox
+                                    </DrawerClose>
                                 </Button>
-                            </DrawerClose>
-                        </Button>
+
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="secondary" asChild>
+                                    <DrawerClose asChild>
+                                        <Link href="/settings" className="w-full">
+                                            User settings
+                                        </Link>
+                                    </DrawerClose>
+                                </Button>
+                                <Button variant="secondary" className="w-full" onClick={() => setMobileSwitchMailbox(true)}>
+                                    Switch Mailbox
+                                    <ChevronRightIcon className="h-4 w-4 ms-2" />
+                                </Button>
+                                <Button variant="secondary" asChild>
+                                    <DrawerClose className="w-full" onClick={() => void logout()}>
+                                        Sign out
+                                    </DrawerClose>
+                                </Button>
+                            </>
+                        )}
                     </div>
 
                     <DrawerFooter>
-                        <DrawerClose asChild>
-                            <Button variant="default">Close</Button>
-                        </DrawerClose>
+                        {mobileSwitchMailbox ? (
+                            <Button variant="default" onClick={() => setMobileSwitchMailbox(false)}>
+                                <ChevronLeftIcon className="h-4 w-4 me-2" />
+                                Back
+                            </Button>
+
+                        ) : (
+                            <DrawerClose asChild>
+                                <Button variant="default">Close</Button>
+                            </DrawerClose>
+                        )}
                     </DrawerFooter>
                 </DrawerContent>
-            </Drawer>
+            </Drawer >
 
         )
     }
@@ -128,11 +181,27 @@ export function UserNav({ user, mailboxId }: UserProps) {
                             Dashboard
                         </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link href={`/mail/${mailboxId}/config`} className="cursor-pointer">
-                            Mailbox Config
-                        </Link>
-                    </DropdownMenuItem>
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            Switch Mailbox
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                                {mailboxes.map(({ id, name }) => (
+                                    <DropdownMenuItem key={id} asChild>
+                                        <Link href={`/mail/${id}`} className="cursor-pointer" onClick={() => changeMailboxCookie(id)}>
+                                            {name}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                ))}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>
+                                    <PlusCircleIcon className="mr-2 h-4 w-4" />
+                                    <span>New mailbox</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
                     <DropdownMenuItem asChild>
                         <Link href="/settings" className="cursor-pointer">
                             User Settings
