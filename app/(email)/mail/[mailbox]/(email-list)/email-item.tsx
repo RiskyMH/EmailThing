@@ -111,7 +111,6 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         <ContextMenuSeparator />
                         {type !== "temp" && (
                             <ContextMenuSub>
-                                <ContextMenuSeparator />
                                 <ContextMenuSubTrigger className="flex gap-2 cursor-pointer w-full">
                                     <TagIcon className="w-5 h-5 text-muted-foreground" />
                                     Categorize as

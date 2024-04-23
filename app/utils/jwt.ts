@@ -32,6 +32,9 @@ export const addUserTokenToCookie = async (user: { id: string }) => {
     cookies().set("token", token, {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         path: "/",
+        sameSite: "strict",
+        httpOnly: true,
+        secure: true,
     })
 }
 
