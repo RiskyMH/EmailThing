@@ -9,10 +9,13 @@ import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescripti
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { asc, eq } from "drizzle-orm";
-import { PlusIcon, MoreHorizontalIcon, CheckIcon, Trash2Icon, PencilIcon } from "lucide-react";
+import { PlusIcon, MoreHorizontalIcon, CheckIcon, Trash2Icon, PencilIcon, ClipboardIcon } from "lucide-react";
 import { ContextMenuAction } from "../components.client";
 import { changeDefaultAlias, deleteAlias, deleteCategory, deleteCustomDomain, deleteToken } from "./actions";
 import LocalTime from "@/components/localtime";
+import { codeToHtml } from "shiki";
+import { readFileSync } from "fs";
+import CopyButton from "@/components/copy-button.client";
 
 
 export const metadata: Metadata = {
@@ -275,7 +278,7 @@ export default async function EmailConfig({
                                 mailbox.categories.map((row) => (
                                     <TableRow key={row.id}>
                                         <TableCell className="py-3 font-medium gap-2 h-full">
-                                            <span className="self-center rounded-full h-3 w-3 mr-2 inline-block flex-shrink-0" style={{backgroundColor: row.color || "grey"}} />
+                                            <span className="self-center rounded-full h-3 w-3 mr-2 inline-block flex-shrink-0" style={{ backgroundColor: row.color || "grey" }} />
                                             {row.name}
                                         </TableCell>
                                         <TableCell className="py-3">
@@ -366,7 +369,7 @@ export default async function EmailConfig({
                             </Button>
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
-                            <AddCustomDomainForm mailboxId={params.mailbox} />
+                            <AddCustomDomainForm mailboxId={params.mailbox} cfWorkerCode={cfWorkerCode} />
 
                             <SmartDrawerFooter className="pt-2 flex sm:hidden">
                                 <SmartDrawerClose asChild>
@@ -425,8 +428,24 @@ export default async function EmailConfig({
                                                         </SmartDrawerContent>
                                                     </SmartDrawer>
 
-                                                    {/* // todo: setup page/modal */}
-                                                    <DropdownMenuItem>Setup again</DropdownMenuItem>
+
+                                                    <SmartDrawer>
+                                                        <DropdownMenuItem asChild>
+                                                            <SmartDrawerTrigger className="w-full">
+                                                                Setup again
+                                                            </SmartDrawerTrigger>
+                                                        </DropdownMenuItem>
+                                                        <SmartDrawerContent className="sm:max-w-[425px]">
+                                                            <AddCustomDomainForm mailboxId={params.mailbox} cfWorkerCode={cfWorkerCode} initialDomain={row.domain} />
+
+                                                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                                                                <SmartDrawerClose asChild>
+                                                                    <Button variant="secondary">Cancel</Button>
+                                                                </SmartDrawerClose>
+                                                            </SmartDrawerFooter>
+                                                        </SmartDrawerContent>
+                                                    </SmartDrawer>
+
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>
@@ -530,31 +549,9 @@ export default async function EmailConfig({
                         </TableBody>
                     </Table>
                 </div>
-            </div>
 
-            <div>
-                {/* How to receive emails */}
-                <h2 className="text-lg font-semibold">How to receive emails</h2>
-                You need to setup Cloudflare Email Workers to receive emails. {" "}
-                You can use this example script and fill in the <code>token</code> env var to get started.
                 <br />
-                Make sure to enable catch all for the worker so all emails come to your inbox.
-                <br />
-                <a href="https://github.com/RiskyMH/EmailThing/blob/main/cloudflare-workers/receive-email.js" target="_blank" rel="noreferrer" className="font-bold hover:underline">Click here for example script.</a> {" "}
-                If you are confused, you can ask for help in the <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank" rel="noreferrer">Discord</a> server.
-                <br />
-                <br />
-
-                {/* how to send emails */}
-                <h2 className="text-lg font-semibold">How to send emails</h2>
-                {/* user needs to authorize mailchannels SPF and cf worker */}
-                You need to authorize MailChannels and Cloudflare Workers to send emails on your behalf. To do so, add these TXT records.
-                <pre className="overflow-auto">
-                    {`_mailchannels.<domain> "v=mc1 cfid=riskymh.workers.dev"\n`}
-                    {`<domain>               "v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all"`}
-                </pre>
-                <br />
-                If you would like to send emails via the API, see the documentation here: <a href="https://github.com/RiskyMH/EmailThing/tree/main/app/api/v0#readme" target="_blank" rel="noreferrer" className="font-bold hover:underline">API Documentation</a>
+                If you would like to send emails via the API, see the documentation here: <a href="/api-docs" target="_blank" rel="noreferrer" className="font-bold hover:underline">API Documentation</a>
                 <br />
             </div>
 
@@ -570,3 +567,37 @@ function hideToken(token: string) {
     // show first 4 and last 4 characters
     return token.slice(0, newToken.length + 4) + '......' + token.slice(-4)
 }
+
+
+const cfWorkerCodeText = readFileSync("./public/cloudflare-worker.js", "utf-8")
+const cfWorkerCode = (
+    <>
+        <Button className="absolute right-6 m-2 shadow-md" size="sm" variant="secondary" asChild>
+            <CopyButton text={cfWorkerCodeText}>
+                <ClipboardIcon className="h-4 w-4" />
+            </CopyButton>
+        </Button>
+
+        <pre className="overflow-auto max-h-52 bg-tertiary p-2 rounded-md" dangerouslySetInnerHTML={{
+            __html:
+                await codeToHtml(
+                    cfWorkerCodeText,
+                    {
+                        lang: "javascript",
+                        theme: "github-dark",
+                        mergeWhitespaces: true,
+                        transformers: [
+                            {
+                                line(node, line) {
+                                    this.addClassToHast(node, ["break-words", ""]);
+                                },
+                                pre(hast) {
+                                    this.addClassToHast(hast, "!bg-transparent");
+                                },
+                            },
+                        ],
+                    }
+                )
+        }} />
+    </>
+)

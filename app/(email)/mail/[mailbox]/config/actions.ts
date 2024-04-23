@@ -56,7 +56,8 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
 
     if (exists) {
         console.log(exists)
-        return { error: "You have already verified this domain" }
+        // return { error: "You have already verified this domain" }
+        return revalidatePath(`/mail/${mailboxId}/config`);
     }
 
     // verify domain by checking txt records on _emailthing.<domain> and check if one of the txt records has their mailbox id

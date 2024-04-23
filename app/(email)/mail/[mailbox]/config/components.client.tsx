@@ -1,20 +1,21 @@
 'use client'
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { verifyDomain, addAlias, editAlias, makeToken, createCategory, editCategory } from "./actions";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronRightIcon, CopyIcon, Loader2 } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, CopyIcon, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { SmartDrawerHeader, SmartDrawerTitle, SmartDrawerDescription, SmartDrawerClose, SmartDrawerFooter } from "@/components/ui/smart-drawer";
 import CopyButton from "@/components/copy-button.client";
 
 
-export function AddCustomDomainForm({ mailboxId }: { mailboxId: string }) {
+export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "" }: { mailboxId: string, cfWorkerCode: ReactNode, initialDomain?: string }) {
     const [isPending, startTransition] = useTransition();
-    const [page, setPage] = useState<"form" | "verify">("form");
-    const [domain, setDomain] = useState("");
+    const [page, setPage] = useState<"form" | "verify" | "spf" | "cf-worker-code" | "token" | "finish">(initialDomain ? "spf" : "form");
+    const [domain, setDomain] = useState(initialDomain);
+    const [token, setToken] = useState<string | null>(null);
 
     const verify = async () => {
         startTransition(async () => {
@@ -22,11 +23,22 @@ export function AddCustomDomainForm({ mailboxId }: { mailboxId: string }) {
             if (res?.error) {
                 toast.error(res.error)
             } else {
-                document.getElementById("smart-drawer:close")?.click()
+                setPage('spf')
+                // document.getElementById("smart-drawer:close")?.click()
                 toast("Domain verified!")
             }
         })
     }
+
+    const cToken = async () => {
+        if (token) return
+        startTransition(async () => {
+            const token = await makeToken(mailboxId, `Cloudflare Worker (${domain})`)
+            setToken(token!.token!)
+        })
+    }
+
+    // todo: add a way for user to add custom dkim config
 
     return (
         page === "form" ? (
@@ -42,13 +54,13 @@ export function AddCustomDomainForm({ mailboxId }: { mailboxId: string }) {
                     autoComplete="off"
                 >
                     <Input className="bg-secondary border-none" name="domain" placeholder="example.com" defaultValue={domain} id="domain" autoFocus disabled={isPending} required />
-                    <Button type="submit" disabled={isPending} className="gap-2">
+                    <Button type="submit" disabled={isPending} className="gap-2" autoFocus>
                         {/* {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />} */}
                         Next <ChevronRightIcon className="w-4 h-4" />
                     </Button>
                 </form>
             </>
-        ) : (
+        ) : page === "verify" ? (
             <>
                 <SmartDrawerHeader>
                     <SmartDrawerTitle>Add Custom Domain</SmartDrawerTitle>
@@ -78,6 +90,150 @@ export function AddCustomDomainForm({ mailboxId }: { mailboxId: string }) {
                     </div>
                 </div>
             </>
+        ) : page === "spf" ? (
+            <>
+                <SmartDrawerHeader>
+                    <SmartDrawerTitle>Add SPF Records <span className="text-muted-foreground">(1/4)</span></SmartDrawerTitle>
+                    <SmartDrawerDescription>Please the following TXT DNS records to allow sending</SmartDrawerDescription>
+                </SmartDrawerHeader>
+
+                <div className="grid items-start gap-4 px-4 sm:px-0">
+                    <div className="grid gap-2">
+                        {/* <Label htmlFor="name">Name</Label>
+                        <Input className="bg-secondary border-none" value={`${domain}`} id="name" readOnly />
+
+                        <Label htmlFor="type">Type</Label>
+                        <Input className="bg-secondary border-none" value="TXT" id="type" readOnly /> */}
+
+                        <Label htmlFor="spf">
+                            <code className="text-muted-foreground font-semibold">TXT</code> {domain}
+                        </Label>
+                        <div className="flex items-center gap-2">
+                            <Input className="bg-secondary border-none" value="v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all" id="spf" readOnly />
+                            <Button size="sm" className="px-3" asChild>
+                                <CopyButton text="v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all">
+                                    <span className="sr-only">Copy</span>
+                                    <CopyIcon className="h-4 w-4" />
+                                </CopyButton>
+                            </Button>
+                        </div>
+
+                        <Label htmlFor="_mailchannels">
+                            <code className="text-muted-foreground font-semibold">TXT</code> <span className="text-muted-foreground">_mailchannels.</span>{domain}
+                        </Label>
+                        <div className="flex items-center gap-2">
+                            <Input className="bg-secondary border-none" value="v=mc1 cfid=riskymh.workers.dev" id="_mailchannels" readOnly />
+                            <Button size="sm" className="px-3" asChild>
+                                <CopyButton text="v=mc1 cfid=riskymh.workers.dev">
+                                    <span className="sr-only">Copy</span>
+                                    <CopyIcon className="h-4 w-4" />
+                                </CopyButton>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 sm:gap-4">
+                        <Button onClick={() => setPage("verify")} className="gap-2" variant="secondary" disabled>
+                            <ChevronLeftIcon className="w-4 h-4" />
+                        </Button>
+                        <Button onClick={() => setPage("cf-worker-code")} className="gap-2 w-full">
+                            Continue
+                        </Button>
+                    </div>
+                </div>
+            </>
+
+        ) : page === "cf-worker-code" ? (
+            <>
+                <SmartDrawerHeader>
+                    <SmartDrawerTitle>Create Cloudflare Email Worker <span className="text-muted-foreground">(2/4)</span></SmartDrawerTitle>
+                    <SmartDrawerDescription>
+                        To receive emails create a catch-all {" "}
+                        <a href="https://developers.cloudflare.com/email-routing/email-workers/enable-email-workers/" target="_blank" rel="noreferrer" className="font-bold hover:underline">
+                            email worker
+                        </a> for your domain with the following code:
+                    </SmartDrawerDescription>
+                </SmartDrawerHeader>
+
+                <div className="grid items-start gap-4 px-4 sm:px-0">
+                    {cfWorkerCode}
+
+                    <div className="flex gap-2 sm:gap-4">
+                        <Button onClick={() => setPage("spf")} className="gap-2" variant="secondary">
+                            <ChevronLeftIcon className="w-4 h-4" />
+                        </Button>
+                        <Button onClick={() => { setPage("token"); cToken() }} className="gap-2 w-full">
+                            Continue
+                        </Button>
+                    </div>
+                </div>
+            </>
+        ) : page === "token" ? (
+            <>
+                <SmartDrawerHeader>
+                    <SmartDrawerTitle>Create API Token <span className="text-muted-foreground">(3/4)</span></SmartDrawerTitle>
+                    <SmartDrawerDescription>Add the <code className="font-semibold">token</code> environment variable to your worker</SmartDrawerDescription>
+                </SmartDrawerHeader>
+
+                <div className="grid items-start gap-4 px-4 sm:px-0">
+                    <Label htmlFor="alias">Your new token:</Label>
+                    <div className="flex items-center gap-2">
+                        {token ? (
+                            <>
+                                <Input className="bg-secondary border-none font-mono" name="token" value={token} id="token" readOnly />
+                                <Button type="submit" size="sm" className="px-3" asChild>
+                                    <CopyButton text={token}>
+                                        <span className="sr-only">Copy</span>
+                                        <CopyIcon className="h-4 w-4" />
+                                    </CopyButton>
+                                </Button>
+                            </>
+                        ) : (
+                            <div className="h-10">
+                                <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex gap-2 sm:gap-4">
+                    <Button onClick={() => setPage("cf-worker-code")} className="gap-2" variant="secondary">
+                        <ChevronLeftIcon className="w-4 h-4" />
+                    </Button>
+                    <Button onClick={() => setPage("finish")} className="gap-2 w-full">
+                        Continue
+                    </Button>
+                </div>
+            </>
+
+        ) : page === "finish" ? (
+            <>
+                <SmartDrawerHeader>
+                    <SmartDrawerTitle>Custom Domain <span className="text-muted-foreground">(4/4)</span></SmartDrawerTitle>
+                    <SmartDrawerDescription>You have successfully added <code className="font-semibold">{domain}</code> to your account.</SmartDrawerDescription>
+                </SmartDrawerHeader>
+
+                <p>
+
+                    If you have any issues or questions, you can join our {" "}
+                    <a href="https://discord.gg/GT9Q2Yz4VS" target="_blank" rel="noreferrer" className="font-bold hover:underline">
+                        Discord server
+                    </a>.
+                </p>
+
+
+                <div className="flex gap-2 sm:gap-4">
+                    <Button onClick={() => setPage("token")} className="gap-2" variant="secondary">
+                        <ChevronLeftIcon className="w-4 h-4" />
+                    </Button>
+                    <Button onClick={() => document.getElementById("smart-drawer:close")?.click()} className="gap-2 w-full">
+                        Close
+                    </Button>
+                </div >
+            </>
+
+        ) : (
+            "uhh this isnt meant to happen"
         )
     );
 }
@@ -180,7 +336,7 @@ export function DeleteButton({ action }: { action: () => Promise<any> }) {
     );
 }
 
-export function CreateTokenForm({ mailboxId}: { mailboxId: string }) {
+export function CreateTokenForm({ mailboxId }: { mailboxId: string }) {
     const [isPending, startTransition] = useTransition();
     const [token, setToken] = useState<string | null>(null);
 
@@ -291,7 +447,7 @@ export function CreateCategoryForm({ mailboxId }: { mailboxId: string }) {
     );
 }
 
-export function EditCategoryForm({ mailboxId, id, name, color }: { mailboxId: string, id: string, name: string, color: string | null}) {
+export function EditCategoryForm({ mailboxId, id, name, color }: { mailboxId: string, id: string, name: string, color: string | null }) {
     const [isPending, startTransition] = useTransition();
 
     const formSubmit = (event: FormEvent<HTMLFormElement>) => {
