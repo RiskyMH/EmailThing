@@ -94,17 +94,11 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
             <>
                 <SmartDrawerHeader>
                     <SmartDrawerTitle>Add SPF Records <span className="text-muted-foreground">(1/4)</span></SmartDrawerTitle>
-                    <SmartDrawerDescription>Please the following TXT DNS records to allow sending</SmartDrawerDescription>
+                    <SmartDrawerDescription>Please add the following TXT DNS records to allow sending</SmartDrawerDescription>
                 </SmartDrawerHeader>
 
                 <div className="grid items-start gap-4 px-4 sm:px-0">
                     <div className="grid gap-2">
-                        {/* <Label htmlFor="name">Name</Label>
-                        <Input className="bg-secondary border-none" value={`${domain}`} id="name" readOnly />
-
-                        <Label htmlFor="type">Type</Label>
-                        <Input className="bg-secondary border-none" value="TXT" id="type" readOnly /> */}
-
                         <Label htmlFor="spf">
                             <code className="text-muted-foreground font-semibold">TXT</code> {domain}
                         </Label>
@@ -167,6 +161,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                         </Button>
                     </div>
                 </div>
+
             </>
         ) : page === "token" ? (
             <>
@@ -194,15 +189,15 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                             </div>
                         )}
                     </div>
-                </div>
 
-                <div className="flex gap-2 sm:gap-4">
-                    <Button onClick={() => setPage("cf-worker-code")} className="gap-2" variant="secondary">
-                        <ChevronLeftIcon className="w-4 h-4" />
-                    </Button>
-                    <Button onClick={() => setPage("finish")} className="gap-2 w-full">
-                        Continue
-                    </Button>
+                    <div className="flex gap-2 sm:gap-4">
+                        <Button onClick={() => setPage("cf-worker-code")} className="gap-2" variant="secondary">
+                            <ChevronLeftIcon className="w-4 h-4" />
+                        </Button>
+                        <Button onClick={() => setPage("finish")} className="gap-2 w-full">
+                            Continue
+                        </Button>
+                    </div>
                 </div>
             </>
 
@@ -213,23 +208,23 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                     <SmartDrawerDescription>You have successfully added <code className="font-semibold">{domain}</code> to your account.</SmartDrawerDescription>
                 </SmartDrawerHeader>
 
-                <p>
+                <div className="grid items-start gap-4 px-4 sm:px-0">
+                    <p>
+                        If you have any issues or questions, you can join our {" "}
+                        <a href="https://discord.gg/GT9Q2Yz4VS" target="_blank" rel="noreferrer" className="font-bold hover:underline">
+                            Discord server
+                        </a>.
+                    </p>
 
-                    If you have any issues or questions, you can join our {" "}
-                    <a href="https://discord.gg/GT9Q2Yz4VS" target="_blank" rel="noreferrer" className="font-bold hover:underline">
-                        Discord server
-                    </a>.
-                </p>
-
-
-                <div className="flex gap-2 sm:gap-4">
-                    <Button onClick={() => setPage("token")} className="gap-2" variant="secondary">
-                        <ChevronLeftIcon className="w-4 h-4" />
-                    </Button>
-                    <Button onClick={() => document.getElementById("smart-drawer:close")?.click()} className="gap-2 w-full">
-                        Close
-                    </Button>
-                </div >
+                    <div className="flex gap-2 sm:gap-4">
+                        <Button onClick={() => setPage("token")} className="gap-2" variant="secondary">
+                            <ChevronLeftIcon className="w-4 h-4" />
+                        </Button>
+                        <Button onClick={() => document.getElementById("smart-drawer:close")?.click()} className="gap-2 w-full">
+                            Close
+                        </Button>
+                    </div>
+                </div>
             </>
 
         ) : (

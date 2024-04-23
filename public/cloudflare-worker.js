@@ -1,4 +1,4 @@
-// Creating `auth` env var is in next step
+// Creating `token` env var is in next step
 
 export default {
     /**
