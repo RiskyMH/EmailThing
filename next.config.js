@@ -3,6 +3,9 @@ const nextConfig = {
     experimental: {
         // ppr: true,
         useLightningcss: true,
+        outputFileTracingIncludes: {
+            '/mail/[mailbox]/config': ['./public/cloudflare-worker.js'],
+        },
     },
     logging: {
         fetches: {

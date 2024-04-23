@@ -14,7 +14,7 @@ import { ContextMenuAction } from "../components.client";
 import { changeDefaultAlias, deleteAlias, deleteCategory, deleteCustomDomain, deleteToken } from "./actions";
 import LocalTime from "@/components/localtime";
 import { codeToHtml } from "shiki";
-import { readFileSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import CopyButton from "@/components/copy-button.client";
 
 
@@ -567,7 +567,6 @@ function hideToken(token: string) {
     // show first 4 and last 4 characters
     return token.slice(0, newToken.length + 4) + '......' + token.slice(-4)
 }
-
 
 const cfWorkerCodeText = readFileSync("./public/cloudflare-worker.js", "utf-8")
 const cfWorkerCode = (
