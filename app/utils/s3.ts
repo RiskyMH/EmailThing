@@ -21,8 +21,8 @@ export async function getSignedUrl({ key, responseContentType, expiresIn = 3600 
         signQuery: true,
     })
 
-    const signed = await awsSign.sign()
-    return signed.url.toString()
+    const signed = (await awsSign.sign()).url.toString()
+    return env.S3_PUBLIC_URL ? signed.replace(s3Url, env.S3_PUBLIC_URL) : signed
 }
 
 

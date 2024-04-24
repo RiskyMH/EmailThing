@@ -37,6 +37,7 @@ If you are developing locally you need to create an `.env` file. Refer to the ta
 | `S3_KEY_ID`                            | The Access Key ID for S3                                                                 | ✔️        |
 | `S3_SECRET_ACCESS_KEY`                 | The Secret Access Key for S3                                                             | ✔️        |
 | `S3_URL`                               | The Client URL for S3                                                                    | ✔️        |
+| `S3_PUBLIC_URL`                        | Optional custom domain for looking better for S3                                         | ❌        |
 
 ### Running the development environment
 
