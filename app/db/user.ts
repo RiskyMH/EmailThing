@@ -13,7 +13,7 @@ export const User = sqliteTable("users", {
     password: text("password", { length: 200 }).notNull(),
     admin: int("admin", { mode: "boolean" }).default(false),
     email: text("email").notNull(),
-    onboardingStatus: text("onboarding_status", { mode: "json" }).$type<{initial: boolean}>().default({ initial: false }),
+    onboardingStatus: text("onboarding_status", { mode: "json" }).$type<{initial: boolean}>().default("{ initial: false }" as any),
     backupEmail: text("backup_email"),
 }, (table) => ({
     usernameIdx: index("user_username").on(table.username),

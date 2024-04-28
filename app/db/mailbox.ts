@@ -140,6 +140,7 @@ export const MailboxForUser = sqliteTable("mailbox_for_user", {
     userId: text("user_id", { length: 24 }).notNull(),
         // .references(() => User.id, { onDelete: 'cascade' }),
     joinedAt: integer('joined_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    role: text("role", { enum: ["OWNER", "ADMIN"] }).default("ADMIN").notNull(),
 }, (table) => {
     return {
         pk: primaryKey({ columns: [table.mailboxId, table.userId] })

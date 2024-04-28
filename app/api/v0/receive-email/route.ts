@@ -157,15 +157,15 @@ export async function POST(request: Request) {
 
     console.log("inserted email", emailId)
 
-    // save the email to s3
-    const upload = await uploadFile({
-        key: `${mailboxId}/${emailId}/email.eml`,
-        buffer: Buffer.from(rawEmail),
-        contentType: "message/rfc822"
-    })
-
-    if (!upload.ok) {
-        console.error(await upload.text())
+    try {
+        // save the email to s3
+        const upload = await uploadFile({
+            key: `${mailboxId}/${emailId}/email.eml`,
+            buffer: Buffer.from(rawEmail),
+            contentType: "message/rfc822"
+        })
+    } catch (e) {
+        console.error(e)
     }
 
     for (const attachment of email.attachments) {
@@ -183,14 +183,14 @@ export async function POST(request: Request) {
                 size: attContent.byteLength,
             })
 
-        const upload = await uploadFile({
-            key: `${mailboxId}/${emailId}/${attId}/${encodeURIComponent(name)}`,
-            buffer: attContent,
-            contentType: attachment.mimeType
-        })
-
-        if (!upload.ok) {
-            console.error(await upload.text())
+        try {
+            const upload = await uploadFile({
+                key: `${mailboxId}/${emailId}/${attId}/${encodeURIComponent(name)}`,
+                buffer: attContent,
+                contentType: attachment.mimeType
+            })
+        } catch (e) {
+            console.error(e)
         }
     }
 

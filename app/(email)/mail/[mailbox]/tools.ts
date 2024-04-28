@@ -25,8 +25,8 @@ export const userMailboxAccess = cache((mailboxId: string, userId: string | null
             tags: [
                 `mailbox-${mailboxId}`,
                 `user-${userId}`,
-                `userMailboxAccess`,
-                `userMailboxAccess-${mailboxId}-${userId}`
+                `user-mailbox-access`,
+                `user-mailbox-access-${mailboxId}-${userId}`
             ],
             // revalidate after 7 days
             revalidate: 60 * 60 * 24 * 7,

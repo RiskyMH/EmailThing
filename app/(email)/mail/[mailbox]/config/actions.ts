@@ -2,11 +2,10 @@
 
 import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "../tools";
-import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxTokens } from "@/db";
+import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxTokens, MailboxForUser, User } from "@/db";
 import { aliasLimit, customDomainLimit } from "@/utils/limits";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
-import { createId } from '@paralleldrive/cuid2';
 import { and, count, eq, like, not } from "drizzle-orm";
 import { generateToken } from "@/utils/token";
 
@@ -428,3 +427,56 @@ export async function deleteCategory(mailboxId: string, categoryId: string) {
     revalidateTag(`mailbox-categories-${mailboxId}`)
     revalidatePath(`/mail/${mailboxId}/config`);
 }
+
+export async function addUserToMailbox(mailboxId: string, username: string, role: "ADMIN") {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    // check if the current user is an admin
+    const userRole = await db.query.MailboxForUser.findFirst({
+        where: and(
+            eq(MailboxForUser.mailboxId, mailboxId),
+            eq(MailboxForUser.userId, userId)
+        ),
+        columns: {
+            role: true
+        }
+    })
+
+    if (userRole?.role !== "OWNER") {
+        return { error: "Only owner can add someone to the mailbox" }
+    }
+
+
+    // check if user exists
+    const proposedUser = await db.query.User.findFirst({
+        where: eq(User.username, username),
+        columns: {
+            id: true
+        }
+    })
+
+    if (!proposedUser) {
+        return { error: `Can't find user "${username}"` }
+    }
+
+    const validRoles = ["ADMIN"];
+    if (!validRoles.includes(role)) {
+        return { error: "Invalid role" }
+    }
+
+    // add user to mailbox
+    await db.insert(MailboxForUser)
+        .values({
+            mailboxId,
+            userId: proposedUser.id,
+            role
+        })
+        .execute()
+
+    revalidateTag(`user-mailbox-access-${mailboxId}-${proposedUser.id}`)
+    revalidatePath(`/mail/${mailboxId}/config`);
+}
+
