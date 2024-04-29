@@ -3,11 +3,13 @@
 import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "../tools";
 import { db, DefaultDomain, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxTokens, MailboxForUser, User } from "@/db";
-import { aliasLimit, customDomainLimit } from "@/utils/limits";
+import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@/utils/limits";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { emailSchema } from "@/validations/auth";
 import { and, count, eq, like, not } from "drizzle-orm";
 import { generateToken } from "@/utils/token";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export async function verifyDomain(mailboxId: string, customDomain: string) {
     const userId = await getCurrentUser()
@@ -391,7 +393,7 @@ export async function editCategory(mailboxId: string, categoryId: string, name: 
     if (!userId || !await userMailboxAccess(mailboxId, userId)) {
         throw new Error("Mailbox not found");
     }
-    
+
     if (color && !categoryColorRegex.test(color)) {
         return { error: "Invalid color" }
     }
@@ -448,7 +450,24 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
     if (userRole?.role !== "OWNER") {
         return { error: "Only owner can add someone to the mailbox" }
     }
+    
 
+    // check how many users are in the mailbox
+    const [mailboxUsers, mailbox] = await db.batch([
+        db.select({ count: count() })
+            .from(MailboxForUser)
+            .where(eq(MailboxForUser.mailboxId, mailboxId)),
+        db.query.Mailbox.findFirst({
+            where: eq(Mailbox.id, mailboxId),
+            columns: {
+                plan: true
+            }
+        })
+    ])
+
+    if (!mailbox || mailboxUsers[0].count >= mailboxUsersLimit[mailbox.plan]) {
+        return { error: "Mailbox users limit reached" }
+    }
 
     // check if user exists
     const proposedUser = await db.query.User.findFirst({
@@ -460,6 +479,23 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
 
     if (!proposedUser) {
         return { error: `Can't find user "${username}"` }
+    }
+
+    // check if they already have access
+    if (await userMailboxAccess(mailboxId, proposedUser.id)) {
+        return { error: "User already has access to this mailbox" }
+    }
+
+    // check how many other mailboxes the user is in
+    const userMailboxes = await db.select({ count: count() })
+        .from(MailboxForUser)
+        .where(eq(MailboxForUser.userId, proposedUser.id))
+        .execute()
+
+    // TODO: either make it 5 free mailboxes or somehow make a plan for this
+    // (mailboxes having the free plan sounds better then users having pro, but this is harder)
+    if (userMailboxes[0].count >= 5) {
+        return { error: "User is already in 5 other mailboxes" }
     }
 
     const validRoles = ["ADMIN"];
@@ -477,6 +513,103 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
         .execute()
 
     revalidateTag(`user-mailbox-access-${mailboxId}-${proposedUser.id}`)
+    revalidateTag(`user-mailboxes-${proposedUser.id}`)
     revalidatePath(`/mail/${mailboxId}/config`);
 }
 
+export async function removeUserFromMailbox(mailboxId: string, userId: string) {
+    const currentUserId = await getCurrentUser()
+    if (!currentUserId || !await userMailboxAccess(mailboxId, currentUserId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    // check if the current user is an admin
+    const userRole = await db.query.MailboxForUser.findFirst({
+        where: and(
+            eq(MailboxForUser.mailboxId, mailboxId),
+            eq(MailboxForUser.userId, currentUserId)
+        ),
+        columns: {
+            role: true
+        }
+    })
+
+    if (userRole?.role !== "OWNER") {
+        return { error: "Only owner can remove someone from the mailbox" }
+    }
+
+    // check if user exists
+    const proposedUser = await db.query.User.findFirst({
+        where: eq(User.id, userId),
+        columns: {
+            id: true
+        }
+    })
+
+    if (!proposedUser) {
+        return { error: `Can't find user with id "${userId}"` }
+    }
+
+    // remove user from mailbox
+    await db.delete(MailboxForUser)
+        .where(and(
+            eq(MailboxForUser.mailboxId, mailboxId),
+            eq(MailboxForUser.userId, userId),
+            not(eq(MailboxForUser.role, "OWNER"))
+        ))
+        .execute()
+
+    revalidateTag(`user-mailbox-access-${mailboxId}-${userId}`)
+    revalidateTag(`user-mailboxes-${userId}`)
+    revalidatePath(`/mail/${mailboxId}/config`);
+}
+
+export async function leaveMailbox(mailboxId: string) {
+    const currentUserId = await getCurrentUser()
+    if (!currentUserId) {
+        throw new Error("Mailbox not found");
+    }
+
+    // check if user exists
+    const proposedUser = await db.query.User.findFirst({
+        where: eq(User.id, currentUserId),
+        columns: {
+            id: true
+        }
+    })
+
+    if (!proposedUser) {
+        return { error: `Can't find user with id "${currentUserId}"` }
+    }
+
+    // check if they are owner
+    const userRole = await db.query.MailboxForUser.findFirst({
+        where: and(
+            eq(MailboxForUser.mailboxId, mailboxId),
+            eq(MailboxForUser.userId, currentUserId)
+        ),
+        columns: {
+            role: true
+        }
+    })
+
+    if (userRole?.role === "OWNER") {
+        return { error: "Owner can't leave the mailbox" }
+    }
+
+    // remove user from mailbox
+    await db.delete(MailboxForUser)
+        .where(and(
+            eq(MailboxForUser.mailboxId, mailboxId),
+            eq(MailboxForUser.userId, currentUserId),
+            not(eq(MailboxForUser.role, "OWNER"))
+        ))
+        .execute()
+
+    revalidateTag(`user-mailbox-access-${mailboxId}-${currentUserId}`)
+    revalidateTag(`user-mailboxes-${currentUserId}`)
+    revalidatePath(`/mail/${mailboxId}/config`);
+    cookies().delete("mailboxId");
+    redirect("/mail");
+
+}

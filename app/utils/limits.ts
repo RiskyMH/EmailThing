@@ -23,3 +23,9 @@ export const aliasLimit = {
     [PlanType.FREE]: 5,
     [PlanType.UNLIMITED]: Infinity,
 }
+
+export const mailboxUsersLimit = {
+    [PlanType.FREE]: 3,
+    [PlanType.UNLIMITED]: Infinity,
+}
+

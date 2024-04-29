@@ -38,7 +38,7 @@ export default function PricingPage() {
               <CheckIcon className="mr-2 h-4 w-4" /> 3 custom domain per mailbox
             </li>
             <li className="flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" /> 5 other users per mailbox
+              <CheckIcon className="mr-2 h-4 w-4" /> 3 other users per mailbox
             </li>
             <li className="flex items-center">
               <CheckIcon className="mr-2 h-4 w-4" /> 5 Mailboxes

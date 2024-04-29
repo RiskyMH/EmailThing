@@ -1,21 +1,22 @@
 import { Metadata } from "next"
 import { pageMailboxAccess } from "../tools"
-import { db, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxTokens } from "@/db";
+import { db, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens } from "@/db";
 import { notFound } from "next/navigation"
 import { customDomainLimit, storageLimit, aliasLimit } from "@/utils/limits"
-import { AddAliasForm, AddCustomDomainForm, CreateCategoryForm, CreateTokenForm, DeleteButton, EditAliasForm, EditCategoryForm } from "./components.client"
+import { AddAliasForm, AddCustomDomainForm, CreateCategoryForm, CreateTokenForm, DeleteButton, EditAliasForm, EditCategoryForm, InviteUserForm } from "./components.client"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { asc, eq } from "drizzle-orm";
-import { PlusIcon, MoreHorizontalIcon, CheckIcon, Trash2Icon, PencilIcon, ClipboardIcon } from "lucide-react";
+import { PlusIcon, MoreHorizontalIcon, CheckIcon, Trash2Icon, PencilIcon, ClipboardIcon, UserRoundXIcon } from "lucide-react";
 import { ContextMenuAction } from "../components.client";
-import { changeDefaultAlias, deleteAlias, deleteCategory, deleteCustomDomain, deleteToken } from "./actions";
+import { changeDefaultAlias, deleteAlias, deleteCategory, deleteCustomDomain, deleteToken, leaveMailbox, removeUserFromMailbox } from "./actions";
 import LocalTime from "@/components/localtime";
 import { codeToHtml } from "shiki";
 import { readFileSync } from "fs";
 import CopyButton from "@/components/copy-button.client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 export const metadata: Metadata = {
@@ -31,7 +32,8 @@ export default async function EmailConfig({
         email: string
     }
 }) {
-    await pageMailboxAccess(params.mailbox)
+    const userId = await pageMailboxAccess(params.mailbox)
+    if (!userId) return notFound()
 
     const mailbox = await db.query.Mailbox.findFirst({
         where: eq(Mailbox.id, params.mailbox),
@@ -74,11 +76,29 @@ export default async function EmailConfig({
                     color: true
                 },
                 orderBy: asc(MailboxCategory.createdAt)
+            },
+            users: {
+                columns: {
+                    userId: true,
+                    role: true,
+                    joinedAt: true,
+                },
+                orderBy: asc(MailboxForUser.joinedAt),
+                with: {
+                    user: {
+                        columns: {
+                            username: true,
+                        }
+                    }
+                }
             }
         }
     })
 
     if (!mailbox) return notFound()
+
+    const userRole = mailbox.users.find(user => user.userId === userId)?.role
+    if (!userRole) return notFound()
 
 
     return (
@@ -87,16 +107,16 @@ export default async function EmailConfig({
 
             <div>
                 <h2 className="text-lg font-semibold">Storage</h2>
-                <p>Used: {Math.ceil(mailbox.storageUsed / 1e+6)}MB / {(storageLimit as any)[mailbox.plan] / 1e+6}MB</p>
+                <p>Used: {Math.ceil((mailbox.storageUsed / 1e+6) * 10) / 10}MB / {storageLimit[mailbox.plan] / 1e+6}MB</p>
             </div>
 
             <div className="mb-3 max-w-[40rem]">
                 <div className="flex pb-2">
-                    <h2 className="text-lg font-semibold">Aliases</h2>
+                    <h2 className="text-lg font-semibold">Aliases <span className="text-muted-foreground text-sm">({mailbox.aliases.length}/5)</span></h2>
                     <SmartDrawer>
                         <SmartDrawerTrigger asChild>
                             <Button
-                                disabled={mailbox.aliases.length >= (aliasLimit as any)[mailbox.plan]}
+                                disabled={mailbox.aliases.length >= aliasLimit[mailbox.plan]}
                                 className="ms-auto flex gap-2"
                                 size="sm"
                                 variant="secondary"
@@ -238,12 +258,7 @@ export default async function EmailConfig({
                     <h2 className="text-lg font-semibold">Categories</h2>
                     <SmartDrawer>
                         <SmartDrawerTrigger asChild>
-                            <Button
-                                disabled={mailbox.aliases.length >= (aliasLimit as any)[mailbox.plan]}
-                                className="ms-auto flex gap-2"
-                                size="sm"
-                                variant="secondary"
-                            >
+                            <Button className="ms-auto flex gap-2" size="sm" variant="secondary">
                                 <PlusIcon className='h-4 w-4' /> Create category
                             </Button>
                         </SmartDrawerTrigger>
@@ -356,11 +371,11 @@ export default async function EmailConfig({
 
             <div className="max-w-[40rem]">
                 <div className="flex pb-2">
-                    <h2 className="text-lg font-semibold">Custom domains</h2>
+                    <h2 className="text-lg font-semibold">Custom domains <span className="text-muted-foreground text-sm">({mailbox.customDomains.length}/3)</span></h2>
                     <SmartDrawer>
                         <SmartDrawerTrigger asChild>
                             <Button
-                                disabled={mailbox.customDomains.length >= (customDomainLimit as any)[mailbox.plan]}
+                                disabled={mailbox.customDomains.length >= customDomainLimit[mailbox.plan]}
                                 className="ms-auto flex gap-2"
                                 size="sm"
                                 variant="secondary"
@@ -543,6 +558,141 @@ export default async function EmailConfig({
                 <br />
             </div>
 
+            <div className="max-w-[40rem]">
+                <div className="flex pb-2">
+                    <h2 className="text-lg font-semibold">Users <span className="text-muted-foreground text-sm">({mailbox.users.length}/5)</span></h2>
+                    <SmartDrawer>
+                        <SmartDrawerTrigger asChild>
+                            <Button className="ms-auto flex gap-2" size="sm" variant="secondary" disabled={userRole !== "OWNER"}>
+                                <PlusIcon className='h-4 w-4' /> Invite user
+                            </Button>
+                        </SmartDrawerTrigger>
+                        <SmartDrawerContent className="sm:max-w-[425px]">
+                            <SmartDrawerHeader>
+                                <SmartDrawerTitle>Invite user</SmartDrawerTitle>
+                                <SmartDrawerDescription>Enter their username and the chosen role type</SmartDrawerDescription>
+                            </SmartDrawerHeader>
+
+                            <InviteUserForm mailboxId={params.mailbox} />
+
+                            <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                                <SmartDrawerClose asChild>
+                                    <Button variant="secondary">Cancel</Button>
+                                </SmartDrawerClose>
+                            </SmartDrawerFooter>
+                        </SmartDrawerContent>
+                    </SmartDrawer>
+                </div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="rounded-t-lg">
+                                <TableHead className="bg-tertiary rounded-ss-md">
+                                    <p>Username</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary">
+                                    <p>Added</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary w-1">
+                                    <p>Role</p>
+                                </TableHead>
+                                <TableHead className="bg-tertiary rounded-se-md w-1" />
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mailbox.users.length ? (
+                                mailbox.users.map((row) => (
+                                    <TableRow key={row.userId}>
+                                        <TableCell className="font-medium py-3">
+                                            {row.user.username}
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <LocalTime time={row.joinedAt} />
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <Select defaultValue={row.role || "ADMIN"} disabled={userRole !== "OWNER" || row.role === "OWNER"}>
+                                                <SelectTrigger className="w-[125px]">
+                                                    <SelectValue placeholder="Role" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="OWNER" disabled>Owner</SelectItem>
+                                                    <SelectItem value="ADMIN" disabled={row.userId === userId}>Admin</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </TableCell>
+                                        <TableCell className="py-3">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    {row.userId === userId ? (
+                                                        <SmartDrawer>
+                                                            <DropdownMenuItem asChild disabled={row.role === "OWNER"}>
+                                                                <SmartDrawerTrigger className="gap-2 w-full">
+                                                                    <UserRoundXIcon className="h-5 w-5" />
+                                                                    Leave mailbox
+                                                                </SmartDrawerTrigger>
+                                                            </DropdownMenuItem>
+
+                                                            <SmartDrawerContent className="sm:max-w-[425px]">
+                                                                <SmartDrawerHeader>
+                                                                    <SmartDrawerTitle>Leave Mailbox</SmartDrawerTitle>
+                                                                    <SmartDrawerDescription>
+                                                                        Are you sure you want to leave this mailbox. You will require an invite to join again.
+                                                                    </SmartDrawerDescription>
+                                                                </SmartDrawerHeader>
+                                                                <SmartDrawerFooter className="pt-2 flex">
+                                                                    <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Cancel</SmartDrawerClose>
+                                                                    <DeleteButton action={leaveMailbox.bind(null, params.mailbox)} text="Leave" />
+                                                                </SmartDrawerFooter>
+                                                            </SmartDrawerContent>
+                                                        </SmartDrawer>
+                                                    ) : (
+                                                        <SmartDrawer>
+                                                            <DropdownMenuItem asChild disabled={row.role === "OWNER" || userRole !== "OWNER"}>
+                                                                <SmartDrawerTrigger className="gap-2 w-full">
+                                                                    <UserRoundXIcon className="h-5 w-5" />
+                                                                    Remove user
+                                                                </SmartDrawerTrigger>
+                                                            </DropdownMenuItem>
+
+                                                            <SmartDrawerContent className="sm:max-w-[425px]">
+                                                                <SmartDrawerHeader>
+                                                                    <SmartDrawerTitle>Remove User</SmartDrawerTitle>
+                                                                    <SmartDrawerDescription>
+                                                                        Are you sure you want to remove <strong>{row.user.username}</strong>&apos;s access to this mailbox.
+                                                                    </SmartDrawerDescription>
+                                                                </SmartDrawerHeader>
+                                                                <SmartDrawerFooter className="pt-2 flex">
+                                                                    <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Cancel</SmartDrawerClose>
+                                                                    <DeleteButton action={removeUserFromMailbox.bind(null, params.mailbox, row.userId)} text="Remove User" />
+                                                                </SmartDrawerFooter>
+                                                            </SmartDrawerContent>
+                                                        </SmartDrawer>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+
+                                        </TableCell>
+
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell className="h-24 text-center" colSpan={4}>
+                                        No users yet.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div >
+            <br />
         </div >
 
     )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
-import { verifyDomain, addAlias, editAlias, makeToken, createCategory, editCategory } from "./actions";
+import { verifyDomain, addAlias, editAlias, makeToken, createCategory, editCategory, addUserToMailbox } from "./actions";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { ChevronLeftIcon, ChevronRightIcon, CopyIcon, Loader2 } from "lucide-rea
 import { Label } from "@/components/ui/label";
 import { SmartDrawerHeader, SmartDrawerTitle, SmartDrawerDescription, SmartDrawerClose, SmartDrawerFooter } from "@/components/ui/smart-drawer";
 import CopyButton from "@/components/copy-button.client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "" }: { mailboxId: string, cfWorkerCode: ReactNode, initialDomain?: string }) {
@@ -321,7 +322,7 @@ export function EditAliasForm({ mailboxId, alias, name, id }: { mailboxId: strin
 }
 
 
-export function DeleteButton({ action }: { action: () => Promise<any> }) {
+export function DeleteButton({ action, text = "Delete" }: { action: () => Promise<any>, text?: string }) {
     const [isPending, startTransition] = useTransition();
 
     const onClick = (event: any) => {
@@ -342,7 +343,7 @@ export function DeleteButton({ action }: { action: () => Promise<any> }) {
     return (
         <Button type="submit" disabled={isPending} className="gap-2" variant="destructive" onClick={onClick} autoFocus>
             {isPending && <Loader2 className="w-5 h-5  animate-spin" />}
-            Delete
+            {text}
         </Button>
     );
 }
@@ -489,6 +490,51 @@ export function EditCategoryForm({ mailboxId, id, name, color }: { mailboxId: st
             <Button type="submit" disabled={isPending} className="gap-2">
                 {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
                 Edit category
+            </Button>
+        </form>
+    );
+}
+
+
+export function InviteUserForm({ mailboxId }: { mailboxId: string }) {
+    const [isPending, startTransition] = useTransition();
+
+    const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isPending) return;
+
+        startTransition(async () => {
+            // @ts-expect-error
+            const res = await addUserToMailbox(mailboxId, event.target.username.value, event.target.role.value)
+            if (res?.error) {
+                toast.error(res.error)
+            } else {
+                document.getElementById("smart-drawer:close")?.click()
+            }
+        })
+
+    }
+
+    return (
+        <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+            <div className="grid gap-2">
+                <Label htmlFor="role">Role</Label>
+                <Select defaultValue="ADMIN" name="role">
+                    <SelectTrigger className="bg-secondary border-none">
+                        <SelectValue placeholder="Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="ADMIN">Admin</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Label htmlFor="password">Username</Label>
+                <Input className="bg-secondary border-none" name="username" placeholder="RiskyMH" id="username" autoFocus disabled={isPending} required />
+            </div>
+
+            <Button type="submit" disabled={isPending} className="gap-2">
+                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                Invite user
             </Button>
         </form>
     );
