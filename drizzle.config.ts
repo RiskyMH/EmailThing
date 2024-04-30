@@ -10,4 +10,5 @@ export default {
         authToken: process.env.DATABASE_TOKEN!
     },
     verbose: true,
-} satisfies Config;
+// } satisfies Config;
+} as Config;
