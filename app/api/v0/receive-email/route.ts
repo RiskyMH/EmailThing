@@ -1,6 +1,4 @@
-// @ts-ignore
 import PostalMime from 'postal-mime';
-type PostalMime = import("postal-mime").default;
 import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification, TempAlias, MailboxTokens } from "@/db";
 import { storageLimit } from '@/utils/limits';
 import { createId } from '@paralleldrive/cuid2';
@@ -22,7 +20,7 @@ export async function POST(request: Request) {
         return Response.json({ error: 'missing required fields' }, { status: 400 })
     }
 
-    const parser = new PostalMime() as PostalMime
+    const parser = new PostalMime()
     const email = await parser.parse(rawEmail as string);
 
     // work out which mailbox to put it in
