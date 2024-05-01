@@ -1,4 +1,3 @@
-import "server-only"
 import { createId } from "@paralleldrive/cuid2"
 
 const algorithm = "SHA-512"

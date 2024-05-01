@@ -59,7 +59,7 @@ I made this because I wanted to have a way to deal with my emails from a custom 
 
 ### How to set up the database and app?
 
-There was a lot of hard-coding that I have done in this. However, after setting up the database, you will need to manual create yourself an account in the `User` table with admin access. This will allow you to create other users (through `/api/invite`) and manage the app. 
+There was a lot of hard-coding that I have done in this. However, after setting up the database, you can run the [`create-admin.ts`](./scripts/create-admin.ts) script to make an admin user. This will allow you to create other users (through `/api/invite`) and manage the app. 
 
 Currently, there isn't a way to add default domains, so you will also need to manual add those using the `default_domain` table. I also have hard coded the url to send emails through, so you will need to change that in the appropriate files.
 
