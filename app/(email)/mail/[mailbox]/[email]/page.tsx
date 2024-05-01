@@ -176,24 +176,27 @@ export default async function EmailPage({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="min-w-[10rem] ">
-
                             <ViewSelect selected={view} htmlValid={!!email.html} />
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                                <Link target="_blank" href={email.raw === "s3" ? await getSignedUrl({
-                                    key: `${params.mailbox}/${params.email}/email.eml`,
-                                    responseContentType: "text/plain"
-                                }) : `/mail/${params.mailbox}/${params.email}/raw`}>
-                                    <CodeIcon className="h-5 w-5 text-muted-foreground" />
-                                    View original
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                                <Link download href={email.raw === "s3" ? await getSignedUrl({ key: `${params.mailbox}/${params.email}/email.eml` }) : `/mail/${params.mailbox}/${params.email}/raw`}>
-                                    <DownloadIcon className="h-5 w-5 text-muted-foreground" />
-                                    Download message
-                                </Link>
-                            </DropdownMenuItem>
+                            {email.raw !== "draft" &&
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
+                                        <Link target="_blank" href={email.raw === "s3" ? await getSignedUrl({
+                                            key: `${params.mailbox}/${params.email}/email.eml`,
+                                            responseContentType: "text/plain"
+                                        }) : `/mail/${params.mailbox}/${params.email}/raw`}>
+                                            <CodeIcon className="h-5 w-5 text-muted-foreground" />
+                                            View original
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
+                                        <Link download href={email.raw === "s3" ? await getSignedUrl({ key: `${params.mailbox}/${params.email}/email.eml` }) : `/mail/${params.mailbox}/${params.email}/raw`}>
+                                            <DownloadIcon className="h-5 w-5 text-muted-foreground" />
+                                            Download message
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </>
+                            }
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
