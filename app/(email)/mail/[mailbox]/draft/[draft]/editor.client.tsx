@@ -29,6 +29,7 @@ export function BodyEditor({ saveAction, savedBody }: { saveAction: ({ body }: {
             required
             maxLength={4000}
             onChange={(e) => debounced({ body: e.target.value })}
+            onBlur={(e) => { saveAction({ body: e.target.value }) }}
         />
     );
 }
@@ -45,6 +46,7 @@ export function Subject({ saveAction, savedSubject }: { saveAction: ({ subject }
             maxLength={100}
             required
             onChange={(e) => debounced({ subject: e.target.value })}
+            onBlur={(e) => { saveAction({ subject: e.target.value }) }}
         />
     );
 }
