@@ -37,14 +37,14 @@ export default async function UserSettingsPage() {
 
         <div className="container flex p-5 w-screen h-screen flex-col items-center bg-background" vaul-drawer-wrapper="">
             <Link
-                href="/home"
+                href="/mail"
                 className={cn(
                     buttonVariants({ variant: "ghost" }),
                     "absolute left-4 top-4 md:left-8 md:top-8"
                 )}
             >
                 <ChevronLeft className="me-2 h-4 w-4" />
-                Home
+                Back to Mailbox
             </Link>
 
             <div className="mx-auto flex w-full flex-col gap-3 sm:w-[350px] mt-16">
