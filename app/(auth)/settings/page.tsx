@@ -12,6 +12,7 @@ import { ReactNode } from "react";
 import NotificationsButton from "./notifications.client";
 import { eq } from "drizzle-orm";
 import { db, User } from "@/db";
+import { cookies } from "next/headers";
 
 export const metadata = {
     title: "User Settings",
@@ -33,11 +34,14 @@ export default async function UserSettingsPage() {
     })
     if (!user) return notFound();
 
+    // this wont be accurate 100% of the time, but easier then keeping track of history
+    const currentMailbox = cookies().get("mailboxId")?.value;
+
     return (
 
         <div className="container flex p-5 w-screen h-screen flex-col items-center bg-background" vaul-drawer-wrapper="">
             <Link
-                href="/mail"
+                href={currentMailbox ? `/mail/${currentMailbox}` : "/mail"}
                 className={cn(
                     buttonVariants({ variant: "ghost" }),
                     "absolute left-4 top-4 md:left-8 md:top-8"
