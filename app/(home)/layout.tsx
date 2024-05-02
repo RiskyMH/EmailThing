@@ -12,7 +12,7 @@ export default function HomeLayout({ children }: PropsWithChildren<{}>) {
             <header className="container z-40 bg-background">
                 <div className="flex h-20 items-center justify-between py-6">
                     <div className="flex gap-6 md:gap-10">
-                        <Link href="/home" className="items-center space-x-2 flex group">
+                        <Link href="/home" className="items-center gap-1 flex group">
                             <Logo className="h-7 w-7" />
                             <h1 className="inline-block whitespace-nowrap font-bold text-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br from-[#FF9797] to-[#6D6AFF]">
                                 EmailThing
