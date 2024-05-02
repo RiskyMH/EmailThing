@@ -4,6 +4,7 @@ import { PropsWithChildren } from "react"
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { MainNavItem } from "./components.client";
+import Logo from "@/components/logo";
 
 export default function HomeLayout({ children }: PropsWithChildren<{}>) {
     return (
@@ -11,11 +12,11 @@ export default function HomeLayout({ children }: PropsWithChildren<{}>) {
             <header className="container z-40 bg-background">
                 <div className="flex h-20 items-center justify-between py-6">
                     <div className="flex gap-6 md:gap-10">
-                        <Link href="/home" className="items-center space-x-2 flex">
-                            <MailIcon />
-                            <span className="font-bold inline-block">
+                        <Link href="/home" className="items-center space-x-2 flex group">
+                            <Logo className="h-7 w-7" />
+                            <h1 className="inline-block whitespace-nowrap font-bold text-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br from-[#FF9797] to-[#6D6AFF]">
                                 EmailThing
-                            </span>
+                            </h1>
                         </Link>
                         <MainNavItem href="/home/#features" title="Features" />
                         <MainNavItem href="/pricing" title="Pricing" mobileShow />

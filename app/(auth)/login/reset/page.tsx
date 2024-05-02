@@ -8,6 +8,7 @@ import { UserAuthForm } from "./form.client"
 import { db, ResetPasswordToken } from "@/db"
 import { notFound } from "next/navigation"
 import { and, eq, gt } from "drizzle-orm"
+import Logo from "@/components/logo"
 
 export const revalidate = 0
 
@@ -53,7 +54,8 @@ export default async function LoginPage({
 
             <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
                 <div className="flex flex-col gap-2 text-center">
-                    <MailIcon className="mx-auto h-6 w-6" />
+                    <Logo className="mx-auto h-10 w-10" />
+                    {/* <MailIcon className="mx-auto h-6 w-6" /> */}
                     <h1 className="text-2xl font-semibold tracking-tight">
                         Reset your password
                     </h1>
