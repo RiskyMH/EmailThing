@@ -43,15 +43,9 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
             isRead: true,
             isStarred: true,
             binnedAt: true,
+            categoryId: true
         },
         with: {
-            category: {
-                columns: {
-                    name: true,
-                    id: true,
-                    color: true
-                }
-            },
             from: {
                 columns: {
                     name: true,
@@ -129,7 +123,7 @@ export async function getDraftJustEmailsList(mailboxId: string, options?: { take
         },
         draft: true,
         binnedAt: null,
-        category: null as any as { name: string, color?: string, id: string } | null
+        categoryId: null
     }))
 
     return emailsFormatted;

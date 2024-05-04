@@ -12,9 +12,7 @@ export function MainNavItem({ href, title, disabled = false, mobileShow = false 
             href={disabled ? "#" : href}
             className={cn(
                 "hidden md:flex items-center text-sm font-medium transition-colors hover:text-foreground/80 ",
-                (href === `/${segment}`)
-                    ? "text-foreground"
-                    : "text-foreground/60",
+                (href === `/${segment}`) ? "text-foreground" : "text-foreground/60",
                 disabled && "cursor-not-allowed opacity-80",
                 mobileShow && "flex"
             )}

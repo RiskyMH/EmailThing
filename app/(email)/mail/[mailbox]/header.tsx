@@ -36,7 +36,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                             href={"/mail/" + mailboxId}
                         >
                             <Logo className="h-7 w-7" />
-                            <h1 className="inline-block whitespace-nowrap font-bold text-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br from-[#FF9797] to-[#6D6AFF]">
+                            <h1 className="inline-block whitespace-nowrap font-bold text-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br from-[#FF9797] to-[#6D6AFF] group-hover:transition-all group-hover:duration-200">
                                 EmailThing
                             </h1>
                         </Link>

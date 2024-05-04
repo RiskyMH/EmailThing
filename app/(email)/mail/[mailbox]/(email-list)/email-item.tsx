@@ -20,17 +20,20 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
     const emailId = email.id
     const updateEmail = updateEmailAction.bind(null, mailboxId, emailId, type)
 
+    const category = categories?.find(c=> c.id === email.categoryId)
+    const link = `/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`
+
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>
                 <Link
-                    href={`/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`}
+                    href={link}
                     className={cn("rounded h-16 px-5 py-1.5 inline-flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60 shadow-sm")}
                 >
-                    <TooltipText text={email.category?.name ?? "No category"}>
+                    <TooltipText text={category?.name ?? "No category"}>
                         <span
                             className="self-center rounded-full h-3 w-3 m-2 inline-block mx-auto flex-shrink-0"
-                            style={{ backgroundColor: email.category?.color ?? "grey" }}
+                            style={{ backgroundColor: category?.color ?? "grey" }}
                         />
                     </TooltipText>
 
@@ -47,7 +50,6 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                     </TooltipText>
 
                     <span className="self-center w-full hidden sm:inline-flex gap-4 flex-shrink-[2]">
-
                         {!email.isRead && (
                             <span className="select-none bg-red self-center text-white text-xs rounded px-3 py-1 font-bold inline h-6">
                                 NEW
@@ -65,7 +67,6 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
 
                 {!["drafts", "temp"].includes(type) ? (
                     <>
-                        {/* // TODO: implement sending emails */}
                         <ContextMenuItem className="flex gap-2" asChild>
                             <Link href={`/mail/${mailboxId}/draft/new?reply=${emailId}`}>
                                 <ReplyIcon className="w-5 h-5 text-muted-foreground" />
@@ -109,6 +110,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                             </ContextMenuAction>
                         </ContextMenuItem>
                         <ContextMenuSeparator />
+
                         {type !== "temp" && (
                             <ContextMenuSub>
                                 <ContextMenuSubTrigger className="flex gap-2 cursor-pointer w-full">
@@ -117,14 +119,14 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                                 </ContextMenuSubTrigger>
                                 <ContextMenuSubContent className="w-48">
                                     <ContextMenuItem asChild className="flex gap-2 cursor-pointer w-full" >
-                                        <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
+                                        <ContextMenuAction icon={!email.categoryId ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
                                             None
                                         </ContextMenuAction>
                                     </ContextMenuItem>
 
                                     {categories?.map(category => (
                                         <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer w-full" >
-                                            <ContextMenuAction icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: category.id })}>
+                                            <ContextMenuAction icon={email.categoryId === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: category.id })}>
                                                 {category.name}
                                             </ContextMenuAction>
                                         </ContextMenuItem>
@@ -143,7 +145,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                 <ContextMenuSeparator />
 
                 <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
-                    <Link href={`/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`} target="_blank">
+                    <Link href={link} target="_blank">
                         <ExternalLink className="w-5 h-5 text-muted-foreground" />
                         Open in new tab
                     </Link>
