@@ -2,7 +2,7 @@
 const nextConfig = {
     experimental: {
         // ppr: true,
-        useLightningcss: true,
+        useLightningcss: process.env.TURBOPACK === "1",
         outputFileTracingIncludes: {
             '/mail/[mailbox]/config': ['./public/cloudflare-worker.js'],
         },
@@ -110,4 +110,4 @@ const nextConfig = {
     }
 };
 
-export default nextConfig;
+module.exports = nextConfig;
