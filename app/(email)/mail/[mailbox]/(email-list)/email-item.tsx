@@ -25,7 +25,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
             <ContextMenuTrigger asChild>
                 <Link
                     href={`/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`}
-                    className={cn("rounded shadow-sm h-16 px-5 py-1.5 inline-flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60")}
+                    className={cn("rounded h-16 px-5 py-1.5 inline-flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60 shadow-sm")}
                 >
                     <TooltipText text={email.category?.name ?? "No category"}>
                         <span

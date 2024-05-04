@@ -16,13 +16,13 @@
     --popover: var(--tertiary);
     --popover-foreground: var(--primary);
 
-    --border: #9c9aac;
+    --border: #eeeff0;
     --input: var(--muted-foreground);
 
     --card: var(--secondary);
     --card-foreground: var(--primary);
 
-    --primary: #000000;
+    --primary: #07041d;
     --primary-foreground: var(--secondary);
 
     --secondary: #f1f0f5;
@@ -34,7 +34,7 @@
     --tertiary: #ffffff;
     --tertiary-foreground: var(--muted-foreground);
 
-    --red: #ff4f4f;
+    --red: #fc5a5a;
     --red-foreground: var(--secondary);
 
     --blue: #1e75ff;
@@ -50,11 +50,11 @@
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --background: #222229;
+      --background: #1c1c24;
       --foreground: var(--primary);
 
       --muted: var(--tertiary);
-      --muted-foreground: #909099;
+      --muted-foreground: #898993;
 
       --accent: var(--border);
       --accent-foreground: #f1f0f5;
@@ -71,16 +71,16 @@
       --primary: #efeff0;
       --primary-foreground: var(--secondary);
 
-      --secondary: #2d2d35;
+      --secondary: #292932;
       --secondary-foreground: var(--primary);
 
-      --tertiary: #1d1d23;
+      --tertiary: #17171e;
       --tertiary-foreground: var(--muted-foreground);
 
-      --red: #f35953;
+      --red: #fc5a5a;
       --red-foreground: var(--primary);
 
-      --blue: #2d77ff;
+      --blue: #1e75ff;
       --blue-foreground: var(--secondary-foreground);
 
       --destructive: var(--red);
