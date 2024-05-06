@@ -80,6 +80,7 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
             .values({
                 mailboxId,
                 userId,
+                role: "OWNER"
             }),
 
         db.insert(MailboxAlias)
