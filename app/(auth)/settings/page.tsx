@@ -7,12 +7,16 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ChangePassword, ChangeSetting, SignOut } from "./components.client";
-import { changeUsername, changeBackupEmail } from "./actions";
+import { changeUsername, changeBackupEmail, deletePasskey } from "./actions";
 import { ReactNode } from "react";
 import NotificationsButton from "./notifications.client";
 import { eq } from "drizzle-orm";
 import { db, User } from "@/db";
 import { cookies } from "next/headers";
+import PasskeysSetup from "./passkeys.client";
+import { createId } from "@paralleldrive/cuid2";
+import LocalTime from "@/components/localtime";
+import { DeleteButton } from "@/(email)/mail/[mailbox]/config/components.client";
 
 export const metadata = {
     title: "User Settings",
@@ -30,6 +34,9 @@ export default async function UserSettingsPage() {
             username: true,
             email: true,
             backupEmail: true,
+        },
+        with: {
+            passkeys: true
         }
     })
     if (!user) return notFound();
@@ -82,6 +89,42 @@ export default async function UserSettingsPage() {
                     <ChangeSetting current={user.backupEmail || ''} action={changeBackupEmail} />
                 </SettingForm>
                 <NotificationsButton />
+                <PasskeysSetup
+                    userId={userId}
+                    username={user.username}
+                />
+                {user.passkeys.length ? (
+                    <div>
+                        <h3 className="text-lg">Passkeys</h3>
+                        {user.passkeys.map(e => (
+                            <div key={e.id} className="flex gap-2">
+                                {e.name}
+                                <span className="text-muted-foreground">(<LocalTime time={e.createdAt} />)</span>
+                                <SmartDrawer>
+                                    <SmartDrawerTrigger className="text-red hover:underline">
+                                        X
+                                    </SmartDrawerTrigger>
+
+                                    <SmartDrawerContent className="sm:max-w-[425px]">
+                                        <SmartDrawerHeader>
+                                            <SmartDrawerTitle>Delete Passkey</SmartDrawerTitle>
+                                            <SmartDrawerDescription>
+                                                Are you sure you want to delete the passkey <strong>{e.name}</strong>.
+                                            </SmartDrawerDescription>
+                                        </SmartDrawerHeader>
+                                        <SmartDrawerFooter className="pt-2 flex">
+                                            <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Cancel</SmartDrawerClose>
+                                            <DeleteButton action={deletePasskey.bind(null, e.id)} />
+                                        </SmartDrawerFooter>
+                                    </SmartDrawerContent>
+                                </SmartDrawer>
+
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    null
+                )}
                 <SignOut />
             </div>
         </div>
