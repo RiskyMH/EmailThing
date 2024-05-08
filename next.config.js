@@ -86,6 +86,9 @@ const nextConfig = {
                         value: '(?<mailbox>.*)'
                     },
                 ],
+                missing: [
+                    { type: 'query', key: 'from' }
+                ],
                 destination: '/mail/:mailbox',
                 permanent: false,
             },
