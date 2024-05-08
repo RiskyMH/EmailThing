@@ -11,6 +11,7 @@ import { FormEvent, useState, useTransition } from "react"
 import Link from "next/link"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
 import PasskeysLogin from "./passkeys.client"
+import { useRouter } from "next/navigation"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -19,6 +20,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
     const [hadAnError, setHadAnError] = useState<false | string>(false)
     const [loading, setLoading] = useState(false)
+    const router = useRouter()
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -34,7 +36,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 return void toast.error(signInResult.error)
             }
 
-            return void toast.success("Welcome back!")
+            toast.success("Welcome back!")
+            router.refresh()
         });
     }
 

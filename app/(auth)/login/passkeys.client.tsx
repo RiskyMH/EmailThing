@@ -7,6 +7,7 @@ import { Loader2Icon, KeyRoundIcon } from "lucide-react";
 import { toast } from "sonner";
 import { signInPasskey } from "./action";
 import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
+import { useRouter } from "next/navigation";
 
 export default function PasskeysLogin({ transition, challenge = "login" }: { transition: [boolean, TransitionStartFunction], challenge?: string }) {
     const [isPending, startTransition] = transition
@@ -16,6 +17,7 @@ export default function PasskeysLogin({ transition, challenge = "login" }: { tra
     }, []);
 
     const [loading, setLoading] = useState(false)
+    const router = useRouter()
 
     const handleLogin = async (event: any) => {
         event.preventDefault();
@@ -55,7 +57,8 @@ export default function PasskeysLogin({ transition, challenge = "login" }: { tra
                 }
 
                 setLoading(false)
-                return void toast.success("Welcome back!")
+                toast.success("Welcome back!")
+                router.refresh()
             } catch (err) {
                 console.error(err)
                 setLoading(false)

@@ -27,6 +27,7 @@ export async function GET() {
             columns: { mailboxId: true }
         })
         if (firstMailbox) {
+            cookies().set("mailboxId", firstMailbox.mailboxId)
             return redirect(`/mail/${firstMailbox.mailboxId}`)
         } else {
             cookies().delete("token").delete("mailboxId")
