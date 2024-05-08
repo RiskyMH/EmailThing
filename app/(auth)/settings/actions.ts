@@ -2,7 +2,7 @@
 
 import { getCurrentUser } from "@/utils/jwt"
 import { createPasswordHash, verifyPassword } from "@/utils/password"
-import { db, User, UserNotification } from "@/db";
+import { db, PasskeyCredentials, User, UserNotification } from "@/db";
 import { and, eq, not } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache"
 import { cookies } from "next/headers"
@@ -10,6 +10,7 @@ import { redirect } from "next/navigation"
 import { sendNotification } from "@/utils/web-push";
 import { userAuthSchema } from "@/validations/auth"
 import { env } from "@/utils/env";
+import { verifyCredentials } from "@/utils/passkeys";
 
 
 export async function changeUsername(username: string) {
@@ -193,4 +194,40 @@ If you did not expect this email or have any questions, please contact us at con
     revalidatePath('/settings')
 
     if (redirectHome) redirect("/mail")
+}
+
+
+export async function addPasskey(creds: Credential, name: string) {
+    const userId = await getCurrentUser()
+    if (!userId) return
+    try {
+        const { credentialID, publicKey } = await verifyCredentials(userId, creds);
+
+        await db.insert(PasskeyCredentials)
+            .values({
+                userId,
+                name,
+                publicKey: publicKey,
+                credentialId: credentialID
+            })
+    } catch (err) {
+        console.error(err)
+        return { error: "Failed to verify passkey" }
+    }
+
+    revalidatePath("/settings")
+}
+
+export async function deletePasskey(passkeyId: string) {
+    const userId = await getCurrentUser()
+    if (!userId) return
+
+    await db.delete(PasskeyCredentials)
+        .where(and(
+            eq(PasskeyCredentials.id, passkeyId),
+            eq(PasskeyCredentials.userId, userId)
+        ))
+        .execute()
+
+    revalidatePath("/settings")
 }

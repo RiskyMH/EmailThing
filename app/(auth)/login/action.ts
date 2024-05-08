@@ -1,7 +1,8 @@
 "use server";
-import { db, MailboxForUser, User, ResetPasswordToken } from "@/db";
+import { db, MailboxForUser, User, ResetPasswordToken, PasskeyCredentials } from "@/db";
 import { env } from "@/utils/env";
 import { addUserTokenToCookie } from "@/utils/jwt"
+import { verifyCredentials, verifyCredentialss } from "@/utils/passkeys";
 import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth"
 import { createId } from "@paralleldrive/cuid2";
@@ -56,6 +57,80 @@ export default async function signIn(data: FormData, callback?: string | null): 
             .set({ password: verified })
             .where(eq(User.id, user.id))
             .execute()
+    }
+
+    await addUserTokenToCookie(user)
+
+    if (callback) {
+        redirect(callback)
+    }
+
+    // get the user's mailbox then redirect to it
+    const mailboxes = await db.query.MailboxForUser.findMany({
+        where: eq(MailboxForUser.userId, user.id),
+        columns: {
+            mailboxId: true,
+        }
+    })
+
+    const possibleMailbox = cookies().get("mailboxId")?.value
+    if (possibleMailbox && mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)) {
+        redirect(`/mail/${possibleMailbox}`)
+    } else {
+        cookies().set("mailboxId", mailboxes[0].mailboxId, {
+            path: "/",
+            expires: new Date("2038-01-19 04:14:07")
+        });
+        redirect(`/mail/${mailboxes[0].mailboxId}`)
+    }
+}
+
+export async function signInPasskey(credential: Credential, callback?: string | null): Promise<{ error?: string | null }> {
+    console.log(credential)
+    if (!callback) {
+        const referer = headers().get("referer")
+        if (referer) {
+            callback = new URL(referer).searchParams?.get("from")
+        } else {
+            const mailboxId = cookies().get("mailboxId")
+            if (mailboxId) {
+                callback = `/mail/${mailboxId.value}`
+            }
+        }
+    }
+
+    const cred = await db.query.PasskeyCredentials.findFirst({
+        where: eq(PasskeyCredentials.credentialId, credential.id)
+    });
+    if (cred == null) {
+        return { error: "Passkey not found" };
+    }
+
+    let verification;
+
+    try {
+        verification = await verifyCredentialss("login", credential, cred);
+    } catch (error) {
+        console.error(error);
+        return { error: "Failed to verify passkey :(" }
+    }
+
+    console.log(verification)
+    if (!verification.userVerified) {
+        return { error: "Failed to verify passkey" }
+    }
+
+    // find user
+    const user = await db.query.User.findFirst({
+        where: eq(User.id, cred.userId),
+        columns: {
+            id: true,
+            password: true,
+        }
+    })
+
+    if (!user) {
+        return { error: "Can't find user" }
     }
 
     await addUserTokenToCookie(user)
