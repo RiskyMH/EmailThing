@@ -19,14 +19,15 @@ export function UserAuthForm({ className, username, token, ...props }: UserAuthF
     const [isPending, startTransition] = useTransition();
 
     async function onSubmit(data: FormData) {
+        // @ts-ignore - the types seem to be wrong with async
         startTransition(async () => {
             const signInResult = await resetPasswordWithToken(token, data.get("password") as string)
 
             if (signInResult?.error) {
-                return void toast.error(signInResult.error)
+                return toast.error(signInResult.error)
             }
 
-            return void toast.success("Now login with your new password!")
+            return toast.success("Now login with your new password!")
         });
     }
 

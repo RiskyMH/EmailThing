@@ -19,14 +19,15 @@ export function Page({ githubStars, action }: any) {
     }, [])
 
     async function actionn(data: FormData) {
+        // @ts-ignore - the types seem to be wrong with async
         startTransition(async () => {
             const res = await action(data.get("email") as string, true)
             
             if (res?.error) {
-               return void toast.error(res.error)
+               return toast.error(res.error)
             }
             
-            return void toast.success("Your backup email has been saved.")
+            return toast.success("Your backup email has been saved.")
         })
     }
 

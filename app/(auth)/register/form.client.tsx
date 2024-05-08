@@ -17,15 +17,16 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
+        // @ts-ignore - the types seem to be wrong with async
         startTransition(async () => {
             const formData = new FormData(event.target as HTMLFormElement)
             const signUpResult = await signUp(formData)
 
             if (signUpResult?.error) {
-                return void toast.error(signUpResult.error)
+                return toast.error(signUpResult.error)
             }
 
-            return void toast.success("Welcome!")
+            return toast.success("Welcome!")
         });
     }
 

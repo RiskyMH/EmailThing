@@ -13,7 +13,7 @@ export const User = sqliteTable("users", {
     password: text("password", { length: 200 }).notNull(),
     admin: int("admin", { mode: "boolean" }).default(false),
     email: text("email").notNull(),
-    onboardingStatus: text("onboarding_status", { mode: "json" }).$type<{ initial: boolean }>().default({ initial: false }),
+    onboardingStatus: text("onboarding_status", { mode: "json" }).$type<{initial: boolean}>().default("{ initial: false }" as any),
     backupEmail: text("backup_email"),
 }, (table) => ({
     usernameIdx: index("user_username").on(table.username),
@@ -23,26 +23,6 @@ export const UserRelations = relations(User, ({ many, one }) => ({
     notifications: many(UserNotification),
     mailboxes: many(MailboxForUser),
     passwordResets: many(ResetPasswordToken),
-    passkeys: many(PasskeyCredentials)
-}));
-
-
-// passkeys
-export const PasskeyCredentials = sqliteTable("passkey_credentials", {
-    id: text("id", { length: 24 }).unique().$defaultFn(() => createId()).primaryKey(),
-    userId: text("user_id", { length: 24 }).notNull()
-        .references(() => User.id, { onDelete: 'cascade' }),
-    credentialId: text("credential_id").notNull().notNull(),
-    createdAt: int('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-    name: text("name"),
-    publicKey: text("public_key").notNull(),
-});
-
-export const PasskeyCredentialsSchemaRelations = relations(PasskeyCredentials, ({ many, one }) => ({
-    user: one(User, {
-        fields: [PasskeyCredentials.userId],
-        references: [User.id],
-    })
 }));
 
 

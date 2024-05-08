@@ -5,12 +5,11 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { KeyRoundIcon, Loader2, Loader2Icon } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import signIn, { resetPassword } from "./action"
 import { FormEvent, useState, useTransition } from "react"
 import Link from "next/link"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
-import PasskeysLogin from "./passkeys.client"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -18,23 +17,21 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
     const [hadAnError, setHadAnError] = useState<false | string>(false)
-    const [loading, setLoading] = useState(false)
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        setLoading(true)
+        // @ts-ignore - the types seem to be wrong with async
         startTransition(async () => {
             const formData = new FormData(event.target as HTMLFormElement)
             const signInResult = await signIn(formData)
-            setLoading(false)
 
             if (signInResult?.error) {
                 // @ts-expect-error yay types
                 setHadAnError(event.target?.username?.value ?? "unknown")
-                return void toast.error(signInResult.error)
+                return toast.error(signInResult.error)
             }
 
-            return void toast.success("Welcome back!")
+            return toast.success("Welcome back!")
         });
     }
 
@@ -76,25 +73,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                         </div>
 
                         <Button disabled={isPending} type="submit">
-                            {loading && (
+                            {isPending && (
                                 <Loader2 className="me-2 h-4 w-4 animate-spin" />
                             )}
                             Sign In
                         </Button>
                     </div>
                 </form>
+
             </div>
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t-2" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                        Or continue with
-                    </span>
-                </div>
-            </div>
-            <PasskeysLogin transition={[isPending, startTransition]} />
             <p className="px-8 text-center text-sm text-muted-foreground flex flex-col gap-2">
                 <Link
                     href="/register"
@@ -141,7 +128,7 @@ function ResetPasswordDiag({ username }: { username: string }) {
                     </SmartDrawerDescription>
                 </SmartDrawerHeader>
                 <SmartDrawerFooter className="pt-2 flex">
-                    <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Close</SmartDrawerClose>
+                    <SmartDrawerClose className={buttonVariants({variant: "secondary"})}>Close</SmartDrawerClose>
                     <Button onClick={resetPasswordAction} disabled={isPending} className="gap-2">
                         {isPending && (
                             <Loader2 className="me-2 h-4 w-4 animate-spin" />
