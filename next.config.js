@@ -36,27 +36,10 @@ const nextConfig = {
                     missing: [
                         {
                             type: 'cookie',
-                            key: 'token',
-                        },
-                    ],
-                },
-                {
-                    source: '/(login|register|login\/reset|onboarding\/welcome)?',
-                    destination: '/mail',
-                    has: [
-                        {
-                            type: 'cookie',
-                            key: 'token',
-                        },
-                    ],
-                    missing: [
-                        {
-                            type: 'cookie',
                             key: 'mailboxId',
                         },
-                    ]
+                    ],
                 },
-
             ],
             afterFiles: [],
             fallback: [],
@@ -91,7 +74,7 @@ const nextConfig = {
                 permanent: false,
             },
             {
-                source: '/(login|register)?',
+                source: '/(login|register|login\/reset)?',
                 has: [
                     {
                         type: 'cookie',
@@ -105,6 +88,15 @@ const nextConfig = {
                 ],
                 destination: '/mail/:mailbox',
                 permanent: false,
+            },
+            {
+                source: '/login',
+                destination: '/:from?from=',
+                permanent: false,
+                has: [
+                    { type: 'cookie', key: 'token' },
+                    { type: 'query', key: 'from' }
+                ]
             },
         ];
     }
