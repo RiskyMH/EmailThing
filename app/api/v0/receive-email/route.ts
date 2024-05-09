@@ -248,12 +248,14 @@ function slice(text: string, length: number) {
     return text.slice(0, length) + (length < text.length ? '…' : '')
 }
 
-import TurndownService from "turndown"
+import Turndown from "turndown"
+import { JSDOM } from "jsdom";
+
 function emailContent({ text, html }: { text?: string, html?: string }) {
     if (text) return text
     if (!html) return "(no body)"
 
     const h = html.replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, "")
 
-    return "<!-- Converted markdown from HTML -->\n" + new TurndownService().turndown(h)
+    return "<!-- Converted markdown from HTML -->\n" + new Turndown().turndown(JSDOM.fragment(h))
 }
