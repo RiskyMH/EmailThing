@@ -74,6 +74,17 @@ const nextConfig = {
                 permanent: false,
             },
             {
+                source: "/",
+                destination: "/login",
+                has: [
+                    { type: 'cookie', key: 'mailboxId' },
+                ],
+                missing: [
+                    { type: 'cookie', key: 'token' },
+                ],
+                permanent: false,
+            },
+            {
                 source: '/(login|register|login\/reset)?',
                 has: [
                     {
