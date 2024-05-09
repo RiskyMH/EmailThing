@@ -101,8 +101,6 @@ export async function POST(request: Request) {
 
     const emailSize = new Blob([rawEmail]).size
 
-    const body = email.text || email.html || "(no body)";
-
     const emailId = createId()
     await db.batch([
         db.insert(Email)
@@ -110,7 +108,7 @@ export async function POST(request: Request) {
                 id: emailId,
                 raw: 's3',
                 subject: email.subject,
-                body: body,
+                body: emailContent(email),
                 html: email.html,
                 snippet: email.text ? slice(email.text, 200) : null,
                 mailboxId,
@@ -248,4 +246,14 @@ export async function POST(request: Request) {
 
 function slice(text: string, length: number) {
     return text.slice(0, length) + (length < text.length ? '…' : '')
+}
+
+import TurndownService from "turndown"
+function emailContent({ text, html }: { text?: string, html?: string }) {
+    if (text) return text
+    if (!html) return "(no body)"
+
+    const h = html.replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, "")
+
+    return "<!-- Converted markdown from HTML -->\n" + new TurndownService().turndown(h)
 }

@@ -86,7 +86,8 @@ export async function parseHTML(content: string, moreTrusted = false) {
             // 'alt',
             'constrain',
             'type',
-            'title'
+            'title',
+            'hidden'
         ],
 
     });
