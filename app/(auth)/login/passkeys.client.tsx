@@ -56,13 +56,13 @@ export default function PasskeysLogin({ transition, challenge = "login" }: { tra
                     return void toast.error(signInResult.error)
                 }
 
-                setLoading(false)
                 toast.success("Welcome back!")
                 router.refresh()
+                setLoading(false)
             } catch (err) {
                 console.error(err)
+                toast.error("Failed to sign in with passkey")
                 setLoading(false)
-                return void toast.error("Failed to sign in with passkey")
             }
         })
     }

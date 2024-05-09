@@ -28,16 +28,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         startTransition(async () => {
             const formData = new FormData(event.target as HTMLFormElement)
             const signInResult = await signIn(formData)
-            setLoading(false)
 
             if (signInResult?.error) {
                 // @ts-expect-error yay types
                 setHadAnError(event.target?.username?.value ?? "unknown")
+                setLoading(false)
                 return void toast.error(signInResult.error)
             }
 
             toast.success("Welcome back!")
             router.refresh()
+            setLoading(false)
         });
     }
 
