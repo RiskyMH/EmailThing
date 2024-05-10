@@ -3,7 +3,7 @@ import { pageMailboxAccess } from "../tools"
 import { db, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens } from "@/db";
 import { notFound } from "next/navigation"
 import { customDomainLimit, storageLimit, aliasLimit } from "@/utils/limits"
-import { AddAliasForm, AddCustomDomainForm, CreateCategoryForm, CreateTokenForm, DeleteButton, EditAliasForm, EditCategoryForm, InviteUserForm } from "./components.client"
+import { AddAliasForm, AddCustomDomainForm, CreateCategoryForm, CreateTokenForm, DeleteButton, EditAliasForm, InviteUserForm } from "./components.client"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -318,7 +318,7 @@ export default async function EmailConfig({
                                                                 <SmartDrawerDescription>Enter the new name and hex color</SmartDrawerDescription>
                                                             </SmartDrawerHeader>
 
-                                                            <EditCategoryForm mailboxId={params.mailbox} name={row.name} id={row.id} color={row.color} />
+                                                            <CreateCategoryForm mailboxId={params.mailbox} name={row.name} id={row.id} color={row.color} />
 
                                                             <SmartDrawerFooter className="pt-2 flex sm:hidden">
                                                                 <SmartDrawerClose asChild>

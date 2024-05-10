@@ -5,11 +5,13 @@ import { verifyDomain, addAlias, editAlias, makeToken, createCategory, editCateg
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, CopyIcon, Loader2 } from "lucide-react";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CopyIcon, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { SmartDrawerHeader, SmartDrawerTitle, SmartDrawerDescription, SmartDrawerClose, SmartDrawerFooter } from "@/components/ui/smart-drawer";
 import CopyButton from "@/components/copy-button.client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import TooltipText from "@/components/tooltip-text";
 
 
 export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "" }: { mailboxId: string, cfWorkerCode: ReactNode, initialDomain?: string }) {
@@ -423,73 +425,84 @@ export function CreateTokenForm({ mailboxId }: { mailboxId: string }) {
 }
 
 
-export function CreateCategoryForm({ mailboxId }: { mailboxId: string }) {
+export function CreateCategoryForm({ mailboxId, id, name, color: c }: { mailboxId: string, id?: undefined, name?: undefined, color?: undefined } | { mailboxId: string, id: string, name: string, color: string | null }) {
     const [isPending, startTransition] = useTransition();
+    const [color, setColor] = useState(c || "")
 
     const formSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (isPending) return;
 
         startTransition(async () => {
-            // @ts-expect-error
-            const res = await createCategory(mailboxId, event.target.name.value, event.target.color?.value)
+            let res
+            if (id) {
+                res = await editCategory(mailboxId, id, (event.target as any).name.value, (event.target as any).color?.value)
+            } else {
+                res = await createCategory(mailboxId, (event.target as any).name.value, (event.target as any).color?.value)
+            }
+
             if (res?.error) {
                 toast.error(res.error)
             } else {
                 document.getElementById("smart-drawer:close")?.click()
             }
         })
-
     }
+
+    const defaultColors = [
+        { name: "Grey", hex: "#6b7280" },
+        { name: "Red", hex: "#ef4444" },
+        { name: "Orange", hex: "#f97316" },
+        { name: "Amber", hex: "#f59e0b" },
+        { name: "Yellow", hex: "#eab308" },
+        { name: "Lime", hex: "#84cc16" },
+        { name: "Green", hex: "#22c55e" },
+        { name: "Emerald", hex: "#10b981" },
+        { name: "Teal", hex: "#14b8a6" },
+        { name: "Cyan", hex: "#06b6d4" },
+        { name: "Sky", hex: "#0ea5e9" },
+        { name: "Blue", hex: "#3b82f6" },
+        { name: "Indigo", hex: "#6366f1" },
+        { name: "Violet", hex: "#8b5cf6" },
+        { name: "Purple", hex: "#a855f7" },
+        { name: "Fuchsia", hex: "#d946ef" },
+        { name: "Pink", hex: "#ec4899" },
+        { name: "Rose", hex: "#f43f5e" },
+    ]
 
     return (
         <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
             <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
-                <Input className="bg-secondary border-none" name="name" placeholder="Work" id="name" autoFocus disabled={isPending} required />
+                <Input className="bg-secondary border-none" name="name" placeholder="Work" id="name" autoFocus disabled={isPending} required defaultValue={name} />
 
                 <Label htmlFor="name">Color</Label>
-                <Input className="bg-secondary border-none" name="color" placeholder="#000000" id="color" disabled={isPending} />
+                <div className="flex items-center gap-2">
+                    <Input className="bg-secondary border-none" name="color" placeholder="#000000" id="color" disabled={isPending} value={color} onChange={e => setColor(e.currentTarget.value)} />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="secondary" className="px-3">
+                                <ChevronDownIcon className="h-5 w-5" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="flex flex-wrap gap-4 justify-evenly">
+                            {defaultColors.map(color => (
+                                <TooltipText text={color.name} subtext={color.hex} key={color.hex}>
+                                    <button
+                                        style={{ backgroundColor: color.hex }}
+                                        className="h-6 w-6 rounded-full grow-0 shrink-0 hover:opacity-75 transition-all"
+                                        onClick={() => setColor(color.hex)}
+                                    />
+                                </TooltipText>
+                            ))}
+                        </PopoverContent>
+                    </Popover>
+                </div>
+
             </div>
             <Button type="submit" disabled={isPending} className="gap-2">
                 {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
-                Create category
-            </Button>
-        </form>
-    );
-}
-
-export function EditCategoryForm({ mailboxId, id, name, color }: { mailboxId: string, id: string, name: string, color: string | null }) {
-    const [isPending, startTransition] = useTransition();
-
-    const formSubmit = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (isPending) return;
-
-        startTransition(async () => {
-            // @ts-expect-error
-            const res = await editCategory(mailboxId, id, event.target.name.value, event.target.color?.value)
-            if (res?.error) {
-                toast.error(res.error)
-            } else {
-                document.getElementById("smart-drawer:close")?.click()
-            }
-        })
-
-    }
-
-    return (
-        <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
-            <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input className="bg-secondary border-none" name="name" placeholder="Work" id="name" defaultValue={name} autoFocus disabled={isPending} required />
-
-                <Label htmlFor="name">Color</Label>
-                <Input className="bg-secondary border-none" name="color" placeholder="#000000" id="color" defaultValue={color || ''} disabled={isPending} />
-            </div>
-            <Button type="submit" disabled={isPending} className="gap-2">
-                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
-                Edit category
+                {id ? "Edit category" : "Create category"}
             </Button>
         </form>
     );

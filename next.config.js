@@ -6,6 +6,9 @@ const nextConfig = {
         outputFileTracingIncludes: {
             '/mail/[mailbox]/config': ['./public/cloudflare-worker.js'],
         },
+        optimizePackageImports: [
+            'shiki',
+        ],
     },
     logging: {
         fetches: {
