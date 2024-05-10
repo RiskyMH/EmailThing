@@ -62,7 +62,10 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
             ? await getJustEmailsList(mailboxId, { ...emailFetchOptions, selectCategories: false, take: 10 }, curser)
             : await getDraftJustEmailsList(mailboxId, { take: 10, search }, curser)
 
-        if (emails.length === 0) throw new Error("No more emails")
+        if (emails.length === 0) {
+            console.error("No more emails")
+            return [[], null] as [JSX.Element[], null]
+        }
 
         const nextPageEmail = emails.length >= 11 ? emails.pop() : null
         const categories = type === "temp" ? undefined : await mailboxCategories(mailboxId)
