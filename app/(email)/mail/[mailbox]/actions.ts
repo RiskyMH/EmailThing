@@ -22,7 +22,6 @@ export interface UpdatableEmailConfig {
     isRead?: boolean;
     category?: string | null;
     binned?: boolean;
-    permDelete?: boolean;
 }
 
 export async function updateEmail(mailboxId: string, emailId: string, type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "mail-page" | "temp", state: UpdatableEmailConfig) {
@@ -32,62 +31,6 @@ export async function updateEmail(mailboxId: string, emailId: string, type: "inb
     }
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : type === "mail-page" ? `/${emailId}` : `/${type}`}`
-
-    if (type === "drafts") {
-        if (state.binned) {
-            await db.delete(DraftEmail)
-                .where(and(
-                    eq(DraftEmail.id, emailId),
-                    eq(DraftEmail.mailboxId, mailboxId),
-                ))
-                .execute()
-
-            return revalidatePath(baseUrl)
-        }
-        if (state.category) throw new Error("Cannot categorize drafts");
-        return "Can only delete drafts for now";
-    } else {
-        if (state.permDelete) {
-            const email = await db.query.Email.findFirst({
-                where: and(
-                    eq(Email.id, emailId),
-                    eq(Email.mailboxId, mailboxId),
-                ),
-                columns: {
-                    size: true,
-                }
-            })
-
-            const attachments = await db.query.EmailAttachments.findMany({
-                where: eq(EmailAttachments.emailId, emailId),
-                columns: {
-                    id: true,
-                    filename: true,
-                }
-            })
-
-            await deleteFile(`${mailboxId}/${emailId}`);
-            await deleteFile(`${mailboxId}/${emailId}/email.eml`);
-            await Promise.all(attachments.map(async (attachment) => {
-                await deleteFile(`${mailboxId}/${emailId}/${attachment.id}/${attachment.filename}`);
-            }));
-
-            await db.delete(Email)
-                .where(and(
-                    eq(Email.id, emailId),
-                    eq(Email.mailboxId, mailboxId),
-                ))
-                .execute()
-
-            await db.update(Mailbox)
-                .set({
-                    storageUsed: sql`${Mailbox.storageUsed} - ${email!.size}`
-                })
-                .where(eq(Mailbox.id, mailboxId))
-
-            return revalidatePath(baseUrl)
-        }
-    }
 
     await db.update(Email)
         .set({
@@ -103,4 +46,58 @@ export async function updateEmail(mailboxId: string, emailId: string, type: "inb
         .execute()
 
     revalidatePath(baseUrl)
+}
+
+
+export async function deleteEmail(mailboxId: string, emailId: string, type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "mail-page" | "temp") {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("No access to mailbox");
+    }
+
+    const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : type === "mail-page" ? `/${emailId}` : `/${type}`}`
+
+    const email = await db.query.Email.findFirst({
+        where: and(
+            eq(Email.id, emailId),
+            eq(Email.mailboxId, mailboxId),
+        ),
+        columns: {
+            size: true,
+        }
+    })
+
+    if (!email) {
+        throw new Error("Email not found")
+    }
+
+    const attachments = await db.query.EmailAttachments.findMany({
+        where: eq(EmailAttachments.emailId, emailId),
+        columns: {
+            id: true,
+            filename: true,
+        }
+    })
+
+    await Promise.all([
+        deleteFile(`${mailboxId}/${emailId}`),
+        deleteFile(`${mailboxId}/${emailId}/email.eml`),
+        ...attachments.map((attachment) => deleteFile(`${mailboxId}/${emailId}/${attachment.id}/${attachment.filename}`)),
+    ])
+
+    await db.batch([
+        db.delete(Email)
+            .where(and(
+                eq(Email.id, emailId),
+                eq(Email.mailboxId, mailboxId),
+            )),
+
+        db.update(Mailbox)
+            .set({
+                storageUsed: sql`${Mailbox.storageUsed} - ${email!.size}`
+            })
+            .where(eq(Mailbox.id, mailboxId))
+    ])
+
+    return revalidatePath(baseUrl)
 }

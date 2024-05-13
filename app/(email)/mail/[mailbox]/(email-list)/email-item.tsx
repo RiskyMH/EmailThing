@@ -7,7 +7,7 @@ import { ClientStar, ContextMenuAction } from "../components.client";
 import { getJustEmailsList, getDraftJustEmailsList } from "./tools";
 import { ReplyIcon, ReplyAllIcon, ForwardIcon, TagIcon, ExternalLink } from "lucide-react";
 import { mailboxCategories } from "../tools";
-import { updateEmail as updateEmailAction } from "../actions"
+import { deleteEmail, updateEmail as updateEmailAction } from "../actions"
 
 export interface EmailItemProps {
     email: Awaited<ReturnType<typeof getJustEmailsList>>[0] | Awaited<ReturnType<typeof getDraftJustEmailsList>>[0];
@@ -20,7 +20,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
     const emailId = email.id
     const updateEmail = updateEmailAction.bind(null, mailboxId, emailId, type)
 
-    const category = categories?.find(c=> c.id === email.categoryId)
+    const category = categories?.find(c => c.id === email.categoryId)
     const link = `/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`
 
     return (
@@ -99,7 +99,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         </ContextMenuItem>
                         {email.binnedAt && (
                             <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                                <ContextMenuAction icon="Trash2Icon" action={updateEmail.bind(null, { binned: false, permDelete: true })}>
+                                <ContextMenuAction icon="Trash2Icon" action={deleteEmail.bind(null, mailboxId, emailId, type)}>
                                     Delete forever
                                 </ContextMenuAction>
                             </ContextMenuItem>
@@ -137,7 +137,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                     </>
                 ) : (
                     <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                        <ContextMenuAction icon="Trash2Icon" action={updateEmail.bind(null, { binned: false, permDelete: true })}>
+                        <ContextMenuAction icon="Trash2Icon" action={deleteEmail.bind(null, mailboxId, emailId, type)}>
                             Delete forever
                         </ContextMenuAction>
                     </ContextMenuItem>
