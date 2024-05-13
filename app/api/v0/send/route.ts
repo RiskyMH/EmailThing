@@ -87,7 +87,7 @@ export async function POST(request: Request) {
             ],
             from: {
                 email: alias.alias,
-                name: alias.name ?? undefined
+                name: fromObj.name ?? undefined
             },
             reply_to: data.reply_to ? getInfoFromAddress(data.reply_to) : undefined,
             subject: data.subject || "(no subject)",

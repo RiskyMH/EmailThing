@@ -139,7 +139,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, cheese
             ))
     ])
 
-    redirect(`/mail/${mailboxId}`)
+    return redirect(`/mail/${mailboxId}/${emailId}`)
 }
 
 
