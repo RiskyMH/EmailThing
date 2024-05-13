@@ -108,7 +108,7 @@ export function UserNav({ user, mailboxId, mailboxes }: UserProps) {
                                     </Button>
                                 ))}
                                 {/* + new */}
-                                <Button variant="secondary" asChild>
+                                <Button variant="secondary" asChild disabled>
                                     <DrawerClose className="w-full">
                                         <PlusCircleIcon className="mr-2 h-4 w-4" />
                                         New mailbox
@@ -195,7 +195,7 @@ export function UserNav({ user, mailboxId, mailboxes }: UserProps) {
                                     </DropdownMenuItem>
                                 ))}
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>
+                                <DropdownMenuItem disabled>
                                     <PlusCircleIcon className="mr-2 h-4 w-4" />
                                     <span>New mailbox</span>
                                 </DropdownMenuItem>
