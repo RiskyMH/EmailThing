@@ -64,8 +64,8 @@ export async function deleteEmail(mailboxId: string, emailId: string, type: "inb
     if (type === "drafts") {
         await db.delete(DraftEmail)
             .where(and(
-                eq(Email.id, emailId),
-                eq(Email.mailboxId, mailboxId),
+                eq(DraftEmail.id, emailId),
+                eq(DraftEmail.mailboxId, mailboxId),
             ))
 
         return revalidatePath(baseUrl)
