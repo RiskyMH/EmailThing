@@ -30,9 +30,17 @@ export async function GET(
         columns: {
             filename: true,
             id: true
+        },
+        with: {
+            email: {
+                columns: {
+                    mailboxId: true
+                }
+            }
         }
     })
     if (!attachment) return notFound()
+    if (attachment.email.mailboxId !== params.mailbox) return notFound()
 
     const url = await getSignedUrl({
         key: `${params.mailbox}/${params.email}/${attachment.id}/${attachment.filename}`
