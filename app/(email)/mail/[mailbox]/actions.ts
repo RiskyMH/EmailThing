@@ -32,6 +32,10 @@ export async function updateEmail(mailboxId: string, emailId: string, type: "inb
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : type === "mail-page" ? `/${emailId}` : `/${type}`}`
 
+    if (type === "drafts") {
+        throw new Error("Draft can only be perm deleted")
+    }
+
     await db.update(Email)
         .set({
             isStarred: state.isStarred,
@@ -57,6 +61,16 @@ export async function deleteEmail(mailboxId: string, emailId: string, type: "inb
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : type === "mail-page" ? `/${emailId}` : `/${type}`}`
 
+    if (type === "drafts") {
+        await db.delete(DraftEmail)
+            .where(and(
+                eq(Email.id, emailId),
+                eq(Email.mailboxId, mailboxId),
+            ))
+
+        return revalidatePath(baseUrl)
+    }
+
     const email = await db.query.Email.findFirst({
         where: and(
             eq(Email.id, emailId),
@@ -68,7 +82,8 @@ export async function deleteEmail(mailboxId: string, emailId: string, type: "inb
     })
 
     if (!email) {
-        throw new Error("Email not found")
+        revalidatePath(baseUrl)
+        return { error: "Can't find email" }
     }
 
     const attachments = await db.query.EmailAttachments.findMany({
