@@ -554,7 +554,7 @@ export default async function EmailConfig({
                 </div>
 
                 <br />
-                If you would like to send emails via the API, see the documentation here: <a href="/api-docs" target="_blank" rel="noreferrer" className="font-bold hover:underline">API Documentation</a>
+                If you would like to send emails via the API, see the documentation here: <a href="/api-docs" target="_blank" className="font-bold hover:underline">API Documentation</a>
                 <br />
             </div>
 

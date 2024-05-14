@@ -159,7 +159,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                     <SmartDrawerTitle>Create Cloudflare Email Worker <span className="text-muted-foreground">(2/4)</span></SmartDrawerTitle>
                     <SmartDrawerDescription>
                         To receive emails create a catch-all {" "}
-                        <a href="https://developers.cloudflare.com/email-routing/email-workers/enable-email-workers/" target="_blank" rel="noreferrer" className="font-bold hover:underline">
+                        <a href="https://developers.cloudflare.com/email-routing/email-workers/enable-email-workers/" target="_blank" className="font-bold hover:underline">
                             email worker
                         </a> for your domain with the following code:
                     </SmartDrawerDescription>
@@ -228,7 +228,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                 <div className="grid items-start gap-4 px-4 sm:px-0">
                     <p>
                         If you have any issues or questions, you can join our {" "}
-                        <a href="https://discord.gg/GT9Q2Yz4VS" target="_blank" rel="noreferrer" className="font-bold hover:underline">
+                        <a href="https://discord.gg/GT9Q2Yz4VS" target="_blank" className="font-bold hover:underline">
                             Discord server
                         </a>.
                     </p>

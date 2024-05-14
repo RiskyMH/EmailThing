@@ -33,9 +33,9 @@ export default async function LoginPage() {
                     </p> */}
                     <p className="text-sm text-muted-foreground">
                         Currently you need an invite code, please {" "}
-                        <a href="mailto:emailthing@riskymh.dev" className="font-bold hover:underline" target="_blank" rel="noreferrer">email me</a>
+                        <a href="mailto:emailthing@riskymh.dev" className="font-bold hover:underline" target="_blank">email me</a>
                         {" "} or ask on{" "}
-                        <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank" rel="noreferrer">Discord</a>
+                        <a href="https://discord.gg/GT9Q2Yz4VS" className="font-bold hover:underline" target="_blank">Discord</a>
                         {" "} for an invite code.
                     </p>
                 </div>

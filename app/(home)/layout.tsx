@@ -54,7 +54,6 @@ function SiteFooter() {
                         <a
                             href="https://riskymh.dev"
                             target="_blank"
-                            rel="noreferrer"
                             className="font-medium underline underline-offset-4"
                         >
                             RiskyMH
@@ -63,7 +62,6 @@ function SiteFooter() {
                         <a
                             href="https://github.com/RiskyMH/EmailThing"
                             target="_blank"
-                            rel="noreferrer"
                             className="font-medium underline underline-offset-4"
                         >
                             GitHub

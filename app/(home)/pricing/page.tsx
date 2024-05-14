@@ -64,7 +64,7 @@ export default function PricingPage() {
         <p className="max-w-[85%] leading-normal text-muted-foreground sm:leading-7">
           <strong>EmailThing is only a free app right now.</strong> {" "}
           If you would like to donate and keep the project free for everyone, you can do so on my{" "}
-          <Link href="https://github.com/sponsors/RiskyMH" className="underline hover:text-foreground" target="_blank" rel="noreferrer">
+          <Link href="https://github.com/sponsors/RiskyMH" className="underline hover:text-foreground" target="_blank">
             donation page
           </Link>.
         </p>

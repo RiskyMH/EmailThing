@@ -30,7 +30,6 @@ export default function Home() {
             <Link
               href="https://github.com/RiskyMH/EmailThing"
               target="_blank"
-              rel="noreferrer"
               className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
             >
               GitHub
@@ -57,7 +56,7 @@ export default function Home() {
             title="API integration"
             description={(<>
               You can send emails and do other things with our API. {" "}
-              <a href="/api-docs" className="font-bold hover:underline" target="_blank" rel="noreferrer">
+              <a href="/api-docs" className="font-bold hover:underline" target="_blank">
                 read docs
               </a>.
             </>)}
@@ -67,7 +66,7 @@ export default function Home() {
             title="Anti-spam"
             description={(<>
               We use {" "}
-              <a href="https://www.cloudflare.com/en-au/developer-platform/email-routing/" className="font-bold hover:underline" target="_blank" rel="noreferrer">
+              <a href="https://www.cloudflare.com/en-au/developer-platform/email-routing/" className="font-bold hover:underline" target="_blank">
                 Cloudflare Email Routing
               </a>
               {" "} to try and minimize spam.
@@ -111,7 +110,6 @@ export default function Home() {
             <Link
               href="https://github.com/RiskyMH/EmailThing"
               target="_blank"
-              rel="noreferrer"
               className="underline underline-offset-4"
             >
               GitHub
