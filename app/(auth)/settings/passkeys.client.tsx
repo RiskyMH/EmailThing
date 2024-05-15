@@ -7,6 +7,7 @@ import { Loader2Icon, KeyRoundIcon } from "lucide-react";
 import { addPasskey } from "./actions";
 import { toast } from "sonner";
 import { create, parseCreationOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
+import UAParser from "ua-parser-js"
 
 
 export default function PasskeysSetup({ userId, username }: { userId: string, username: string }) {
@@ -17,7 +18,7 @@ export default function PasskeysSetup({ userId, username }: { userId: string, us
         setSupport(supported());
     }, []);
 
-    const handleCreate = (  ) => {
+    const handleCreate = () => {
         startTransition(async () => {
             try {
                 const cred = await create(parseCreationOptionsFromJSON({
@@ -48,7 +49,8 @@ export default function PasskeysSetup({ userId, username }: { userId: string, us
                 }
 
                 console.log({ cred })
-                const res = await addPasskey(cred, `${navigator.platform}`)
+                const ua = new UAParser(navigator.userAgent).getResult()
+                const res = await addPasskey(cred, `${ua.browser.name} on ${ua.os.name}`)
                 if (res?.error) {
                     return void toast.error(res.error)
                 }
@@ -74,7 +76,6 @@ export default function PasskeysSetup({ userId, username }: { userId: string, us
             )}{" "}
             Setup New Passkey
         </button>
-
     )
 
 }
