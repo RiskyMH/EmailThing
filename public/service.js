@@ -6,7 +6,9 @@ self.addEventListener('push', async (event) => {
         self.registration.showNotification(eventData.title, {
             body: eventData.body,
             icon: '/logo.png',
+            badge: '/badge.png',
             timestamp: Date.now(),
+            tag: eventData.url,
             data: {
                 url: eventData.url,
             },
