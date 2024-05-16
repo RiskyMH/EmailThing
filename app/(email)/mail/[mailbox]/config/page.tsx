@@ -716,7 +716,7 @@ const cfWorkerCode = (
             </CopyButton>
         </Button>
 
-        <div className="overflow-auto max-h-52 bg-tertiary p-2 rounded-md text-sm" dangerouslySetInnerHTML={{
+        <div className="overflow-auto max-h-52 bg-[#17171e] p-2 rounded-md text-sm" dangerouslySetInnerHTML={{
             __html:
                 await codeToHtml(
                     cfWorkerCodeText,

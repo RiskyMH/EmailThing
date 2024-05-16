@@ -10,6 +10,9 @@ const nextConfig = {
         //     'shiki',
         // ],
     },
+    transpilePackages: [
+        "shiki"
+    ],
     logging: {
         fetches: {
             fullUrl: true,
