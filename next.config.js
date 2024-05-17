@@ -9,7 +9,7 @@ const nextConfig = {
         // optimizePackageImports: [
         //     'shiki',
         // ],
-        reactCompiler: true
+        reactCompiler: !process.env.TURBOPACK
     },
     transpilePackages: [
         "shiki"

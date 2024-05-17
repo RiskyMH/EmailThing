@@ -100,7 +100,7 @@ export function SignOut() {
     }
 
     return (
-        <Button variant="secondary" className="gap-2" onClick={onClick as any} disabled={isPending}>
+        <Button variant="destructive" className="gap-2" onClick={onClick as any} disabled={isPending}>
             {isPending && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
             Sign out
         </Button>

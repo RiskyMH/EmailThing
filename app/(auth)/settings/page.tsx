@@ -2,7 +2,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer";
 import { getCurrentUser } from "@/utils/jwt";
 import { cn } from "@/utils/tw";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, TrashIcon } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -14,7 +14,6 @@ import { eq } from "drizzle-orm";
 import { db, User } from "@/db";
 import { cookies } from "next/headers";
 import PasskeysSetup from "./passkeys.client";
-import { createId } from "@paralleldrive/cuid2";
 import LocalTime from "@/components/localtime";
 import { DeleteButton } from "@/(email)/mail/[mailbox]/config/components.client";
 
@@ -101,8 +100,8 @@ export default async function UserSettingsPage() {
                                 {e.name}
                                 <span className="text-muted-foreground">(<LocalTime time={e.createdAt} />)</span>
                                 <SmartDrawer>
-                                    <SmartDrawerTrigger className="text-red hover:underline">
-                                        X
+                                    <SmartDrawerTrigger className="text-red hover:underline" title="Remove Device">
+                                        <TrashIcon className="h-4 w-4" />
                                     </SmartDrawerTrigger>
 
                                     <SmartDrawerContent className="sm:max-w-[425px]">
@@ -135,7 +134,7 @@ function SettingForm({ buttonName, header, children }: { buttonName: string, chi
     return (
         <SmartDrawer>
             <SmartDrawerTrigger asChild>
-                <Button>
+                <Button variant="secondary">
                     {buttonName}
                 </Button>
             </SmartDrawerTrigger>

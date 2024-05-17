@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState, useTransition, type TransitionStartFunction } from "react";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/utils/tw";
+import { useEffect, useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
 import { Loader2Icon, KeyRoundIcon } from "lucide-react";
 import { addPasskey } from "./actions";
 import { toast } from "sonner";
@@ -63,9 +62,9 @@ export default function PasskeysSetup({ userId, username }: { userId: string, us
     }
 
     return (
-        <button
+        <Button
             type="button"
-            className={cn(buttonVariants())}
+            variant="secondary"
             onClick={handleCreate}
             disabled={isPending || !support}
         >
@@ -75,7 +74,7 @@ export default function PasskeysSetup({ userId, username }: { userId: string, us
                 <KeyRoundIcon className="mr-2 h-4 w-4" />
             )}{" "}
             Setup New Passkey
-        </button>
+        </Button>
     )
 
 }

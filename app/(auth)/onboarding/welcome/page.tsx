@@ -31,7 +31,7 @@ export default async function WelcomePage() {
         }
     })
     if (!user) return notFound();
-    if (user.onboardingStatus?.initial) return redirect("/mail");
+    // if (user.onboardingStatus?.initial) return redirect("/mail");
 
     const githubStars = (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing", { next: { revalidate: 60 } })).json()).stargazers_count;
 

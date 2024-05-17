@@ -94,7 +94,13 @@ export default function NotificationsButton() {
     }
 
     return (
-        <Button onClick={() => isSubscribed ? unSubscribe() : requestPermission()} disabled={isPending || !isLoaded} className='flex gap-2 w-full'>
+        <Button
+            onClick={() => isSubscribed ? unSubscribe() : requestPermission()}
+            disabled={isPending || !isLoaded}
+            className='flex gap-2 w-full'
+            // variant={isSubscribed ? "destructive" : "secondary"}
+            variant="secondary"
+        >
             {isPending && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
             {isSubscribed ? 'Disable notifications' : 'Enable notifications'}
         </Button>
