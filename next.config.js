@@ -9,6 +9,7 @@ const nextConfig = {
         // optimizePackageImports: [
         //     'shiki',
         // ],
+        reactCompiler: true
     },
     transpilePackages: [
         "shiki"
