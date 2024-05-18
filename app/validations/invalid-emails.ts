@@ -89,6 +89,13 @@ export const impersonatingEmails = [
     "strategic",
     "keyaccount",
     "customerrelations",
-    "clients",
+    "client",
+    "upgrade",
+    "subscription",
+    "care",
+    "paid",
+    "donotreply",
+    "sponsors",
+    "moderator",
     "publicrelations"
 ];
