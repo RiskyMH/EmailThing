@@ -101,7 +101,10 @@ export async function POST(request: Request) {
                     value: data.html
                 }] : [])
             ],
-            headers: data.headers,
+            headers: {
+                ...data.headers,
+                "X-MailboxId": mailboxId
+            },
         }),
     })
 
