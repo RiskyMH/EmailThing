@@ -82,7 +82,11 @@ export async function sendEmailAction(mailboxId: string, draftId: string, cheese
                     type: "text/plain",
                     value: body
                 }) : undefined,
-            ]
+            ],
+            headers: {
+                "X-UserId": userId,
+                "X-MailboxId": mailboxId
+            }
         }),
     })
 
