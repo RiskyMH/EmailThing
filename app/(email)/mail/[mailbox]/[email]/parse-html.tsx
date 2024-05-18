@@ -1,4 +1,4 @@
-
+import 'server-only'
 import createDOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 

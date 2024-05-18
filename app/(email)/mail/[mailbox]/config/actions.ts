@@ -10,6 +10,7 @@ import { and, count, eq, like, not } from "drizzle-orm";
 import { generateToken } from "@/utils/token";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { impersonatingEmails } from "@/validations/invalid-emails";
 
 export async function verifyDomain(mailboxId: string, customDomain: string) {
     const userId = await getCurrentUser()
@@ -154,6 +155,17 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
 
     if (!defaultDomain && !customDomain) {
         return { error: "You don't have access to this domain, please add it as custom domain." }
+    }
+
+    if (defaultDomain && mailbox?.plan != "UNLIMITED") {
+        const emailPart = alias.split("@")[0]
+
+        if (emailPart.length <= 3) {
+            return { error: "Email too short" }
+        }
+        else if (impersonatingEmails.some(v => emailPart.includes(v))) {
+            return { error: "Invalid alias" }
+        }
     }
 
     if (aliasCount[0].count >= aliasLimit[mailbox?.plan ?? "FREE"]) {
@@ -450,7 +462,7 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
     if (userRole?.role !== "OWNER") {
         return { error: "Only owner can add someone to the mailbox" }
     }
-    
+
 
     // check how many users are in the mailbox
     const [mailboxUsers, mailbox] = await db.batch([

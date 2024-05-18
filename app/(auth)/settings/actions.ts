@@ -11,6 +11,7 @@ import { sendNotification } from "@/utils/web-push";
 import { userAuthSchema } from "@/validations/auth"
 import { env } from "@/utils/env";
 import { verifyCredentials } from "@/utils/passkeys";
+import { impersonatingEmails } from "@/validations/invalid-emails";
 
 
 export async function changeUsername(username: string) {
@@ -30,6 +31,18 @@ export async function changeUsername(username: string) {
     // check schema
     const validUsername = userAuthSchema.safeParse({ username, password: "password" })
     if (!validUsername.success) return { error: validUsername.error.errors[0].message }
+
+    if (impersonatingEmails.some(v => validUsername.data.username.includes(v))) {
+        const user = await db.query.User.findFirst({
+            where: eq(User.id, userId),
+            columns: {
+                admin: true
+            }
+        })
+        if (!user?.admin) {
+            return { error: "Invalid username" }
+        }
+    }
 
     // update username
     await db.update(User)

@@ -3,6 +3,7 @@ import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User } from "@/d
 import { addUserTokenToCookie } from "@/utils/jwt"
 import { createPasswordHash } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth"
+import { impersonatingEmails } from "@/validations/invalid-emails";
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq, gte, isNull } from "drizzle-orm";
 import { cookies, headers } from "next/headers"
@@ -16,6 +17,10 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
         return {
             error: parsedData.error.errors[0].message
         }
+    }
+
+    if (impersonatingEmails.some(v => parsedData.data.username.includes(v))) {
+        return { error: "Invalid username" }
     }
 
     // currently you require invite code to sign up
