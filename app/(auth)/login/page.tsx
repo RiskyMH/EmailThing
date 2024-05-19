@@ -37,6 +37,14 @@ export default async function LoginPage() {
                 <UserAuthForm />
 
             </div>
+            <script type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "WebSite",
+                        "description": "Login to your account",
+                    })
+                }} />
         </div>
     )
 }
@@ -45,7 +53,7 @@ export const metadata = {
     title: "Login",
     description: "Login to your account",
     robots: {
-        index: false,
-        follow: false,
+        // index: false,
+        // follow: false,
     }
 } satisfies Metadata

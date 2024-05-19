@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { useSelectedLayoutSegment } from "next/navigation"
 import { cn } from "@/utils/tw"
-import { PropsWithChildren } from "react"
+import { PropsWithChildren, useEffect, useState } from "react"
 
 export function MainNavItem({ href, title, disabled = false, mobileShow = false }: PropsWithChildren<{ href: string, disabled?: boolean, title: string, mobileShow?: boolean }>) {
     const segment = useSelectedLayoutSegment()
@@ -19,5 +19,25 @@ export function MainNavItem({ href, title, disabled = false, mobileShow = false 
         >
             {title}
         </Link>
+    )
+}
+
+export function Header({ children, className }: PropsWithChildren<{ className?: string }>) {
+    const [scrolled, setScrolled] = useState(false)
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const isScrolled = window.scrollY > 0;
+            setScrolled(isScrolled);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    return (
+        <header className={cn(className, scrolled && "border-b-2 h-16 bg-background")}>
+            {children}
+        </header>
     )
 }

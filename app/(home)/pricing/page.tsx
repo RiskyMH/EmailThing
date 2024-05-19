@@ -6,6 +6,7 @@ import { CheckIcon } from "lucide-react"
 
 export const metadata = {
   title: "Pricing",
+  description: "Whats included in FREE plan? Everything!",
   alternates: {
     canonical: "https://emailthing.xyz/pricing",
   },
@@ -69,6 +70,14 @@ export default function PricingPage() {
           </Link>.
         </p>
       </div>
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "description": "Whats included in FREE plan? Everything!",
+          })
+        }} />
     </section>
   )
 }

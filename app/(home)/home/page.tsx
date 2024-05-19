@@ -23,7 +23,8 @@ export default async function Home() {
             Follow along on Discord
           </Link>
           <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
-            An email app where you can receive and send emails!
+            <span className='sr-only'>EmailThing is </span>
+            <span className='uppercase'>a</span>n email app where you can receive and send emails!
           </h1>
           <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8" style={{ textWrap: 'balance' }} >
             I didn&apos;t like options for custom domains and email, so I decided to build an email app and make it open source.
