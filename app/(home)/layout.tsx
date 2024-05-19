@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { MailIcon } from "lucide-react"
-import { PropsWithChildren } from "react"
+import { PropsWithChildren, Suspense, type ReactNode } from "react"
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { MainNavItem } from "./components.client";
 import Logo from "@/components/logo";
+import { getCurrentUser } from "@/utils/jwt";
+import db, { User } from "@/db";
+import { eq } from "drizzle-orm";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { gravatar } from "@/utils/tools";
 
-export default function HomeLayout({ children }: PropsWithChildren<{}>) {
+export const runtime = "edge"
+
+export default async function HomeLayout({ children }: PropsWithChildren<{}>) {
+    const userId = await getCurrentUser()
+
     return (
         <div className="flex min-h-screen flex-col">
             <header className="container z-40 bg-background">
@@ -22,15 +31,19 @@ export default function HomeLayout({ children }: PropsWithChildren<{}>) {
                         <MainNavItem href="/pricing" title="Pricing" mobileShow />
                     </div>
                     <nav>
-                        <Link
-                            href="/login"
-                            className={cn(
-                                buttonVariants({ variant: "secondary", size: "sm" }),
-                                "px-4"
-                            )}
-                        >
-                            Login
-                        </Link>
+                        {userId ? (
+
+                            <Suspense fallback={<div className="h-8 w-8 rounded-full bg-secondary animate-pulse" />}>
+                                <UserIcon userId={userId} />
+                            </Suspense>
+                        ) : (
+                            <Link
+                                href="/login"
+                                className={buttonVariants({ variant: "secondary", size: "sm", className: "px-4" })}
+                            >
+                                Login
+                            </Link>
+                        )}
                     </nav>
                 </div>
             </header>
@@ -39,6 +52,26 @@ export default function HomeLayout({ children }: PropsWithChildren<{}>) {
             </main>
             <SiteFooter />
         </div>
+    )
+}
+
+async function UserIcon({ userId }: { userId: string }) {
+    const user = await db.query.User.findFirst({
+        where: eq(User.id, userId),
+        columns: {
+            username: true,
+            email: true
+        }
+    })
+    if (!user) return "Error?"
+
+    return (
+        <Avatar className="h-8 w-8 rounded-full">
+            <AvatarImage src={await gravatar(user.email)} alt={user.username} className="bg-background dark:bg-secondary" />
+            <AvatarFallback className="bg-background dark:bg-secondary">
+                {user.username.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+        </Avatar>
     )
 }
 

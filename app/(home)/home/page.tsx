@@ -1,11 +1,16 @@
 import { buttonVariants } from '@/components/ui/button'
+import { getCurrentUser } from '@/utils/jwt'
 import { cn } from '@/utils/tw'
 import { ShieldAlertIcon, CloudCogIcon, UsersIcon, SmartphoneIcon, TimerIcon, LucideIcon, WebhookIcon } from 'lucide-react'
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 
-export default function Home() {
+export default async function Home() {
+  const userId = await getCurrentUser()
+  const currentMailbox = cookies().get("mailboxId")?.value
+
   return (
     <>
       <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
@@ -24,9 +29,15 @@ export default function Home() {
             I didn&apos;t like options for custom domains and email, so I decided to build an email app and make it open source.
           </p>
           <div className="space-x-4">
-            <Link href="/register" className={cn(buttonVariants({ size: "lg" }))}>
-              Get Started
-            </Link>
+            {userId ? (
+              <Link href={currentMailbox ? `/mail/${currentMailbox}` : "/mail"} className={cn(buttonVariants({ size: "lg" }))}>
+                Open Mailbox
+              </Link>
+            ) : (
+              <Link href="/register" className={cn(buttonVariants({ size: "lg" }))}>
+                Get Started
+              </Link>
+            )}
             <Link
               href="https://github.com/RiskyMH/EmailThing"
               target="_blank"
