@@ -66,8 +66,8 @@ const nextConfig = {
             },
             {
                 source: '/api-docs',
-                destination: 'https://github.com/RiskyMH/EmailThing/tree/main/app/api/v0#readme',
-                permanent: false,
+                destination: '/docs/api',
+                permanent: true,
             },
             {
                 source: "/mail/:path*",

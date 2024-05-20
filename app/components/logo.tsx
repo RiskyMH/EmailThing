@@ -1,5 +1,3 @@
-
-
 export default function Logo({ className }: { className?: string }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 512 512" className={className}>
@@ -12,5 +10,13 @@ export default function Logo({ className }: { className?: string }) {
             </defs>
         </svg>
 
+    )
+}
+
+export function EmailthingText() {
+    return (
+        <h1 className="inline-block whitespace-nowrap font-bold text-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br from-[#FF9797] to-[#6D6AFF] group-hover:transition-all group-hover:duration-200">
+            EmailThing
+        </h1>
     )
 }
