@@ -1,5 +1,5 @@
 import { DocsPage } from "@/components/docs-page"
-import { Components as MD, CodeBlock, MdxCard, Callout } from "@/components/docs-page-components"
+import { Components as MD, MdxCard, Callout } from "@/components/docs-page-components"
 import type { Metadata } from "next"
 
 export const metadata = {

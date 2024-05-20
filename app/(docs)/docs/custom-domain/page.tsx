@@ -1,5 +1,5 @@
 import { DocsPage } from "@/components/docs-page"
-import { CodeBlock, Components as MD } from "@/components/docs-page-components"
+import { Components as MD } from "@/components/docs-page-components"
 import type { Metadata } from "next"
 
 export const metadata = {
@@ -41,12 +41,6 @@ export default function AboutPage() {
             <MD.h2 id="HI2">HI2</MD.h2>
             <div className="h-56"></div>
             <MD.code>HII</MD.code>
-
-            <CodeBlock
-                code={"const a = 'a'\nconst b: 1 = 2"}
-                lang="typescript"
-                theme="github-dark"
-            />
 
         </DocsPage>
     )

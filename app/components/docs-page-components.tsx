@@ -1,5 +1,5 @@
 import { cn } from "@/utils/tw";
-import { codeToHtml } from "shiki";
+// import { codeToHtml } from "shiki";
 import Link from "next/link"
 
 
@@ -204,29 +204,29 @@ export function Callout({
     )
 }
 
-export async function CodeBlock({lang, theme = "github-dark", code}: {lang: string, theme?: string, code: string}) {
-    return (
-        <div className="overflow-auto max-h-52 bg-[#17171e] p-2 rounded-md text-sm" dangerouslySetInnerHTML={{
-            __html:
-                await codeToHtml(
-                    code,
-                    {
-                        lang,
-                        theme,
-                        mergeWhitespaces: true,
-                        transformers: [
-                            {
-                                line(node, line) {
-                                    this.addClassToHast(node, ["break-words", ""]);
-                                },
-                                pre(hast) {
-                                    this.addClassToHast(hast, "!bg-transparent");
-                                },
-                            },
-                        ],
-                    }
-                )
-        }} />
+// export async function CodeBlock({lang, theme = "github-dark", code}: {lang: string, theme?: string, code: string}) {
+//     return (
+//         <div className="overflow-auto max-h-52 bg-[#17171e] p-2 rounded-md text-sm" dangerouslySetInnerHTML={{
+//             __html:
+//                 await codeToHtml(
+//                     code,
+//                     {
+//                         lang,
+//                         theme,
+//                         mergeWhitespaces: true,
+//                         transformers: [
+//                             {
+//                                 line(node, line) {
+//                                     this.addClassToHast(node, ["break-words", ""]);
+//                                 },
+//                                 pre(hast) {
+//                                     this.addClassToHast(hast, "!bg-transparent");
+//                                 },
+//                             },
+//                         ],
+//                     }
+//                 )
+//         }} />
 
-    )
-}
+//     )
+// }
