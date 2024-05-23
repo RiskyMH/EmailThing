@@ -23,7 +23,7 @@ export default function HomeLayout({ children }: PropsWithChildren<{}>) {
                     </div>
                 </div>
                 <nav>
-                    <UserNav />
+                    <UserNav fallbackLogin={true} />
                 </nav>
             </Header>
             <main className="flex-1">

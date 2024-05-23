@@ -1,20 +1,32 @@
+import "server-only"
+
 import db, { User } from "@/db"
-import { gravatar } from "@/utils/tools"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { eq } from "drizzle-orm"
-import { Suspense } from "react"
-import Link from "next/link"
 import { getCurrentUser } from "@/utils/jwt"
+import { gravatar } from "@/utils/tools"
+import { eq } from "drizzle-orm"
+import { redirect } from "next/navigation"
+import { UserDropDown } from "./user-nav.client"
+import { Suspense, type ReactNode } from "react"
 import { buttonVariants } from "./ui/button"
+import Link from "next/link"
 
-
-export default async function UserNav() {
-    const userId = await getCurrentUser()
-    return userId ? (
-        <Suspense fallback={<div className="h-8 w-8 rounded-full bg-secondary animate-pulse" />}>
-            <UserIcon userId={userId} />
+export default function UserNav({ fallbackLogin }: { fallbackLogin?: boolean }) {
+    return (
+        <Suspense fallback={fallbackLogin ? <UserNavLogin /> : <UserNavFallback />}>
+            <UserNavv />
         </Suspense>
-    ) : (
+    )
+}
+
+
+function UserNavFallback() {
+    return (
+        <div className="h-8 w-8 rounded-full bg-secondary animate-pulse" />
+    )
+}
+
+function UserNavLogin() {
+    return (
         <Link
             href="/login"
             className={buttonVariants({ variant: "secondary", size: "sm", className: "px-4" })}
@@ -25,22 +37,26 @@ export default async function UserNav() {
 
 }
 
-async function UserIcon({ userId }: { userId: string }) {
+export async function UserNavv() {
+    const userId = await getCurrentUser()
+    if (!userId) return <UserNavLogin />
+
     const user = await db.query.User.findFirst({
         where: eq(User.id, userId),
         columns: {
             username: true,
+            onboardingStatus: true,
             email: true
         }
     })
-    if (!user) return "Error?"
+    if (!user) return <UserNavLogin />
+    if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
 
     return (
-        <Avatar className="h-8 w-8 rounded-full">
-            <AvatarImage src={await gravatar(user.email)} alt={user.username} className="bg-background dark:bg-secondary" />
-            <AvatarFallback className="bg-background dark:bg-secondary">
-                {user.username.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-        </Avatar>
-    )
+        <UserDropDown user={{
+            name: user.username,
+            secondary: user.email,
+            image: user.email ? await gravatar(user.email) : undefined,
+        }} />
+    );
 }

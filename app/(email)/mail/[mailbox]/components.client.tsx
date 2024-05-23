@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { StarIcon, Loader2, BellDotIcon, Trash2Icon, ArchiveRestoreIcon, MailOpenIcon, CheckIcon, RotateCcwIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, PropsWithChildren } from "react"
 import { useTransition } from 'react';
@@ -99,3 +100,12 @@ export function RefreshButton({ className }: { className?: string }) {
         </Button>
     )
 }
+
+const changeMailboxCookie = (mailboxId: string) => {
+    document.cookie = `mailboxId=${mailboxId}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`
+}
+
+export function MailboxLink({ mailboxId, children, ...props }: PropsWithChildren<{ mailboxId: string }>) {
+    return <Link {...props} onClick={() => changeMailboxCookie(mailboxId)} href={`/mail/${mailboxId}`}>{children}</Link>
+}
+

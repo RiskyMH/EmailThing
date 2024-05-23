@@ -45,7 +45,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                             {/* user icon/login */}
                             {/* <div className="h-8 w-8 rounded-full bg-secondary animate-pulse" /> */}
                             <div className="px-4 hidden sm:flex">
-                                <UserNav />
+                                <UserNav fallbackLogin={true} />
                             </div>
 
                             <MenuIcon className="sm:hidden" />

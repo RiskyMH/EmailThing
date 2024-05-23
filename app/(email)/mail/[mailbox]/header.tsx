@@ -1,11 +1,10 @@
 import { getCurrentUser } from "@/utils/jwt";
-import { db, Mailbox, MailboxForUser, User, MailboxAlias } from "@/db";
+import { db, User } from "@/db";
 import { Suspense } from "react";
 import { Search } from "./nav.search";
-import { UserNav } from "./user.nav.client";
 import Link from "next/link";
-import { MailIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckIcon, ChevronsUpDownIcon, PlusCircleIcon } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { mailboxAliases, userMailboxAccess, userMailboxes } from "./tools";
 import Sidebar from "./sidebar";
 import { MobileNav } from "./sidebar.client";
@@ -13,9 +12,20 @@ import { eq } from "drizzle-orm";
 import { gravatar } from "@/utils/tools";
 import { redirect } from "next/navigation";
 import Logo, { EmailthingText } from "@/components/logo";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { cn } from "@/utils/tw";
+import { MailboxLink } from "./components.client";
+import UserNav from "@/components/user-navbar";
 
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
+
+    const mailboxes = (
+        <Suspense fallback={<MailboxesFallback />}>
+            <Mailboxes mailbox={mailboxId} />
+        </Suspense>
+    )
+
     return (
         <div className="sticky flex items-center justify-between border-b-2 top-0 z-40 bg-secondary dark:bg-tertiary px-7">
             <header className="flex h-16 w-full items-center">
@@ -27,6 +37,10 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                         </h1>
                     </div>
                     <Sidebar mailbox={mailboxId} />
+
+                    <div className="fixed bottom-3 w-[calc(75vw-3rem)]">
+                        {mailboxes}
+                    </div>
                 </MobileNav>
 
                 <nav className="w-auto lg:w-[calc(15rem-1.75rem)] mx-auto me-auto sm:ms-0 sm:mx-0">
@@ -35,7 +49,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                             className="flex items-center gap-1 hover:bg-transparent sm:-ms-4 sm:me-8 group"
                             href={"/mail/" + mailboxId}
                         >
-                            <Logo className="h-7 w-7" />
+                            <Logo className="h-7 w-7 flex-shrink-0" />
                             <EmailthingText />
                         </Link>
                     </Button>
@@ -45,46 +59,52 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                 <div className="hidden md:flex me-auto">
                     <Search className="relative w-full lg:w-96" mailboxId={mailboxId} />
                 </div>
-                <div className="flex justify-end ms-auto">
-                    <Suspense fallback={<UserMenuFallback />}>
-                        <UserMenu mailbox={mailboxId} />
-                    </Suspense>
+                <div className="flex gap-3 justify-end ms-auto self-center">
+                    <div className="hidden sm:flex">{mailboxes}</div>
+
+                    <UserNav />
                 </div>
             </header>
         </div>
     )
 };
 
-function UserMenuFallback() {
+function MailboxesFallback() {
     return (
-        <div className="h-8 w-8 rounded-full bg-secondary animate-pulse" />
+        <div className="m-2 w-40 h-10 rounded-md bg-tertiary sm:bg-secondary animate-pulse" />
     )
 }
 
-async function UserMenu({ mailbox: mailboxId }: { mailbox: string }) {
+async function Mailboxes({ mailbox: mailboxId }: { mailbox: string }) {
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) return null
 
-    const user = await db.query.User.findFirst({
-        where: eq(User.id, userId),
-        columns: {
-            username: true,
-            onboardingStatus: true
-        }
-    })
-    if (!user) return null
-    if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
-
-    const { default: defaultAlias } = await mailboxAliases(mailboxId);
     const mailboxes = await userMailboxes(userId);
-
+    const { default: defaultAlias } = await mailboxAliases(mailboxId);
 
     return (
-        <UserNav mailboxId={mailboxId} mailboxes={mailboxes} user={{
-            id: mailboxId,
-            name: user.username,
-            secondary: defaultAlias?.alias ?? "email@email.?",
-            image: defaultAlias?.alias ? await gravatar(defaultAlias.alias) : undefined,
-        }} />
-    );
+        <DropdownMenu>
+            <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", className: "flex gap-1 pe-2 bg-tertiary sm:bg-transparent hover:sm:bg-tertiary dark:hover:sm:bg-secondary w-full" })}>
+                <span className="self-center text-sm">{defaultAlias?.name}</span>
+                <ChevronsUpDownIcon className="text-muted-foreground h-5 w-5 self-center" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                {mailboxes.map(m => (
+                    <DropdownMenuItem key={m.id} asChild className="flex gap-2 cursor-pointer">
+                        <MailboxLink mailboxId={m.id}>
+                            {m.id === mailboxId ? <CheckIcon className="text-muted-foreground h-4 w-4" /> : <span className="w-4" />}
+                            {m.name}
+                        </MailboxLink>
+                    </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled>
+                    <PlusCircleIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <span>New mailbox</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+
 }
+

@@ -9,14 +9,6 @@ import { and, eq, sql } from "drizzle-orm";
 import { deleteFile } from "@/utils/s3";
 
 
-export async function logout() {
-    const c = cookies()
-    c.delete('token')
-    c.delete('mailboxId')
-
-    redirect("/login")
-}
-
 export interface UpdatableEmailConfig {
     isStarred?: boolean;
     isRead?: boolean;
