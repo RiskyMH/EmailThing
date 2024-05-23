@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import UserNav from "@/components/user-navbar";
 
 export const runtime = "edge"
+export const experimental_ppr = true
 
 export default function HomeLayout({ children }: PropsWithChildren<{}>) {
     return (

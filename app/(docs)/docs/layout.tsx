@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react"
 import { DocsSidebarNav } from "./components.client"
 import { docsNav } from "./pages"
 
+export const experimental_ppr = true
 
 export default function DocsLayout({ children }: PropsWithChildren) {
     return (

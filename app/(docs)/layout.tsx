@@ -11,6 +11,7 @@ interface DocsLayoutProps {
 }
 
 export const runtime = "edge"
+export const experimental_ppr = true
 
 export const metadata = {
     title: {

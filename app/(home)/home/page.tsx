@@ -7,6 +7,8 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 
+export const experimental_ppr = true
+
 export default async function Home() {
   const userId = await getCurrentUser()
   const currentMailbox = cookies().get("mailboxId")?.value
