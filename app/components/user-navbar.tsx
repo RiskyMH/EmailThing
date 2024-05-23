@@ -11,8 +11,9 @@ import { buttonVariants } from "./ui/button"
 import Link from "next/link"
 
 export default function UserNav({ fallbackLogin }: { fallbackLogin?: boolean }) {
+    const Fallback = fallbackLogin ? UserNavLogin : UserNavFallback
     return (
-        <Suspense fallback={fallbackLogin ? <UserNavLogin /> : <UserNavFallback />}>
+        <Suspense fallback={<Fallback />}>
             <UserNavv />
         </Suspense>
     )

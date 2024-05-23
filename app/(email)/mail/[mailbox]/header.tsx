@@ -21,9 +21,9 @@ import UserNav from "@/components/user-navbar";
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
 
     const mailboxes = (
-        <Suspense fallback={<MailboxesFallback />}>
+        // <Suspense fallback={<MailboxesFallback />}>
             <Mailboxes mailbox={mailboxId} />
-        </Suspense>
+        // </Suspense>
     )
 
     return (
