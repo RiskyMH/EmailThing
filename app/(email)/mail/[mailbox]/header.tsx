@@ -20,11 +20,7 @@ import UserNav from "@/components/user-navbar";
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
 
-    const mailboxes = (
-        // <Suspense fallback={<MailboxesFallback />}>
-            <Mailboxes mailbox={mailboxId} />
-        // </Suspense>
-    )
+    const mailboxes = <Mailboxes mailbox={mailboxId} />
 
     return (
         <div className="sticky flex items-center justify-between border-b-2 top-0 z-40 bg-secondary dark:bg-tertiary px-7">
@@ -39,7 +35,9 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                     <Sidebar mailbox={mailboxId} />
 
                     <div className="fixed bottom-3 w-[calc(75vw-3rem)]">
-                        {mailboxes}
+                        <Suspense fallback={<MailboxesFallback />}>
+                            {mailboxes}
+                        </Suspense>
                     </div>
                 </MobileNav>
 
@@ -60,7 +58,11 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                     <Search className="relative w-full lg:w-96" mailboxId={mailboxId} />
                 </div>
                 <div className="flex gap-3 justify-end ms-auto self-center">
-                    <div className="hidden sm:flex">{mailboxes}</div>
+                    <div className="hidden sm:flex">
+                        <Suspense fallback={<MailboxesFallback />}>
+                            {mailboxes}
+                        </Suspense>
+                    </div>
 
                     <UserNav />
                 </div>
