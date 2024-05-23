@@ -80,8 +80,12 @@ export function UserDropDown({ user }: UserProps) {
                                 </Link>
                             </DrawerClose>
                         </Button>
-                        <Button variant="secondary" className="w-full">
-                            placeholder...
+                        <Button variant="secondary" asChild>
+                            <DrawerClose asChild>
+                                <Link href="/home" className="w-full">
+                                    EmailThing Home
+                                </Link>
+                            </DrawerClose>
                         </Button>
                         <Button variant="secondary" asChild>
                             <DrawerClose className="w-full" onClick={() => void logout()}>
@@ -130,8 +134,10 @@ export function UserDropDown({ user }: UserProps) {
                             User Settings
                         </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        placeholder...
+                    <DropdownMenuItem asChild>
+                        <Link href="/home" className="cursor-pointer">
+                            EmailThing Home
+                        </Link>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
 
