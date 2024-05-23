@@ -8,12 +8,14 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import signUp from "./action"
 import { FormEvent, useTransition } from "react"
+import { useRouter } from "next/navigation"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
+    const router = useRouter()
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -25,7 +27,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 return void toast.error(signUpResult.error)
             }
 
-            return void toast.success("Welcome!")
+            toast.success("Welcome!")
+            router.refresh()
         });
     }
 
