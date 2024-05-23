@@ -68,9 +68,9 @@ export default async function Home() {
             title="API integration"
             description={(<>
               You can send emails and do other things with our API. {" "}
-              <a href="/docs/api" className="font-bold hover:underline" target="_blank">
+              <Link href="/docs/api" className="font-bold hover:underline">
                 read docs
-              </a>.
+              </Link>.
             </>)}
           />
           <Feature

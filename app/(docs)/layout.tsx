@@ -13,7 +13,10 @@ interface DocsLayoutProps {
 export const runtime = "edge"
 
 export const metadata = {
-    title: "Documentation",
+    title: {
+        default: "Documentation",
+        template: "%s - EmailThing"
+    },
     description: "The docs for EmailThing",
     openGraph: {
         title: "Documentation",

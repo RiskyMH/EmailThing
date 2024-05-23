@@ -3,7 +3,7 @@ import { Components as MD, MdxCard, Callout } from "@/components/docs-page-compo
 import type { Metadata } from "next"
 
 export const metadata = {
-    title: "Docs Introduction",
+    title: "Documentation",
     description: "The many features that EmailThing has!",
     openGraph: {
         title: "EmailThing Documentation",
@@ -16,7 +16,7 @@ export const metadata = {
     },
     alternates: {
         canonical: "https://emailthing.xyz/docs",
-    },    
+    },
 } satisfies Metadata
 
 
