@@ -19,7 +19,7 @@ export const metadata = {
     },
 } satisfies Metadata
 
-export const experimental_ppr = true
+// export const experimental_ppr = true
 
 export default function AboutPage() {
     return (

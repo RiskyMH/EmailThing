@@ -10,9 +10,8 @@ interface DocsLayoutProps {
     children: React.ReactNode
 }
 
-// export const runtime = "edge"
-export const experimental_ppr = true
-
+export const runtime = "edge"
+// export const experimental_ppr = true
 export const metadata = {
     title: {
         default: "Documentation",

@@ -12,7 +12,7 @@ export const metadata = {
   },
 }
 
-export const experimental_ppr = true
+// export const experimental_ppr = true
 
 export default function PricingPage() {
   return (
