@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/utils/jwt";
 import { db, User } from "@/db";
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import { Search } from "./nav.search";
 import Link from "next/link";
 import { CheckIcon, ChevronsUpDownIcon, PlusCircleIcon } from "lucide-react";
@@ -20,8 +20,6 @@ import UserNav from "@/components/user-navbar";
 
 export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
 
-    const mailboxes = <Mailboxes mailbox={mailboxId} />
-
     return (
         <div className="sticky flex items-center justify-between border-b-2 top-0 z-40 bg-secondary dark:bg-tertiary px-7">
             <header className="flex h-16 w-full items-center">
@@ -36,7 +34,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
 
                     <div className="fixed bottom-3 w-[calc(75vw-3rem)]">
                         <Suspense fallback={<MailboxesFallback />}>
-                            {mailboxes}
+                            <Mailboxes mailbox={mailboxId} />
                         </Suspense>
                     </div>
                 </MobileNav>
@@ -60,7 +58,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                 <div className="flex gap-3 justify-end ms-auto self-center">
                     <div className="hidden sm:flex">
                         <Suspense fallback={<MailboxesFallback />}>
-                            {mailboxes}
+                            <Mailboxes mailbox={mailboxId} />
                         </Suspense>
                     </div>
 
@@ -73,11 +71,12 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
 
 function MailboxesFallback() {
     return (
-        <div className="m-2 w-40 h-10 rounded-md bg-tertiary sm:bg-secondary animate-pulse" />
+        // <div className="m-2 w-32 h-8 rounded-md bg-tertiary sm:bg-secondary animate-pulse" />
+        <span />
     )
 }
 
-async function Mailboxes({ mailbox: mailboxId }: { mailbox: string }) {
+const Mailboxes = cache(async ({ mailbox: mailboxId }: { mailbox: string }) => {
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) return null
 
@@ -107,6 +106,4 @@ async function Mailboxes({ mailbox: mailboxId }: { mailbox: string }) {
             </DropdownMenuContent>
         </DropdownMenu>
     )
-
-}
-
+})
