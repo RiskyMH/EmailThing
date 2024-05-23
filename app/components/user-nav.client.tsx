@@ -121,7 +121,7 @@ export function UserDropDown({ user }: UserProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
-                        <Link href="/mail" className="cursor-pointer">
+                        <Link href="/" className="cursor-pointer">
                             Dashboard
                         </Link>
                     </DropdownMenuItem>

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// export const runtime = 'edge'
+export const runtime = 'edge'
 export const revalidate = 0
 
 export async function GET() {
