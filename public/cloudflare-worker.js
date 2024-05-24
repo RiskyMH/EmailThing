@@ -7,6 +7,10 @@ export default {
      * @param {{token: string, forward?: string}} env 
      */
     async email(message, env, ctx) {
+        if (!message.raw) throw new Error(
+            "Raw email content not present.\n" +
+            "Make sure this email was sent correctly (and not using the demo one)"
+        );
         const rawEmail = await streamToArrayBuffer(message.raw, message.rawSize);
         const raw = new TextDecoder("utf-8").decode(rawEmail);
 
