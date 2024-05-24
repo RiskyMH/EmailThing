@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     experimental: {
-        // ppr: "incremental",
+        // ppr: true,
         useLightningcss: process.env.TURBOPACK === "1",
         outputFileTracingIncludes: {
             '/mail/[mailbox]/config': ['./public/cloudflare-worker.js'],
