@@ -40,7 +40,7 @@ export default {
 
 /**
  * 
- * @param {import("@cloudflare/workers-types").ReadableStream<any>} stream
+ * @param {ReadableStream<any>} stream
  * @param {number} streamSize
  */
 async function streamToArrayBuffer(stream, streamSize) {

@@ -26,9 +26,9 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                 <MobileNav>
                     <div className="flex gap-1 items-center">
                         <Logo className="h-7 w-7" />
-                        <h1 className="inline-block whitespace-nowrap font-bold text-xl">
+                        <h2 className="inline-block whitespace-nowrap font-bold text-xl">
                             EmailThing
-                        </h1>
+                        </h2>
                     </div>
                     <Sidebar mailbox={mailboxId} />
 
