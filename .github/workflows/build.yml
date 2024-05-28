@@ -24,9 +24,11 @@ jobs:
         with:
           bun-version: latest
 
-      - run: bun install --frozen-lockfile
+      - name: Install deps
+        run: bun install --frozen-lockfile
 
-      - run: bun run build
+      - name: Build
+        run: bun run build 2>&1 | tee -a build.log
         env:
           STANDALONE: "1"
 
@@ -39,11 +41,17 @@ jobs:
           S3_URL: "no"
           S3_SECRET_ACCESS_KEY: "no"
       
-      - name: copy files
+      - name: Copy static asset files
         run: |
           mkdir --parents ./.next/standalone/public/_next/static 
           cp ./public -r ./.next/standalone
           cp ./.next/static -r ./.next/standalone/public/_next
+
+      - name: Echo build log to $GITHUB_STEP_SUMMARY
+        run: |
+          echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
+          cat build.log >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v4
         with:
