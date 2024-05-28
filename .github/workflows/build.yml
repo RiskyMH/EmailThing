@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches: 
+      - main
+
+permissions:
+  contents: read
+
+
+jobs:
+  website:
+    name: Build Next.JS App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run build
+        env:
+          STANDALONE: "1"
+
+          DATABASE_URL: "file:db.db"
+          EMAIL_AUTH_TOKEN: "no"
+          S3_KEY_ID: "no"
+          NEXT_PUBLIC_APP_URL: "https://emailthing.xyz"
+          WEB_NOTIFICATIONS_PRIVATE_KEY: "no"
+          NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: "no"
+          S3_URL: "no"
+          S3_SECRET_ACCESS_KEY: "no"
+      
+      - name: copy files
+        run: |
+          mkdir --parents ./.next/standalone/public/_next/static 
+          cp ./public -r ./.next/standalone
+          cp ./.next/static -r ./.next/standalone/public/_next
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: .next/standalone
+          name: Standalone Next.js
+          compression-level: 1

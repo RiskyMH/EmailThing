@@ -11,6 +11,7 @@ const nextConfig = {
         // ],
         // reactCompiler: !process.env.TURBOPACK
     },
+    output: process.env.STANDALONE ? "standalone" : undefined,
     transpilePackages: [
         "shiki"
     ],

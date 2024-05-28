@@ -19,6 +19,7 @@ export default async function LoginPage({
         token: string
     }
 }) {
+    if (!searchParams.token) return notFound();
 
     const token = await db.query.ResetPasswordToken.findFirst({
         where: and(
