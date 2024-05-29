@@ -1,6 +1,6 @@
 'use client'
-import { useEffect, type PropsWithChildren } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState, useTransition, type PropsWithChildren, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon } from "lucide-react";
@@ -42,6 +42,7 @@ export function ViewSelect({ selected, htmlValid = false }: { selected: "text" |
     const router = useRouter()
 
     function onValueChange(v: string) {
+        (window as any)?.emailContentLoading?.(v)
         router.push("?view=" + v)
     }
 
@@ -51,5 +52,19 @@ export function ViewSelect({ selected, htmlValid = false }: { selected: "text" |
             <DropdownMenuRadioItem value="markdown">Markdown</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="html" disabled={!htmlValid}>HTML</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
+    )
+}
+
+export function ClientSuspense({ fallback, children, currentView }: PropsWithChildren<{ fallback: ReactNode, currentView: string }>) {
+    const [view, setPending] = useState(currentView)
+    useEffect(() => {
+        (window as any).emailContentLoading = setPending
+    }, [])
+
+    if (view != currentView) return fallback
+    return (
+        <Suspense key={view} fallback={fallback}>
+            {children}
+        </Suspense>
     )
 }

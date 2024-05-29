@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { pageMailboxAccess, userMailboxAccess } from "../tools"
 import { Metadata } from "next"
 import { db, Email } from "@/db";
-import { MarkRead, ViewSelect } from "./components.client"
+import { ClientSuspense, MarkRead, ViewSelect } from "./components.client"
 import { revalidatePath } from "next/cache"
 import ParseHTML, { parseHTML } from "./parse-html"
 import { marked } from 'marked';
@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { gravatar } from "@/utils/tools"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
+import { ChevronDown, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, Loader2, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
 import LocalTime from "@/components/localtime"
 import { getEmail } from "./tools"
 import { and, eq } from "drizzle-orm";
@@ -20,6 +20,7 @@ import { getSignedUrl } from "@/utils/s3";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/tw";
 import Link from "next/link";
+import { Suspense } from "react";
 
 
 export async function generateMetadata(props: { params: { mailbox: string, email: string } }): Promise<Metadata> {
@@ -227,15 +228,42 @@ export default async function EmailPage({
                         ))}
                     </div>
                 )}
-
-                {view === "text" ? <p className="whitespace-pre-wrap break-words leading-normal overflow-auto">{email.body}</p> : null}
-                {view === "markdown" ? <ParseHTML className="prose dark:prose-invert max-w-full break-words overflow-auto" body={await marked.parse(email.body, { breaks: true })} /> : null}
-                {/* {view === "html" ? <ParseHTML className="rounded-lg" body={mail.html || mail.body} /> : null} */}
-                {view === "html" ? <iframe className="rounded-lg w-full h-screen bg-card" sandbox='allow-popups' srcDoc={await parseHTML(email.html || email.body, true)} /> : null}
+                <ClientSuspense currentView={view} fallback={<EmailContentSpinner />}>
+                    <EmailContent mailboxId={params.mailbox} emailId={params.email} view={view} />
+                </ClientSuspense>
             </div>
 
         </div>
 
+    )
+}
+
+async function EmailContent({ mailboxId, emailId, view }: { mailboxId: string, emailId: string, view: "text" | "markdown" | "html" }) {
+    // const email = await db.query.Email.findFirst({
+    //     where: and(
+    //         eq(Email.id, emailId),
+    //         eq(Email.mailboxId, mailboxId)
+    //     ),
+    //     columns: {
+    //         id: true,
+    //         body: true,
+    //         html: true,
+    //         raw: true
+    //     }
+    // })
+    const email = await getEmail(mailboxId, emailId)
+    if (!email) return notFound()
+
+    if (view === "text") return <p className="whitespace-pre-wrap break-words leading-normal overflow-auto">{email.body}</p>
+    if (view === "markdown") return <ParseHTML className="prose dark:prose-invert max-w-full break-words overflow-auto" body={await marked.parse(email.body, { breaks: true })} />
+    if (view === "html") return <iframe className="rounded-lg w-full h-screen bg-card" sandbox='allow-popups' srcDoc={await parseHTML(email.html || email.body, true)} />
+}
+
+function EmailContentSpinner() {
+    return (
+        <div className="flex h-screen w-full items-center justify-center flex-col">
+            <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+        </div>
     )
 }
 
