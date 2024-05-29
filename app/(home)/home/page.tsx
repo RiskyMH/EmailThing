@@ -1,3 +1,4 @@
+import GitHubIcon from '@/components/icons/github'
 import { buttonVariants } from '@/components/ui/button'
 import { getCurrentUser } from '@/utils/jwt'
 import { cn } from '@/utils/tw'
@@ -8,8 +9,8 @@ import Link from 'next/link'
 import { ReactNode } from 'react'
 
 export default async function Home() {
-  const userId = await getCurrentUser()
   const currentMailbox = cookies().get("mailboxId")?.value
+  const githubStars = (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing", { next: { revalidate: 60 } })).json()).stargazers_count;
 
   return (
     <>
@@ -29,9 +30,9 @@ export default async function Home() {
           <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8" style={{ textWrap: 'balance' }} >
             I didn&apos;t like options for custom domains and email, so I decided to build an email app and make it open source.
           </p>
-          <div className="space-x-4">
-            {userId ? (
-              <Link href={currentMailbox ? `/mail/${currentMailbox}` : "/mail"} className={cn(buttonVariants({ size: "lg" }))}>
+          <div className="flex gap-4">
+            {currentMailbox ? (
+              <Link href={`/mail/${currentMailbox}`} className={cn(buttonVariants({ size: "lg" }))}>
                 Open Mailbox
               </Link>
             ) : (
@@ -42,9 +43,11 @@ export default async function Home() {
             <Link
               href="https://github.com/RiskyMH/EmailThing"
               target="_blank"
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              className={cn(buttonVariants({ variant: "outline", size: "lg", className: "gap-1 font-medium px-5" }))}
             >
-              GitHub
+              <GitHubIcon className='h-4 w-4 mb-[0.1rem] me-1' />
+              Github 
+              <span className="text-muted-foreground font-normal">• {githubStars}</span>
             </Link>
           </div>
         </div>
