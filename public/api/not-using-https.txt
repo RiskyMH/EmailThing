@@ -1,0 +1,1 @@
+ERROR: You did not use HTTPS for your api query!
