@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 
 jobs:
@@ -66,10 +64,3 @@ jobs:
           path: .next/standalone
           name: Standalone Next.js
           compression-level: 1
-
-      - run: zip -r .next/standalone.zip .next/standalone
-
-      - uses: actions/attest-build-provenance@v1
-        with:
-          subject-path: .next/standalone.zip
-          subject-name: EmailThing - Standalone Next.js
