@@ -16,8 +16,8 @@ interface EmailPostOptions {
     bcc?: string[]
     reply_to?: string
     config?: {
-        save_in_sent?: boolean
-    },
+
+    } & Record<string, any>,
     headers?: Record<string, string>
 }
 

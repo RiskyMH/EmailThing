@@ -49,8 +49,7 @@ await emailthing.send({
     'X-Entity-Ref-ID': '23456789',
   },
   config: {
-    // save the email in the sent folder?
-    save_in_sent: false, // (default: true)
+    // no config options right now
   },
 });
 ```

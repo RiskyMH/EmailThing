@@ -49,12 +49,8 @@ export interface EmailSendOptions {
 
     /** Some more options */
     config?: {
-        /**
-         * Save the email in the sent folder?
-         * @default true
-         */
-        save_in_sent?: boolean
-    },
+        // no config options right now
+    } & Record<string, any>,
 
     /** Custom headers to add to the email. */
     headers?: Record<string, string>

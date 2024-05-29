@@ -49,7 +49,6 @@ Send an email with an mailbox alias.
 | `html`                | `string?`   | The HTML version of the message.                   |
 | `text`                | `string?`   | The plain text version of the message.             |
 | `headers`             | `object?`   | Custom headers to add to the email.                |
-| `config.save_in_sent` | `boolean?`  | Save the email in the sent folder. (default: true) |
 
 **Example:**
 ```json
@@ -73,7 +72,7 @@ Send an email with an mailbox alias.
     "X-Entity-Ref-ID":  "23456789",
   },
   "config": {
-    "save_in_sent": true,
+    // no config options right now
   }
 }
 
@@ -90,8 +89,6 @@ Send an email with an mailbox alias.
 ```json
 {
   "success": true,
-  // if `config.save_in_sent` is true
-  "emailId": "somerandomid"
 }
 ```
 
