@@ -15,15 +15,15 @@ export async function saveSubscription(subscription: PushSubscriptionJSON) {
     if (!subscription.keys) throw new Error("Subscription keys are missing");
     if (!subscription.endpoint) throw new Error("Subscription endpoint is missing");
 
-    const res = await sendNotification({
-        subscription: subscription as any,
-        data: JSON.stringify({
-            title: "Text Notification",
-            body: "This is a test notification!",
-        })
-    })
+    // const res = await sendNotification({
+    //     subscription: subscription as any,
+    //     data: JSON.stringify({
+    //         title: "Text Notification",
+    //         body: "This is a test notification!",
+    //     })
+    // })
 
-    if (!res.ok) throw new Error("Failed to send test notification: " + await res.text())
+    // if (!res.ok) throw new Error("Failed to send test notification: " + await res.text())
 
 
     await db.insert(UserNotification)
