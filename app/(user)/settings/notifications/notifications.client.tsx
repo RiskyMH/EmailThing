@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
 import { useEffect, useState, useTransition } from 'react'
 import { registerServiceWorker, resetServiceWorker, unregisterServiceWorkers } from '@/utils/service-worker'
 import { env } from '@/utils/env'
 import { Button } from '@/components/ui/button'
-import { deleteSubscription, saveSubscription } from './actions'
+// import { deleteSubscription, saveSubscription } from './actions'
 import { toast } from "sonner"
 import { Loader2, Trash2 } from 'lucide-react'
 
@@ -60,7 +60,7 @@ export default function NotificationsButton() {
             if (!swRegistration.active) return void await subscribe(false);
             const subscription = await swRegistration.pushManager.subscribe(options)
 
-            await saveSubscription(subscription.toJSON())
+            // await saveSubscription(subscription.toJSON())
             setIsSubscribed(true)
             toast('You have successfully subscribed to notifications');
 
@@ -82,7 +82,7 @@ export default function NotificationsButton() {
 
                 await subscription.unsubscribe()
                 await unregisterServiceWorkers()
-                await deleteSubscription(subscription.endpoint)
+                // await deleteSubscription(subscription.endpoint)
                 setIsSubscribed(false)
                 toast('Unsubscribed from notifications');
 
@@ -97,9 +97,9 @@ export default function NotificationsButton() {
         <Button
             onClick={() => isSubscribed ? unSubscribe() : requestPermission()}
             disabled={isPending || !isLoaded}
-            className='flex gap-2 w-full'
+            className='flex gap-2 w-min'
             // variant={isSubscribed ? "destructive" : "secondary"}
-            variant="secondary"
+            variant="default"
         >
             {isPending && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
             {isSubscribed ? 'Disable notifications' : 'Enable notifications'}

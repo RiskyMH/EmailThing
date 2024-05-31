@@ -14,9 +14,10 @@ import { verifyCredentials } from "@/utils/passkeys";
 import { impersonatingEmails } from "@/validations/invalid-emails";
 
 
-export async function changeUsername(username: string) {
+export async function changeUsername(_prevState: any, data: FormData) {
     const userId = await getCurrentUser()
     if (!userId) return
+    const username = data.get("new-name") as string
 
     // check if taken (but not by the user)
     const existingUser = await db.query.User.findFirst({
@@ -51,11 +52,15 @@ export async function changeUsername(username: string) {
         .execute()
 
     revalidatePath('/settings')
+    return { success: "Your username has been updated." }
 }
 
-export async function changePassword(oldPassword: string, newPassword: string) {
+export async function changePassword(_prevState: any, data: FormData) {
     const userId = await getCurrentUser()
     if (!userId) return
+
+    const oldPassword = data.get("password") as string
+    const newPassword = data.get("new-password") as string
 
     // check old password
     const user = await db.query.User.findFirst({
@@ -81,6 +86,7 @@ export async function changePassword(oldPassword: string, newPassword: string) {
         .execute()
 
     revalidatePath('/settings')
+    return { success: "Your password has been updated." }
 }
 
 
@@ -92,57 +98,11 @@ export async function logout() {
     redirect("/login")
 }
 
-
-export async function saveSubscription(subscription: PushSubscriptionJSON) {
-    const userId = await getCurrentUser();
-    if (!userId) throw new Error("User not found");
-
-    // save subscription
-    if (!subscription.keys) throw new Error("Subscription keys are missing");
-    if (!subscription.endpoint) throw new Error("Subscription endpoint is missing");
-
-    const res = await sendNotification({
-        subscription: subscription as any,
-        data: JSON.stringify({
-            title: "Text Notification",
-            body: "This is a test notification!",
-        })
-    })
-
-    if (!res.ok) throw new Error("Failed to send test notification: " + await res.text())
-
-
-    await db.insert(UserNotification)
-        .values({
-            userId,
-            endpoint: subscription.endpoint,
-            expiresAt: subscription.expirationTime ? new Date(subscription.expirationTime) : undefined,
-            p256dh: subscription.keys.p256dh,
-            auth: subscription.keys.auth,
-        })
-        .execute()
-}
-
-export async function deleteSubscription(endpoint: string) {
-    const userId = await getCurrentUser();
-    if (!userId) throw new Error("User not found");
-
-    // delete subscription
-    if (!endpoint) throw new Error("Subscription endpoint is missing");
-
-    await db.delete(UserNotification)
-        .where(and(
-            eq(UserNotification.userId, userId),
-            eq(UserNotification.endpoint, endpoint)
-        ))
-        .execute()
-
-    revalidatePath('/settings')
-}
-
-export async function changeBackupEmail(email: string, redirectHome = false) {
+export async function changeBackupEmail(_prevState: any, data: FormData, redirectHome = false) {
     const userId = await getCurrentUser()
     if (!userId) return
+
+    const email = data.get("email") as string
 
     const user = await db.query.User.findFirst({
         where: eq(User.id, userId),
@@ -207,6 +167,7 @@ If you did not expect this email or have any questions, please contact us at con
     revalidatePath('/settings')
 
     if (redirectHome) redirect("/mail")
+    return { success: "Your backup email has been updated." }
 }
 
 
@@ -243,4 +204,20 @@ export async function deletePasskey(passkeyId: string) {
         .execute()
 
     revalidatePath("/settings")
+}
+
+export async function changeEmail(_prevState: any, data: FormData) {
+    const userId = await getCurrentUser()
+    if (!userId) return
+
+    await db.update(User)
+        .set({
+            email: data.get("email") as string,
+        })
+        .where(eq(User.id, userId))
+        .execute()
+
+    revalidateTag(`user-${userId}`)
+    revalidatePath("/settings")
+    return { success: "Your email has been updated."}
 }

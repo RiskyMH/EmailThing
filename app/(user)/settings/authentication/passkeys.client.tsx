@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2Icon, KeyRoundIcon } from "lucide-react";
-import { addPasskey } from "./actions";
+import { addPasskey } from "../../actions";
 import { toast } from "sonner";
 import { create, parseCreationOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
 import UAParser from "ua-parser-js"
@@ -64,16 +64,17 @@ export default function PasskeysSetup({ userId, username }: { userId: string, us
     return (
         <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={handleCreate}
             disabled={isPending || !support}
+            className="w-min border-0"
         >
             {isPending ? (
                 <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
             ) : (
                 <KeyRoundIcon className="mr-2 h-4 w-4" />
             )}{" "}
-            Setup New Passkey
+            Create new
         </Button>
     )
 

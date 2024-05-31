@@ -8,7 +8,7 @@ import { notFound, redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db, User } from "@/db";
 import { Page } from "./components.client";
-import { changeBackupEmail } from "../../settings/actions";
+import { changeBackupEmail } from "@/(user)/actions";
 
 export const metadata = {
     title: {

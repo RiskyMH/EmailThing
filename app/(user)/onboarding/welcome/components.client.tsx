@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useState, useEffect, useTransition } from "react";
 import { cn } from "@/utils/tw";
 import { toast } from "sonner";
+// import { changeBackupEmail } from "@/(user)/actions";
 
 
 export function Page({ githubStars, action }: any) {
@@ -20,7 +21,7 @@ export function Page({ githubStars, action }: any) {
 
     async function actionn(data: FormData) {
         startTransition(async () => {
-            const res = await action(data.get("email") as string, true)
+            const res = await action(null, data, true)
             
             if (res?.error) {
                return void toast.error(res.error)

@@ -110,6 +110,7 @@ export const userMailboxes = cache((userId: string) => {
                 where: eq(MailboxForUser.userId, userId),
                 columns: {
                     mailboxId: true,
+                    role: true
                 },
                 orderBy: asc(MailboxForUser.mailboxId)
             })
@@ -127,6 +128,7 @@ export const userMailboxes = cache((userId: string) => {
 
             return mailboxes.map(m => ({
                 id: m.mailboxId,
+                role: m.role,
                 name: mailboxesAliases.find(a => a.mailboxId === m.mailboxId)?.alias || null
             }));
         },

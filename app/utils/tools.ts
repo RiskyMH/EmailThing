@@ -8,7 +8,7 @@ export function dateDay(date: Date, timeZone: string | undefined) {
     })
 }
 
-export type DateStyle = "normal" | "hour-min" | "hour-min/date" | "full" | "date"
+export type DateStyle = "normal" | "hour-min" | "hour-min/date" | "full" | "date" | "ago"
 export function formatDate(date: Date, type: DateStyle, timeZone: string | undefined) {
     const todayWithTz = dateDay(new Date(), timeZone)
 
@@ -27,6 +27,8 @@ export function formatDate(date: Date, type: DateStyle, timeZone: string | undef
         }
     } else if (type === "full") {
         return date.toLocaleString([], { timeZone, dateStyle: "medium", timeStyle: "short" }) + ` (${formatTimeAgo(date)})`
+    } else if (type === "ago") {
+        return formatTimeAgo(date)
     } else {
         return date.toLocaleDateString([], { timeZone })
     }
