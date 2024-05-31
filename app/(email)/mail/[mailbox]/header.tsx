@@ -11,7 +11,7 @@ import { MobileNav } from "./sidebar.client";
 import { eq } from "drizzle-orm";
 import { gravatar } from "@/utils/tools";
 import { redirect } from "next/navigation";
-import Logo, { EmailthingText } from "@/components/logo";
+import Logo, { EmailThing, EmailthingText } from "@/components/logo";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/tw";
 import { MailboxLink } from "./components.client";
@@ -45,8 +45,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                             className="flex items-center gap-1 hover:bg-transparent sm:-ms-4 sm:me-8 group"
                             href={"/mail/" + mailboxId}
                         >
-                            <Logo className="h-7 w-7 flex-shrink-0" />
-                            <EmailthingText />
+                            <EmailThing />
                         </Link>
                     </Button>
 
