@@ -36,28 +36,15 @@ export default async function WelcomePage() {
     const githubStars = (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing", { next: { revalidate: 60 } })).json()).stargazers_count;
 
     return (
-        <div className="container flex p-5 w-screen h-screen flex-col items-center bg-background" vaul-drawer-wrapper="">
-            <Link
-                href="/home"
-                className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "absolute left-4 top-4 md:left-8 md:top-8"
-                )}
-            >
-                <ChevronLeft className="me-2 h-4 w-4" />
-                Home
-            </Link>
+        <div className="mx-auto w-full flex flex-col gap-3 sm:w-[500px] mt-16">
+            <h1 className="text-2xl text-center pb-2">Welcome to EmailThing!</h1>
+            <p className="text-muted-foreground">
+                EmailThing is a new way to manage your email.
+                You can use it to send and receive emails, and even create your own email addresses.
+                We&lsquo;re excited to have you on board!
+            </p>
 
-            <div className="mx-auto w-full flex flex-col gap-3 sm:w-[500px] mt-16">
-                <h1 className="text-2xl text-center pb-2">Welcome to EmailThing!</h1>
-                <p className="text-muted-foreground">
-                    EmailThing is a new way to manage your email.
-                    You can use it to send and receive emails, and even create your own email addresses.
-                    We&lsquo;re excited to have you on board!
-                </p>
-
-                <Page githubStars={githubStars} action={changeBackupEmail} />
-            </div>
+            <Page githubStars={githubStars} action={changeBackupEmail} />
         </div>
     );
 }

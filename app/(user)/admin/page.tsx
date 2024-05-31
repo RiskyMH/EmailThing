@@ -42,18 +42,6 @@ export default async function AdminPage() {
     ])
 
     return (
-        <div className="container flex p-5 w-screen min-h-screen flex-col items-center bg-background" vaul-drawer-wrapper="">
-            <Link
-                href="/home"
-                className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "absolute left-4 top-4 md:left-8 md:top-8"
-                )}
-            >
-                <ChevronLeft className="me-2 h-4 w-4" />
-                Home
-            </Link>
-
             <div className="mx-auto w-full flex flex-col gap-3 sm:w-[750px] mt-16 mb-7">
                 <h1 className="text-2xl text-center pb-2">The secret admin page!</h1>
 
@@ -352,8 +340,6 @@ export default async function AdminPage() {
                         </Table>
                     </div>
                 </div>
-
-            </div>
         </div>
     )
 }
