@@ -51,7 +51,7 @@ export async function UserNavv() {
         }
     })
     if (!user) return <UserNavLogin />
-    if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
+    // if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
 
     return (
         <UserDropDown user={{

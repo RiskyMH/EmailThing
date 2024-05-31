@@ -14,7 +14,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 sm:[.kawaii_&]:pt-10">
+      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 sm:[.kawaii_&]:pt-10 lg:[.kawaii_&]:pb-10">
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <Link
             href="https://discord.gg/GT9Q2Yz4VS"
@@ -23,7 +23,7 @@ export default async function Home() {
           >
             Follow along on Discord
           </Link>
-          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl [.kawaii_&]:hidden flex">
+          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl [.kawaii_&]:hidden block">
             <span className='sr-only'>EmailThing is </span>
             <span className='uppercase'>a</span>n email app where you can receive and send emails!
           </h1>
