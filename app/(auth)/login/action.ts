@@ -39,6 +39,7 @@ export default async function signIn(data: FormData, callback?: string | null): 
         columns: {
             id: true,
             password: true,
+            onboardingStatus: true
         }
     })
 
@@ -60,6 +61,10 @@ export default async function signIn(data: FormData, callback?: string | null): 
     }
 
     await addUserTokenToCookie(user)
+
+    if (!user.onboardingStatus?.initial) {
+        redirect("/onboarding/welcome")
+    }
 
     if (callback) {
         redirect(callback)
@@ -126,6 +131,7 @@ export async function signInPasskey(credential: Credential, callback?: string | 
         columns: {
             id: true,
             password: true,
+            onboardingStatus: true
         }
     })
 
@@ -134,6 +140,10 @@ export async function signInPasskey(credential: Credential, callback?: string | 
     }
 
     await addUserTokenToCookie(user)
+
+    if (!user.onboardingStatus?.initial) {
+        redirect("/onboarding/welcome")
+    }
 
     if (callback) {
         redirect(callback)
