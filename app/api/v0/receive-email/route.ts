@@ -252,6 +252,7 @@ import Turndown from "turndown"
 import { JSDOM } from "jsdom";
 
 function emailContent({ text, html }: { text?: string, html?: string }) {
+    if (text === "\n") text = undefined
     if (text) return text
     if (!html) return "(no body)"
 
