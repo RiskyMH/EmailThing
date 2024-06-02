@@ -23,6 +23,8 @@ export function uploadFile({ key, buffer, contentType }: { key: string, buffer: 
     return s3.PutObject({
         key,
         'Content-Type': contentType,
+        // @ts-expect-error - me being sus with some types
+        "Content-Length": buffer.byteLength
     }, buffer)
 }
 
