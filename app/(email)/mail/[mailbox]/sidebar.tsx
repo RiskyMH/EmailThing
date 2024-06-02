@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { db, Email } from "@/db";
+import { db, DraftEmail, Email } from "@/db";
 import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon, TimerIcon } from "lucide-react";
 import Link from "next/link";
 import { SidebarLink } from "./sidebar.client";
@@ -7,7 +7,7 @@ import { Suspense, cache } from "react";
 import { cn } from "@/utils/tw";
 import { getCurrentUser } from "@/utils/jwt";
 import { userMailboxAccess } from "./tools";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, isNotNull } from "drizzle-orm";
 
 export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string, className?: string }) => {
 
@@ -87,42 +87,69 @@ function LinkElement({ href, name, icon: Icon, disabled, className }: { href: st
             <SidebarLink href={href} className="" disabled={disabled}>
                 <Icon className="h-6 w-6" />
                 <span className="self-center sm:max-lg:hidden">{name}</span>
-                {(name === "Inbox") && (
+                {name === "Inbox" ? (
                     <Suspense>
-                        <UnreadEmailsCount mailboxId={href.split("/")[2]} />
+                        <ItemCount mailboxId={href.split("/")[2]} keyy="unread" primary />
                     </Suspense>
-                )}
+                ) : name === "Draft" ? (
+                    <Suspense>
+                        <ItemCount mailboxId={href.split("/")[2]} keyy="drafts" />
+                    </Suspense>
+                ) : name === "Trash" ? (
+                    <Suspense>
+                        <ItemCount mailboxId={href.split("/")[2]} keyy="binned" />
+                    </Suspense>
+                ) : null}
             </SidebarLink>
         </Button>
     )
 }
 
-const getUnreadEmailsCount = cache(async (mailboxId: string) => {
+const getCounts = cache(async (mailboxId: string) => {
     const userId = await getCurrentUser()
-    if (!await userMailboxAccess(mailboxId, userId)) return []
+    if (!await userMailboxAccess(mailboxId, userId)) return {}
 
-    const unreadEmails = await db
-        .select({ count: count() })
-        .from(Email)
-        .where(and(
-            eq(Email.mailboxId, mailboxId),
-            eq(Email.isRead, false)
-        ))
-        .execute()
+    const [unreadEmails, binnedEmails, drafts] = await db.batch([
+        db
+            .select({ count: count() })
+            .from(Email)
+            .where(and(
+                eq(Email.mailboxId, mailboxId),
+                eq(Email.isRead, false)
+            )),
 
-    return unreadEmails[0].count
+        db
+            .select({ count: count() })
+            .from(Email)
+            .where(and(
+                eq(Email.mailboxId, mailboxId),
+                isNotNull(Email.binnedAt)
+            )),
+
+        db
+            .select({ count: count() })
+            .from(DraftEmail)
+            .where(eq(DraftEmail.mailboxId, mailboxId)),
+    ])
+
+    return {
+        unread: unreadEmails[0].count,
+        binned: binnedEmails[0].count,
+        drafts: drafts[0].count,
+    }
 })
 
-async function UnreadEmailsCount({ mailboxId }: { mailboxId: string }) {
-    const unreadEmails = await getUnreadEmailsCount(mailboxId)
-    if (unreadEmails === 0 || !unreadEmails) {
+
+async function ItemCount({ mailboxId, keyy, primary = false }: { mailboxId: string, keyy: "unread" | "binned" | "drafts", primary?: boolean }) {
+    const counts = await getCounts(mailboxId)
+    const item = counts[keyy]
+    if (!item || item === 0) {
         return <></>
     }
 
     return (
-        <span className="bg-blue text-blue-foreground rounded font-bold px-3 py-1 text-xs ms-auto float-right self-center select-none sm:max-lg:hidden">
-            {unreadEmails}
+        <span className={`${primary ? "bg-blue text-blue-foreground" : "bg-secondary text-foreground"} rounded font-bold px-3 py-1 text-xs ms-auto float-right self-center select-none sm:max-lg:hidden`}>
+            {item}
         </span>
     )
-
 }
