@@ -94,7 +94,10 @@ export async function pageMailboxAccess(mailboxId?: string | null, throwOnFail =
     if (!mailboxId) return redirect('/login')
 
     const userId = await getCurrentUser()
-    if (!userId) return throwOnFail ? redirect("/login?from=/mail/" + mailboxId) : false
+    if (!userId) {
+        if (!throwOnFail) return false
+        redirect("/login?from=/mail/" + mailboxId)
+    }
 
     const userHasAccess = await userMailboxAccess(mailboxId, userId)
     if (!userHasAccess) return throwOnFail ? notFound() : false
