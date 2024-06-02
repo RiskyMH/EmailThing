@@ -46,9 +46,9 @@ export function EmailThing() {
         <>
             <Logo className="h-7 w-7 flex-shrink-0 [.kawaii_&]:hidden flex" />
             <EmailthingText className="[.kawaii_&]:hidden flex" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <ContextMenu>
                 <ContextMenuTrigger className="hidden [.kawaii_&]:flex self-baseline">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/emailthing-kawaii.svg" className="flex h-12" alt="EmailThing kawaii logo by Alfonsusac" />
                 </ContextMenuTrigger>
                 <ContextMenuContent>

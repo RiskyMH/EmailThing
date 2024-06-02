@@ -43,7 +43,7 @@ export function ViewSelect({ selected, htmlValid = false }: { selected: "text" |
 
     function onValueChange(v: string) {
         (window as any)?.emailContentLoading?.(v)
-        router.push("?view=" + v)
+        router.replace("?view=" + v)
     }
 
     return (
