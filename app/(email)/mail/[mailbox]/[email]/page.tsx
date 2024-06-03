@@ -98,10 +98,10 @@ export default async function EmailPage({
                             {email.from?.name && <p className="text-muted-foreground text-sm">{`<${email.from.address}>`}</p>}
                         </div>
                         <div className="text-muted-foreground text-sm flex">
-                            <p className="self-center">to {email.recipients.map(e => e.name || e.address).join(", ")}</p>
+                            <p className="self-center break-words overflow-hidden">to {email.recipients.map(e => e.name || e.address).join(", ")}</p>
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button variant="ghost" size="auto" className="rounded-full p-1 -m-1 ms-1 text-muted-foreground hover:text-foreground hover:bg-background">
+                                    <Button variant="ghost" size="auto" className="rounded-full p-1 -my-1 ms-1 text-muted-foreground hover:text-foreground hover:bg-background">
                                         <ChevronDown className="h-5 w-5" />
                                     </Button>
                                 </PopoverTrigger>

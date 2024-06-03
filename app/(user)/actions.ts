@@ -1,6 +1,6 @@
 'use server'
 
-import { getCurrentUser } from "@/utils/jwt"
+import { getCurrentUser, removeToken } from "@/utils/jwt"
 import { createPasswordHash, verifyPassword } from "@/utils/password"
 import { db, PasskeyCredentials, User, UserNotification } from "@/db";
 import { and, eq, not } from "drizzle-orm";
@@ -91,9 +91,8 @@ export async function changePassword(_prevState: any, data: FormData) {
 
 
 export async function logout() {
-    const c = cookies()
-    c.delete('token')
-    c.delete('mailboxId')
+    removeToken()
+    cookies().delete('mailboxId')
 
     redirect("/login")
 }
@@ -219,5 +218,5 @@ export async function changeEmail(_prevState: any, data: FormData) {
 
     revalidateTag(`user-${userId}`)
     revalidatePath("/settings")
-    return { success: "Your email has been updated."}
+    return { success: "Your email has been updated." }
 }

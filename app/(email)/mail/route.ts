@@ -1,5 +1,5 @@
 import { db, MailboxForUser } from "@/db";
-import { getCurrentUser } from "@/utils/jwt";
+import { getCurrentUser, removeToken } from "@/utils/jwt";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -12,7 +12,7 @@ export async function GET() {
     const userId = await getCurrentUser();
 
     if (!userId) {
-        cookies().delete("token")
+        removeToken()
         return redirect("/login")
     }
 
@@ -30,7 +30,8 @@ export async function GET() {
             cookies().set("mailboxId", firstMailbox.mailboxId)
             return redirect(`/mail/${firstMailbox.mailboxId}`)
         } else {
-            cookies().delete("token").delete("mailboxId")
+            removeToken()
+            cookies().delete("mailboxId")
             return redirect("/login")
         }
     }

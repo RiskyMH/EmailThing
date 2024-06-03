@@ -2,11 +2,11 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { removeToken } from "./utils/jwt"
 
 export async function logout() {
-    const c = cookies()
-    c.delete('token')
-    c.delete('mailboxId')
+    removeToken()
+    cookies().delete('mailboxId')
 
     redirect("/login")
 }

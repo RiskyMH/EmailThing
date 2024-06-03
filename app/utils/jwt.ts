@@ -50,3 +50,4 @@ export const getCurrentUser = (async () => {
     }
 })
 
+export const removeToken = () => cookies().delete("token")
