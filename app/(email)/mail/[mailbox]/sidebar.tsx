@@ -1,13 +1,16 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { db, DraftEmail, Email } from "@/db";
-import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon, TimerIcon } from "lucide-react";
+import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon, TimerIcon, CheckIcon, ChevronsUpDownIcon, PlusCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { SidebarLink } from "./sidebar.client";
 import { Suspense, cache } from "react";
 import { cn } from "@/utils/tw";
 import { getCurrentUser } from "@/utils/jwt";
-import { userMailboxAccess } from "./tools";
+import { mailboxAliases, userMailboxAccess, userMailboxes } from "./tools";
 import { and, count, eq, isNotNull } from "drizzle-orm";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MailboxLink } from "./components.client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string, className?: string }) => {
 
@@ -51,7 +54,7 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
     ]
 
     return (
-        <div className={cn("sm:min-h-screen sm:bg-tertiary text-tertiary-foreground lg:w-60 sm:p-3 sm:flex-shrink-0 inline overflow-y-auto", className)}>
+        <div className={cn("min-h-screen sm:bg-tertiary text-tertiary-foreground lg:w-60 sm:p-3 sm:flex-shrink-0 flex flex-col overflow-y-auto", className)}>
 
             <br className="sm:hidden" />
 
@@ -74,6 +77,12 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
                     href={`/mail/${mailboxId}/config`}
                 />
             </div>
+
+            <div className="mt-auto justify-end">
+                <Suspense fallback={<MailboxesFallback />}>
+                    <Mailboxes mailbox={mailboxId} />
+                </Suspense>
+            </div>
         </div>
     )
 
@@ -89,15 +98,15 @@ function LinkElement({ href, name, icon: Icon, disabled, className }: { href: st
                 <span className="self-center sm:max-lg:hidden">{name}</span>
                 {name === "Inbox" ? (
                     <Suspense>
-                        <ItemCount mailboxId={href.split("/")[2]} keyy="unread" primary />
+                        <ItemCount mailboxId={href.split("/")[2]} type="unread" primary />
                     </Suspense>
                 ) : name === "Draft" ? (
                     <Suspense>
-                        <ItemCount mailboxId={href.split("/")[2]} keyy="drafts" />
+                        <ItemCount mailboxId={href.split("/")[2]} type="drafts" />
                     </Suspense>
                 ) : name === "Trash" ? (
                     <Suspense>
-                        <ItemCount mailboxId={href.split("/")[2]} keyy="binned" />
+                        <ItemCount mailboxId={href.split("/")[2]} type="binned" />
                     </Suspense>
                 ) : null}
             </SidebarLink>
@@ -140,9 +149,9 @@ const getCounts = cache(async (mailboxId: string) => {
 })
 
 
-async function ItemCount({ mailboxId, keyy, primary = false }: { mailboxId: string, keyy: "unread" | "binned" | "drafts", primary?: boolean }) {
+async function ItemCount({ mailboxId, type, primary = false }: { mailboxId: string, type: "unread" | "binned" | "drafts", primary?: boolean }) {
     const counts = await getCounts(mailboxId)
-    const item = counts[keyy]
+    const item = counts[type]
     if (!item || item === 0) {
         return <></>
     }
@@ -153,3 +162,42 @@ async function ItemCount({ mailboxId, keyy, primary = false }: { mailboxId: stri
         </span>
     )
 }
+
+
+function MailboxesFallback() {
+    return (
+        <div className="w-full h-10 rounded-md bg-secondary animate-pulse mt-3" />
+    )
+}
+
+const Mailboxes = (async ({ mailbox: mailboxId }: { mailbox: string }) => {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) return null
+
+    const mailboxes = await userMailboxes(userId);
+    const { default: defaultAlias } = await mailboxAliases(mailboxId);
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", className: "flex gap-1 pe-4 sm:pe-auto md:pe-4 bg-secondary w-full mt-3" })}>
+                <span className="self-center text-sm sm:max-lg:hidden">{defaultAlias?.name}</span>
+                <ChevronsUpDownIcon className="text-muted-foreground h-5 w-5 self-center" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                {mailboxes.map(m => (
+                    <DropdownMenuItem key={m.id} asChild className="flex gap-2 cursor-pointer">
+                        <MailboxLink mailboxId={m.id}>
+                            {m.id === mailboxId ? <CheckIcon className="text-muted-foreground h-4 w-4" /> : <span className="w-4" />}
+                            {m.name}
+                        </MailboxLink>
+                    </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled>
+                    <PlusCircleIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <span>New mailbox</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+})

@@ -87,7 +87,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
     return (
         <>
             <div className="flex-col gap-2 p-5 flex w-full min-w-0">
-                <div className="flex flex-row w-full min-w-0 pb-3 border-b-2 -mt-4 pt-3 gap-6 overflow-y-auto">
+                <div className="flex flex-row w-full min-w-0 pb-3 border-b-2 -mt-4 pt-3 gap-6 overflow-y-auto sticky top-0 z-10 bg-background">
                     <input type="checkbox" disabled id="select" className="mr-2 self-start mt-1 h-4 w-4 flex-shrink-0" />
                     <div className="flex flex-row w-full min-w-0 pb-3 -mb-3 gap-6 overflow-y-auto">
                         <CategoryItem
