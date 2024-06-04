@@ -7,7 +7,7 @@ import { Suspense, cache } from "react";
 import { cn } from "@/utils/tw";
 import { getCurrentUser } from "@/utils/jwt";
 import { mailboxAliases, userMailboxAccess, userMailboxes } from "./tools";
-import { and, count, eq, isNotNull } from "drizzle-orm";
+import { and, count, eq, isNotNull, isNull } from "drizzle-orm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MailboxLink } from "./components.client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -129,7 +129,8 @@ const getCounts = cache(async (mailboxId: string) => {
         .from(Email)
         .where(and(
             eq(Email.mailboxId, mailboxId),
-            eq(Email.isRead, false)
+            eq(Email.isRead, false),
+            isNull(Email.binnedAt)
         ))
         .execute()
 

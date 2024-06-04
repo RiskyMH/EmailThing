@@ -18,7 +18,7 @@ export function getJustEmailsList(mailboxId: string, options: EmailListFindOptio
         where: and(
             eq(Email.mailboxId, mailboxId),
             options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
-            eq(Email.isSender, options.isSender || false),
+            options.isBinned ? undefined : eq(Email.isSender, options.isSender || false),
             options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
             options.isTemp ?
                 and(
@@ -70,7 +70,7 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
             .where(and(
                 eq(Email.mailboxId, mailboxId),
                 options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
-                eq(Email.isSender, options.isSender || false),
+                options.isBinned ? undefined : eq(Email.isSender, options.isSender || false),
                 options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
                 options.search ? like(Email.subject, `%${options.search}%`) : undefined,
                 options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId)
@@ -82,7 +82,7 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
             .where(and(
                 eq(Email.mailboxId, mailboxId),
                 options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
-                eq(Email.isSender, options.isSender || false),
+                options.isBinned ? undefined : eq(Email.isSender, options.isSender || false),
                 options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
                 options.search ? like(Email.subject, `%${options.search}%`) : undefined,
                 options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId)
