@@ -11,6 +11,7 @@ import { and, count, eq, isNotNull } from "drizzle-orm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MailboxLink } from "./components.client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { gravatar } from "@/utils/tools";
 
 export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string, className?: string }) => {
 
@@ -65,20 +66,25 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
                 </Link>
             </Button>
 
-            <br className="h-4" />
-
             <div className="flex flex-col gap-2 py-2 text-sm">
                 {items.map(item => (<LinkElement key={item.href} {...item} />))}
 
-                <hr className="bg-border w-full" />
+                {/* <hr className="bg-border w-full" />
                 <LinkElement
                     name="Mailbox Config"
                     icon={SettingsIcon}
                     href={`/mail/${mailboxId}/config`}
-                />
+                /> */}
             </div>
 
-            <div className="mt-auto justify-end">
+            <div className="flex mt-auto justify-end flex-col gap-1">
+                <hr className="bg-border w-full " />
+                <LinkElement
+                    name="Mailbox Config"
+                    icon={SettingsIcon}
+                    href={`/mail/${mailboxId}/config`}
+                    className="py-4"
+                />
                 <Suspense fallback={<MailboxesFallback />}>
                     <Mailboxes mailbox={mailboxId} />
                 </Suspense>
@@ -92,9 +98,9 @@ export default Sidebar;
 
 function LinkElement({ href, name, icon: Icon, disabled, className }: { href: string, name: string, icon: any, disabled?: boolean, className?: string }) {
     return (
-        <Button asChild variant="ghost" className={cn("flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal sm:self-center w-full lg:self-auto", className)}>
+        <Button asChild variant="ghost" className={cn("flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal self-center w-full lg:self-auto text-center", className)}>
             <SidebarLink href={href} className="" disabled={disabled}>
-                <Icon className="h-6 w-6" />
+                <Icon className="h-6 w-6 self-center sm:max-lg:mx-auto" />
                 <span className="self-center sm:max-lg:hidden">{name}</span>
                 {name === "Inbox" ? (
                     <Suspense>
@@ -150,6 +156,7 @@ const getCounts = cache(async (mailboxId: string) => {
 
 
 async function ItemCount({ mailboxId, type, primary = false }: { mailboxId: string, type: "unread" | "binned" | "drafts", primary?: boolean }) {
+    // return <></>
     const counts = await getCounts(mailboxId)
     const item = counts[type]
     if (!item || item === 0) {
@@ -166,7 +173,11 @@ async function ItemCount({ mailboxId, type, primary = false }: { mailboxId: stri
 
 function MailboxesFallback() {
     return (
-        <div className="w-full h-10 rounded-md bg-secondary animate-pulse mt-3" />
+        <div className="w-full h-10 py-2 rounded-md bg-tertiary animate-pulse flex gap-3 px-3 sm:max-lg:px-1">
+            <div className="h-7 w-7 bg-secondary animate-pulse rounded-full" />
+
+            <ChevronsUpDownIcon className="text-muted-foreground h-5 w-5 ms-auto self-end sm:max-lg:hidden" />
+        </div>
     )
 }
 
@@ -179,9 +190,16 @@ const Mailboxes = (async ({ mailbox: mailboxId }: { mailbox: string }) => {
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", className: "flex gap-1 pe-4 sm:pe-auto md:pe-4 bg-secondary w-full mt-3" })}>
-                <span className="self-center text-sm sm:max-lg:hidden">{defaultAlias?.name}</span>
-                <ChevronsUpDownIcon className="text-muted-foreground h-5 w-5 self-center" />
+            <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "flex gap-3 px-3 sm:max-lg:px-1 w-full text-left")}>
+                <Avatar className="h-7 w-7">
+                    <AvatarImage className="rounded-full" src={await gravatar(defaultAlias?.alias ?? "ab@c.com")} />
+                    <AvatarFallback className="rounded-full text-muted-foreground bg-secondary p-1 text-xs w-full h-full">
+                        {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                </Avatar>
+                <span className="text-sm sm:max-lg:hidden text-foreground">{defaultAlias?.name}</span>
+
+                <ChevronsUpDownIcon className="text-muted-foreground h-5 w-5 ms-auto self-end sm:max-lg:hidden" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 {mailboxes.map(m => (
