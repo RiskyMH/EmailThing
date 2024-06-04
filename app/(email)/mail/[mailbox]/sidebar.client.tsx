@@ -29,7 +29,7 @@ export function SidebarLink({ href, className, children, disabled }: PropsWithCh
             className={cn(className, pathName === href && "text-blue dark:text-foreground")}
         >
             {/* make a vertical line on very left of screen */}
-            {pathName === href && <span className="relative -ms-6 me-1 w-1 bg-blue dark:bg-foreground self-center h-10 rounded-e" />}
+            {pathName === href && <span className="absolute start-0 sm:relative sm:-ms-6 sm:start-auto me-1 w-1 bg-blue dark:bg-foreground self-center h-10 rounded-e" />}
 
             {children}
         </Link>
