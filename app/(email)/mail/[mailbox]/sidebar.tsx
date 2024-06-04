@@ -124,28 +124,29 @@ const getCounts = cache(async (mailboxId: string) => {
     const userId = await getCurrentUser()
     if (!await userMailboxAccess(mailboxId, userId)) return {}
 
-    const [unreadEmails, binnedEmails, drafts] = await db.batch([
-        db
-            .select({ count: count() })
-            .from(Email)
-            .where(and(
-                eq(Email.mailboxId, mailboxId),
-                eq(Email.isRead, false)
-            )),
+    const unreadEmails = await db
+        .select({ count: count() })
+        .from(Email)
+        .where(and(
+            eq(Email.mailboxId, mailboxId),
+            eq(Email.isRead, false)
+        ))
+        .execute()
 
-        db
-            .select({ count: count() })
-            .from(Email)
-            .where(and(
-                eq(Email.mailboxId, mailboxId),
-                isNotNull(Email.binnedAt)
-            )),
+    const binnedEmails = await db
+        .select({ count: count() })
+        .from(Email)
+        .where(and(
+            eq(Email.mailboxId, mailboxId),
+            isNotNull(Email.binnedAt)
+        ))
+        .execute()
 
-        db
-            .select({ count: count() })
-            .from(DraftEmail)
-            .where(eq(DraftEmail.mailboxId, mailboxId)),
-    ])
+    const drafts = await db
+        .select({ count: count() })
+        .from(DraftEmail)
+        .where(eq(DraftEmail.mailboxId, mailboxId))
+        .execute()
 
     return {
         unread: unreadEmails[0].count,
