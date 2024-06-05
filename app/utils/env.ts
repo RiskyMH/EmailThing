@@ -13,6 +13,7 @@ export const env = createEnv({
         S3_KEY_ID: z.string(),
         S3_SECRET_ACCESS_KEY: z.string(),
         S3_URL: z.string(),
+        TURNSTILE_SECRET_KEY: z.string().optional()
     },
     client: {
         NEXT_PUBLIC_APP_URL: z.string().min(1),
@@ -30,5 +31,6 @@ export const env = createEnv({
         S3_KEY_ID: process.env.S3_KEY_ID,
         S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
         S3_URL: process.env.S3_URL,
+        TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     },
 })

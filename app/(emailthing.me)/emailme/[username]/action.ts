@@ -3,6 +3,7 @@
 import db, { User } from "@/db"
 import { env } from "@/utils/env"
 import { and, eq } from "drizzle-orm"
+import { headers } from "next/headers";
 
 const MAX_REQUESTS_PER_WINDOW = 5;
 const WINDOW_DURATION_MS = 60 * 1000;
@@ -10,7 +11,6 @@ const WINDOW_DURATION_MS = 60 * 1000;
 const ratelimit = new Map<string, { count: number, resetAt: Date }>();
 
 export async function emailMeForm(_prevState: any, data: FormData): Promise<{ error?: string, success?: string } | void> {
-
     const username = data.get("username") as string
     const user = await db.query.User.findFirst({
         where: and(
@@ -25,6 +25,29 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
         }
     })
     if (!user) return { error: "Can't find user to email" }
+
+    // turnstile verify user
+    if (env.TURNSTILE_SECRET_KEY) {
+        const formData = new FormData()
+        // formData.append("secret", "1x0000000000000000000000000000000AA")
+        formData.append("secret", env.TURNSTILE_SECRET_KEY)
+        formData.append("response", data.get("cf-turnstile-response") as string)
+        formData.append("remoteip", headers().get("CF-Connecting-IP") as string)
+
+        const turnstile = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+            method: 'POST',
+            body: formData,
+        })
+
+        const result = await turnstile.json()
+        console.log(result)
+        if (!result.success) {
+            return { error: "Failed turnstile capture" }
+        }
+        return { success: "test done" }
+    } else {
+        console.warn("No turnstile setup, allowing request")
+    }
 
     const key = user.id;
     let rate = ratelimit.get(key);

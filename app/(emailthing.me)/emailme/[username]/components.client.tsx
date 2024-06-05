@@ -11,18 +11,24 @@ export function Form({ children, className, publicEmail }: { children: ReactNode
     const [state, formAction] = useFormState(emailMeForm, {})
 
     return (
-        <form action={formAction} className={className}>
+        <form action={formAction} className={className} suppressHydrationWarning>
             {children}
-            <div className="flex mt-2 sm:mt-1 sm:h-10 items-center flex-col-reverse sm:flex-row gap-3">
-                {state?.error ? (
-                    <p className="text-red justify-center text-sm">
-                        {state.error}
-                    </p>
-                ) : (
-                    <p className="text-muted-foreground justify-center text-sm overflow-auto">
-                        You can also email <a href={`mailto:${publicEmail}`} className="font-bold hover:underline">{publicEmail}</a>
-                    </p>
-                )}
+            <div className="flex mt-2 sm:mt-1 sm:h-10 items-center flex-col-reverse sm:flex-row gap-3" suppressHydrationWarning>
+                <div suppressHydrationWarning className="flex flex-col gap-2">
+                    <div className="cf-turnstile [&>*]:sm:mt-12 [&>*]:sm:mx-1" data-sitekey="0x4AAAAAAAb9U2XXs4z4cJUN" suppressHydrationWarning></div>
+                    {/* <div className="cf-turnstile [&>*]:sm:mt-12 [&>*]:sm:mx-1" data-sitekey="2x00000000000000000000AB" suppressHydrationWarning></div> */}
+                    <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=managed" />
+
+                    {state?.error ? (
+                        <p className="text-red justify-center text-sm">
+                            {state.error}
+                        </p>
+                    ) : (
+                        <p className="text-muted-foreground justify-center text-sm overflow-auto">
+                            You can also email <a href={`mailto:${publicEmail}`} className="font-bold hover:underline">{publicEmail}</a>
+                        </p>
+                    )}
+                </div>
                 <SendButton />
             </div>
             <Toaster message={state?.success} />
