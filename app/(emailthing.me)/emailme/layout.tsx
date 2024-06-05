@@ -41,7 +41,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                 </div>
                 <nav className="flex gap-2">
                     <Link
-                        href="https://emailthing.xyz/register?from=/settings/emailthing.me"
+                        href="https://emailthing.xyz/register?from=/settings/emailthing-me"
                         className={buttonVariants({ variant: "secondary", size: "sm", className: "px-4" })}
                         target="_blank"
                     >
