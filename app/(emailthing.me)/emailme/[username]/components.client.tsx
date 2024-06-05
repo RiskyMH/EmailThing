@@ -11,6 +11,12 @@ import { ClientInput, ClientTextarea } from "@/(user)/components.client";
 export function Form({ publicEmail, username }: { className?: string, publicEmail?: string, username?: string }) {
     const [state, formAction] = useFormState(emailMeForm, {})
 
+    useEffect(() => {
+        if (state?.error) {
+            (window as any)?.turnstile?.reset()
+        }
+    }, [state])
+
     return (
         <>
             <form action={formAction} className="flex flex-col gap-2 max-w-[35rem] self-center w-full" suppressHydrationWarning>
@@ -24,7 +30,7 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
 
                 <div className="flex mt-2 sm:mt-1 sm:h-10 items-center flex-col-reverse sm:flex-row gap-3" suppressHydrationWarning>
                     <div suppressHydrationWarning className="flex flex-col">
-                        <div className="cf-turnstile [&>*]:mb-2 [&>*]:sm:mt-12 [&>*]:sm:mx-1" data-sitekey="0x4AAAAAAAb9U2XXs4z4cJUN" suppressHydrationWarning></div>
+                        <div className="cf-turnstile [&>*]:mb-2 [&>*]:sm:mt-12 [&>*]:sm:mx-1" data-sitekey="0x4AAAAAAAb9U2XXs4z4cJUN" suppressHydrationWarning hidden={!!state?.success}></div>
                         {/* <div className="cf-turnstile [&>*]:mb-2 [&>*]:sm:mt-12 [&>*]:sm:mx-1" data-sitekey="3x00000000000000000000FF" suppressHydrationWarning hidden={!!state?.success}></div> */}
                         <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=managed" />
 
@@ -60,9 +66,8 @@ function Toaster({ message }: { message?: string }) {
     useEffect(() => {
         if (!state.pending && message) {
             toast.success(message)
-        } else if (state.pending === false) {
-            (window as any)?.turnstile?.reset()
         }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.pending])
     return <></>
