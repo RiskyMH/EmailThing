@@ -11,9 +11,13 @@ import { Select } from "@/components/ui/select";
 import type { SelectProps } from "@radix-ui/react-select";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Textarea, type TextareaProps } from "@/components/ui/textarea";
+import type { SwitchProps } from "@radix-ui/react-switch";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/utils/tw";
 
 
-export function CardForm({ children, action, subtitle }: { children: ReactNode, action: (_prev: any, data: FormData) => Promise<{ error?: string, success?: string } | void>, subtitle?: string }) {
+export function CardForm({ children, action, subtitle, disabled }: { children: ReactNode, action: (_prev: any, data: FormData) => Promise<{ error?: string, success?: string } | void>, subtitle?: string, disabled?: boolean }) {
     const [state, formAction] = useFormState(action, {})
 
     return (
@@ -29,17 +33,17 @@ export function CardForm({ children, action, subtitle }: { children: ReactNode, 
                         {subtitle}
                     </span>
                 )}
-                <SaveButton />
+                <SaveButton disabled={disabled} />
             </CardFooter>
             <Toaster message={state?.success} />
         </form>
     );
 }
 
-function SaveButton() {
+function SaveButton({ disabled }: { disabled?: boolean }) {
     const state = useFormStatus()
     return (
-        <Button type="submit" className="ms-auto flex gap-2" size="sm" disabled={state.pending}>
+        <Button type="submit" className="ms-auto flex gap-2" size="sm" disabled={disabled || state.pending}>
             {state.pending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
             Save
         </Button>
@@ -60,13 +64,28 @@ function Toaster({ message }: { message?: string }) {
 export function ClientSelect(props: SelectProps) {
     const state = useFormStatus()
 
-    return <Select {...props} disabled={state.pending}>{props.children}</Select>
+    return <Select {...props} disabled={props.disabled || state.pending}>{props.children}</Select>
 }
 
 export function ClientInput(props: InputProps) {
     const state = useFormStatus()
 
-    return <Input {...props} disabled={state.pending} />
+    return <Input {...props} disabled={props.disabled || state.pending} />
+}
+
+export function ClientTextarea(props: TextareaProps) {
+    const state = useFormStatus()
+
+    return <Textarea {...props} disabled={props.disabled || state.pending} />
+}
+
+export function ClientSwitch(props: SwitchProps) {
+    const state = useFormStatus()
+
+    return state.pending ? (<div className={cn("flex gap-2", props.className)}>
+        <Loader2 className="w-5 h-5 self-center text-muted-foreground animate-spin" />
+        <Switch {...props} disabled={true} />
+    </div>) : <Switch {...props} disabled={props.disabled} />
 }
 
 export function MenuItem({ href, children }: { href: string, children: ReactNode }) {

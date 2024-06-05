@@ -15,6 +15,8 @@ export const User = sqliteTable("users", {
     email: text("email").notNull(),
     onboardingStatus: text("onboarding_status", { mode: "json" }).$type<{ initial: boolean }>().default({ initial: false }),
     backupEmail: text("backup_email"),
+    publicEmail: text("public_email"),
+    publicContactPage: int("public_contact_page", { mode: "boolean" }).default(false),
 }, (table) => ({
     usernameIdx: index("user_username").on(table.username),
 }));

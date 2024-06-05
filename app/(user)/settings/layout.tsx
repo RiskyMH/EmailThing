@@ -16,6 +16,7 @@ export default function SettingsLayout({ children }: DocsLayoutProps) {
                     <MenuItem href="/settings/authentication">Authentication</MenuItem>
                     <MenuItem href="/settings/notifications">Notifications</MenuItem>
                     <MenuItem href="/settings/mailboxes">Mailboxes</MenuItem>
+                    <MenuItem href="/settings/emailthing-me">EmailThing.me</MenuItem>
                     <MenuItem href="/settings/#">Advanced</MenuItem>
                 </nav>
                 <div className="grid gap-6">

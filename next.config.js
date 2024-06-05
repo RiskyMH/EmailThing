@@ -40,6 +40,39 @@ const nextConfig = {
             beforeFiles: [
                 {
                     source: "/",
+                    destination: "/emailme",
+                    has: [
+                        {
+                            type: 'header',
+                            key: 'Host',
+                            value: 'emailthing.me'
+                        },
+                    ],
+                },
+                {
+                    source: "/\\@:slug",
+                    destination: "/emailme/@:slug",
+                    has: [
+                        {
+                            type: 'header',
+                            key: 'Host',
+                            value: 'emailthing.me'
+                        },
+                    ],
+                },
+                {
+                    source: "/\^(login|register|mail|pricing|docs|manifest|email):slug*",
+                    destination: "/emailme/404?from=:slug*",
+                    has: [
+                        {
+                            type: 'header',
+                            key: 'Host',
+                            value: 'emailthing.me'
+                        },
+                    ],
+                },
+                {
+                    source: "/",
                     destination: "/home",
                     missing: [
                         {
@@ -112,7 +145,7 @@ const nextConfig = {
                 permanent: false,
             },
             {
-                source: '/login',
+                source: '/(login|register)',
                 destination: '/:from?from=',
                 permanent: false,
                 has: [
@@ -120,6 +153,19 @@ const nextConfig = {
                     { type: 'query', key: 'from' }
                 ]
             },
+            {
+                source: "/emailme",
+                destination: "/",
+                permanent: true,
+                has: [
+                    {
+                        type: 'header',
+                        key: 'Host',
+                        value: 'emailthing.me'
+                    },
+                ],
+            },
+
         ];
     }
 };

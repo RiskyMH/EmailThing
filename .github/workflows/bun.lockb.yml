@@ -44,9 +44,11 @@ jobs:
             git diff ${{ github.event.before }}..${{ github.event.after }} bun.lockb
             git diff ${{ github.event.before }}..${{ github.event.after }} bun.lockb >> bun.diff
           fi
+        continue-on-error: true
 
       - name: Echo Diff to $GITHUB_STEP_SUMMARY
         run: |
           echo "\`\`\`diff" >> $GITHUB_STEP_SUMMARY
           cat bun.diff >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true

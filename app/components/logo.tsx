@@ -17,10 +17,10 @@ export default function Logo({ className }: { className?: string }) {
     )
 }
 
-export function EmailthingText({ className }: { className?: string }) {
+export function EmailthingText({ className, text = "EmailThing" }: { className?: string, text?: string }) {
     return (
         <h2 className={cn("inline-block whitespace-nowrap font-bold text-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br from-[#FF9797] to-[#6D6AFF] group-hover:transition-all group-hover:duration-200", className)}>
-            EmailThing
+            {text}
         </h2>
     )
 }

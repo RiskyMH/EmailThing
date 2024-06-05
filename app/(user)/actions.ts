@@ -220,3 +220,37 @@ export async function changeEmail(_prevState: any, data: FormData) {
     revalidatePath("/settings")
     return { success: "Your email has been updated." }
 }
+
+export async function changePublicEmailStatus(data: FormData) {
+    const userId = await getCurrentUser()
+    if (!userId) return
+
+    const user = await db.update(User)
+        .set({
+            publicContactPage: data.get("enabled") as string === "true",
+        })
+        .where(eq(User.id, userId))
+        .returning({ username: User.username })
+        .execute()
+
+    revalidatePath("/settings")
+    revalidatePath(`/emailme/@${user?.[0].username}`)
+    return { success: "Your can now use the page." }
+}
+
+export async function changePublicEmail(_prevState: any, data: FormData) {
+    const userId = await getCurrentUser()
+    if (!userId) return
+
+    const user = await db.update(User)
+        .set({
+            publicEmail: data.get("email") as string,
+        })
+        .where(eq(User.id, userId))
+        .returning({ username: User.username })
+        .execute()
+
+    revalidatePath("/settings")
+    revalidatePath(`/emailme/@${user?.[0].username}`)
+    return { success: "Your public email has been updated." }
+}

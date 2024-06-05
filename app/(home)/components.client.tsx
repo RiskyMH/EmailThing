@@ -3,6 +3,7 @@ import Link from "next/link"
 import { useSelectedLayoutSegment } from "next/navigation"
 import { cn } from "@/utils/tw"
 import { PropsWithChildren, useEffect, useState } from "react"
+import { ExternalLinkIcon } from "lucide-react"
 
 export function MainNavItem({ href, title, disabled = false, mobileShow = false }: PropsWithChildren<{ href: string, disabled?: boolean, title: string, mobileShow?: boolean }>) {
     const segment = useSelectedLayoutSegment()
@@ -10,14 +11,16 @@ export function MainNavItem({ href, title, disabled = false, mobileShow = false 
     return (
         <Link
             href={disabled ? "#" : href}
+            target={href.startsWith("http") ? "_blank" : undefined}
             className={cn(
-                "hidden md:flex items-center text-sm font-medium transition-colors hover:text-foreground/80 ",
+                "hidden md:flex items-center text-sm font-medium transition-colors hover:text-foreground/80 gap-2",
                 (href === `/${segment}`) ? "text-foreground" : "text-foreground/60",
                 disabled && "cursor-not-allowed opacity-80",
                 mobileShow && "flex"
             )}
         >
             {title}
+            {href.startsWith("http") && <ExternalLinkIcon className="h-4 w-4 stroke-[3px]" />}
         </Link>
     )
 }
