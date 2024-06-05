@@ -1,31 +1,37 @@
 import { notFound, redirect } from "next/navigation"
 import { Form } from "./components.client"
-import { ClientInput, ClientTextarea } from "@/(user)/components.client"
 import db, { User } from "@/db"
 import { and, eq } from "drizzle-orm"
 import type { Metadata } from "next"
+import { cache } from "react"
+
+export const revalidate = 60
 
 export async function generateMetadata({ params }: { params: { username: string } }) {
-    const username = params.username.replace("%40", '')
+    const user = await getUser(params.username)
+
     return {
-        title: `Contact @${username}`,
-        description: `Use this form to send a message to @${username}!`,
+        title: `Contact @${user.username}`,
+        description: `Use this form to send a message to @${user.username}!`,
         openGraph: {
             siteName: "EmailThing.me",
-            title: `Contact @${username}`,
-            description: `Use this form to send a message to @${username}!`,
+            title: `Contact @${user.username}`,
+            description: `Use this form to send a message to @${user.username}!`,
             images: [
                 "https://emailthing.xyz/logo.png"
             ]
         },
         twitter: {
-            title: `Contact @${username}`,
-            description: `Use this form to send a message to @${username}!`,
+            title: `Contact @${user.username}`,
+            description: `Use this form to send a message to @${user.username}!`,
             card: "summary",
             creator: "EmailThing_",
             images: [
                 "https://emailthing.xyz/logo.png"
             ]
+        },
+        alternates: {
+            // canonical: `https://emailthing.me/@${user.username}`
         },
         robots: {
             index: false
@@ -33,11 +39,8 @@ export async function generateMetadata({ params }: { params: { username: string 
     } satisfies Metadata
 }
 
-export default async function ContactUserPage({ params }: { params: { username: string } }) {
-    if (!params.username.startsWith("%40")) return notFound()
-    const username = params.username.replace("%40", '')
-
-    const user = await db.query.User.findFirst({
+const fetchUser = cache((username: string) => {
+    return db.query.User.findFirst({
         where: and(
             eq(User.username, username),
             eq(User.publicContactPage, true)
@@ -48,9 +51,19 @@ export default async function ContactUserPage({ params }: { params: { username: 
             publicEmail: true
         }
     })
-    if (!user) return notFound()
-    if (username != user.username) redirect(`./@${user.username}`)
+})
 
+const getUser = async (username: string) => {
+    if (!username.startsWith("%40")) return notFound()
+    const _username = username.replace("%40", '')
+    const user = await fetchUser(_username)
+    if (!user) return notFound()
+    if (_username != user.username) redirect(`./@${user.username}`)
+    return user
+}
+
+export default async function ContactUserPage({ params }: { params: { username: string } }) {
+    const user = await getUser(params.username)
     return (
         <main className="flex flex-col gap-5 container max-w-[65rem] py-11 sm:my-16 min-h-[calc(100vh-10.5rem)] sm:min-h-[calc(100vh-13rem)]">
             <h1 className="text-3xl sm:text-5xl font-bold text-center !leading-[1.5] pb-2">
@@ -59,7 +72,7 @@ export default async function ContactUserPage({ params }: { params: { username: 
                     @{user.username}
                 </span>
             </h1>
-            <Form publicEmail={user.publicEmail || `${username}@emailthing.me`}  username={user.username} />
+            <Form publicEmail={user.publicEmail || `${user.username}@emailthing.me`} username={user.username} />
         </main>
     )
 }

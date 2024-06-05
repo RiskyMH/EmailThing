@@ -101,10 +101,7 @@ Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}
 `
                 }
             ],
-            reply_to: {
-                email,
-                name
-            }
+            reply_to: email ? ({ email, name }) : undefined
         }),
     })
 
