@@ -44,7 +44,7 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
         if (!result.success) {
             return { error: "Failed turnstile capture" }
         }
-        return { success: "test done" }
+        // return { success: "test done" }
     } else {
         console.warn("No turnstile setup, allowing request")
     }
