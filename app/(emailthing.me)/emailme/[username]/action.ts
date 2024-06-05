@@ -42,7 +42,7 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
         const result = await turnstile.json()
         console.log(result)
         if (!result.success) {
-            return { error: "Failed turnstile capture" }
+            return { error: "Failed turnstile recapture test" }
         }
         // return { success: "test done" }
     } else {

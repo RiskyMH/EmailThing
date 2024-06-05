@@ -59,15 +59,7 @@ export default async function ContactUserPage({ params }: { params: { username: 
                     @{user.username}
                 </span>
             </h1>
-            <Form className="flex flex-col gap-2 max-w-[35rem] self-center w-full" publicEmail={user.publicEmail || `${username}@emailthing.me`}>
-                <input name="username" value={user.username} hidden />
-                <div className="flex gap-2 sm:flex-row flex-col">
-                    <ClientInput placeholder="Name" className="w-full sm:w-1/2 border-none bg-secondary" name="name" autoComplete="name" />
-                    <ClientInput placeholder="Email" className="w-full sm:w-1/2 border-none bg-secondary" name="email" type="email" />
-                </div>
-                <ClientInput placeholder="Subject" className="w-full border-none bg-secondary" name="subject" />
-                <ClientTextarea placeholder="Message... *" className="w-full border-none bg-secondary" rows={7} required name="message" />
-            </Form>
+            <Form publicEmail={user.publicEmail || `${username}@emailthing.me`}  username={user.username} />
         </main>
     )
 }
