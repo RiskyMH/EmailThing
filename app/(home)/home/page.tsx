@@ -2,7 +2,7 @@ import GitHubIcon from '@/components/icons/github'
 import { buttonVariants } from '@/components/ui/button'
 import { getCurrentUser } from '@/utils/jwt'
 import { cn } from '@/utils/tw'
-import { ShieldAlertIcon, CloudCogIcon, UsersIcon, SmartphoneIcon, TimerIcon, LucideIcon, WebhookIcon } from 'lucide-react'
+import { ShieldAlertIcon, CloudCogIcon, UsersIcon, SmartphoneIcon, TimerIcon, LucideIcon, WebhookIcon, ReceiptIcon, ReceiptTextIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
@@ -79,14 +79,13 @@ export default async function Home() {
             </>)}
           />
           <Feature
-            icon={ShieldAlertIcon}
-            title="Anti-spam"
+            icon={ReceiptTextIcon}
+            title="Contact page"
             description={(<>
-              We use {" "}
-              <a href="https://www.cloudflare.com/en-au/developer-platform/email-routing/" className="font-bold hover:underline" target="_blank">
-                Cloudflare Email Routing
-              </a>
-              {" "} to try and minimize spam.
+              You can setup your very own contact page. {" "}
+              <Link href="https://emailthing.xyz/emailme/@riskymh" className="font-bold hover:underline" target='_blank'>
+                see example
+              </Link>.
             </>)}
           />
           <Feature
