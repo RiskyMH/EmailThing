@@ -34,7 +34,9 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build
-        run: bun run build 2>&1 | tee -a build.log
+        run: |
+          set -o pipefail
+          bun run build 2>&1 | tee -a build.log
         env:
           STANDALONE: "1"
 
@@ -47,17 +49,17 @@ jobs:
           S3_URL: "no"
           S3_SECRET_ACCESS_KEY: "no"
       
-      - name: Copy static asset files
-        run: |
-          mkdir --parents ./.next/standalone/public/_next/static 
-          cp ./public -r ./.next/standalone
-          cp ./.next/static -r ./.next/standalone/public/_next
-
       - name: Echo build log to $GITHUB_STEP_SUMMARY
         run: |
           echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
           cat build.log >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        
+      - name: Copy static asset files
+        run: |
+          mkdir --parents ./.next/standalone/public/_next/static 
+          cp ./public -r ./.next/standalone
+          cp ./.next/static -r ./.next/standalone/public/_next
 
       - uses: actions/upload-artifact@v4
         with:
