@@ -293,7 +293,7 @@ export default async function EmailConfig({
                                 mailbox.categories.map((row) => (
                                     <TableRow key={row.id}>
                                         <TableCell className="py-3 font-medium gap-2 h-full">
-                                            <span className="self-center rounded-full h-3 w-3 mr-2 inline-block flex-shrink-0" style={{ backgroundColor: row.color || "grey" }} />
+                                            <span className="self-center rounded-full h-3 w-3 mr-2 inline-block shrink-0" style={{ backgroundColor: row.color || "grey" }} />
                                             {row.name}
                                         </TableCell>
                                         <TableCell className="py-3">

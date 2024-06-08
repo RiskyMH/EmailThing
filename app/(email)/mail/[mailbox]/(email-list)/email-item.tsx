@@ -32,7 +32,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                 >
                     <TooltipText text={category?.name ?? "No category"}>
                         <span
-                            className="self-center rounded-full h-3 w-3 m-2 inline-block mx-auto flex-shrink-0"
+                            className="self-center rounded-full h-3 w-3 m-2 inline-block mx-auto shrink-0"
                             style={{ backgroundColor: category?.color ?? "grey" }}
                         />
                     </TooltipText>
@@ -49,7 +49,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         </span>
                     </TooltipText>
 
-                    <span className="self-center w-full hidden sm:inline-flex gap-4 flex-shrink-[2]">
+                    <span className="self-center w-full hidden sm:inline-flex gap-4 shrink-[2]">
                         {!email.isRead && (
                             <span className="select-none bg-red self-center text-white text-xs rounded px-3 py-1 font-bold inline h-6">
                                 NEW
@@ -59,8 +59,8 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                             {email.snippet}
                         </span>
                     </span>
-                    <ClientStar enabled={!!email.isStarred} action={updateEmail.bind(null, { isStarred: !email.isStarred })} className="self-center text-muted-foreground hover:text-foreground flex-shrink-0 ms-auto -me-2 hidden sm:inline-block" />
-                    <LocalTime type="hour-min/date" time={email.createdAt} className="float-right self-center text-muted-foreground text-sm flex-shrink-0 w-16 text-right" />
+                    <ClientStar enabled={!!email.isStarred} action={updateEmail.bind(null, { isStarred: !email.isStarred })} className="self-center text-muted-foreground hover:text-foreground shrink-0 ms-auto -me-2 hidden sm:inline-block" />
+                    <LocalTime type="hour-min/date" time={email.createdAt} className="float-right self-center text-muted-foreground text-sm shrink-0 w-16 text-right" />
                 </Link>
             </ContextMenuTrigger>
             <ContextMenuContent>

@@ -88,7 +88,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
         <>
             <div className="flex-col gap-2 p-5 flex w-full min-w-0">
                 <div className="flex flex-row w-full min-w-0 pb-3 border-b-2 -mt-4 pt-3 gap-6 overflow-y-auto sticky top-0 z-10 bg-background">
-                    <input type="checkbox" disabled id="select" className="mr-2 self-start mt-1 h-4 w-4 flex-shrink-0" />
+                    <input type="checkbox" disabled id="select" className="mr-2 self-start mt-1 h-4 w-4 shrink-0" />
                     <div className="flex flex-row w-full min-w-0 pb-3 -mb-3 gap-6 overflow-y-auto">
                         <CategoryItem
                             circleColor={null}
@@ -122,7 +122,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
                             </SmartDrawerContent>
                         </SmartDrawer>
                     )}
-                    <div className="ms-auto me-2 flex-shrink-0">
+                    <div className="ms-auto me-2 shrink-0">
                         <RefreshButton />
                     </div>
                 </div>
@@ -174,7 +174,7 @@ export default async function EmailList({ mailboxId, categoryId, type = "inbox",
 
 export function CategoryItem({ circleColor, name, count, link, category, isCurrent = false }: { circleColor: string | null, name: string, count: number, link: string, category: string | null, isCurrent: boolean }) {
     return (
-        <Link href={link + (category ? "?category=" + category : "")} className={cn("group flex-shrink-0 inline-flex items-center gap-1 px-1 max-w-fit w-auto font-bold border-b-3 border-transparent", isCurrent && "border-blue")}>
+        <Link href={link + (category ? "?category=" + category : "")} className={cn("group shrink-0 inline-flex items-center gap-1 px-1 max-w-fit w-auto font-bold border-b-3 border-transparent", isCurrent && "border-blue")}>
             {circleColor && <div className="w-2.5 h-2.5 rounded-full mr-1" style={{ backgroundColor: circleColor }}></div>}
             <span className="font-medium group-hover:text-muted-foreground">{name}</span>
             <span className="text-sm text-muted-foreground group-hover:text-muted-foreground/50">({count})</span>

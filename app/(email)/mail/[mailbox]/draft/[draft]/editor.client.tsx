@@ -181,7 +181,7 @@ export function RecipientInput({ saveAction, savedTo }: RecipientInputProps) {
                         <RecipientPill key={address} name={name} address={address} onRemove={() => removeRecipient(type, address)} />
                     ))}
                     <input
-                        className="text-sm flex-grow sm:min-w-48 focus-visible:outline-none bg-transparent py-1"
+                        className="text-sm grow sm:min-w-48 focus-visible:outline-none bg-transparent py-1"
                         placeholder="Add recipients..."
                         type="email"
                         onBlur={e => {
@@ -226,7 +226,7 @@ function RecipientPill({ name, address, onRemove }: { name: string | null, addre
             <span>{name || address}</span>
             {name && <span className="text-muted-foreground">{`<${address}>`}</span>}
 
-            <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-muted-foreground bg-tertiary hover:bg-tertiary hover:text-black dark:hover:text-white flex-shrink-0" onClick={onRemove}>
+            <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-muted-foreground bg-tertiary hover:bg-tertiary hover:text-black dark:hover:text-white shrink-0" onClick={onRemove}>
                 {/* <XIcon  /> */}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zM6.707 6.707a1 1 0 011.414 0L10 8.586l1.879-1.88a1 1 0 011.414 1.414L11.414 10l1.88 1.879a1 1 0 01-1.414 1.414L10 11.414l-1.879 1.88a1 1 0 01-1.414-1.414L8.586 10 6.707 8.121a1 1 0 010-1.414z" clipRule="evenodd" />

@@ -49,7 +49,7 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
             onSubmit={onSubmit} 
             className={cn("group h-10 w-full py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-background dark:bg-secondary rounded flex self-center px-1 gap-2", className)}
         >
-            <Button size="icon-sm" variant="ghost" className="self-center text-muted-foreground rounded-full flex-shrink-0 m-0.5 p-1.5 focus-visible:ring-offset-0 focus-visible:ring-1" type="submit">
+            <Button size="icon-sm" variant="ghost" className="self-center text-muted-foreground rounded-full shrink-0 m-0.5 p-1.5 focus-visible:ring-offset-0 focus-visible:ring-1" type="submit">
                 {isPending ? (
                     <Loader2 className="animate-spin self-center text-muted-foreground" />
                 ) : (
@@ -61,7 +61,7 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
                 type="search"
                 name="q"
                 placeholder="Search emails..."
-                className="w-full focus-visible:outline-none bg-transparent"
+                className="w-full focus-visible:outline-none bg-transparent border-none"
             />
             <ChevronDownIcon className="self-center text-muted-foreground me-2" />
         </form>

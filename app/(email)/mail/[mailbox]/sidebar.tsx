@@ -55,7 +55,7 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
     ]
 
     return (
-        <div className={cn("min-h-screen sm:bg-tertiary text-tertiary-foreground lg:w-60 sm:p-3 sm:flex-shrink-0 flex flex-col overflow-y-auto", className)}>
+        <div className={cn("min-h-screen sm:bg-tertiary text-tertiary-foreground lg:w-60 sm:p-3 sm:shrink-0 flex flex-col overflow-y-auto", className)}>
 
             <br className="sm:hidden" />
 

@@ -93,7 +93,7 @@ export default async function EmailPage({
                     </Avatar>
 
                     <div className="flex flex-col overflow-hidden">
-                        <div className="flex gap-2 overflow-ellipsis whitespace-nowrap">
+                        <div className="flex gap-2 text-ellipsis whitespace-nowrap">
                             <b className="font-bold">{email.from?.name || email.from!.address}</b>
                             {email.from?.name && <p className="text-muted-foreground text-sm">{`<${email.from.address}>`}</p>}
                         </div>
@@ -222,7 +222,7 @@ export default async function EmailPage({
                                 className="flex gap-2 items-center p-2 rounded-md bg-background hover:bg-background/80"
                             >
                                 {GetAttachmentIcon(a.filename.split('.').at(-1) || '')}
-                                <p className="flex-1 overflow-hidden whitespace-nowrap overflow-ellipsis">{a.title || a.filename}</p>
+                                <p className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">{a.title || a.filename}</p>
                                 <span className="text-muted-foreground text-sm">{size(a.size)}</span>
                             </a>
                         ))}

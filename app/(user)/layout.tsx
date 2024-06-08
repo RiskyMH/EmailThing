@@ -17,7 +17,7 @@ export default function SettingsLayout({ children }: DocsLayoutProps) {
     return (
         <div className="flex flex-col" vaul-drawer-wrapper="">
             <header className="sticky top-0 z-40 border-b-2 bg-tertiary">
-                <div className="container flex overflow-clip h-16 items-center gap-6 sm:gap-10 sm:justify-between">
+                <div className="container flex text-clip h-16 items-center gap-6 sm:gap-10 sm:justify-between">
                     <Link href="/" className="items-center gap-1 flex group">
                         <EmailThing />
                     </Link>

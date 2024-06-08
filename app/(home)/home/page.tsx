@@ -23,10 +23,12 @@ export default async function Home() {
           >
             Follow along on Discord
           </Link>
-          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl [.kawaii_&]:hidden block">
+          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl [.kawaii_&]:hidden block" style={{ textWrap: 'balance' }} >
             <span className='sr-only'>EmailThing is </span>
             <span className='uppercase'>a</span>n email app where you can receive and send emails!
           </h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" className="hidden" alt="EmailThing logo" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/emailthing-kawaii.svg" className="hidden [.kawaii_&]:flex sm:h-[20rem] self-center" alt="EmailThing kawaii logo by Alfonsusac" />
           <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8" style={{ textWrap: 'balance' }} >
@@ -48,7 +50,7 @@ export default async function Home() {
               className={cn(buttonVariants({ variant: "outline", size: "lg", className: "gap-1 font-medium px-5" }))}
             >
               <GitHubIcon className='h-4 w-4 mb-[0.1rem] me-1' />
-              Github 
+              Github
               <span className="text-muted-foreground font-normal">• {githubStars}</span>
             </Link>
           </div>

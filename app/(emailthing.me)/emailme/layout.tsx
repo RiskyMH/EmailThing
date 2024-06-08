@@ -30,7 +30,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
             <Header className="container z-40 top-0 sticky flex h-20 items-center justify-between py-6 w-full transition-[height]">
                 <div className="flex gap-6 md:gap-10">
                     <Link href="/emailme" className="items-center gap-1 flex group">
-                        <Logo className="h-7 w-7 flex-shrink-0 flex" />
+                        <Logo className="h-7 w-7 shrink-0 flex" />
                         <EmailthingText className="flex" text="EmailThing.me" />
                     </Link>
                     <div className="flex gap-6">
