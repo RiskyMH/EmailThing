@@ -6,7 +6,7 @@ import { Loader2Icon, KeyRoundIcon } from "lucide-react";
 import { addPasskey } from "../../actions";
 import { toast } from "sonner";
 import { create, parseCreationOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
-import UAParser from "ua-parser-js"
+import { UAParser } from "ua-parser-js"
 
 
 export default function PasskeysSetup({ userId, username }: { userId: string, username: string }) {
