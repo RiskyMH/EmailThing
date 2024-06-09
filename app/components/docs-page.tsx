@@ -69,6 +69,7 @@ export function DocsPager({ prev, next }: DocsPagerProps) {
                 <Link
                     href={prev.href}
                     className={cn(buttonVariants({ variant: "ghost" }))}
+                    rel="prev"
                 >
                     <ChevronLeftIcon className="mr-2 h-4 w-4" />
                     {prev.title}
@@ -78,6 +79,7 @@ export function DocsPager({ prev, next }: DocsPagerProps) {
                 <Link
                     href={next.href}
                     className={cn(buttonVariants({ variant: "ghost" }), "ml-auto")}
+                    rel="next"
                 >
                     {next.title}
                     <ChevronRightIcon className="ml-2 h-4 w-4" />
