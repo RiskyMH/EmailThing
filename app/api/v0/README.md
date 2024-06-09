@@ -6,6 +6,15 @@ JS SDK: https://www.npmjs.com/package/emailthing
 
 **NOTE:** This is v0 still and can contain breaking changes.
 
+## Headers
+
+The headers all routes use and require.
+
+| Header          | Type     | Description                                 |
+| --------------- | -------- | ------------------------------------------- |
+| `Authorization` | `string` | The token to use, (eg `Bearer et__abcd...`) |
+| `Content-Type`  | `string` | Currently only supports `application/json`  |
+
 ## [`POST /api/v0/receive-email`](./receive-email/route.ts)
 
 Sending your emails to the front-end app. Mainly for custom domains and cloudflare email workers.
