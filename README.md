@@ -71,6 +71,7 @@ Many individuals and organizations have contributed to the creation of this proj
 * [Cloudflare](https://cloudflare.com) for providing workers and email routing.
 * [MailChannels](https://mailchannels.com) for offering a straightforward transactional email API.
 * [Turso](https://turso.tech) for providing a good pricing for database.
+* [Alfonsusac](https://github.com/alfonsusac) for designing the logo and sticker.
 * [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.
 * And one of the most important, [Dawid Jankowski](https://dribbble.com/shots/15142673-E-mail-Client-Inbox-Dark-Mode) for providing the design to base the app on.
 * *and many more that I can't possibly mention...*
