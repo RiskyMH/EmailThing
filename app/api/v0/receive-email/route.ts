@@ -145,6 +145,7 @@ export async function POST(request: Request) {
                 mimeType: attachment.mimeType,
                 size: attContent.byteLength,
             })
+            .execute()
 
         try {
             const upload = await uploadFile({

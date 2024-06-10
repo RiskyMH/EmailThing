@@ -24,6 +24,7 @@ export async function sendEmail(data: Record<string, any>) {
             target: [Stats.time, Stats.type],
             set: { value: sql`excluded.value + 1` }
         })
+        .execute()
 
     if (!e.ok) {
         console.error(await e.text())

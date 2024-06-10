@@ -176,6 +176,7 @@ export async function addPasskey(creds: Credential, name: string) {
                 publicKey: publicKey,
                 credentialId: credentialID
             })
+            .execute()
     } catch (err) {
         console.error(err)
         return { error: "Failed to verify passkey" }
