@@ -22,7 +22,7 @@ export async function sendEmail(data: Record<string, any>) {
         })
         .onConflictDoUpdate({
             target: [Stats.time, Stats.type],
-            set: { value: sql`excluded.value + 1` }
+            set: { value: sql`${Stats.value} + 1` }
         })
         .execute()
 
