@@ -21,7 +21,7 @@ export async function sendEmail(data: Record<string, any>) {
             type: "send-email"
         })
         .onConflictDoUpdate({
-            target: Stats.time,
+            target: [Stats.time, Stats.type],
             set: { value: sql`excluded.value + 1` }
         })
 

@@ -112,7 +112,7 @@ export async function POST(request: Request) {
                 type: "receive-email"
             })
             .onConflictDoUpdate({
-                target: Stats.time,
+                target: [Stats.time, Stats.type],
                 set: { value: sql`excluded.value + 1` }
             })
 
