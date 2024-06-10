@@ -33,7 +33,7 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
                         <div
                             className={`cf-turnstile`}
                             data-appearance="interaction-only"
-                            data-action="emailthing.me"
+                            data-action="emailthing-me"
                             data-sitekey="0x4AAAAAAAb9U2XXs4z4cJUN"
                             // data-sitekey="3x00000000000000000000FF"
                             suppressHydrationWarning
