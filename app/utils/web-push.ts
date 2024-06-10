@@ -13,4 +13,3 @@ export async function sendNotification({ data, subscription }: { data: string, s
     const payload = await buildPushPayload(message, subscription, vapid);
     return fetch(subscription.endpoint, payload);
 };
-

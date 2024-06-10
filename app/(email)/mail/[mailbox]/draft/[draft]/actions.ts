@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/utils/jwt";
 import { revalidatePath } from "next/cache";
 import { SaveActionProps } from "./types";
 import { and, eq, sql } from "drizzle-orm";
+import { sendEmail } from "@/utils/send-email";
 
 export async function sendEmailAction(mailboxId: string, draftId: string, cheese?: boolean) {
     const userId = await getCurrentUser()
@@ -53,47 +54,37 @@ export async function sendEmailAction(mailboxId: string, draftId: string, cheese
     }
 
     // now send email (via mailchannels)!
-    const e = await fetch("https://email.riskymh.workers.dev", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-auth": env.EMAIL_AUTH_TOKEN
-        } as Record<string, string>,
-        body: JSON.stringify({
-            personalizations: [
-                {
-                    to: to!.filter(({ cc }) => cc !== "cc" && cc !== "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                    cc: to!.filter(({ cc }) => cc === "cc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                    bcc: to!.filter(({ cc }) => cc === "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                    ...(env.EMAIL_DKIM_PRIVATE_KEY ? ({
-                        dkim_domain: "emailthing.xyz",
-                        dkim_private_key: env.EMAIL_DKIM_PRIVATE_KEY,
-                        dkim_selector: "emailthing",
-                    }) : []),
-                },
-            ],
-            from: {
-                email: alias.alias,
-                name: alias.name ?? undefined
+    const e = await sendEmail({
+        personalizations: [
+            {
+                to: to!.filter(({ cc }) => cc !== "cc" && cc !== "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
+                cc: to!.filter(({ cc }) => cc === "cc").map(({ address, name }) => ({ email: address, name: name || undefined })),
+                bcc: to!.filter(({ cc }) => cc === "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
+                ...(env.EMAIL_DKIM_PRIVATE_KEY ? ({
+                    dkim_domain: "emailthing.xyz",
+                    dkim_private_key: env.EMAIL_DKIM_PRIVATE_KEY,
+                    dkim_selector: "emailthing",
+                }) : []),
             },
-            subject: subject || "(no subject)",
-            content: [
-                body ? ({
-                    type: "text/plain",
-                    value: body
-                }) : undefined,
-            ],
-            headers: {
-                "X-UserId": userId,
-                "X-MailboxId": mailboxId
-            }
-        }),
+        ],
+        from: {
+            email: alias.alias,
+            name: alias.name ?? undefined
+        },
+        subject: subject || "(no subject)",
+        content: [
+            body ? ({
+                type: "text/plain",
+                value: body
+            }) : undefined,
+        ],
+        headers: {
+            "X-UserId": userId,
+            "X-MailboxId": mailboxId
+        }
     })
 
-    if (!e.ok) {
-        console.error(await e.text())
-        throw new Error("Failed to send email")
-    }
+    if (e?.error) return e
 
     // const emailId = createId()
     const emailId = draftId // could also make new id here

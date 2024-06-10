@@ -12,6 +12,7 @@ import { userAuthSchema } from "@/validations/auth"
 import { env } from "@/utils/env";
 import { verifyCredentials } from "@/utils/passkeys";
 import { impersonatingEmails } from "@/validations/invalid-emails";
+import { sendEmail } from "@/utils/send-email";
 
 
 export async function changeUsername(_prevState: any, data: FormData) {
@@ -115,13 +116,7 @@ export async function changeBackupEmail(_prevState: any, data: FormData, redirec
 
     if (!user) throw new Error("User not found")
 
-    const e = await fetch("https://email.riskymh.workers.dev", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-auth": env.EMAIL_AUTH_TOKEN
-        } as Record<string, string>,
-        body: JSON.stringify({
+    const e = await sendEmail({
             personalizations: [
                 {
                     to: [{ email }]
@@ -146,11 +141,9 @@ If you did not expect this email or have any questions, please contact us at con
 `
                 }
             ]
-        }),
-    })
+        })
 
-    if (!e.ok) {
-        console.error(await e.text())
+    if (e?.error) {
         return { error: "Failed to send test email to your email address" }
     }
 

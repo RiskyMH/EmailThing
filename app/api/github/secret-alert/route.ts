@@ -1,5 +1,6 @@
 import db, { MailboxAlias, MailboxTokens } from "@/db";
 import { env } from "@/utils/env";
+import { sendEmail } from "@/utils/send-email";
 import { createVerify } from "crypto";
 import { asc, eq } from "drizzle-orm";
 
@@ -97,28 +98,22 @@ export async function POST(request: Request) {
         // send email
         if (alias) {
             console.log(`Sending email to ${alias.alias} for token "${match.token}"`)
-            const e = await fetch("https://email.riskymh.workers.dev", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-auth": env.EMAIL_AUTH_TOKEN
-                } as Record<string, string>,
-                body: JSON.stringify({
-                    personalizations: [
-                        {
-                            to: [{ email: alias.alias }]
-                        },
-                    ],
-                    from: {
-                        email: "system@emailthing.xyz",
-                        name: "EmailThing System"
+            const e = await sendEmail({
+                personalizations: [
+                    {
+                        to: [{ email: alias.alias }]
                     },
-                    subject: "Your token has been compromised",
-                    content: [
-                        {
-                            type: "text/plain",
-                            value:
-                                `Hey, ${alias.name || alias.alias}!
+                ],
+                from: {
+                    email: "system@emailthing.xyz",
+                    name: "EmailThing System"
+                },
+                subject: "Your token has been compromised",
+                content: [
+                    {
+                        type: "text/plain",
+                        value:
+                            `Hey, ${alias.name || alias.alias}!
 
 It appears that the token for your mailbox has been posted to the internet. 
 Luckily, GitHub has noticed and we have removed your token - hopefully before anyone could have maliciously used it!
@@ -130,12 +125,9 @@ Be more careful in the future, and make sure to not accidentally upload your tok
 Obtain a New Token: https://emailthing.xyz/mail/${token.mailboxId}/config
 
 `
-                        }
-                    ]
-                }),
+                    }
+                ]
             })
-
-
 
         } else {
             console.log(`No alias found for mailbox ${token.mailboxId}, but still invalidated token "${match.token}"`)

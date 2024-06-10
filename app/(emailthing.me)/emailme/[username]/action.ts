@@ -2,6 +2,7 @@
 
 import db, { User } from "@/db"
 import { env } from "@/utils/env"
+import { sendEmail } from "@/utils/send-email";
 import { and, eq } from "drizzle-orm"
 import { headers } from "next/headers";
 
@@ -72,43 +73,33 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
 
     if (!message) return { error: "You must provide a message" }
 
-    const e = await fetch("https://email.riskymh.workers.dev", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-auth": env.EMAIL_AUTH_TOKEN
-        } as Record<string, string>,
-        body: JSON.stringify({
-            personalizations: [
-                {
-                    to: [{ email: user.publicEmail || user.email }]
-                },
-            ],
-            from: {
-                email: "emailthing.me@emailthing.xyz",
-                name: `${name || email || "Someone"} (emailthing.me)`
+    const e = await sendEmail({
+        personalizations: [
+            {
+                to: [{ email: user.publicEmail || user.email }]
             },
-            subject: subject ? `${subject} - EmailThing.me` : "New message from EmailThing.me",
-            content: [
-                {
-                    type: "text/plain",
-                    value:
-                        `${message}
+        ],
+        from: {
+            email: "emailthing.me@emailthing.xyz",
+            name: `${name || email || "Someone"} (emailthing.me)`
+        },
+        subject: subject ? `${subject} - EmailThing.me` : "New message from EmailThing.me",
+        content: [
+            {
+                type: "text/plain",
+                value:
+                    `${message}
 
 ---
 
 Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}) using your [EmailThing.me](https://emailthing.xyz/emailme/@${username}) contact form.
 `
-                }
-            ],
-            reply_to: email ? ({ email, name }) : undefined
-        }),
+            }
+        ],
+        reply_to: email ? ({ email, name }) : undefined
     })
 
-    if (!e.ok) {
-        console.error(await e.text())
-        return { error: "Failed to notify user" }
-    }
+    if (e?.error) return { error: "Failed to notify user" }
 
     return { success: "Successfully sent your message!" }
 }

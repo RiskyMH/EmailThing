@@ -1,12 +1,13 @@
 "use server";
-import { db, MailboxForUser, User, ResetPasswordToken, PasskeyCredentials } from "@/db";
+import { db, MailboxForUser, User, ResetPasswordToken, PasskeyCredentials, Stats } from "@/db";
 import { env } from "@/utils/env";
 import { addUserTokenToCookie } from "@/utils/jwt"
 import { verifyCredentials, verifyCredentialss } from "@/utils/passkeys";
 import { createPasswordHash, verifyPassword } from "@/utils/password";
+import { sendEmail } from "@/utils/send-email";
 import { userAuthSchema } from "@/validations/auth"
 import { createId } from "@paralleldrive/cuid2";
-import { and, eq, lt, gt } from "drizzle-orm";
+import { and, eq, lt, gt, sql } from "drizzle-orm";
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
@@ -193,44 +194,33 @@ export async function resetPassword(username: string) {
         .execute()
 
     // send email
-    const e = await fetch("https://email.riskymh.workers.dev", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-auth": env.EMAIL_AUTH_TOKEN
-        } as Record<string, string>,
-        body: JSON.stringify({
-            personalizations: [
-                {
-                    to: [{ email: user.backupEmail }]
-                },
-            ],
-            from: {
-                email: "system@emailthing.xyz",
-                name: "EmailThing System"
+    const e = await sendEmail({
+        personalizations: [
+            {
+                to: [{ email: user.backupEmail }]
             },
-            subject: "Reset your password on EmailThing",
-            content: [
-                {
-                    type: "text/plain",
-                    value:
-                        `Hello @${user.username},
+        ],
+        from: {
+            email: "system@emailthing.xyz",
+            name: "EmailThing System"
+        },
+        subject: "Reset your password on EmailThing",
+        content: [
+            {
+                type: "text/plain",
+                value:
+                    `Hello @${user.username},
 
 You have requested to reset your password on EmailThing. Click the link below to reset your password:
 
 https://emailthing.xyz/login/reset?token=${token}
 
 If you did not request this, please ignore this email.`
-                }
-            ]
-        }),
+            }
+        ]
     })
 
-    if (!e.ok) {
-        console.error(await e.text())
-        return { error: "Failed to send email" }
-    }
-
+    if (e?.error) return e
 }
 
 export async function resetPasswordWithToken(token: string, password: string) {

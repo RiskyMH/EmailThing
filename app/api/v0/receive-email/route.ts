@@ -1,10 +1,9 @@
 import PostalMime from 'postal-mime';
-import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification, TempAlias, MailboxTokens } from "@/db";
+import { db, DefaultDomain, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCustomDomain, MailboxForUser, UserNotification, TempAlias, MailboxTokens, Stats } from "@/db";
 import { storageLimit } from '@/utils/limits';
 import { createId } from '@paralleldrive/cuid2';
-import { and, eq, gt, lt, sql } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { uploadFile } from '@/utils/s3';
-import { sendNotification } from '@/utils/web-push';
 import { getTokenMailbox } from '../tools';
 
 export const revalidate = 0
@@ -13,7 +12,6 @@ export const revalidate = 0
 
 export async function POST(request: Request) {
     const { searchParams } = new URL(request.url)
-    const internal = searchParams.has('internal')
 
     const { email: rawEmail, from, to } = await request.json() as Record<string, string>
     if (!rawEmail || !from || !to) {
@@ -23,59 +21,17 @@ export async function POST(request: Request) {
     const parser = new PostalMime()
     const email = await parser.parse(rawEmail as string);
 
-    // work out which mailbox to put it in
-    let mailboxId: string | undefined = undefined
-    let tempId: string | undefined
-
-    if (internal) {
-        // check if its a default domain (and if so, check the alias and get the mailbox id)
-        const defaultDomain = await db.query.DefaultDomain.findFirst({
-            where: and(
-                eq(DefaultDomain.domain, searchParams.get('zone')!),
-                eq(DefaultDomain.authKey, request.headers.get("x-auth")!)
-            ),
-            columns: {
-                id: true,
-                tempDomain: true,
-            }
-        })
-        if (!defaultDomain) {
-            return new Response('Unauthorized', { status: 401 })
-        }
-
-        const alias = defaultDomain.tempDomain ?
-            await db.query.TempAlias.findFirst({
-                where: and(
-                    eq(TempAlias.alias, to),
-                    gt(TempAlias.expiresAt, new Date()),
-                ),
-                columns: {
-                    mailboxId: true,
-                    id: true
-                }
-            })
-            : await db.query.MailboxAlias.findFirst({
-                where: eq(MailboxAlias.alias, to),
-                columns: {
-                    mailboxId: true,
-                    id: true
-                }
-            })
-
-        if (alias) {
-            mailboxId = alias.mailboxId
-            if (defaultDomain.tempDomain) {
-                tempId = alias.id
-            }
-        }
-
-    } else {
-        // it must be custom domain (so check the token)
-        mailboxId = await getTokenMailbox() || undefined
-        if (!mailboxId) {
-            return new Response('Unauthorized', { status: 401 })
-        }
+    const mailboxResult = await getMailbox({
+        internal: searchParams.has('internal'),
+        zone: searchParams.get('zone') as string,
+        auth: request.headers.get("x-auth") as string,
+        to
+    })
+    if (!mailboxResult) {
+        return new Response('Unauthorized', { status: 401 })
     }
+
+    const { mailboxId, tempId } = mailboxResult
 
     if (!mailboxId) {
         return new Response('Mailbox not found', { status: 400 })
@@ -118,23 +74,21 @@ export async function POST(request: Request) {
             }),
 
         db.insert(EmailRecipient)
-            .values(
-                [
-                    ...email.to?.map((to) => ({
-                        emailId: emailId,
-                        address: to.address!,
-                        name: to.name,
-                        cc: false,
-                    })) ?? [],
+            .values([
+                ...email.to?.map((to) => ({
+                    emailId: emailId,
+                    address: to.address!,
+                    name: to.name,
+                    cc: false,
+                })) ?? [],
 
-                    ...email.cc?.map((cc) => ({
-                        emailId: emailId,
-                        address: cc.address!,
-                        name: cc.name,
-                        cc: true,
-                    })) ?? []
-                ]
-            ),
+                ...email.cc?.map((cc) => ({
+                    emailId: emailId,
+                    address: cc.address!,
+                    name: cc.name,
+                    cc: true,
+                })) ?? []
+            ]),
 
         db.insert(EmailSender)
             .values({
@@ -148,7 +102,20 @@ export async function POST(request: Request) {
             .set({
                 storageUsed: sql`${Mailbox.storageUsed} + ${emailSize}`
             })
-            .where(eq(Mailbox.id, mailboxId))
+            .where(eq(Mailbox.id, mailboxId)),
+
+        // stats!
+        db.insert(Stats)
+            .values({
+                time: `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}`,
+                value: 1,
+                type: "receive-email"
+            })
+            .onConflictDoUpdate({
+                target: Stats.time,
+                set: { value: sql`excluded.value + 1` }
+            })
+
     ])
 
     console.log("inserted email", emailId)
@@ -193,50 +160,12 @@ export async function POST(request: Request) {
     console.log("saved email to s3", emailId)
 
     // send push notifications
-    const notifications = await db
-        .select({
-            endpoint: UserNotification.endpoint,
-            p256dh: UserNotification.p256dh,
-            auth: UserNotification.auth,
-            expiresAt: UserNotification.expiresAt,
-        })
-        .from(UserNotification)
-        .leftJoin(MailboxForUser, eq(UserNotification.userId, MailboxForUser.userId))
-        .where(eq(MailboxForUser.mailboxId, mailboxId))
-        .execute()
-
-    await Promise.all(notifications.map(async (n) => {
-        const payload = JSON.stringify({
-            title: email.from.address,
-            body: email.subject ? slice(email.subject, 200) : undefined,
-            url: `/mail/${mailboxId}/${emailId}`,
-        })
-        if (!n.endpoint || !n.p256dh || !n.auth) return console.error('missing notification data', n)
-
-        const res = await sendNotification({
-            subscription: {
-                endpoint: n.endpoint,
-                keys: {
-                    p256dh: n.p256dh,
-                    auth: n.auth,
-                },
-                expirationTime: n.expiresAt,
-            },
-            data: payload
-        })
-
-        if (!res.ok) {
-            // delete the notification if it's no longer valid
-            if (res.status === 410) {
-                await db.delete(UserNotification)
-                    .where(eq(UserNotification.endpoint, n.endpoint))
-                    .execute()
-            }
-            console.error(await res.text())
-        }
-    }))
-
     console.log("sent push notifications", emailId)
+    await notifyMailbox(mailboxId, {
+        title: email.from.address,
+        body: email.subject ? slice(email.subject, 200) : undefined,
+        url: `/mail/${mailboxId}/${emailId}`,
+    })
 
     return Response.json({
         success: true,
@@ -244,12 +173,63 @@ export async function POST(request: Request) {
     })
 }
 
+
+async function getMailbox({ internal, zone, auth, to }: { internal: boolean, zone: string, auth: string, to: string }) {
+    // work out which mailbox to put it in
+
+    if (!internal) {
+        // it must be custom domain (so check the token)
+        const mailboxId = await getTokenMailbox()
+        if (!mailboxId) return null
+        return { mailboxId }
+    }
+
+    // check if its a default domain (and if so, check the alias and get the mailbox id)
+    const defaultDomain = await db.query.DefaultDomain.findFirst({
+        where: and(
+            eq(DefaultDomain.domain, zone!),
+            eq(DefaultDomain.authKey, auth!)
+        ),
+        columns: {
+            id: true,
+            tempDomain: true,
+        }
+    })
+    if (!defaultDomain) return null
+
+    const alias = defaultDomain.tempDomain ?
+        await db.query.TempAlias.findFirst({
+            where: and(
+                eq(TempAlias.alias, to),
+                gt(TempAlias.expiresAt, new Date()),
+            ),
+            columns: {
+                mailboxId: true,
+                id: true
+            }
+        })
+        : await db.query.MailboxAlias.findFirst({
+            where: eq(MailboxAlias.alias, to),
+            columns: {
+                mailboxId: true,
+                id: true
+            }
+        })
+
+    if (defaultDomain.tempDomain) {
+        return { mailboxId: alias?.mailboxId, tempId: alias?.id }
+    }
+    return { mailboxId: alias?.mailboxId }
+}
+
+
 function slice(text: string, length: number) {
     return text.slice(0, length) + (length < text.length ? '…' : '')
 }
 
 import Turndown from "turndown"
 import { JSDOM } from "jsdom";
+import { notifyMailbox } from '@/utils/notifications';
 
 function emailContent({ text, html }: { text?: string, html?: string }) {
     if (text === "\n") text = undefined

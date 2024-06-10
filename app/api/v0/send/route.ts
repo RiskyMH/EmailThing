@@ -3,6 +3,7 @@ import { getTokenMailbox } from "../tools"
 import { env } from "@/utils/env"
 import { and, eq, sql } from "drizzle-orm"
 import { createId } from "@paralleldrive/cuid2"
+import { sendEmail } from "@/utils/send-email"
 
 export const revalidate = 0
 
@@ -66,109 +67,91 @@ export async function POST(request: Request) {
     if (!alias) return Response.json({ error: 'invalid alias' }, { status: 400 })
 
     // now send email (via mailchannels)!
-    const e = await fetch("https://email.riskymh.workers.dev?dry-run=false", {
-        method: "POST",
+    const e = await sendEmail({
+        personalizations: [
+            {
+                to: data.to.map(getInfoFromAddress),
+                cc: data.cc?.map(getInfoFromAddress),
+                bcc: data.bcc?.map(getInfoFromAddress),
+                ...(env.EMAIL_DKIM_PRIVATE_KEY ? ({
+                    dkim_domain: "emailthing.xyz",
+                    dkim_private_key: env.EMAIL_DKIM_PRIVATE_KEY,
+                    dkim_selector: "emailthing",
+                }) : []),
+            },
+        ],
+        from: {
+            email: alias.alias,
+            name: fromObj.name ?? undefined
+        },
+        reply_to: data.reply_to ? getInfoFromAddress(data.reply_to) : undefined,
+        subject: data.subject || "(no subject)",
+        content: [
+            ...(data.text ? [{ type: "text/plain", value: data.text }] : []),
+            ...(data.html ? [{ type: "text/html", value: data.html }] : [])
+        ],
         headers: {
-            "Content-Type": "application/json",
-            "x-auth": env.EMAIL_AUTH_TOKEN
-        } as Record<string, string>,
-        body: JSON.stringify({
-            personalizations: [
-                {
-                    to: data.to.map(getInfoFromAddress),
-                    cc: data.cc?.map(getInfoFromAddress),
-                    bcc: data.bcc?.map(getInfoFromAddress),
-                    ...(env.EMAIL_DKIM_PRIVATE_KEY ? ({
-                        dkim_domain: "emailthing.xyz",
-                        dkim_private_key: env.EMAIL_DKIM_PRIVATE_KEY,
-                        dkim_selector: "emailthing",
-                    }) : []),
-                },
-            ],
-            from: {
-                email: alias.alias,
-                name: fromObj.name ?? undefined
-            },
-            reply_to: data.reply_to ? getInfoFromAddress(data.reply_to) : undefined,
-            subject: data.subject || "(no subject)",
-            content: [
-                ...(data.text ? [{
-                    type: "text/plain",
-                    value: data.text
-                }] : []),
-                ...(data.html ? [{
-                    type: "text/html",
-                    value: data.html
-                }] : [])
-            ],
-            headers: {
-                ...data.headers,
-                "X-MailboxId": mailboxId
-            },
-        }),
+            ...data.headers,
+            "X-MailboxId": mailboxId,
+        },
     })
 
-    if (!e.ok) {
-        console.error(await e.text())
-        return Response.json({ error: 'failed to send email' }, { status: 500 })
-    }
+    if (e?.error) return Response.json(e, { status: 500 })
 
-    console.log((await e.json())?.data)
+    // if (data.config?.save_in_sent ?? true) {
+    const emailId = createId()
 
-    if (data.config?.save_in_sent ?? true) {
-        const emailId = createId()
+    const size = (data.html || '').length + (data.text || '').length
 
-        const size = (data.html || '').length + (data.text || '').length
+    // add to sent folder
+    await db.batch([
+        db.insert(Email)
+            .values({
+                id: emailId,
+                body: data.text || "",
+                html: data.html || "",
+                subject: data.subject,
+                snippet: data.text ? (data.text.slice(0, 200) + (200 < data.text.length ? '…' : '')) : '',
+                raw: "draft",
+                mailboxId,
+                isRead: true,
+                isSender: true,
+                size,
+                createdAt: new Date(),
+            }),
 
-        // add to sent folder
-        await db.batch([
-            db.insert(Email)
-                .values({
-                    id: emailId,
-                    body: data.text || "",
-                    html: data.html || "",
-                    subject: data.subject,
-                    snippet: data.text ? (data.text.slice(0, 200) + (200 < data.text.length ? '…' : '')) : '',
-                    raw: "draft",
-                    mailboxId,
-                    isRead: true,
-                    isSender: true,
-                    size,
-                    createdAt: new Date(),
-                }),
-
-            db.insert(EmailRecipient)
-                .values([
-                    ...data.to.map((address) => ({
-                        emailId,
-                        address,
-                        cc: false,
-                    })),
-
-                    ...data.cc?.map((address) => ({
-                        emailId,
-                        address,
-                        cc: true,
-                    })) ?? [],
-                ]),
-
-            db.insert(EmailSender)
-                .values({
+        db.insert(EmailRecipient)
+            .values([
+                ...data.to.map((address) => ({
                     emailId,
-                    name: alias.name ?? undefined,
-                    address: alias.alias
-                }),
+                    address,
+                    cc: false,
+                })),
 
-            db.update(Mailbox)
-                .set({
-                    storageUsed: sql`${Mailbox.storageUsed} + ${size}`,
-                })
-                .where(eq(Mailbox.id, mailboxId)),
-        ])
-        return Response.json({ success: true, emailId })
-    }
+                ...data.cc?.map((address) => ({
+                    emailId,
+                    address,
+                    cc: true,
+                })) ?? [],
+            ]),
 
-    return Response.json({ success: true })
+        db.insert(EmailSender)
+            .values({
+                emailId,
+                name: alias.name ?? undefined,
+                address: alias.alias
+            }),
+
+        db.update(Mailbox)
+            .set({
+                storageUsed: sql`${Mailbox.storageUsed} + ${size}`,
+            })
+            .where(eq(Mailbox.id, mailboxId)),
+    ])
+    return Response.json({ success: true, emailId })
+    // }
+
+    // return Response.json({ success: true })
 
 }
 
