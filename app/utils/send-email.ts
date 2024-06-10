@@ -1,6 +1,7 @@
 import db, { Stats } from "@/db"
 import { env } from "./env"
 import { sql } from "drizzle-orm"
+import { todayDate } from "./tools"
 
 
 export async function sendEmail(data: Record<string, any>) {
@@ -13,10 +14,9 @@ export async function sendEmail(data: Record<string, any>) {
         body: JSON.stringify(data),
     })
 
-    const date = new Date()
     await db.insert(Stats)
         .values({
-            time: `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`,
+            time: todayDate(),
             value: 1,
             type: "send-email"
         })

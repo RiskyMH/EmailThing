@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         // stats!
         db.insert(Stats)
             .values({
-                time: `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()}`,
+                time: todayDate(),
                 value: 1,
                 type: "receive-email"
             })
@@ -230,6 +230,7 @@ function slice(text: string, length: number) {
 import Turndown from "turndown"
 import { JSDOM } from "jsdom";
 import { notifyMailbox } from '@/utils/notifications';
+import { todayDate } from '@/utils/tools';
 
 function emailContent({ text, html }: { text?: string, html?: string }) {
     if (text === "\n") text = undefined

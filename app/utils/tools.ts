@@ -1,7 +1,12 @@
+export function todayDate(): `${number}-${number}-${number}` {
+    return new Date().toISOString().slice(0, 10) as any
+}
+
 
 export function dateDay(date: Date, timeZone: string | undefined) {
     return date.toLocaleString([], {
         timeZone,
+        // timeZone,
         month: "2-digit",
         day: "2-digit",
         year: "numeric",
