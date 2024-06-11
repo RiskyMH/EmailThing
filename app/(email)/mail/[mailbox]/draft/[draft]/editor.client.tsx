@@ -64,11 +64,13 @@ export function SendButton({ sendAction, isValid, text, className }: { sendActio
         }
 
         startTransition(async () => {
-            toast.promise(sendAction(), {
-                loading: "Sending your email...",
-                success: "Sent your email!",
-                error: "Failed to send your email",
-            })
+            const t = toast.loading("Sending your email...")
+            const res = await sendAction()
+
+            if (res?.error) {
+                return void toast.error(res.error, { id: t })
+            }
+            toast.success("Sent your email!", { id: t })
         })
     }
 

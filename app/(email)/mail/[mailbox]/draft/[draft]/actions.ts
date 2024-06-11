@@ -28,7 +28,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, cheese
             to: true,
         }
     })
-    if (!mail) throw new Error("Mail not found")
+    if (!mail) return { error: "Draft doesn't exist, make sure you haven't sent it already" }
 
     let { body, subject, from, to } = mail
     if (!to) throw new Error("No recipients")
