@@ -39,7 +39,7 @@
     "drizzle-orm": "^0.31.2",
     "jose": "^5.4.0",
     "jsdom": "^24.1.0",
-    "lucide-react": "^0.390.0",
+    "lucide-react": "^0.394.0",
     "marked": "^12.0.2",
     "next": "^14.2.3",
     "postal-mime": "^2.2.5",
@@ -47,7 +47,7 @@
     "react-dom": "^18.3.1",
     "server-only": "^0.0.1",
     "shiki": "^1.6.3",
-    "sonner": "^1.4.41",
+    "sonner": "^1.5.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "turndown": "^7.2.0",
@@ -68,7 +68,7 @@
     "@types/turndown": "^5.0.4",
     "@types/ua-parser-js": "^0.7.39",
     "autoprefixer": "^10.4.19",
-    "drizzle-kit": "^0.22.5",
+    "drizzle-kit": "^0.22.7",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
     "postcss": "^8.4.38",
@@ -78,7 +78,6 @@
   "trustedDependencies": [],
   "overrides": {
     "esbuild": "0.18.20",
-    "libsql": "0.3.10",
     "eslint": "8.57.0"
   }
 }
