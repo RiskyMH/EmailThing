@@ -16,11 +16,26 @@ export const metadata = {
         default: "EmailThing.me",
         template: "%s - EmailThing.me"
     },
-    description: "Forms to email someone!",
+    description: "EmailThing.me is your own contact page to make emailing easy!",
     openGraph: {
         title: "EmailThing.me",
-        description: "Forms to email someone!",
+        description: "EmailThing.me is your own contact page to make emailing easy!",
         siteName: "EmailThing.me",
+        images: [
+            "/logo.png",
+        ],
+        locale: "en_US",
+        url: "https://emailthing.me",
+        type: "website"
+    },
+    twitter: {
+        title: "EmailThing.me",
+        description: "EmailThing.me is your own contact page to make emailing easy!",
+        card: "summary",
+        images: [
+            "/logo.png",
+        ],
+        creator: "EmailThing_"
     },
 } satisfies Metadata
 
