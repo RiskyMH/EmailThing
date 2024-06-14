@@ -6,15 +6,17 @@ import { env } from "@/utils/env";
 import { userMailboxAccess } from "../../tools";
 import { getCurrentUser } from "@/utils/jwt";
 import { revalidatePath } from "next/cache";
-import { SaveActionProps } from "./types";
+import { getData } from "./tools";
 import { and, eq, sql } from "drizzle-orm";
 import { sendEmail } from "@/utils/send-email";
 
-export async function sendEmailAction(mailboxId: string, draftId: string, cheese?: boolean) {
+export async function sendEmailAction(mailboxId: string, draftId: string, data: FormData) {
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) {
         throw new Error("Mailbox not found");
     }
+
+    if (!data) return { error: "No data???" }
 
     const mail = await db.query.DraftEmail.findFirst({
         where: and(
@@ -22,16 +24,27 @@ export async function sendEmailAction(mailboxId: string, draftId: string, cheese
             eq(DraftEmail.mailboxId, mailboxId),
         ),
         columns: {
-            body: true,
-            subject: true,
-            from: true,
-            to: true,
+            // body: true,
+            // subject: true,
+            // from: true,
+            // to: true,
+            id: true
         }
     })
     if (!mail) return { error: "Draft doesn't exist, make sure you haven't sent it already" }
 
-    let { body, subject, from, to } = mail
-    if (!to) throw new Error("No recipients")
+    // let { body, subject, from, to } = mail
+    const { body, subject, from, to } = getData(data)
+
+    if (!subject) {
+        return { error: "Subject is required" };
+    } else if (!body) {
+        return { error: "Body is required" };
+    } else if (!from) {
+        return { error: "From is required" };
+    } else if (!to || [...to].filter(e => !e.cc).length <= 0) {
+        return { error: "At least one recipient is required" };
+    }
 
     // verify alias is valid (and user has access to it)
     const alias = await db.query.MailboxAlias.findFirst({
@@ -45,13 +58,6 @@ export async function sendEmailAction(mailboxId: string, draftId: string, cheese
         }
     })
     if (!alias) throw new Error("Alias not found")
-
-    // if cheese, replace some chars with cheese (~25% of chars)
-    const cheeseify = (str: string) => str.split("").map(char => Math.random() < 0.25 ? "🧀" : char).join("")
-    if (cheese) {
-        if (subject) subject = cheeseify(subject)
-        if (body) body = cheeseify(body)
-    }
 
     // now send email (via mailchannels)!
     const e = await sendEmail({
@@ -138,19 +144,14 @@ export async function sendEmailAction(mailboxId: string, draftId: string, cheese
 }
 
 
-export async function saveDraftAction(mailboxId: string, draftId: string, data: SaveActionProps) {
+export async function saveDraftAction(mailboxId: string, draftId: string, data: FormData) {
     const userId = await getCurrentUser()
     if (!userId || !await userMailboxAccess(mailboxId, userId)) {
         throw new Error("Mailbox not found");
     }
 
     await db.update(DraftEmail)
-        .set({
-            body: data.body,
-            subject: data.subject,
-            from: data.from,
-            to: data.to?.map(({ name, address, cc }) => ({ name, address, cc }))
-        })
+        .set(getData(data))
         .where(and(
             eq(DraftEmail.id, draftId),
             eq(DraftEmail.mailboxId, mailboxId)
@@ -158,4 +159,20 @@ export async function saveDraftAction(mailboxId: string, draftId: string, data: 
         .execute()
 
     revalidatePath(`/mail/${mailboxId}/draft/${draftId}`)
+};
+
+export async function deleteDraftAction(mailboxId: string, draftId: string) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    await db.delete(DraftEmail)
+        .where(and(
+            eq(DraftEmail.id, draftId),
+            eq(DraftEmail.mailboxId, mailboxId)
+        ))
+        .execute()
+
+    return redirect(`/mail/${mailboxId}`)
 };

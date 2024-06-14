@@ -26,7 +26,7 @@ export async function notifyMailbox(mailboxId: string, data: { title?: string | 
                     p256dh: n.p256dh,
                     auth: n.auth,
                 },
-                expirationTime: n.expiresAt,
+                expirationTime: null
             },
             data: JSON.stringify(data)
         })

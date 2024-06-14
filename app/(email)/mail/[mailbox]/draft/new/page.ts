@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { mailboxAliases, pageMailboxAccess } from "../../tools";
 import { and, eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
-import type { Recipient } from "../[draft]/types";
+import type { Recipient } from "../[draft]/tools";
 import { headers } from "next/headers";
 
 export default async function Page({

@@ -1,10 +1,13 @@
-import { db, DraftEmail } from "@/db";
-import { BodyEditor, FromInput, RecipientInput, SendButton, Subject } from "./editor.client"
-import { notFound } from "next/navigation"
+import { db, DraftEmail, Email } from "@/db";
+import { BodyEditor, DeleteButton, FromInput, RecipientInput, SendButton, Subject } from "./editor.client"
+import { notFound, redirect } from "next/navigation"
 import { mailboxAliases, pageMailboxAccess } from "../../tools"
-import { saveDraftAction, sendEmailAction } from "./actions"
+import { deleteDraftAction, saveDraftAction, sendEmailAction } from "./actions"
 import { cache } from "react"
 import { and, eq } from "drizzle-orm";
+import { Button } from "@/components/ui/button";
+import { PaperclipIcon } from "lucide-react";
+import LocalTime from "@/components/localtime";
 
 export async function generateMetadata(props: { params: { mailbox: string, draft: string } }) {
     if (!await pageMailboxAccess(props.params.mailbox, false)) return {}
@@ -25,11 +28,11 @@ const fetchDraft = cache(async (mailboxId: string, draftId: string) => {
             body: true,
             subject: true,
             from: true,
-            to: true
+            to: true,
+            updatedAt: true
         },
     })
 })
-
 
 
 export default async function DraftPage({
@@ -45,37 +48,43 @@ export default async function DraftPage({
     const { aliases, default: defaultAlias } = await mailboxAliases(params.mailbox)
 
     const mail = await fetchDraft(params.mailbox, params.draft)
-    if (!mail) return notFound()
-
-
-    const saveAction = saveDraftAction.bind(null, params.mailbox, params.draft)
-    const sendAction = sendEmailAction.bind(null, params.mailbox, params.draft)
-
-    let isValid = null;
-    if (!mail.subject) {
-        isValid = "Subject is required";
-    } else if (!mail.body) {
-        isValid = "Body is required";
-    } else if (!mail.from) {
-        isValid = "From is required";
-    } else if (!mail.to || [...mail.to].filter(e => !e.cc).length <= 0) {
-        isValid = "At least one recipient is required";
+    if (!mail) {
+        // check if mail sent before 404ing
+        const mail = await db.query.Email.findFirst({
+            where: and(
+                eq(Email.id, params.draft),
+                eq(Email.mailboxId, params.mailbox),
+            ),
+            columns: {
+                id: true
+            }
+        })
+        if (mail) return redirect(`/mail/${params.mailbox}/${params.draft}`)
+        return notFound()
     }
 
     return (
-        <div className="w-full p-4 md:p-8 gap-4 flex flex-col">
-            <div className="flex items-center gap-4">
-                <SendButton sendAction={sendAction} isValid={isValid} />
-                {(mail.from?.includes("cheese") || mail.subject?.includes("cheese")) && (
-                    <SendButton className="bg-orange-500 hover:bg-orange-400" text="🧀" sendAction={sendAction.bind(null, true)} isValid={isValid} />
-                )}
-                <FromInput savedAlias={mail.from || defaultAlias?.alias} aliases={aliases} saveAction={saveAction} />
-            </div>
+        <form action={saveDraftAction.bind(null, params.mailbox, params.draft)} id="draft-form" className="w-full h-full p-4 md:p-6 gap-4 flex flex-col" suppressHydrationWarning>
+            <FromInput savedAlias={mail.from || defaultAlias?.alias || undefined} aliases={aliases} />
+            <RecipientInput savedTo={mail.to || undefined} />
+            <Subject savedSubject={mail.subject || undefined} />
+            <br className="h-1" />
+            <BodyEditor savedBody={mail.body || undefined} />
 
-            <RecipientInput savedTo={mail.to || undefined} saveAction={saveAction} />
-            <Subject savedSubject={mail.subject || undefined} saveAction={saveAction} />
-            <br className="h-4" />
-            <BodyEditor savedBody={mail.body ?? undefined} saveAction={saveAction} />
-        </div>
+            <div className="flex gap-4">
+                <button type='submit' hidden></button>
+                <DeleteButton delAction={deleteDraftAction.bind(null, params.mailbox, params.draft)} />
+
+                <p className='ms-auto text-sm text-muted-foreground self-center'>
+                    Saved at <LocalTime type="hour-min/date" time={mail.updatedAt} />
+                </p>
+                {/* <Button variant="ghost" size="icon" onClick={() => toast.warning("Not implemented yet")}> */}
+                <Button variant="ghost" size="icon" className="shrink-0">
+                    <PaperclipIcon className='h-5 w-5' />
+                </Button>
+                <SendButton sendAction={sendEmailAction.bind(null, params.mailbox, params.draft)} />
+            </div>
+        </form>
+
     )
 }

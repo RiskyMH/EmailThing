@@ -9,7 +9,7 @@ export interface LocalTimeProps {
     type?: DateStyle
 }
 
-export default function LocalTimeClient({ time, className, type = "date", initialTimeZone }: (LocalTimeProps & { initialTimeZone: string })) {
+export default function LocalTimeClient({ time, className, type = "date", initialTimeZone }: (LocalTimeProps & { initialTimeZone?: string })) {
     const [timeZone, setTimeZone] = useState<string | undefined>(initialTimeZone)
 
     useEffect(() => setTimeZone(undefined), [])

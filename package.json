@@ -11,7 +11,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@block65/webcrypto-web-push": "^0.3.2",
+    "@block65/webcrypto-web-push": "^1.0.0",
     "@github/webauthn-json": "^2.1.1",
     "@libsql/client": "0.6.2",
     "@paralleldrive/cuid2": "^2.2.2",
@@ -39,8 +39,8 @@
     "drizzle-orm": "^0.31.2",
     "jose": "^5.4.0",
     "jsdom": "^24.1.0",
-    "lucide-react": "^0.394.0",
-    "marked": "^12.0.2",
+    "lucide-react": "*0.395.0",
+    "marked": "^13.0.0",
     "next": "^14.2.4",
     "postal-mime": "^2.2.5",
     "react": "^18.3.1",
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240605.0",
-    "@types/bun": "^1.1.3",
+    "@types/bun": "^1.1.4",
     "@types/dompurify": "^3.0.5",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^20.14.2",
@@ -73,7 +73,7 @@
     "eslint-config-next": "^14.2.4",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.1-rc"
   },
   "trustedDependencies": [],
   "overrides": {
