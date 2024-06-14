@@ -52,30 +52,7 @@ const nextConfig = {
                     destination: "/emailme",
                     has: [
                         {
-                            type: 'header',
-                            key: 'Host',
-                            value: 'emailthing.me'
-                        },
-                    ],
-                },
-                {
-                    source: "/\\@:slug",
-                    destination: "/emailme/@:slug",
-                    has: [
-                        {
-                            type: 'header',
-                            key: 'Host',
-                            value: 'emailthing.me'
-                        },
-                    ],
-                },
-                {
-                    source: "/\^(login|register|mail|pricing|docs|manifest|email):slug*",
-                    destination: "/emailme/404?from=:slug*",
-                    has: [
-                        {
-                            type: 'header',
-                            key: 'Host',
+                            type: 'host',
                             value: 'emailthing.me'
                         },
                     ],
@@ -90,8 +67,30 @@ const nextConfig = {
                         },
                     ],
                 },
+                {
+                    source: "/(login|register|mail|pricing|docs|manifest|email)",
+                    destination: "/emailme/404",
+                    has: [
+                        {
+                            type: 'host',
+                            value: 'emailthing.me'
+                        },
+                    ],
+                },
+
             ],
-            afterFiles: [],
+            afterFiles: [
+                {
+                    source: "/:path*",
+                    destination: "/emailme/:path*",
+                    has: [
+                        {
+                            type: 'host',
+                            value: 'emailthing.me'
+                        },
+                    ],
+                },
+            ],
             fallback: [],
         };
     },
@@ -176,13 +175,12 @@ const nextConfig = {
             },
             {
                 source: "/emailme/:path",
-                destination: "/:path",
-                permanent: true,
+                destination: "https://emailthing.me/:path",
+                permanent: false,
                 has: [
                     {
-                        type: 'header',
-                        key: 'Host',
-                        value: 'emailthing.me'
+                        type: 'host',
+                        value: 'emailthing.xyz'
                     },
                 ],
             },
