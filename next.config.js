@@ -174,7 +174,18 @@ const nextConfig = {
                     },
                 ],
             },
-
+            {
+                source: "/emailme/:path",
+                destination: "/:path",
+                permanent: true,
+                has: [
+                    {
+                        type: 'header',
+                        key: 'Host',
+                        value: 'emailthing.me'
+                    },
+                ],
+            },
         ];
     }
 };

@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: { username: string 
             ]
         },
         alternates: {
-            // canonical: `https://emailthing.me/@${user.username}`
+            canonical: `https://emailthing.me/@${user.username}`
         },
         robots: {
             index: false

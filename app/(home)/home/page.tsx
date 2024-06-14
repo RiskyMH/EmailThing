@@ -85,7 +85,7 @@ export default async function Home() {
             title="Contact page"
             description={(<>
               You can setup your very own contact page. {" "}
-              <Link href="https://emailthing.xyz/emailme/@riskymh" className="font-bold hover:underline" target='_blank'>
+              <Link href="https://emailthing.me/@riskymh" className="font-bold hover:underline" target='_blank'>
                 see example
               </Link>.
             </>)}

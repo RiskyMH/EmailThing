@@ -64,9 +64,7 @@ export default async function UserSettingsPage() {
                     <Label htmlFor="enabled" className="text-xl font-semibold leading-none tracking-tight">Enable public page</Label>
                     <p className="text-muted-foreground text-sm">If you enable this, anyone will be able to send you email easier.</p>
                     {user.publicContactPage && (
-                        // todo: fix with getting domain
-                        // <a href={`https://emailthing.me/@${user.username}`} className="hover:text-blue underline text-sm transition-colors" target="_blank">
-                        <a href={`https://emailthing.xyz/emailme/@${user.username}`} className="hover:text-blue underline text-sm transition-colors" target="_blank">
+                        <a href={`https://emailthing.me/@${user.username}`} className="hover:text-blue underline text-sm transition-colors" target="_blank">
                             https://emailthing.me/@{user.username}
                         </a>
                     )}

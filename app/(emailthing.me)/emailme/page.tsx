@@ -25,7 +25,7 @@ export default async function Home() {
                             Setup your own!
                         </Link>
                         <Link
-                            href="/emailme/@RiskyMH"
+                            href="/@RiskyMH"
                             className={buttonVariants({ variant: "outline", className: "h-11 rounded-md px-8" })}
                         >
                             Example
@@ -40,13 +40,9 @@ export default async function Home() {
 
 export const metadata: Metadata = {
     alternates: {
-        // canonical: "https://emailthing.me",
+        canonical: "https://emailthing.me",
     },
     title: {
         absolute: "EmailThing.me | Custom forms to make emailing you easy!",
     },
-    // todo: when the domain is acquired fix:
-    robots: {
-        index: false
-    }
 }

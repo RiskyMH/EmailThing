@@ -80,7 +80,7 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
             },
         ],
         from: {
-            email: "emailthing.me@emailthing.xyz",
+            email: `${username}@emailthing.me`,
             name: `${name || email || "Someone"} (emailthing.me)`
         },
         subject: subject ? `${subject} - EmailThing.me` : "New message from EmailThing.me",
@@ -92,7 +92,7 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
 
 ---
 
-Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}) using your [EmailThing.me](https://emailthing.xyz/emailme/@${username}) contact form.
+Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}) using your [EmailThing.me](https://emailthing.me/@${username}) contact form.
 `
             }
         ],
