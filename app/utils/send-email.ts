@@ -19,7 +19,6 @@ export async function sendEmail(data: { from: string, to: string[], data: string
     const json = await res.json();
 
     const txtRecords = json?.Answer?.filter((a: any) => a.type === 16) || [];
-    console.log({ txtRecords })
     const allowed = txtRecords.some((r: any) => r.data.includes("v=spf1") && r.data.includes("include:_spf.mx.emailthing.xyz"));
 
     if (!allowed) {

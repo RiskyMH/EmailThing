@@ -5,7 +5,7 @@ import { env } from "@/utils/env"
 import { sendEmail } from "@/utils/send-email";
 import { and, eq } from "drizzle-orm"
 import { headers } from "next/headers";
-import { createMimeMessage } from 'mimetext'
+import { createMimeMessage, Mailbox } from 'mimetext'
 
 const MAX_REQUESTS_PER_WINDOW = 5;
 const WINDOW_DURATION_MS = 60 * 1000;
@@ -67,10 +67,10 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
     }
 
 
-    const name = data.get("name") as string
-    const email = data.get("email") as string
-    const subject = data.get("subject") as string
-    const message = data.get("message") as string
+    const name = data.get("name") as string | undefined
+    const email = data.get("email") as string | undefined
+    const subject = data.get("subject") as string | undefined
+    const message = data.get("message") as string | undefined
 
     if (!message) return { error: "You must provide a message" }
 
@@ -90,7 +90,7 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
 Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}) using your [EmailThing.me](https://emailthing.me/@${username}) contact form.
 `
     })
-    if (email) mail.setHeader("Reply-To", email)
+    if (email) mail.setHeader("Reply-To", new Mailbox({ addr: email, name: name }))
 
     const e = await sendEmail({ from: `${username}@emailthing.me`, to: [user.publicEmail || user.email], data: mail.asRaw() })
 

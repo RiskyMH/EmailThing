@@ -4,7 +4,7 @@ import { env } from "@/utils/env"
 import { and, eq, sql } from "drizzle-orm"
 import { createId } from "@paralleldrive/cuid2"
 import { sendEmail } from "@/utils/send-email"
-import { createMimeMessage } from "mimetext"
+import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext"
 
 export const revalidate = 0
 
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
         contentType: "text/html",
         data: data.html
     })
-    if (data.reply_to) mail.setHeader("Reply-To", getInfoFromAddress(data.reply_to).email)
+    if (data.reply_to) mail.setHeader("Reply-To", new MimeMailbox(getInfoFromAddress(data.reply_to).email))
     mail.setHeader("X-MailboxId", mailboxId)
 
     const e = await sendEmail({
