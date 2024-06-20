@@ -13,6 +13,7 @@ import { env } from "@/utils/env";
 import { verifyCredentials } from "@/utils/passkeys";
 import { impersonatingEmails } from "@/validations/invalid-emails";
 import { sendEmail } from "@/utils/send-email";
+import { createMimeMessage } from "mimetext";
 
 
 export async function changeUsername(_prevState: any, data: FormData) {
@@ -116,22 +117,13 @@ export async function changeBackupEmail(_prevState: any, data: FormData, redirec
 
     if (!user) throw new Error("User not found")
 
-    const e = await sendEmail({
-            personalizations: [
-                {
-                    to: [{ email }]
-                },
-            ],
-            from: {
-                email: "system@emailthing.xyz",
-                name: "EmailThing System"
-            },
-            subject: "Someone has added you as a backup email! 🎉",
-            content: [
-                {
-                    type: "text/plain",
-                    value:
-                        `Hello!
+    const mail = createMimeMessage()
+    mail.setSender({ addr: "system@emailthing.xyz", name: "EmailThing System" })
+    mail.setRecipient(email)
+    mail.setSubject("Someone has added you as a backup email! 🎉")
+    mail.addMessage({
+        contentType: "text/plain",
+        data: `Hello!
 
 ${user.username} has added you as a backup email on EmailThing! 🎉
 
@@ -139,9 +131,9 @@ This means that if they ever lose access to their account, they can use this ema
 
 If you did not expect this email or have any questions, please contact us at contact@emailthing.xyz
 `
-                }
-            ]
-        })
+    })
+
+    const e = await sendEmail({ from: "system@emailthing.xyz", to: [email], data: mail.asRaw() })
 
     if (e?.error) {
         return { error: "Failed to send test email to your email address" }

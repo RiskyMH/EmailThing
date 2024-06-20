@@ -118,9 +118,9 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                             <code className="text-muted-foreground font-semibold">TXT</code> {domain}
                         </Label>
                         <div className="flex items-center gap-2">
-                            <Input className="bg-secondary border-none" value="v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all" id="spf" readOnly />
+                            <Input className="bg-secondary border-none" value="v=spf1 include:_spf.mx.emailthing.xyz include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all" id="spf" readOnly />
                             <Button size="sm" className="px-3" asChild>
-                                <CopyButton text="v=spf1 include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all">
+                                <CopyButton text="v=spf1 include:_spf.mx.emailthing.xyz include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all">
                                     <span className="sr-only">Copy</span>
                                     <CopyIcon className="h-4 w-4" />
                                 </CopyButton>

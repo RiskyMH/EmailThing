@@ -2,7 +2,7 @@ import { cn } from "@/utils/tw";
 // import { codeToHtml } from "shiki";
 import Link from "next/link"
 
-
+// TODO: fix types as these seem to be nothing extra
 export const Components = {
     h1: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
         <h1
@@ -58,7 +58,7 @@ export const Components = {
             {...props}
         />
     ),
-    a: ({ className, ...props }: React.HTMLAttributes<HTMLAnchorElement>) => (
+    a: ({ className, ...props }: React.HTMLAttributes<HTMLAnchorElement> & { href?: string, target?: string }) => (
         <a
             className={cn("font-medium underline underline-offset-4", className)}
             {...props}

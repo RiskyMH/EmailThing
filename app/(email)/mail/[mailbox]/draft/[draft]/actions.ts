@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { getData } from "./tools";
 import { and, eq, sql } from "drizzle-orm";
 import { sendEmail } from "@/utils/send-email";
+import { createMimeMessage } from "mimetext";
 
 export async function sendEmailAction(mailboxId: string, draftId: string, data: FormData) {
     const userId = await getCurrentUser()
@@ -59,35 +60,23 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     })
     if (!alias) throw new Error("Alias not found")
 
-    // now send email (via mailchannels)!
+
+    // now send email!
+    const email = createMimeMessage()
+    email.setSender({ addr: alias.alias, name: alias.name ?? undefined })
+    email.setRecipients(to.map(e => ({ addr: e.address, name: e.name || undefined, type: e.cc == "cc" ? "Cc" : e.cc === "bcc" ? "Bcc" : "To" }) as const))
+    email.setSubject(subject || "(no subject)")
+    if (body) email.addMessage({
+        contentType: "text/plain",
+        data: body
+    })
+    email.setHeader("X-UserId", userId)
+    email.setHeader("X-MailboxId", mailboxId)
+
     const e = await sendEmail({
-        personalizations: [
-            {
-                to: to!.filter(({ cc }) => cc !== "cc" && cc !== "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                cc: to!.filter(({ cc }) => cc === "cc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                bcc: to!.filter(({ cc }) => cc === "bcc").map(({ address, name }) => ({ email: address, name: name || undefined })),
-                ...(env.EMAIL_DKIM_PRIVATE_KEY ? ({
-                    dkim_domain: "emailthing.xyz",
-                    dkim_private_key: env.EMAIL_DKIM_PRIVATE_KEY,
-                    dkim_selector: "emailthing",
-                }) : []),
-            },
-        ],
-        from: {
-            email: alias.alias,
-            name: alias.name ?? undefined
-        },
-        subject: subject || "(no subject)",
-        content: [
-            body ? ({
-                type: "text/plain",
-                value: body
-            }) : undefined,
-        ],
-        headers: {
-            "X-UserId": userId,
-            "X-MailboxId": mailboxId
-        }
+        from: alias.alias,
+        to: to.map(e => e.address),
+        data: email.asRaw()
     })
 
     if (e?.error) return e

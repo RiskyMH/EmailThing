@@ -49,7 +49,7 @@ bun dev --turbo
 
 ## How it works
 
-EmailThing primarily handles the front-end aspect of the email management application. For sending and receiving emails, it makes use of [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) to incoming emails, and [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) to outgoing emails.
+EmailThing primarily handles the front-end aspect of the email management application. For sending and receiving emails, it makes use of [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) to incoming emails, and [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) to outgoing emails (currently experimenting with custom sending though).
 
 To do this locally, refer to [./cloudflare-workers/README.md](./cloudflare-workers/README.md) for more information.
 
@@ -69,7 +69,7 @@ Many individuals and organizations have contributed to the creation of this proj
 
 * [Vercel](https://vercel.com) for hosting the application and for developing Next.js.
 * [Cloudflare](https://cloudflare.com) for providing workers and email routing.
-* [MailChannels](https://mailchannels.com) for offering a straightforward transactional email API.
+<!-- * [MailChannels](https://mailchannels.com) for offering a straightforward transactional email API. -->
 * [Turso](https://turso.tech) for providing a good pricing for database.
 * [Alfonsusac](https://github.com/alfonsusac) for designing the logo and sticker.
 * [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.

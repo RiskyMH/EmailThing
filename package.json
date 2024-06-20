@@ -41,6 +41,7 @@
     "jsdom": "^24.1.0",
     "lucide-react": "*0.395.0",
     "marked": "^13.0.0",
+    "mimetext": "^3.0.24",
     "next": "^14.2.4",
     "postal-mime": "^2.2.5",
     "react": "^18.3.1",

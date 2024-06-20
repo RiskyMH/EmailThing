@@ -5,6 +5,7 @@ import { env } from "@/utils/env"
 import { sendEmail } from "@/utils/send-email";
 import { and, eq } from "drizzle-orm"
 import { headers } from "next/headers";
+import { createMimeMessage } from 'mimetext'
 
 const MAX_REQUESTS_PER_WINDOW = 5;
 const WINDOW_DURATION_MS = 60 * 1000;
@@ -73,31 +74,25 @@ export async function emailMeForm(_prevState: any, data: FormData): Promise<{ er
 
     if (!message) return { error: "You must provide a message" }
 
-    const e = await sendEmail({
-        personalizations: [
-            {
-                to: [{ email: user.publicEmail || user.email }]
-            },
-        ],
-        from: {
-            email: `${username}@emailthing.me`,
-            name: `${name || email || "Someone"} (emailthing.me)`
-        },
-        subject: subject ? `${subject} - EmailThing.me` : "New message from EmailThing.me",
-        content: [
-            {
-                type: "text/plain",
-                value:
-                    `${message}
+    const mail = createMimeMessage()
+    mail.setSender({
+        addr: `${username}@emailthing.me`,
+        name: `${name || email || "Someone"} (emailthing.me)`
+    })
+    mail.setRecipient(user.publicEmail || user.email)
+    mail.setSubject(subject ? `${subject} - EmailThing.me` : "New message from EmailThing.me")
+    mail.addMessage({
+        contentType: "text/plain",
+        data: `${message}
 
 ---
 
 Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}) using your [EmailThing.me](https://emailthing.me/@${username}) contact form.
 `
-            }
-        ],
-        reply_to: email ? ({ email, name }) : undefined
     })
+    if (email) mail.setHeader("Reply-To", email)
+
+    const e = await sendEmail({ from: `${username}@emailthing.me`, to: [user.publicEmail || user.email], data: mail.asRaw() })
 
     if (e?.error) return { error: "Failed to notify user" }
 

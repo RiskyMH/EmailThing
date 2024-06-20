@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Button } from '@/components/ui/button';
 import { Fragment, useEffect, useId, useState, useTransition, type MouseEvent } from 'react';
 import { toast } from 'sonner';
-import { Loader2, SendIcon, Trash2Icon } from 'lucide-react';
+import { ExternalLinkIcon, Loader2, SendIcon, Trash2Icon } from 'lucide-react';
 import { cn } from '@/utils/tw';
 
 export function BodyEditor({ savedBody }: { savedBody?: string }) {
@@ -84,6 +84,13 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
             const res = await sendAction(data)
 
             if (res?.error) {
+                // if (res.link) return void toast.error(res.error + "nooo", { id: t, action: { label: "Learn More 🔗", onClick: () => window.open(res.link, "_blank") } });
+                if (res.link) return void toast.error(res.error, {
+                    id: t,
+                    action: (
+                        <a href={res.link} target="blank" className='inline-flex items-center justify-center gap-2 shrink-0 bg-secondary rounded-lg p-2 hover:bg-secondary/80'>Learn More <ExternalLinkIcon className='h-4 w-4 text-muted-foreground' /></a>
+                    )
+                });
                 return void toast.error(res.error, { id: t })
             }
             toast.success("Sent your email!", { id: t })

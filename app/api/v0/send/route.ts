@@ -4,6 +4,7 @@ import { env } from "@/utils/env"
 import { and, eq, sql } from "drizzle-orm"
 import { createId } from "@paralleldrive/cuid2"
 import { sendEmail } from "@/utils/send-email"
+import { createMimeMessage } from "mimetext"
 
 export const revalidate = 0
 
@@ -66,34 +67,29 @@ export async function POST(request: Request) {
     })
     if (!alias) return Response.json({ error: 'invalid alias' }, { status: 400 })
 
-    // now send email (via mailchannels)!
+    const mail = createMimeMessage()
+    mail.setSender({ addr: alias.alias, name: fromObj.name })
+    mail.setRecipients([
+        ...data.to.map(getInfoFromAddress).map(e => ({ addr: e.email, name: e.name, type: "To" } as const)),
+        ...(data.cc?.map(getInfoFromAddress).map(e => ({ addr: e.email, name: e.name, type: "Cc" } as const)) || []),
+        ...(data.bcc?.map(getInfoFromAddress).map(e => ({ addr: e.email, name: e.name, type: "Bcc" } as const)) || []),
+    ])
+    mail.setSubject("Your token has been compromised")
+    if (data.text) mail.addMessage({
+        contentType: "text/plain",
+        data: data.text
+    })
+    if (data.html) mail.addMessage({
+        contentType: "text/html",
+        data: data.html
+    })
+    if (data.reply_to) mail.setHeader("Reply-To", getInfoFromAddress(data.reply_to).email)
+    mail.setHeader("X-MailboxId", mailboxId)
+
     const e = await sendEmail({
-        personalizations: [
-            {
-                to: data.to.map(getInfoFromAddress),
-                cc: data.cc?.map(getInfoFromAddress),
-                bcc: data.bcc?.map(getInfoFromAddress),
-                ...(env.EMAIL_DKIM_PRIVATE_KEY ? ({
-                    dkim_domain: "emailthing.xyz",
-                    dkim_private_key: env.EMAIL_DKIM_PRIVATE_KEY,
-                    dkim_selector: "emailthing",
-                }) : []),
-            },
-        ],
-        from: {
-            email: alias.alias,
-            name: fromObj.name ?? undefined
-        },
-        reply_to: data.reply_to ? getInfoFromAddress(data.reply_to) : undefined,
-        subject: data.subject || "(no subject)",
-        content: [
-            ...(data.text ? [{ type: "text/plain", value: data.text }] : []),
-            ...(data.html ? [{ type: "text/html", value: data.html }] : [])
-        ],
-        headers: {
-            ...data.headers,
-            "X-MailboxId": mailboxId,
-        },
+        from: alias.alias,
+        to: [...data.to, ...(data.cc ?? []), ...(data.bcc ?? [])].map(e => getInfoFromAddress(e).email),
+        data: mail.asRaw()
     })
 
     if (e?.error) return Response.json(e, { status: 500 })

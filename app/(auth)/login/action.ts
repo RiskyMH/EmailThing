@@ -8,6 +8,7 @@ import { sendEmail } from "@/utils/send-email";
 import { userAuthSchema } from "@/validations/auth"
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq, lt, gt, sql } from "drizzle-orm";
+import { createMimeMessage } from "mimetext";
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
@@ -194,31 +195,22 @@ export async function resetPassword(username: string) {
         .execute()
 
     // send email
-    const e = await sendEmail({
-        personalizations: [
-            {
-                to: [{ email: user.backupEmail }]
-            },
-        ],
-        from: {
-            email: "system@emailthing.xyz",
-            name: "EmailThing System"
-        },
-        subject: "Reset your password on EmailThing",
-        content: [
-            {
-                type: "text/plain",
-                value:
-                    `Hello @${user.username},
+    const mail = createMimeMessage()
+    mail.setSender({ addr: "system@emailthing.xyz", name: "EmailThing System" })
+    mail.setRecipient(user.backupEmail)
+    mail.setSubject("Reset your password on EmailThing")
+    mail.addMessage({
+        contentType: "text/plain",
+        data: `Hello @${user.username},
 
 You have requested to reset your password on EmailThing. Click the link below to reset your password:
 
 https://emailthing.xyz/login/reset?token=${token}
 
 If you did not request this, please ignore this email.`
-            }
-        ]
     })
+
+    const e = await sendEmail({ from: "system@emailthing.xyz", to: [user.backupEmail], data: mail.asRaw() })
 
     if (e?.error) return e
 }
