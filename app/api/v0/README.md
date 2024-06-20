@@ -47,17 +47,17 @@ Hello, World!"
 Send an email with an mailbox alias. 
 
 **JSON Body:**
-| Key                   | Value       | Description                                        |
-| --------------------- | ----------- | -------------------------------------------------- |
-| `to`                  | `string[]`  | Recipient email address. (1-1000 values)           |
-| `cc`                  | `string[]?` | Cc recipient email address. (0-1000 values)        |
-| `bcc`                 | `string[]?` | Bcc recipient email address. (0-1000 values)        |
-| `reply_to`            | `string?`   | Reply-to email address.                            |
-| `from`                | `string`    | Sender email address.                              |
-| `subject`             | `string`    | Email subject.                                     |
-| `html`                | `string?`   | The HTML version of the message.                   |
-| `text`                | `string?`   | The plain text version of the message.             |
-| `headers`             | `object?`   | Custom headers to add to the email.                |
+| Key                   | Value       | Description                            |
+| --------------------- | ----------- | -------------------------------------- |
+| `to`                  | `string[]`  | Recipient email address.               |
+| `cc`                  | `string[]?` | Cc recipient email address.            |
+| `bcc`                 | `string[]?` | Bcc recipient email address.           |
+| `reply_to`            | `string?`   | Reply-to email address.                |
+| `from`                | `string`    | Sender email address.                  |
+| `subject`             | `string`    | Email subject.                         |
+| `html`                | `string?`   | The HTML version of the message.       |
+| `text`                | `string?`   | The plain text version of the message. |
+| `headers`             | `object?`   | Custom headers to add to the email.    |
 
 **Example:**
 ```json

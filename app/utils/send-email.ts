@@ -28,6 +28,9 @@ export async function sendEmail(data: { from: string, to: string[], data: string
         }
     }
 
+    if (data.to.length > 50) {
+        return { error: "Too many recipients, please ensure you have under 50." }
+    }
 
     const e = await fetch("https://vps2.riskymh.dev/api/send-email", {
         method: "POST",
