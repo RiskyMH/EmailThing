@@ -22,7 +22,7 @@ export default function UserNav({ fallbackLogin }: { fallbackLogin?: boolean }) 
 
 function UserNavFallback() {
     return (
-        <div className="h-8 w-8 rounded-full bg-secondary animate-pulse self-center" />
+        <div className="size-8 rounded-full bg-secondary animate-pulse self-center" />
     )
 }
 

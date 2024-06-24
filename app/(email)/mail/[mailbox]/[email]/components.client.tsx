@@ -31,7 +31,7 @@ export function BackButton({ fallbackUrl }: { fallbackUrl?: string }) {
                     }
                 }}
             >
-                <ArrowLeftIcon className="h-5 w-5" />
+                <ArrowLeftIcon className="size-5" />
             </Button>
         </TooltipText>
     )

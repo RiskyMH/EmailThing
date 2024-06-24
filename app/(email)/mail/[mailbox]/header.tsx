@@ -14,7 +14,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
             <header className="flex h-16 w-full items-center">
                 <MobileNav>
                     <div className="flex gap-1 items-center">
-                        <Logo className="h-7 w-7" />
+                        <Logo className="size-7" />
                         <h2 className="inline-block whitespace-nowrap font-bold text-xl">
                             EmailThing
                         </h2>
@@ -41,7 +41,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                     {/* <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="ghost" size="auto" className="self-center p-1.5 rounded-full hidden sm:flex">
-                                <BellIcon className="h-5 w-5 text-muted-foreground" />
+                                <BellIcon className="size-5 text-muted-foreground" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="text-sm w-full">

@@ -101,7 +101,7 @@ export default function NotificationsButton() {
             // variant={isSubscribed ? "destructive" : "secondary"}
             variant="default"
         >
-            {isPending && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+            {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
             {isSubscribed ? 'Disable notifications' : 'Enable notifications'}
         </Button>
     )

@@ -81,7 +81,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
                         <Button disabled={isPending} type="submit">
                             {loading && (
-                                <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="me-2 size-4 animate-spin" />
                             )}
                             Sign In
                         </Button>
@@ -148,7 +148,7 @@ function ResetPasswordDiag({ username }: { username: string }) {
                     <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Close</SmartDrawerClose>
                     <Button onClick={resetPasswordAction} disabled={isPending} className="gap-2">
                         {isPending && (
-                            <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                            <Loader2 className="me-2 size-4 animate-spin" />
                         )}
                         Continue
                     </Button>

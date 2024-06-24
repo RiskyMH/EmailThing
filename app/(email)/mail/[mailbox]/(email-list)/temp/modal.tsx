@@ -46,7 +46,7 @@ export function CreateTempEmailForm({ mailboxId, domains = ["temp.emailthing.xyz
                         <Button type="submit" size="sm" className="px-3" asChild>
                             <CopyButton text={tempEmail}>
                                 <span className="sr-only">Copy</span>
-                                <CopyIcon className="h-4 w-4" />
+                                <CopyIcon className="size-4" />
                             </CopyButton>
                         </Button>
                     </div>
@@ -82,7 +82,7 @@ export function CreateTempEmailForm({ mailboxId, domains = ["temp.emailthing.xyz
                         <Input className="bg-secondary border-none" autoFocus name="name" placeholder="John Doe" id="name" disabled={isPending} />
                     </div>
                     <Button type="submit" disabled={isPending} className="gap-2">
-                        {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                        {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
                         Create
                     </Button>
                 </form>

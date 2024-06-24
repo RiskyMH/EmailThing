@@ -25,8 +25,8 @@ export function ClientStar({ action, enabled, className }: { action: () => void,
     return (
         <Button variant="ghost" size="auto" onClick={onClick as any} aria-disabled={isPending} className={cn(className, "hover:bg-transparent rounded-full ring-offset-5", enabled && "text-blue/80")}>
             {isPending ?
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                : <StarIcon fill={enabled ? "currentColor" : "transparent"} className="h-5 w-5" />
+                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                : <StarIcon fill={enabled ? "currentColor" : "transparent"} className="size-5" />
             }
         </Button>
     )
@@ -65,9 +65,9 @@ export function ContextMenuAction({ children, action, icon, fillIcon, tooltip, .
 
     const base = (
         <button {...props} onClick={onClick}>
-            {Icon && !isPending && <Icon className="w-5 h-5 text-muted-foreground" fill={fillIcon ? "currentColor" : "transparent"} />}
-            {icon === "EmptyIcon" && !isPending && <EmptyIcon className="w-5 h-5 text-muted-foreground" />}
-            {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+            {Icon && !isPending && <Icon className="size-5 text-muted-foreground" fill={fillIcon ? "currentColor" : "transparent"} />}
+            {icon === "EmptyIcon" && !isPending && <EmptyIcon className="size-5 text-muted-foreground" />}
+            {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
             {children}
         </button>
     )
@@ -96,7 +96,7 @@ export function RefreshButton({ className }: { className?: string }) {
             onClick={() => { !isPending && startTransition(router.refresh) }}
             className={cn(className, "rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground ")}
         >
-            <RotateCcwIcon className={cn(isPending && "animate-reverse-spin", "h-5 w-5 text-muted-foreground")} />
+            <RotateCcwIcon className={cn(isPending && "animate-reverse-spin", "size-5 text-muted-foreground")} />
         </Button>
     )
 }

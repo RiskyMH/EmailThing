@@ -30,22 +30,22 @@ export default function PricingPage() {
           </h3>
           <ul className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
             <li className="flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" /> Receive & Send Emails
+              <CheckIcon className="mr-2 size-4" /> Receive & Send Emails
             </li>
             <li className="flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" /> 100mb Storage
+              <CheckIcon className="mr-2 size-4" /> 100mb Storage
             </li>
             <li className="flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" /> 3 custom domain per mailbox
+              <CheckIcon className="mr-2 size-4" /> 3 custom domain per mailbox
             </li>
             <li className="flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" /> 3 users per mailbox
+              <CheckIcon className="mr-2 size-4" /> 3 users per mailbox
             </li>
             <li className="flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" /> 5 Mailboxes
+              <CheckIcon className="mr-2 size-4" /> 5 Mailboxes
             </li>
             <li className="flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" /> Basic Support
+              <CheckIcon className="mr-2 size-4" /> Basic Support
             </li>
           </ul>
         </div>

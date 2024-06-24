@@ -61,7 +61,7 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
 
             <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 px-4 lg:px-6 font-bold my-3">
                 <Link href={`/mail/${mailboxId}/draft/new`}>
-                    <PenSquareIcon className="h-5 w-5" />
+                    <PenSquareIcon className="size-5" />
                     <span className="sm:max-lg:hidden">New Message</span>
                 </Link>
             </Button>
@@ -100,7 +100,7 @@ function LinkElement({ href, name, icon: Icon, disabled, className }: { href: st
     return (
         <Button asChild variant="ghost" className={cn("flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal self-center w-full lg:self-auto text-center", className)}>
             <SidebarLink href={href} className="" disabled={disabled}>
-                <Icon className="h-6 w-6 self-center sm:max-lg:mx-auto" />
+                <Icon className="size-6 self-center sm:max-lg:mx-auto" />
                 <span className="self-center sm:max-lg:hidden">{name}</span>
                 {name === "Inbox" ? (
                     <Suspense>
@@ -176,9 +176,9 @@ async function ItemCount({ mailboxId, type, primary = false }: { mailboxId: stri
 function MailboxesFallback() {
     return (
         <div className="w-full h-10 py-2 rounded-md bg-tertiary animate-pulse flex gap-3 px-3 sm:max-lg:px-1">
-            <div className="h-7 w-7 bg-secondary animate-pulse rounded-full" />
+            <div className="size-7 bg-secondary animate-pulse rounded-full" />
 
-            <ChevronsUpDownIcon className="text-muted-foreground h-5 w-5 ms-auto self-end sm:max-lg:hidden" />
+            <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-end sm:max-lg:hidden" />
         </div>
     )
 }
@@ -193,28 +193,28 @@ const Mailboxes = (async ({ mailbox: mailboxId }: { mailbox: string }) => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "flex gap-3 px-3 sm:max-lg:px-1 w-full text-left")}>
-                <Avatar className="h-7 w-7">
+                <Avatar className="size-7">
                     <AvatarImage className="rounded-full" src={await gravatar(defaultAlias?.alias ?? "ab@c.com")} />
-                    <AvatarFallback className="rounded-full text-muted-foreground bg-secondary p-1 text-xs w-full h-full">
+                    <AvatarFallback className="rounded-full text-muted-foreground bg-secondary p-1 text-xs size-full">
                         {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                 </Avatar>
                 <span className="text-sm sm:max-lg:hidden text-foreground">{defaultAlias?.name}</span>
 
-                <ChevronsUpDownIcon className="text-muted-foreground h-5 w-5 ms-auto self-end sm:max-lg:hidden" />
+                <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-end sm:max-lg:hidden" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 {mailboxes.map(m => (
                     <DropdownMenuItem key={m.id} asChild className="flex gap-2 cursor-pointer">
                         <MailboxLink mailboxId={m.id}>
-                            {m.id === mailboxId ? <CheckIcon className="text-muted-foreground h-4 w-4" /> : <span className="w-4" />}
+                            {m.id === mailboxId ? <CheckIcon className="text-muted-foreground size-4" /> : <span className="w-4" />}
                             {m.name}
                         </MailboxLink>
                     </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem disabled>
-                    <PlusCircleIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <PlusCircleIcon className="mr-2 size-4 text-muted-foreground" />
                     <span>New mailbox</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>

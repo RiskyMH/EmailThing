@@ -20,7 +20,7 @@ export function MainNavItem({ href, title, disabled = false, mobileShow = false 
             )}
         >
             {title}
-            {href.startsWith("http") && <ExternalLinkIcon className="h-4 w-4 stroke-[3px]" />}
+            {href.startsWith("http") && <ExternalLinkIcon className="size-4 stroke-[3px]" />}
         </Link>
     )
 }

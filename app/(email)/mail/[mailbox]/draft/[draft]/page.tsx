@@ -64,7 +64,7 @@ export default async function DraftPage({
     }
 
     return (
-        <form action={saveDraftAction.bind(null, params.mailbox, params.draft)} id="draft-form" className="w-full h-full p-4 md:p-6 gap-4 flex flex-col" suppressHydrationWarning>
+        <form action={saveDraftAction.bind(null, params.mailbox, params.draft)} id="draft-form" className="size-full p-4 md:p-6 gap-4 flex flex-col overflow-auto" suppressHydrationWarning>
             <FromInput savedAlias={mail.from || defaultAlias?.alias || undefined} aliases={aliases} />
             <RecipientInput savedTo={mail.to || undefined} />
             <Subject savedSubject={mail.subject || undefined} />
@@ -80,7 +80,7 @@ export default async function DraftPage({
                 </p>
                 {/* <Button variant="ghost" size="icon" onClick={() => toast.warning("Not implemented yet")}> */}
                 <Button variant="ghost" size="icon" className="shrink-0">
-                    <PaperclipIcon className='h-5 w-5' />
+                    <PaperclipIcon className='size-5' />
                 </Button>
                 <SendButton sendAction={sendEmailAction.bind(null, params.mailbox, params.draft)} />
             </div>

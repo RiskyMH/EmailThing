@@ -32,7 +32,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                 >
                     <TooltipText text={category?.name ?? "No category"}>
                         <span
-                            className="self-center rounded-full h-3 w-3 m-2 inline-block mx-auto shrink-0"
+                            className="self-center rounded-full size-3 m-2 inline-block mx-auto shrink-0"
                             style={{ backgroundColor: category?.color ?? "grey" }}
                         />
                     </TooltipText>
@@ -69,19 +69,19 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                     <>
                         <ContextMenuItem className="flex gap-2" asChild>
                             <Link href={`/mail/${mailboxId}/draft/new?reply=${emailId}`}>
-                                <ReplyIcon className="w-5 h-5 text-muted-foreground" />
+                                <ReplyIcon className="size-5 text-muted-foreground" />
                                 Reply
                             </Link>
                         </ContextMenuItem>
                         <ContextMenuItem className="flex gap-2" asChild>
                             <Link href={`/mail/${mailboxId}/draft/new?replyAll=${emailId}`}>
-                                <ReplyAllIcon className="w-5 h-5 text-muted-foreground" />
+                                <ReplyAllIcon className="size-5 text-muted-foreground" />
                                 Reply to all
                             </Link>
                         </ContextMenuItem>
                         <ContextMenuItem className="flex gap-2" asChild>
                             <Link href={`/mail/${mailboxId}/draft/new?forward=${emailId}`}>
-                                <ForwardIcon className="w-5 h-5 text-muted-foreground" />
+                                <ForwardIcon className="size-5 text-muted-foreground" />
                                 Forward
                             </Link>
                         </ContextMenuItem>
@@ -114,7 +114,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         {type !== "temp" && (
                             <ContextMenuSub>
                                 <ContextMenuSubTrigger className="flex gap-2 cursor-pointer w-full">
-                                    <TagIcon className="w-5 h-5 text-muted-foreground" />
+                                    <TagIcon className="size-5 text-muted-foreground" />
                                     Categorize as
                                 </ContextMenuSubTrigger>
                                 <ContextMenuSubContent className="w-48">
@@ -146,7 +146,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
 
                 <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
                     <Link href={link} target="_blank">
-                        <ExternalLink className="w-5 h-5 text-muted-foreground" />
+                        <ExternalLink className="size-5 text-muted-foreground" />
                         Open in new tab
                     </Link>
                 </ContextMenuItem>

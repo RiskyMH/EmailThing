@@ -68,7 +68,7 @@ export default async function ContactUserPage({ params }: { params: { username: 
         <main className="flex flex-col gap-5 container max-w-[65rem] py-11 sm:my-16 min-h-[calc(100vh-10.5rem)] sm:min-h-[calc(100vh-13rem)]">
             <h1 className="text-3xl sm:text-5xl font-bold text-center !leading-[1.5] pb-2">
                 Get in touch with {" "}
-                <span className="break-all text-wrap w-100 inline-block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-br from-[#FF9797] to-[#6D6AFF]">
+                <span className="break-all text-wrap inline-block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-br from-[#FF9797] to-[#6D6AFF]">
                     @{user.username}
                 </span>
             </h1>

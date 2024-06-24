@@ -14,7 +14,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 sm:[.kawaii_&]:pt-10 lg:[.kawaii_&]:pb-10">
+      <section className="flex flex-col gap-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 sm:[.kawaii_&]:pt-10 lg:[.kawaii_&]:pb-10">
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <Link
             href="https://discord.gg/GT9Q2Yz4VS"
@@ -49,7 +49,7 @@ export default async function Home() {
               target="_blank"
               className={cn(buttonVariants({ variant: "outline", size: "lg", className: "gap-1 font-medium px-5" }))}
             >
-              <GitHubIcon className='h-4 w-4 mb-[0.1rem] me-1' />
+              <GitHubIcon className='size-4 mb-[0.1rem] me-1' />
               Github
               <span className="text-muted-foreground font-normal">• {githubStars}</span>
             </Link>
@@ -58,9 +58,9 @@ export default async function Home() {
       </section>
       <section
         id="features"
-        className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
+        className="container flex flex-col gap-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
       >
-        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
+        <div className="mx-auto flex max-w-[58rem] flex-col items-center gap-4 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
             Features
           </h2>
@@ -154,8 +154,8 @@ function Feature({ title, description, icon: Icon }: { title: string, descriptio
   return (
     <div className="bg-card relative overflow-hidden rounded-lg p-2">
       <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
-        <Icon className="h-12 w-12" />
-        <div className="space-y-2">
+        <Icon className="size-8" />
+        <div className="flex flex-col gap-2">
           <h3 className="font-bold">{title}</h3>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>

@@ -40,7 +40,7 @@ export default async function MailLayout({
             <Header mailbox={params.mailbox} />
             <div className="flex w-screen max-w-full h-[calc(100vh-4.1rem)]">
                 <Sidebar mailbox={params.mailbox} className="hidden sm:flex min-h-[calc(100vh-4.1rem)]" />
-                <div className="overflow-y-scroll w-screen max-w-full h-[calc(100vh-4.1rem)]">
+                <div className="overflow-y-auto w-screen max-w-full h-[calc(100vh-4.1rem)]">
                     {children}
                 </div>
             </div>

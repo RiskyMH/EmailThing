@@ -41,7 +41,7 @@ export default async function TopButtons({ mailboxId, emailId }: TopButtonsProps
                 <TooltipText text="Categorize as">
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground">
-                            <TagIcon className="h-5 w-5" />
+                            <TagIcon className="size-5" />
                         </Button>
                     </DropdownMenuTrigger>
                 </TooltipText>
@@ -66,21 +66,21 @@ export default async function TopButtons({ mailboxId, emailId }: TopButtonsProps
             <TooltipText text="Reply">
                 <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
                     <Link href={`/mail/${mailboxId}/draft/new?reply=${emailId}`}>
-                        <ReplyIcon className="h-5 w-5" />
+                        <ReplyIcon className="size-5" />
                     </Link>
                 </Button>
             </TooltipText>
             <TooltipText text="Reply All">
                 <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
                     <Link href={`/mail/${mailboxId}/draft/new?replyAll=${emailId}`}>
-                        <ReplyAllIcon className="h-5 w-5" />
+                        <ReplyAllIcon className="size-5" />
                     </Link>
                 </Button>
             </TooltipText>
             <TooltipText text="Forward">
                 <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
                     <Link href={`/mail/${mailboxId}/draft/new?forward=${emailId}`}>
-                        <ForwardIcon className="h-5 w-5" />
+                        <ForwardIcon className="size-5" />
                     </Link>
                 </Button>
             </TooltipText>

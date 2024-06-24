@@ -77,7 +77,7 @@ export default async function EmailPage({
     const view = searchParams?.view || "markdown"
 
     return (
-        <div className="min-w-0 p-5 w-full h-full flex flex-col gap-3">
+        <div className="min-w-0 p-5 size-full flex flex-col gap-3 overflow-auto">
             <TopButtons mailboxId={params.mailbox} emailId={params.email} />
             {!email.isRead && <MarkRead action={markRead} />}
 
@@ -85,7 +85,7 @@ export default async function EmailPage({
             <div className="bg-card p-3 rounded-md flex flex-col gap-3">
                 {/* from info and gravatar */}
                 <div className="flex gap-2">
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="size-8">
                         <AvatarImage className="bg-tertiary rounded-full" src={await gravatar(email.from!.address)} />
                         <AvatarFallback className="bg-tertiary rounded-full">
                             {(email.from?.name || email.from!.address).slice(0, 2).toUpperCase()}
@@ -102,7 +102,7 @@ export default async function EmailPage({
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="ghost" size="auto" className="rounded-full p-1 -my-1 ms-1 text-muted-foreground hover:text-foreground hover:bg-background">
-                                        <ChevronDown className="h-5 w-5" />
+                                        <ChevronDown className="size-5" />
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-screen sm:w-96">
@@ -173,7 +173,7 @@ export default async function EmailPage({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button className='rounded-full p-2 hover:bg-background flex ms-auto lg:ms-0' variant="ghost" size="icon">
-                                <EllipsisVerticalIcon className="w-6 h-6" />
+                                <EllipsisVerticalIcon className="size-6" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="min-w-[10rem] ">
@@ -189,7 +189,7 @@ export default async function EmailPage({
                                                 : `/mail/${params.mailbox}/${params.email}/raw`
                                             }
                                         >
-                                            <CodeIcon className="h-5 w-5 text-muted-foreground" />
+                                            <CodeIcon className="size-5 text-muted-foreground" />
                                             View original
                                         </Link>
                                     </DropdownMenuItem>
@@ -201,7 +201,7 @@ export default async function EmailPage({
                                                 : `/mail/${params.mailbox}/${params.email}/raw`
                                             }
                                         >
-                                            <DownloadIcon className="h-5 w-5 text-muted-foreground" />
+                                            <DownloadIcon className="size-5 text-muted-foreground" />
                                             Download message
                                         </Link>
                                     </DropdownMenuItem>
@@ -262,7 +262,7 @@ async function EmailContent({ mailboxId, emailId, view }: { mailboxId: string, e
 function EmailContentSpinner() {
     return (
         <div className="flex h-screen w-full items-center justify-center flex-col">
-            <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
     )
 }
@@ -299,5 +299,5 @@ const attachmentExtensionMap = {
 
 function GetAttachmentIcon(extension: string) {
     const ReturnIcon = attachmentExtensionMap[extension] || PaperclipIcon
-    return <ReturnIcon className="h-5 w-5 text-muted-foreground" />
+    return <ReturnIcon className="size-5 text-muted-foreground" />
 }

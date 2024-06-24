@@ -44,7 +44,7 @@ function SaveButton({ disabled }: { disabled?: boolean }) {
     const state = useFormStatus()
     return (
         <Button type="submit" className="ms-auto flex gap-2" size="sm" disabled={disabled || state.pending}>
-            {state.pending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+            {state.pending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
             Save
         </Button>
     )
@@ -83,7 +83,7 @@ export function ClientSwitch(props: SwitchProps) {
     const state = useFormStatus()
 
     return state.pending ? (<div className={cn("flex gap-2", props.className)}>
-        <Loader2 className="w-5 h-5 self-center text-muted-foreground animate-spin" />
+        <Loader2 className="size-5 self-center text-muted-foreground animate-spin" />
         <Switch {...props} disabled={true} />
     </div>) : <Switch {...props} disabled={props.disabled} />
 }

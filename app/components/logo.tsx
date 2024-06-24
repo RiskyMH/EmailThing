@@ -44,7 +44,7 @@ if (item === 'true') {
 export function EmailThing() {
     return (
         <>
-            <Logo className="h-7 w-7 shrink-0 [.kawaii_&]:hidden flex" />
+            <Logo className="size-7 shrink-0 [.kawaii_&]:hidden flex" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.svg" loading="lazy" className="hidden self-baseline h-12" alt="EmailThing logo" />
             <EmailthingText className="[.kawaii_&]:hidden flex" />
@@ -56,7 +56,7 @@ export function EmailThing() {
                 <ContextMenuContent>
                     <ContextMenuItem asChild className="flex gap-2">
                         <a href="https://github.com/alfonsusac" target="_blank">
-                            <GitHubIcon className="h-4 w-4" /> Credit: Alfonsusac
+                            <GitHubIcon className="size-4" /> Credit: Alfonsusac
                         </a>
                     </ContextMenuItem>
                 </ContextMenuContent>

@@ -15,7 +15,7 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
 
     return (
         <Textarea
-            className="h-full w-full bg-card block border-none min-h-28 text-base resize-none"
+            className="size-full bg-card block border-none min-h-28 text-base resize-none"
             id="body"
             name="body"
             defaultValue={savedBody}
@@ -65,7 +65,7 @@ export function DeleteButton({ delAction }: { delAction: () => Promise<any> }) {
 
     return (
         <Button onClick={onClick as any} formAction={delAction} aria-disabled={isPending} disabled={isPending} variant="ghost" size="icon">
-            {isPending ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <Trash2Icon className='h-5 w-5' />}
+            {isPending ? <Loader2 className="size-5 animate-spin text-muted-foreground" /> : <Trash2Icon className='size-5' />}
         </Button>
     )
 }
@@ -88,7 +88,7 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
                 if (res.link) return void toast.error(res.error, {
                     id: t,
                     action: (
-                        <a href={res.link} target="blank" className='inline-flex items-center justify-center gap-2 shrink-0 bg-secondary rounded-lg p-2 hover:bg-secondary/80'>Learn More <ExternalLinkIcon className='h-4 w-4 text-muted-foreground' /></a>
+                        <a href={res.link} target="blank" className='inline-flex items-center justify-center gap-2 shrink-0 bg-secondary rounded-lg p-2 hover:bg-secondary/80'>Learn More <ExternalLinkIcon className='size-4 text-muted-foreground' /></a>
                     )
                 });
                 return void toast.error(res.error, { id: t })
@@ -99,7 +99,7 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
 
     return (
         <Button onClick={onClick as any} type="submit" formAction={sendAction} aria-disabled={isPending} disabled={isPending} className="flex gap-2 px-7">
-            {isPending && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+            {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
             Send
         </Button>
     )
@@ -333,7 +333,7 @@ function RecipientPill({ name, address, onRemove }: { name: string | null, addre
             <span>{name || address}</span>
             {name && <span className="text-muted-foreground">{`<${address}>`}</span>}
 
-            <Button variant="ghost" size="icon" className="h-4 w-4 rounded-full text-muted-foreground bg-tertiary hover:bg-tertiary hover:text-black dark:hover:text-white shrink-0" onClick={onRemove}>
+            <Button variant="ghost" size="icon" className="size-4 rounded-full text-muted-foreground bg-tertiary hover:bg-tertiary hover:text-black dark:hover:text-white shrink-0" onClick={onRemove}>
                 {/* <XIcon  /> */}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zM6.707 6.707a1 1 0 011.414 0L10 8.586l1.879-1.88a1 1 0 011.414 1.414L11.414 10l1.88 1.879a1 1 0 01-1.414 1.414L10 11.414l-1.879 1.88a1 1 0 01-1.414-1.414L8.586 10 6.707 8.121a1 1 0 010-1.414z" clipRule="evenodd" />

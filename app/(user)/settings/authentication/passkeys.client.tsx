@@ -70,9 +70,9 @@ export default function PasskeysSetup({ userId, username }: { userId: string, us
             className="w-min border-0"
         >
             {isPending ? (
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2Icon className="mr-2 size-4 animate-spin" />
             ) : (
-                <KeyRoundIcon className="mr-2 h-4 w-4" />
+                <KeyRoundIcon className="mr-2 size-4" />
             )}{" "}
             Create new
         </Button>

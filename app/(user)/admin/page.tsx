@@ -59,7 +59,7 @@ export default async function AdminPage() {
                         <SmartDrawer>
                             <SmartDrawerTrigger asChild>
                                 <Button className="ms-auto flex gap-2" variant="secondary">
-                                    <PlusIcon className='h-4 w-4' /> Invite User
+                                    <PlusIcon className='size-4' /> Invite User
                                 </Button>
                             </SmartDrawerTrigger>
                             <SmartDrawerContent className="sm:max-w-[425px]">
@@ -105,14 +105,14 @@ export default async function AdminPage() {
                                                 <LocalTime time={user.createdAt} />
                                             </TableCell>
                                             <TableCell className="py-3">
-                                                {user.admin ? <CheckIcon className="h-4 w-4 mx-auto" /> : null}
+                                                {user.admin ? <CheckIcon className="size-4 mx-auto" /> : null}
                                             </TableCell>
                                             <TableCell className="py-3">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <Button variant="ghost" className="size-8 p-0">
                                                             <span className="sr-only">Open menu</span>
-                                                            <MoreHorizontalIcon className="h-4 w-4" />
+                                                            <MoreHorizontalIcon className="size-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
@@ -134,7 +134,7 @@ export default async function AdminPage() {
                             </TableBody>
                         </Table>
                     </div>
-                    <div className="flex items-center justify-end space-x-2 py-4">
+                    <div className="flex items-center justify-end gap-2 py-4">
                         <div className="flex-1 text-sm text-muted-foreground">
                             {users.length} of{" "}
                             {usersCount[0].count} users(s) visible.
@@ -213,9 +213,9 @@ export default async function AdminPage() {
                                             <TableCell className="py-3">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <Button variant="ghost" className="size-8 p-0">
                                                             <span className="sr-only">Open menu</span>
-                                                            <MoreHorizontalIcon className="h-4 w-4" />
+                                                            <MoreHorizontalIcon className="size-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
@@ -237,7 +237,7 @@ export default async function AdminPage() {
                             </TableBody>
                         </Table>
                     </div>
-                    <div className="flex items-center justify-end space-x-2 py-4">
+                    <div className="flex items-center justify-end gap-2 py-4">
                         <div className="flex-1 text-sm text-muted-foreground">
                             {aliases.length} of{" "}
                             {aliasesCount[0].count} alias(s) visible.
@@ -270,7 +270,7 @@ export default async function AdminPage() {
                         <SmartDrawer>
                             <SmartDrawerTrigger asChild>
                                 <Button className="ms-auto flex gap-2" variant="secondary">
-                                    <PlusIcon className='h-4 w-4' /> Add domain
+                                    <PlusIcon className='size-4' /> Add domain
                                 </Button>
                             </SmartDrawerTrigger>
                             <SmartDrawerContent className="sm:max-w-[425px]">
@@ -310,14 +310,14 @@ export default async function AdminPage() {
                                                 {domain.domain}
                                             </TableCell>
                                             <TableCell className="py-3">
-                                                {domain.tempDomain ? <CheckIcon className="h-4 w-4 mx-auto" /> : null}
+                                                {domain.tempDomain ? <CheckIcon className="size-4 mx-auto" /> : null}
                                             </TableCell>
                                             <TableCell className="py-3">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <Button variant="ghost" className="size-8 p-0">
                                                             <span className="sr-only">Open menu</span>
-                                                            <MoreHorizontalIcon className="h-4 w-4" />
+                                                            <MoreHorizontalIcon className="size-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">

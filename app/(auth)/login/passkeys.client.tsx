@@ -75,9 +75,9 @@ export default function PasskeysLogin({ transition, challenge = "login" }: { tra
             disabled={isPending || !support}
         >
             {loading ? (
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2Icon className="mr-2 size-4 animate-spin" />
             ) : (
-                <KeyRoundIcon className="mr-2 h-4 w-4" />
+                <KeyRoundIcon className="mr-2 size-4" />
             )}
             Passkey
         </button>

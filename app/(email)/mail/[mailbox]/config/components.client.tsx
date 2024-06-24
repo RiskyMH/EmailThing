@@ -58,8 +58,8 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                 >
                     <Input className="bg-secondary border-none" name="domain" placeholder="example.com" defaultValue={domain} id="domain" autoFocus disabled={isPending} required />
                     <Button type="submit" disabled={isPending} className="gap-2" autoFocus>
-                        {/* {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />} */}
-                        Next <ChevronRightIcon className="w-4 h-4" />
+                        {/* {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />} */}
+                        Next <ChevronRightIcon className="size-4" />
                     </Button>
                 </form>
 
@@ -93,7 +93,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                             Back
                         </Button> */}
                         <Button onClick={verify} disabled={isPending} className="gap-2 w-full">
-                            {isPending && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
+                            {isPending && <Loader2 className="size-4 text-muted-foreground animate-spin" />}
                             Verify domain
                         </Button>
                     </div>
@@ -122,7 +122,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                             <Button size="sm" className="px-3" asChild>
                                 <CopyButton text="v=spf1 include:_spf.mx.emailthing.xyz include:_spf.mx.cloudflare.net include:relay.mailchannels.net -all">
                                     <span className="sr-only">Copy</span>
-                                    <CopyIcon className="h-4 w-4" />
+                                    <CopyIcon className="size-4" />
                                 </CopyButton>
                             </Button>
                         </div>
@@ -135,7 +135,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                             <Button size="sm" className="px-3" asChild>
                                 <CopyButton text="v=mc1 cfid=riskymh.workers.dev">
                                     <span className="sr-only">Copy</span>
-                                    <CopyIcon className="h-4 w-4" />
+                                    <CopyIcon className="size-4" />
                                 </CopyButton>
                             </Button>
                         </div>
@@ -143,7 +143,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
 
                     <div className="flex gap-2 sm:gap-4">
                         <Button onClick={() => setPage("verify")} className="gap-2" variant="secondary" disabled>
-                            <ChevronLeftIcon className="w-4 h-4" />
+                            <ChevronLeftIcon className="size-4" />
                         </Button>
                         <Button onClick={() => setPage("cf-worker-code")} className="gap-2 w-full">
                             Continue
@@ -170,7 +170,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
 
                     <div className="flex gap-2 sm:gap-4">
                         <Button onClick={() => setPage("spf")} className="gap-2" variant="secondary">
-                            <ChevronLeftIcon className="w-4 h-4" />
+                            <ChevronLeftIcon className="size-4" />
                         </Button>
                         <Button onClick={() => { setPage("token"); cToken() }} className="gap-2 w-full">
                             Continue
@@ -195,20 +195,20 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                                 <Button type="submit" size="sm" className="px-3" asChild>
                                     <CopyButton text={token}>
                                         <span className="sr-only">Copy</span>
-                                        <CopyIcon className="h-4 w-4" />
+                                        <CopyIcon className="size-4" />
                                     </CopyButton>
                                 </Button>
                             </>
                         ) : (
                             <div className="h-10">
-                                <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                                <Loader2 className="size-5 text-muted-foreground animate-spin" />
                             </div>
                         )}
                     </div>
 
                     <div className="flex gap-2 sm:gap-4">
                         <Button onClick={() => setPage("cf-worker-code")} className="gap-2" variant="secondary">
-                            <ChevronLeftIcon className="w-4 h-4" />
+                            <ChevronLeftIcon className="size-4" />
                         </Button>
                         <Button onClick={() => setPage("finish")} className="gap-2 w-full">
                             Continue
@@ -235,7 +235,7 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
 
                     <div className="flex gap-2 sm:gap-4">
                         <Button onClick={() => setPage("token")} className="gap-2" variant="secondary">
-                            <ChevronLeftIcon className="w-4 h-4" />
+                            <ChevronLeftIcon className="size-4" />
                         </Button>
 
                         <SmartDrawerClose asChild>
@@ -281,7 +281,7 @@ export function AddAliasForm({ mailboxId }: { mailboxId: string }) {
                 <Input className="bg-secondary border-none" name="name" placeholder="John Doe" id="name" disabled={isPending} />
             </div>
             <Button type="submit" disabled={isPending} className="gap-2">
-                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
                 Add alias
             </Button>
         </form>
@@ -316,7 +316,7 @@ export function EditAliasForm({ mailboxId, alias, name, id }: { mailboxId: strin
                 <Input className="bg-secondary border-none" name="name" placeholder="John Doe" id="name" defaultValue={name || ''} disabled={isPending} autoFocus />
             </div>
             <Button type="submit" disabled={isPending} className="gap-2">
-                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
                 Edit alias
             </Button>
         </form>
@@ -344,7 +344,7 @@ export function DeleteButton({ action, text = "Delete" }: { action: () => Promis
 
     return (
         <Button type="submit" disabled={isPending} className="gap-2" variant="destructive" onClick={onClick} autoFocus>
-            {isPending && <Loader2 className="w-5 h-5  animate-spin" />}
+            {isPending && <Loader2 className="size-5  animate-spin" />}
             {text}
         </Button>
     );
@@ -385,7 +385,7 @@ export function CreateTokenForm({ mailboxId }: { mailboxId: string }) {
                         <Button type="submit" size="sm" className="px-3" asChild>
                             <CopyButton text={token}>
                                 <span className="sr-only">Copy</span>
-                                <CopyIcon className="h-4 w-4" />
+                                <CopyIcon className="size-4" />
                             </CopyButton>
                         </Button>
                     </div>
@@ -409,7 +409,7 @@ export function CreateTokenForm({ mailboxId }: { mailboxId: string }) {
                         <Input className="bg-secondary border-none" autoFocus name="name" placeholder="Local dev" id="name" disabled={isPending} />
                     </div>
                     <Button type="submit" disabled={isPending} className="gap-2">
-                        {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                        {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
                         Create
                     </Button>
                 </form>
@@ -482,7 +482,7 @@ export function CreateCategoryForm({ mailboxId, id, name, color: c }: { mailboxI
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="secondary" className="px-3">
-                                <ChevronDownIcon className="h-5 w-5" />
+                                <ChevronDownIcon className="size-5" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="flex flex-wrap gap-4 justify-evenly">
@@ -490,7 +490,7 @@ export function CreateCategoryForm({ mailboxId, id, name, color: c }: { mailboxI
                                 <TooltipText text={color.name} subtext={color.hex} key={color.hex}>
                                     <button
                                         style={{ backgroundColor: color.hex }}
-                                        className="h-6 w-6 rounded-full grow-0 shrink-0 hover:opacity-75 transition-all"
+                                        className="size-6 rounded-full grow-0 shrink-0 hover:opacity-75 transition-all"
                                         onClick={() => setColor(color.hex)}
                                     />
                                 </TooltipText>
@@ -501,7 +501,7 @@ export function CreateCategoryForm({ mailboxId, id, name, color: c }: { mailboxI
 
             </div>
             <Button type="submit" disabled={isPending} className="gap-2">
-                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
                 {id ? "Edit category" : "Create category"}
             </Button>
         </form>
@@ -546,7 +546,7 @@ export function InviteUserForm({ mailboxId }: { mailboxId: string }) {
             </div>
 
             <Button type="submit" disabled={isPending} className="gap-2">
-                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
                 Invite user
             </Button>
         </form>

@@ -41,7 +41,7 @@ export function Page({ githubStars, action }: any) {
                     href="https://github.com/RiskyMH/EmailThing" target="_blank"
                     onClick={() => setShow(true)}
                 >
-                    <Github className="h-4 w-4" />
+                    <Github className="size-4" />
                     Star EmailThing on GitHub <span className="text-muted-foreground">({githubStars} stars)</span>
                 </Link>
             </div>
@@ -61,7 +61,7 @@ export function Page({ githubStars, action }: any) {
 
                     <Button type="submit" disabled={pending} className="gap-2">
                         Open mailbox
-                        {pending ? <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                        {pending ? <Loader2 className="size-5 text-muted-foreground animate-spin" /> : <ChevronRight className="size-5" />}
                     </Button>
                 </form>
             </div >

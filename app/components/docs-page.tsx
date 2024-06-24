@@ -46,7 +46,7 @@ export function DocsPageHeader({
 }: DocsPageHeaderProps) {
     return (
         <>
-            <div className={cn("space-y-4", className)} {...props}>
+            <div className={cn("flex flex-col gap-4", className)} {...props}>
                 <h1 className="inline-block font-heading text-4xl lg:text-5xl">
                     {heading}
                 </h1>
@@ -71,7 +71,7 @@ export function DocsPager({ prev, next }: DocsPagerProps) {
                     className={cn(buttonVariants({ variant: "ghost" }))}
                     rel="prev"
                 >
-                    <ChevronLeftIcon className="mr-2 h-4 w-4" />
+                    <ChevronLeftIcon className="mr-2 size-4" />
                     {prev.title}
                 </Link>
             )}
@@ -82,7 +82,7 @@ export function DocsPager({ prev, next }: DocsPagerProps) {
                     rel="next"
                 >
                     {next.title}
-                    <ChevronRightIcon className="ml-2 h-4 w-4" />
+                    <ChevronRightIcon className="ml-2 size-4" />
                 </Link>
             )}
         </div>

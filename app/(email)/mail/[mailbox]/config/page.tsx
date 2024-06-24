@@ -121,7 +121,7 @@ export default async function EmailConfig({
                                 size="sm"
                                 variant="secondary"
                             >
-                                <PlusIcon className='h-4 w-4' /> Create alias
+                                <PlusIcon className='size-4' /> Create alias
                             </Button>
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
@@ -167,21 +167,21 @@ export default async function EmailConfig({
                                             {row.name}
                                         </TableCell>
                                         <TableCell className="py-3">
-                                            {row.default ? <CheckIcon className="h-4 w-4 mx-auto" /> : null}
+                                            {row.default ? <CheckIcon className="size-4 mx-auto" /> : null}
                                         </TableCell>
                                         <TableCell className="py-3">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <Button variant="ghost" className="size-8 p-0">
                                                         <span className="sr-only">Open menu</span>
-                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                        <MoreHorizontalIcon className="size-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <SmartDrawer>
                                                         <DropdownMenuItem asChild>
                                                             <SmartDrawerTrigger className="gap-2 w-full">
-                                                                <PencilIcon className="text-muted-foreground h-5 w-5" />
+                                                                <PencilIcon className="text-muted-foreground size-5" />
                                                                 Edit name
                                                             </SmartDrawerTrigger>
                                                         </DropdownMenuItem>
@@ -217,7 +217,7 @@ export default async function EmailConfig({
                                                             asChild
                                                         >
                                                             <SmartDrawerTrigger>
-                                                                <Trash2Icon className="text-muted-foreground h-5 w-5" />
+                                                                <Trash2Icon className="text-muted-foreground size-5" />
                                                                 Delete alias
                                                             </SmartDrawerTrigger>
                                                         </DropdownMenuItem>
@@ -259,7 +259,7 @@ export default async function EmailConfig({
                     <SmartDrawer>
                         <SmartDrawerTrigger asChild>
                             <Button className="ms-auto flex gap-2" size="sm" variant="secondary">
-                                <PlusIcon className='h-4 w-4' /> Create category
+                                <PlusIcon className='size-4' /> Create category
                             </Button>
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
@@ -293,22 +293,22 @@ export default async function EmailConfig({
                                 mailbox.categories.map((row) => (
                                     <TableRow key={row.id}>
                                         <TableCell className="py-3 font-medium gap-2 h-full">
-                                            <span className="self-center rounded-full h-3 w-3 mr-2 inline-block shrink-0" style={{ backgroundColor: row.color || "grey" }} />
+                                            <span className="self-center rounded-full size-3 mr-2 inline-block shrink-0" style={{ backgroundColor: row.color || "grey" }} />
                                             {row.name}
                                         </TableCell>
                                         <TableCell className="py-3">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <Button variant="ghost" className="size-8 p-0">
                                                         <span className="sr-only">Open menu</span>
-                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                        <MoreHorizontalIcon className="size-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <SmartDrawer>
                                                         <DropdownMenuItem asChild>
                                                             <SmartDrawerTrigger className="gap-2 w-full">
-                                                                <PencilIcon className="text-muted-foreground h-5 w-5" />
+                                                                <PencilIcon className="text-muted-foreground size-5" />
                                                                 Edit name
                                                             </SmartDrawerTrigger>
                                                         </DropdownMenuItem>
@@ -331,7 +331,7 @@ export default async function EmailConfig({
                                                     <SmartDrawer>
                                                         <DropdownMenuItem className="flex gap-2 w-full" asChild>
                                                             <SmartDrawerTrigger>
-                                                                <Trash2Icon className="text-muted-foreground h-5 w-5" />
+                                                                <Trash2Icon className="text-muted-foreground size-5" />
                                                                 Delete category
                                                             </SmartDrawerTrigger>
                                                         </DropdownMenuItem>
@@ -380,7 +380,7 @@ export default async function EmailConfig({
                                 size="sm"
                                 variant="secondary"
                             >
-                                <PlusIcon className='h-4 w-4' /> Add new domain
+                                <PlusIcon className='size-4' /> Add new domain
                             </Button>
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
@@ -408,16 +408,16 @@ export default async function EmailConfig({
                                         <TableCell className="py-3">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <Button variant="ghost" className="size-8 p-0">
                                                         <span className="sr-only">Open menu</span>
-                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                        <MoreHorizontalIcon className="size-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <SmartDrawer>
                                                         <DropdownMenuItem className="flex gap-2 w-full" asChild>
                                                             <SmartDrawerTrigger>
-                                                                <Trash2Icon className="text-muted-foreground h-5 w-5" />
+                                                                <Trash2Icon className="text-muted-foreground size-5" />
                                                                 Delete domain
                                                             </SmartDrawerTrigger>
                                                         </DropdownMenuItem>
@@ -473,7 +473,7 @@ export default async function EmailConfig({
                     <SmartDrawer>
                         <SmartDrawerTrigger asChild>
                             <Button className="ms-auto flex gap-2" size="sm" variant="secondary">
-                                <PlusIcon className='h-4 w-4' /> Create new token
+                                <PlusIcon className='size-4' /> Create new token
                             </Button>
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
@@ -521,7 +521,7 @@ export default async function EmailConfig({
                                         <TableCell className="py-3">
                                             <SmartDrawer>
                                                 <SmartDrawerTrigger className={buttonVariants({ variant: "outline", size: "icon-sm", className: "text-muted-foreground hover:text-destructive hover:border-destructive" })}>
-                                                    <Trash2Icon className="h-5 w-5" />
+                                                    <Trash2Icon className="size-5" />
                                                 </SmartDrawerTrigger>
 
                                                 <SmartDrawerContent className="sm:max-w-[425px]">
@@ -564,7 +564,7 @@ export default async function EmailConfig({
                     <SmartDrawer>
                         <SmartDrawerTrigger asChild>
                             <Button className="ms-auto flex gap-2" size="sm" variant="secondary" disabled={userRole !== "OWNER"}>
-                                <PlusIcon className='h-4 w-4' /> Invite user
+                                <PlusIcon className='size-4' /> Invite user
                             </Button>
                         </SmartDrawerTrigger>
                         <SmartDrawerContent className="sm:max-w-[425px]">
@@ -623,9 +623,9 @@ export default async function EmailConfig({
                                         <TableCell className="py-3">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                    <Button variant="ghost" className="size-8 p-0">
                                                         <span className="sr-only">Open menu</span>
-                                                        <MoreHorizontalIcon className="h-4 w-4" />
+                                                        <MoreHorizontalIcon className="size-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
@@ -633,7 +633,7 @@ export default async function EmailConfig({
                                                         <SmartDrawer>
                                                             <DropdownMenuItem asChild disabled={row.role === "OWNER"}>
                                                                 <SmartDrawerTrigger className="gap-2 w-full">
-                                                                    <UserRoundXIcon className="h-5 w-5" />
+                                                                    <UserRoundXIcon className="size-5" />
                                                                     Leave mailbox
                                                                 </SmartDrawerTrigger>
                                                             </DropdownMenuItem>
@@ -655,7 +655,7 @@ export default async function EmailConfig({
                                                         <SmartDrawer>
                                                             <DropdownMenuItem asChild disabled={row.role === "OWNER" || userRole !== "OWNER"}>
                                                                 <SmartDrawerTrigger className="gap-2 w-full">
-                                                                    <UserRoundXIcon className="h-5 w-5" />
+                                                                    <UserRoundXIcon className="size-5" />
                                                                     Remove user
                                                                 </SmartDrawerTrigger>
                                                             </DropdownMenuItem>
@@ -712,7 +712,7 @@ const cfWorkerCode = (
     <>
         <Button className="absolute right-6 m-2 shadow-md" size="sm" variant="secondary" asChild>
             <CopyButton text={cfWorkerCodeText}>
-                <ClipboardIcon className="h-4 w-4" />
+                <ClipboardIcon className="size-4" />
             </CopyButton>
         </Button>
 

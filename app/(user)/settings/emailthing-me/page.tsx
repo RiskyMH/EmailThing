@@ -59,7 +59,7 @@ export default async function UserSettingsPage() {
                 </CardDescription>
             </div>
 
-            <div className="gap-2 flex flex-row items-center justify-between rounded-lg bg-secondary p-4">
+            <div className="gap-2 flex flex-row items-center justify-between rounded-lg bg-secondary p-6">
                 <div className="flex gap-2 flex-col">
                     <Label htmlFor="enabled" className="text-xl font-semibold leading-none tracking-tight">Enable public page</Label>
                     <p className="text-muted-foreground text-sm">If you enable this, anyone will be able to send you email easier.</p>

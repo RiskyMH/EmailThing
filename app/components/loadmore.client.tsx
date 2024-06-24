@@ -93,7 +93,7 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
                 disabled={disabled || isPending}
                 onClick={() => loadMore()}
             >
-                {isPending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
+                {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
                 {isPending ? "Loading..." : disabled ? "You have reached the bottom" : "Load More"}
             </Button>
         </>

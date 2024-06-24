@@ -42,7 +42,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                     <div className="flex flex-1 items-center gap-4 justify-end -me-2 sm:me-0">
                         <nav className="flex">
                             {/* user icon/login */}
-                            {/* <div className="h-8 w-8 rounded-full bg-secondary animate-pulse" /> */}
+                            {/* <div className="size-8 rounded-full bg-secondary animate-pulse" /> */}
                             <div className="px-4 hidden sm:flex">
                                 <UserNav fallbackLogin={true} />
                             </div>

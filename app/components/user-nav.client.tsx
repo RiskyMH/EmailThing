@@ -47,10 +47,10 @@ export function UserDropDown({ user }: UserProps) {
     const userIcon = (
         <Button
             variant="ghost"
-            className="h-8 w-8 rounded-full self-center bg-transparent hover:bg-transparent"
+            className="size-8 rounded-full self-center bg-transparent hover:bg-transparent"
             suppressHydrationWarning // i give up with sanity
         >
-            <Avatar className="h-8 w-8 rounded-full">
+            <Avatar className="size-8 rounded-full">
                 <AvatarImage src={user.image} alt={user.name} />
                 <AvatarFallback className="bg-primary/80 text-white dark:text-foreground dark:bg-secondary dark:hover:bg-secondary/80 hover:bg-primary/70 transition-all">
                     {getInitials(user.name)}
@@ -113,7 +113,7 @@ export function UserDropDown({ user }: UserProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
+                    <div className="flex flex-col gap-1">
                         <h3 className="text-sm truncate font-medium">
                             {user.name}
                         </h3>

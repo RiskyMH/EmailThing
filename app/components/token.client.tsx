@@ -10,7 +10,7 @@ export default function ToggleVisibilityToken({ code }: { code: string }) {
         <div className="flex gap-2">
             <pre>{visible ? code : "•".repeat(code.length)}</pre>
             <button onClick={() => setVisible(!visible)}>
-                <Icon className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <Icon className="size-4 text-muted-foreground hover:text-foreground" />
             </button>
         </div>
     );

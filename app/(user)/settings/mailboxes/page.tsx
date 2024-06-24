@@ -39,7 +39,7 @@ export default async function UserSettingsPage() {
                     variant="secondary"
                     disabled
                 >
-                    <PlusIcon className='h-4 w-4' /> Create mailbox
+                    <PlusIcon className='size-4' /> Create mailbox
                 </Button>
             </div>
             <div className="border-muted-foreground/30 border rounded-md bg-secondary">
@@ -57,7 +57,7 @@ export default async function UserSettingsPage() {
                         {mailboxess.map(p => (
                             <TableRow key={p.id} className="border-muted-foreground/30">
                                 <TableCell className="w-0 me-0">
-                                    <Avatar className="h-8 w-8 rounded-full">
+                                    <Avatar className="size-8 rounded-full">
                                         <AvatarImage src={p.icon} alt={p.name || undefined} />
                                         <AvatarFallback className="bg-background dark:text-foreground transition-all">
                                             {(p.name || "AB")?.slice(0, 2).toUpperCase()}
@@ -73,7 +73,7 @@ export default async function UserSettingsPage() {
                                 <TableCell className="text-end gap-2 w-0">
                                     <SmartDrawer>
                                         <SmartDrawerTrigger className={buttonVariants({ variant: "destructive", size: "icon-sm" })} disabled={p.role === "OWNER"}>
-                                            <UserX2Icon className="h-4 w-4" />
+                                            <UserX2Icon className="size-4" />
                                         </SmartDrawerTrigger>
 
                                         <SmartDrawerContent className="sm:max-w-[425px]">

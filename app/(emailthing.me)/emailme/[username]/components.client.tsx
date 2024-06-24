@@ -60,8 +60,8 @@ function SendButton({ success }: { success?: boolean }) {
     const state = useFormStatus()
     return (
         <Button type="submit" className="w-full sm:w-min sm:ms-auto px-7 flex gap-2" disabled={state.pending || success} >
-            {state.pending && <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />}
-            {success && <CheckIcon className="w-5 h-5 text-green-500 -ms-1" />}
+            {state.pending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
+            {success && <CheckIcon className="size-5 text-green-500 -ms-1" />}
             {success ? "Sent Message" : "Send Message"}
         </Button>
     )
