@@ -85,7 +85,7 @@ export default async function EmailPage({
             <div className="bg-card p-3 rounded-md flex flex-col gap-3">
                 {/* from info and gravatar */}
                 <div className="flex gap-2">
-                    <Avatar className="size-8">
+                    <Avatar className="size-12">
                         <AvatarImage className="bg-tertiary rounded-full" src={await gravatar(email.from!.address)} />
                         <AvatarFallback className="bg-tertiary rounded-full">
                             {(email.from?.name || email.from!.address).slice(0, 2).toUpperCase()}
@@ -262,7 +262,7 @@ async function EmailContent({ mailboxId, emailId, view }: { mailboxId: string, e
 function EmailContentSpinner() {
     return (
         <div className="flex h-screen w-full items-center justify-center flex-col">
-            <Loader2 className="size-8 animate-spin text-muted-foreground" />
+            <Loader2 className="size-12 animate-spin text-muted-foreground" />
         </div>
     )
 }

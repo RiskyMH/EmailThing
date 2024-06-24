@@ -154,7 +154,7 @@ function Feature({ title, description, icon: Icon }: { title: string, descriptio
   return (
     <div className="bg-card relative overflow-hidden rounded-lg p-2">
       <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
-        <Icon className="size-8" />
+        <Icon className="size-12" />
         <div className="flex flex-col gap-2">
           <h3 className="font-bold">{title}</h3>
           <p className="text-sm text-muted-foreground">{description}</p>
