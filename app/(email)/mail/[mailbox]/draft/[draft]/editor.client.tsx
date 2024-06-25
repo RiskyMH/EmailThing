@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Button } from '@/components/ui/button';
 import { Fragment, useEffect, useId, useState, useTransition, type MouseEvent } from 'react';
 import { toast } from 'sonner';
-import { ExternalLinkIcon, Loader2, SendIcon, Trash2Icon } from 'lucide-react';
+import { CircleAlertIcon, ExternalLinkIcon, Loader2, SendIcon, Trash2Icon } from 'lucide-react';
 import { cn } from '@/utils/tw';
+import useMX from '@/requests/dns.client';
 
 export function BodyEditor({ savedBody }: { savedBody?: string }) {
     const debounced = useDebouncedCallback((() => (document.getElementById("draft-form") as any)?.requestSubmit()), 1000);
@@ -190,7 +191,8 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
         } else if (toastOnError) {
             toast.error("Invalid email address")
         }
-        element.value = element.value.replaceAll(" ", '')
+        element.value = element.value.replaceAll(" ", '');
+        (document.getElementById("draft-form") as any)?.requestSubmit()
     }
 
     useEffect(() => {
@@ -217,7 +219,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
         addEventListener("focusin", fn);
         return () => {
             removeEventListener("focusin", fn)
-            addEventListener("keydown", onKeyDown)
+            removeEventListener("keydown", onKeyDown)
         }
     }, [])
 
@@ -328,8 +330,12 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
 }
 
 function RecipientPill({ name, address, onRemove }: { name: string | null, address: string, onRemove: (e: any) => Promise<void> | void }) {
+    const { data: mx } = useMX(address.split("@")[1])
+
     return (
-        <div className="bg-tertiary text-sm px-2 py-1 rounded flex items-center gap-1 break-all">
+        <div className={cn("bg-tertiary text-sm px-2 py-1 rounded flex items-center gap-1 break-all", mx === null && "outline outline-2 outline-destructive")}>
+            {/* {mx === null && <span className='bg-destructive rounded-full size-4 flex items-center justify-center text-center text-xs' title="Cant't find email record for domain from DNS">!</span>} */}
+            {mx === null && <CircleAlertIcon className='text-destructive size-4' />}
             <span>{name || address}</span>
             {name && <span className="text-muted-foreground">{`<${address}>`}</span>}
 
