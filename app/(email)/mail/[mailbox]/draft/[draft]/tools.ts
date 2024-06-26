@@ -8,12 +8,16 @@ export interface SaveActionProps {
     body?: string,
     subject?: string,
     from?: string,
-    to?: Recipient[]
+    to?: Recipient[],
+    html?: string,
+    preview?: string
 }
 
 
 export function getData(data: FormData): SaveActionProps {
     const body = data.get("body") as string | undefined
+    const html = data.get("html") as string | undefined
+    const preview = data.get("preview") as string | undefined
     const subject = data.get("subject") as string | undefined
     const from = data.get("from") as string | undefined
 
@@ -27,5 +31,5 @@ export function getData(data: FormData): SaveActionProps {
         return { name, address, cc }
     }).filter(e => !!e)
 
-    return { body, subject, from, to }
+    return { body, subject, from, to, html, preview }
 }

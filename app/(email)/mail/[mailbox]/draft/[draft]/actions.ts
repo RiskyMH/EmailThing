@@ -10,6 +10,8 @@ import { getData } from "./tools";
 import { and, eq, sql } from "drizzle-orm";
 import { sendEmail } from "@/utils/send-email";
 import { createMimeMessage } from "mimetext";
+import Turndown from "turndown"
+import { JSDOM } from "jsdom";
 
 export async function sendEmailAction(mailboxId: string, draftId: string, data: FormData) {
     const userId = await getCurrentUser()
@@ -35,11 +37,13 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     if (!mail) return { error: "Draft doesn't exist, make sure you haven't sent it already" }
 
     // let { body, subject, from, to } = mail
-    const { body, subject, from, to } = getData(data)
+    const { body, subject, from, to, html } = getData(data)
 
     if (!subject) {
         return { error: "Subject is required" };
-    } else if (!body) {
+        // } else if (!body) {
+        //     return { error: "Body is required" };
+    } else if (!html) {
         return { error: "Body is required" };
     } else if (!from) {
         return { error: "From is required" };
@@ -60,15 +64,21 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     })
     if (!alias) throw new Error("Alias not found")
 
+    const text = new Turndown().turndown(JSDOM.fragment(html))
+    const actualHTML = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><meta name="color-scheme" content="light dark"/><meta name="supported-color-schemes" content="light dark"/><style type="text/css" rel="stylesheet" media="all">:root{color-scheme: light dark !important;supported-color-schemes: light dark !important;font-family:Arial, sans-serif}</style><html><body style="font-family: Arial, sans-serif">${html}</body></html>`
 
     // now send email!
     const email = createMimeMessage()
     email.setSender({ addr: alias.alias, name: alias.name ?? undefined })
     email.setRecipients(to.map(e => ({ addr: e.address, name: e.name || undefined, type: e.cc == "cc" ? "Cc" : e.cc === "bcc" ? "Bcc" : "To" }) as const))
     email.setSubject(subject || "(no subject)")
-    if (body) email.addMessage({
+    email.addMessage({
         contentType: "text/plain",
-        data: body
+        data: text
+    })
+    email.addMessage({
+        contentType: "text/html",
+        data: actualHTML
     })
     email.setHeader("X-UserId", userId)
     email.setHeader("X-MailboxId", mailboxId)
@@ -89,7 +99,8 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
         db.insert(Email)
             .values({
                 id: emailId,
-                body: body || "",
+                body: text || "",
+                html: actualHTML || "",
                 subject,
                 snippet: body ? (body.slice(0, 200) + (200 < body.length ? '…' : '')) : '',
                 raw: "draft",
@@ -140,6 +151,7 @@ export async function saveDraftAction(mailboxId: string, draftId: string, data: 
     }
 
     await db.update(DraftEmail)
+        // TODO: preview field
         .set(getData(data))
         .where(and(
             eq(DraftEmail.id, draftId),

@@ -68,7 +68,6 @@ export default async function DraftPage({
             <FromInput savedAlias={mail.from || defaultAlias?.alias || undefined} aliases={aliases} />
             <RecipientInput savedTo={mail.to || undefined} />
             <Subject savedSubject={mail.subject || undefined} />
-            <br className="h-0" />
             <BodyEditor savedBody={mail.body || undefined} />
 
             <div className="flex gap-4">

@@ -5,6 +5,8 @@ import { and, eq } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import type { Recipient } from "../[draft]/tools";
 import { headers } from "next/headers";
+import { marked } from "marked";
+import { parseHTML } from "../../[email]/parse-html";
 
 export default async function Page({
     params,
@@ -86,7 +88,10 @@ export default async function Page({
         }
 
         const timeZone = headers().get("x-vercel-ip-timezone") || undefined
-        const emailBody = `\n\nOn ${email.createdAt.toLocaleString([], { timeZone })}, ${email.from?.name ? `${email.from?.name} <${email.from?.address}>` : email.from?.name} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`
+        const emailBody = await parseHTML(await marked.parse(
+            `<br>\n<br>\nOn ${email.createdAt.toLocaleString([], { timeZone })}, ${email.from?.name ? `${email.from.name} &lt;${email.from.address}&gt;` : `${email.from.address}`} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`,
+            { breaks: true }
+        ));
 
         // create draft with reply
         const draftId = createId()
