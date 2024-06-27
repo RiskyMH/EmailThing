@@ -55,5 +55,8 @@ export const metadata = {
     robots: {
         // index: false,
         // follow: false,
-    }
+    },
+    alternates: {
+        canonical: "https://emailthing.xyz/login",
+    },
 } satisfies Metadata
