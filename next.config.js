@@ -184,6 +184,17 @@ const nextConfig = {
                     },
                 ],
             },
+            {
+                source: "/emailme",
+                destination: "https://emailthing.me",
+                permanent: false,
+                has: [
+                    {
+                        type: 'host',
+                        value: 'emailthing.xyz'
+                    },
+                ],
+            },
         ];
     }
 };
