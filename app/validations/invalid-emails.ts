@@ -101,5 +101,6 @@ export const impersonatingEmails = [
     "donotreply",
     "sponsor",
     "moderator",
-    "admin"
+    "admin",
+    "plan"
 ];
