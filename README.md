@@ -63,6 +63,10 @@ There was a lot of hard-coding that I have done in this. However, after setting 
 
 Currently, there isn't a way to add default domains, so you will also need to manual add those using the `default_domain` table. I also have hard coded the url to send emails through, so you will need to change that in the appropriate files.
 
+## Server Actions - Component Flow
+
+[![Server Actions - Component Flow](https://nextjs.apidiagram.com/github/RiskyMH/EmailThing/diagram.svg)](https://nextjs.apidiagram.com/github/RiskyMH/EmailThing)
+
 ## Credits
 
 Many individuals and organizations have contributed to the creation of this project. Special thanks to:
