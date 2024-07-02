@@ -48,7 +48,6 @@ jobs:
           NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY:  ${{ vars.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY }}
           S3_URL: "no"
           S3_SECRET_ACCESS_KEY: "no"
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       
       - name: Echo build log to $GITHUB_STEP_SUMMARY
         run: |
