@@ -3,6 +3,7 @@ import { db, DraftEmail } from "@/db";
 import { notFound } from "next/navigation"
 import { userMailboxAccess } from "../../../tools"
 import { and, eq } from "drizzle-orm";
+import { makeHtml } from "../tools";
 
 // export const runtime = 'edge'
 
@@ -31,7 +32,7 @@ export async function GET(
     })
     if (!mail) return notFound()
 
-    return new Response(mail.body, {
+    return new Response(makeHtml(mail.body || ""), {
         headers: {
             'Content-Type': 'text/html',
         },

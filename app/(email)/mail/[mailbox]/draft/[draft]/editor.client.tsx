@@ -3,7 +3,7 @@
 import { Input } from '@/components/ui/input';
 import { useDebouncedCallback } from 'use-debounce';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Fragment, useEffect, useId, useState, useTransition, type MouseEvent } from 'react';
 import { toast } from 'sonner';
 import { CircleAlertIcon, ExternalLinkIcon, Loader2, Trash2Icon, BoldIcon, ItalicIcon, UnderlineIcon, StrikethroughIcon, ListIcon, ListOrderedIcon, HeadingIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, LinkIcon, RemoveFormattingIcon, QuoteIcon } from 'lucide-react';
@@ -38,6 +38,7 @@ import { Underline } from '@tiptap/extension-underline'
 import "./tiptap.css"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import TooltipText from '@/components/tooltip-text';
 
 
 function getJSON(data?: string) {
@@ -86,139 +87,239 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
         content: getJSON(savedBody),
         editorProps: {
             attributes: {
-                class: 'prose dark:prose-invert prose-md prose-sm=sm:prose=lg:prose-lg=xl:prose-2xl focus:outline-none   h-full max-w-full w-full break-words overflow-auto size-full bg-card block border-none min-h-28 text-base resize-none rounded-md border border-input px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+                class: 'prose dark:prose-invert prose-md prose-sm=sm:prose=lg:prose-lg=xl:prose-2xl focus:outline-none overflow-auto px-3 pb-2 size-full max-w-full  min-h-28 focus-visible:outline-none bg-transparent border-none',
             },
         },
-        onUpdate: e => debounced(),
-        onBlur: e => debounced()
+        onUpdate: e => setTimeout(debounced, 0),
+        onBlur: e => setTimeout(debounced, 0)
     })
 
     return (
-        <div className='flex flex-col gap-1 h-full overflow-y-auto'>
-            <div className='flex gap-1 rounded-lg p-1 h-11 overflow-x-auto bg-tertiary shrink-0'>
-                <Select value={editor?.getAttributes("textStyle").fontFamily || "Arial, sans-serif"} onValueChange={(v) => editor?.chain().focus().setFontFamily(v).run()}>
-                    <SelectTrigger className="w-auto sm:w-[150px] h-9 px-2.5 border-none bg-transparent hover:bg-secondary shrink-0" style={{ fontFamily: editor?.getAttributes("textStyle").fontFamily || "Arial, sans-serif" }}>
-                        <SelectValue placeholder="Select a font" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem value="Georgia" style={{ fontFamily: "Georgia, serif" }}>Georgia</SelectItem>
-                            <SelectItem value="Arial, sans-serif" style={{ fontFamily: "Arial, sans-serif" }}>Arial</SelectItem>
-                            <SelectItem value="Helvetica, sans-serif" style={{ fontFamily: "Helvetica, sans-serif" }}>Helvetica</SelectItem>
-                            <SelectItem value="Menlo, Consolas, Courier New, monospace" style={{ fontFamily: "Menlo, Consolas, Courier New, monospace" }}>Monospace</SelectItem>
-                            <SelectItem value="Tahoma, sans-serif" style={{ fontFamily: "Tahoma, sans-serif" }}>Tahoma</SelectItem>
-                            <SelectItem value="Verdana" style={{ fontFamily: "Verdana" }}>Verdana</SelectItem>
-                            <SelectItem value="Times New Roman, serif" style={{ fontFamily: "Times New Roman, serif" }}>Times New Roman</SelectItem>
-                            <SelectItem value="Trebuchet MS, sans-serif" style={{ fontFamily: "Trebuchet MS, sans-serif" }}>Trebuchet MS</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-                <span className='h-auto w-0.5 bg-secondary rounded-sm shrink-0 my-1' />
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className='hover:bg-secondary'>
-                            {{
-                                1: <Heading1Icon className='size-4' />,
-                                2: <Heading2Icon className='size-4' />,
-                                3: <Heading3Icon className='size-4' />,
-                                4: <Heading4Icon className='size-4' />,
-                                5: <Heading5Icon className='size-4' />,
-                                6: <Heading6Icon className='size-4' />,
-                                'default': <HeadingIcon className='size-4' />
-                            }[(editor?.getAttributes("heading")?.level as number | undefined) || "default"]}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="">
-                        {/* <DropdownMenuLabel>Panel Position</DropdownMenuLabel> */}
-                        {/* <DropdownMenuSeparator /> */}
-                        <DropdownMenuRadioGroup value={editor?.getAttributes("heading")?.level?.toString()} onValueChange={(v) => editor?.chain().focus().toggleHeading({ level: parseInt(v) as any }).run()}>
-                            <DropdownMenuRadioItem value="1" className='text-2xl'>H1</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="2" className='text-xl'>H2</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="3" className='text-lg'>H3</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="4" className='text-md'>H4</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="5" className='text-base'>H5</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="6" className='text-sm'>H6</DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <span className='h-auto w-0.5 bg-secondary rounded-sm shrink-0 my-1' />
-                <Toggle size="sm" aria-label="Toggle bold" pressed={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()} className='hover:bg-secondary'>
-                    <BoldIcon className="size-4" />
-                </Toggle>
-                <Toggle size="sm" aria-label="Toggle italic" pressed={editor?.isActive("italic")} onClick={() => editor?.chain().focus().toggleItalic().run()} className='hover:bg-secondary'>
-                    <ItalicIcon className="size-4" />
-                </Toggle>
-                <Toggle size="sm" aria-label="Toggle underline" pressed={editor?.isActive("underline")} onClick={() => editor?.chain().focus().toggleUnderline().run()} className='hover:bg-secondary'>
-                    <UnderlineIcon className="size-4" />
-                </Toggle>
-                <Toggle size="sm" aria-label="Toggle strikethrough" pressed={editor?.isActive("strike")} onClick={() => editor?.chain().focus().toggleStrike().run()} className='hover:bg-secondary'>
-                    <StrikethroughIcon className="size-4" />
-                </Toggle>
-                <span className='h-auto w-0.5 bg-secondary rounded-sm shrink-0 my-1' />
-                <Toggle size="sm" aria-label="Toggle unordered list" pressed={editor?.isActive("bulletList")} onClick={() => editor?.chain().focus().toggleBulletList().run()} className='hover:bg-secondary'>
-                    <ListIcon className="size-4" />
-                </Toggle>
-                <Toggle size="sm" aria-label="Toggle ordered list" pressed={editor?.isActive("orderedList")} onClick={() => editor?.chain().focus().toggleOrderedList().run()} className='hover:bg-secondary'>
-                    <ListOrderedIcon className="size-4" />
-                </Toggle>
-                <span className='h-auto w-0.5 bg-secondary rounded-sm shrink-0 my-1' />
-                <Toggle size="sm" aria-label="Toggle ordered list" pressed={editor?.isActive("blockquote")} onClick={() => editor?.chain().focus().toggleBlockquote().run()} className='hover:bg-secondary'>
-                    <QuoteIcon className="size-4" />
-                </Toggle>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className={cn('hover:bg-secondary', editor?.getAttributes('link')?.href && "bg-secondary")}>
-                            <LinkIcon className='size-4' />
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <form action={form => {
-                            const url = form.get("link") as string | undefined
-                            const text = form.get("link") as string | undefined
-                            if (!url || url === '') {
-                                return editor?.chain().focus().extendMarkRange('link').unsetLink().run()
-                            }
-                            editor?.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run()
-                            // if (editor?.getText() !== text) {
-                            //     editor?.chain().focus().setContent({ href: url }).run()
-                            // }
-                        }}>
-                            <DialogHeader>
-                                <DialogTitle>Insert link</DialogTitle>
-                                <DialogDescription>
-                                    Please select the type of link you want to insert and fill in all the fields.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="type" className="text-right">
-                                        Link type
-                                    </Label>
-                                    <Select name="type" defaultValue="web" disabled>
-                                        <SelectTrigger id="type" className="col-span-3 border-0 bg-secondary">
-                                            <SelectValue placeholder="Type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="web">Web URL</SelectItem>
-                                            <SelectItem value="email">Email address</SelectItem>
-                                            <SelectItem value="tel">Phone number</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="link" className="text-right">
-                                        URL link
-                                    </Label>
-                                    <Input
-                                        id="link"
-                                        name="link"
-                                        placeholder='Link'
-                                        className="col-span-3 border-0 bg-secondary"
-                                        defaultValue={editor?.getAttributes('link').href}
-                                        type="url"
-                                    />
-                                </div>
-                                {/* <div className="grid grid-cols-4 items-center gap-4">
+        <EditorContent
+            editor={editor}
+            data-placeholder='Write your email body here...'
+            className='grow flex flex-col rounded-md bg-secondary tiptap-editor max-w-full break-words h-full w-full border-none overflow-auto text-base resize-none border border-input ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 group'
+            style={{ fontFamily: "Arial, sans-serif" }}
+        >
+            <div className='flex flex-col gap-1 py-1 h-11 overflow-x-auto overflow-y-hidden shrink-0 sticky top-0 z-10 outline-none'>
+                <div className='flex gap-1 w-full'>
+                    <span />
+                    <Select value={editor?.getAttributes("textStyle").fontFamily || "Arial, sans-serif"} onValueChange={(v) => editor?.chain().focus().setFontFamily(v).run()}>
+                        <TooltipText text="Change Font">
+                            <SelectTrigger
+                                className="w-auto sm:w-[150px] h-8 px-2.5 border-none bg-transparent hover:bg-background shrink-0 focus-within:z-20 focus:z-20 gap-2"
+                                style={{ fontFamily: editor?.getAttributes("textStyle").fontFamily || "Arial, sans-serif" }}
+                            >
+                                <SelectValue placeholder="Select a font" />
+                            </SelectTrigger>
+                        </TooltipText>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="Georgia" style={{ fontFamily: "Georgia, serif" }}>Georgia</SelectItem>
+                                <SelectItem value="Arial, sans-serif" style={{ fontFamily: "Arial, sans-serif" }}>Arial</SelectItem>
+                                <SelectItem value="Helvetica, sans-serif" style={{ fontFamily: "Helvetica, sans-serif" }}>Helvetica</SelectItem>
+                                <SelectItem value="Menlo, Consolas, Courier New, monospace" style={{ fontFamily: "Menlo, Consolas, Courier New, monospace" }}>Monospace</SelectItem>
+                                <SelectItem value="Tahoma, sans-serif" style={{ fontFamily: "Tahoma, sans-serif" }}>Tahoma</SelectItem>
+                                <SelectItem value="Verdana" style={{ fontFamily: "Verdana" }}>Verdana</SelectItem>
+                                <SelectItem value="Times New Roman, serif" style={{ fontFamily: "Times New Roman, serif" }}>Times New Roman</SelectItem>
+                                <SelectItem value="Trebuchet MS, sans-serif" style={{ fontFamily: "Trebuchet MS, sans-serif" }}>Trebuchet MS</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+
+                    <span className='h-auto w-0 border-e-2 border-background/75 rounded-sm shrink-0 grow-0 my-1' />
+
+                    <DropdownMenu>
+                        <TooltipText text="Change Heading Size">
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon-sm" className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'>
+                                    {{
+                                        1: <Heading1Icon className='size-4' />,
+                                        2: <Heading2Icon className='size-4' />,
+                                        3: <Heading3Icon className='size-4' />,
+                                        4: <Heading4Icon className='size-4' />,
+                                        5: <Heading5Icon className='size-4' />,
+                                        6: <Heading6Icon className='size-4' />,
+                                        'default': <HeadingIcon className='size-4' />
+                                    }[(editor?.getAttributes("heading")?.level as number | undefined) || "default"]}
+                                </Button>
+                            </DropdownMenuTrigger>
+                        </TooltipText>
+                        <DropdownMenuContent className="">
+                            <DropdownMenuRadioGroup
+                                value={editor?.getAttributes("heading")?.level?.toString()}
+                                onValueChange={(v) => editor?.chain().focus().toggleHeading({ level: parseInt(v) as any }).run()}
+                            >
+                                <DropdownMenuRadioItem value="1" className='text-2xl'>H1</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="2" className='text-xl'>H2</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="3" className='text-lg'>H3</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="4" className='text-md'>H4</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="5" className='text-base'>H5</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="6" className='text-sm'>H6</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <span className='h-auto w-0 border-e-2 border-background/75 rounded-sm shrink-0 grow-0 my-1' />
+
+                    <TooltipText text="Toggle Bold">
+                        <div>
+                            <Toggle
+                                size="icon-sm"
+                                aria-label="Toggle bold"
+                                pressed={editor?.isActive("bold")}
+                                onClick={() => editor?.chain().focus().toggleBold().run()} className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            >
+                                <BoldIcon className="size-4" />
+                            </Toggle>
+                        </div>
+                    </TooltipText>
+
+                    <TooltipText text="Toggle Italic">
+                        <div>
+                            <Toggle
+                                size="icon-sm"
+                                aria-label="Toggle italic"
+                                pressed={editor?.isActive("italic")}
+                                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                                className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            >
+                                <ItalicIcon className="size-4" />
+                            </Toggle>
+                        </div>
+                    </TooltipText>
+
+                    <TooltipText text="Toggle Underline">
+                        <div>
+                            <Toggle
+                                size="icon-sm"
+                                aria-label="Toggle underline"
+                                pressed={editor?.isActive("underline")}
+                                onClick={() => editor?.chain().focus().toggleUnderline().run()} className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            >
+                                <UnderlineIcon className="size-4" />
+                            </Toggle>
+                        </div>
+                    </TooltipText>
+
+                    <TooltipText text="Toggle Strikethrough">
+                        <div>
+                            <Toggle
+                                size="icon-sm"
+                                aria-label="Toggle strikethrough"
+                                pressed={editor?.isActive("strike")}
+                                onClick={() => editor?.chain().focus().toggleStrike().run()}
+                                className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            >
+                                <StrikethroughIcon className="size-4" />
+                            </Toggle>
+                        </div>
+                    </TooltipText>
+
+                    <span className='h-auto w-0 border-e-2 border-background/75 rounded-sm shrink-0 grow-0 my-1' />
+
+                    <TooltipText text="Toggle Unordered List">
+                        <div>
+                            <Toggle
+                                size="icon-sm"
+                                aria-label="Toggle unordered list"
+                                pressed={editor?.isActive("bulletList")}
+                                onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                                className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            >
+                                <ListIcon className="size-4" />
+                            </Toggle>
+                        </div>
+                    </TooltipText>
+
+                    <TooltipText text="Toggle Ordered List">
+                        <div>
+                            <Toggle
+                                size="icon-sm"
+                                aria-label="Toggle ordered list"
+                                pressed={editor?.isActive("orderedList")}
+                                onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                                className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            >
+                                <ListOrderedIcon className="size-4" />
+                            </Toggle>
+                        </div>
+                    </TooltipText>
+
+                    <span className='h-auto w-0 border-e-2 border-background/75 rounded-sm shrink-0 grow-0 my-1' />
+
+                    <TooltipText text="Toggle Blockquote">
+                        <div>
+                            <Toggle
+                                size="icon-sm"
+                                aria-label="Toggle blockquote list"
+                                pressed={editor?.isActive("blockquote")}
+                                onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+                                className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            >
+                                <QuoteIcon className="size-4" />
+                            </Toggle>
+                        </div>
+                    </TooltipText>
+
+                    <Dialog>
+                        <TooltipText text={editor?.getAttributes('link')?.href ? "Update Link" : "Insert Link"}>
+                            <DialogTrigger className={buttonVariants({
+                                variant: "ghost",
+                                size: "icon-sm",
+                                className: cn('hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0', editor?.getAttributes('link')?.href && "bg-tertiary")
+                            })}>
+                                <LinkIcon className='size-4' />
+                            </DialogTrigger>
+                        </TooltipText>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <form action={form => {
+                                const url = form.get("link") as string | undefined
+                                const text = form.get("link") as string | undefined
+                                if (!url || url === '') {
+                                    return editor?.chain().focus().extendMarkRange('link').unsetLink().run()
+                                }
+                                editor?.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run()
+                                // if (editor?.getText() !== text) {
+                                //     editor?.chain().focus().setContent({ href: url }).run()
+                                // }
+                            }}>
+                                <DialogHeader>
+                                    <DialogTitle>Insert link</DialogTitle>
+                                    <DialogDescription>
+                                        Please select the type of link you want to insert and fill in all the fields.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="type" className="text-right">
+                                            Link type
+                                        </Label>
+                                        <Select name="type" defaultValue="web" disabled>
+                                            <SelectTrigger id="type" className="col-span-3 border-0 bg-secondary">
+                                                <SelectValue placeholder="Type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="web">Web URL</SelectItem>
+                                                <SelectItem value="email">Email address</SelectItem>
+                                                <SelectItem value="tel">Phone number</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="link" className="text-right">
+                                            URL link
+                                        </Label>
+                                        <Input
+                                            id="link"
+                                            name="link"
+                                            placeholder='Link'
+                                            className="col-span-3 border-0 bg-secondary"
+                                            defaultValue={editor?.getAttributes('link').href}
+                                            type="url"
+                                        />
+                                    </div>
+                                    {/* <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="text" className="text-right">
                                         Text to display
                                     </Label> */}
@@ -232,41 +333,47 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                                         disabled
                                     />
                                 </div> */}
-                            </div>
-                            <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button type="submit">Save changes</Button>
-                                </DialogClose>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-                <Button variant="ghost" size="sm" className='hover:bg-secondary' onClick={() => editor?.chain().focus().unsetAllMarks().run()}>
-                    <RemoveFormattingIcon className='size-4' />
-                </Button>
+                                </div>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button type="submit">Save changes</Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
 
+                    <TooltipText text="Remove Formatting">
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                            onClick={() => editor?.chain().focus().unsetAllMarks().run()}
+                        >
+                            <RemoveFormattingIcon className='size-4' />
+                        </Button>
+                    </TooltipText>
+
+                    <span className='shrink-0 w-1' />
+                </div>
+                <span className='h-0 w-full border-b-2 border-background/75 rounded-sm shrink-0 grow-0 flex' />
             </div>
 
-            {editor ? (
-                <>
-                    <EditorContent
-                        editor={editor}
-                        data-placeholder='Write your email body here...'
-                        className='h-full w-full rounded-md bg-secondary tiptap-editor overflow-y-auto'
-                        style={{ fontFamily: "Arial, sans-serif" }}
-                    />
-                    {/* //todo: maybe use json instead of html */}
-                    {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
-                    <input hidden value={editor?.getHTML() || savedBody} name="body" />
-                    <input hidden value={editor?.getHTML()?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")} name="html" />
-                    <input hidden value={editor?.getText()?.slice(0, 250)} name="preview" />
-                </>
-            ) : (
-                <div className='h-full w-full rounded-md bg-secondary size-full flex items-center justify-center flex-col'>
-                    <Loader2 className='animate-spin size-12 text-muted-foreground' />
-                </div>
-            )}
-        </div >
+            {
+                !editor && (
+                    <div className='w-full flex items-center justify-center overflow-auto h-[calc(100%-2.75rem)]'>
+                        <Loader2 className='animate-spin size-12 text-muted-foreground' />
+                    </div>
+                )
+            }
+
+            {/* //todo: maybe use json instead of html */}
+            {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
+            <input hidden value={editor?.getHTML() || savedBody} name="body" />
+            <input hidden value={editor?.getHTML()?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")} name="html" />
+            <input hidden value={editor?.getText()?.slice(0, 250)} name="preview" />
+            {/* </div > */}
+        </EditorContent >
     );
 }
 
@@ -275,7 +382,7 @@ export function Subject({ savedSubject }: { savedSubject?: string }) {
 
     return (
         <Input
-            className="w-full bg-card text-lg border-none shrink-0"
+            className="w-full bg-card text-lg border-none shrink-0 focus:z-10"
             placeholder="Subject..."
             id="subject"
             name="subject"
@@ -340,7 +447,7 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
     }
 
     return (
-        <Button onClick={onClick as any} type="submit" formAction={sendAction} aria-disabled={isPending} disabled={isPending} className="flex gap-2 px-7">
+        <Button onClick={onClick as any} type="submit" id="send-button" formAction={sendAction} aria-disabled={isPending} disabled={isPending} className="flex gap-2 px-7">
             {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
             Send
         </Button>
@@ -358,7 +465,7 @@ export function FromInput({ savedAlias, aliases }: FromInputProps) {
     const [value, setValue] = useState(savedAlias)
     return (
         <Select value={value} onValueChange={setValue} name="from">
-            <SelectTrigger className='bg-card border-none shrink-0'>
+            <SelectTrigger className='bg-card border-none shrink-0 focus:z-10'>
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">From</span>
                     <SelectValue className="text-sm font-semibold">{value}</SelectValue>
@@ -450,9 +557,12 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
 
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault()
+                e.preventDefault();
                 toast.info("Saving...", { duration: 500 });
                 (document.getElementById("draft-form") as any)?.requestSubmit()
+            } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                (document.getElementById("send-button") as any)?.click()
             }
         }
 
@@ -476,7 +586,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
         <>
             <button
                 onClick={() => { setShowFull(true); setTimeout(() => document.getElementById("to:to")?.focus(), 0) }}
-                className={cn('shrink-0 w-full px-3 py-2 h-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-card rounded-md flex self-center gap-2 overflow-y-hidden text-ellipsis', showFull && "hidden")}
+                className={cn('shrink-0 w-full px-3 py-2 h-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-card rounded-md flex self-center gap-2 overflow-y-hidden text-ellipsis focus-within:z-10', showFull && "hidden")}
             >
                 <span className='flex gap-2 w-full overflow-y-hidden text-ellipsis'>
                     {types.map((type) => (
@@ -508,14 +618,13 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                 {to.map(v => <ToFormData key={v.address} address={v.address} name={v.name} cc={v.cc} />)}
             </div>
 
-            <div className={cn("flex flex-col gap-4", !showFull && "hidden")} id="recipients-full">
+            <div className={cn("flex flex-col divide-y-2", !showFull && "hidden")} id="recipients-full">
                 {allTypes.map((type, i) => (
-                    <div className={cn("flex gap-3", !types.includes(type) && "hidden")} key={type}>
-                        <span className="text-sm text-muted-foreground self-center w-7 shrink-0">
-                            {type.toUpperCase()}: {showFull}
-                        </span>
-
-                        <div className="group w-full px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-card rounded-md flex self-center gap-2 flex-wrap">
+                    <Fragment key={type}>
+                        <div className={cn("group w-full px-3 py-1.5 text-sm border-none ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-card rounded-md flex self-center gap-2 flex-wrap focus-within:z-10", !types.includes(type) && "hidden")}>
+                            <span className="text-sm text-muted-foreground self-center w-8 flex shrink-0">
+                                {type.toUpperCase()}:
+                            </span>
                             {to.filter(r => r.cc == (type === "to" ? null : type)).map(({ name, address }) => (
                                 <RecipientPill
                                     key={address}
@@ -563,7 +672,8 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                                 )}
                             </div>
                         </div>
-                    </div>
+                        <span className={cn('h-0 w-full border-b-2 border-background/75 rounded-sm shrink-0 grow-0 flex', ((!types.includes(type)) || (i + 1 == types.length)) && "hidden")} />
+                    </Fragment>
                 ))}
             </div>
         </>

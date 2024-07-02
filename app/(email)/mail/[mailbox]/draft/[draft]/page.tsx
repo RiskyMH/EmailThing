@@ -65,9 +65,14 @@ export default async function DraftPage({
 
     return (
         <form action={saveDraftAction.bind(null, params.mailbox, params.draft)} id="draft-form" className="size-full p-4 md:p-6 gap-4 flex flex-col overflow-auto" suppressHydrationWarning>
-            <FromInput savedAlias={mail.from || defaultAlias?.alias || undefined} aliases={aliases} />
-            <RecipientInput savedTo={mail.to || undefined} />
-            <Subject savedSubject={mail.subject || undefined} />
+            <div className='grow flex flex-col rounded-md bg-secondary max-w-full break-words border-none border-input text-base'>
+                <FromInput savedAlias={mail.from || defaultAlias?.alias || undefined} aliases={aliases} />
+                <span className='h-0 w-full border-b-2 border-background/75 rounded-sm shrink-0 grow-0 flex' />
+                <RecipientInput savedTo={mail.to || undefined} />
+                <span className='h-0 w-full border-b-2 border-background/75 rounded-sm shrink-0 grow-0 flex' />
+                <Subject savedSubject={mail.subject || undefined} />
+            </div>
+            
             <BodyEditor savedBody={mail.body || undefined} />
 
             <div className="flex gap-4">

@@ -6,7 +6,7 @@ import { env } from "@/utils/env";
 import { userMailboxAccess } from "../../tools";
 import { getCurrentUser } from "@/utils/jwt";
 import { revalidatePath } from "next/cache";
-import { getData } from "./tools";
+import { getData, makeHtml } from "./tools";
 import { and, eq, sql } from "drizzle-orm";
 import { sendEmail } from "@/utils/send-email";
 import { createMimeMessage } from "mimetext";
@@ -65,7 +65,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     if (!alias) throw new Error("Alias not found")
 
     const text = new Turndown().turndown(JSDOM.fragment(html))
-    const actualHTML = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><meta name="color-scheme" content="light dark"/><meta name="supported-color-schemes" content="light dark"/><style type="text/css" rel="stylesheet" media="all">:root{color-scheme: light dark !important;supported-color-schemes: light dark !important;font-family:Arial, sans-serif}</style><html><body style="font-family: Arial, sans-serif">${html}</body></html>`
+    const actualHTML = makeHtml(html)
 
     // now send email!
     const email = createMimeMessage()
