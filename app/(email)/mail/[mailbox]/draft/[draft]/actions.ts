@@ -78,7 +78,8 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     })
     email.addMessage({
         contentType: "text/html",
-        data: actualHTML
+        encoding: "base64",
+        data: Buffer.from(actualHTML).toString("base64")
     })
     email.setHeader("X-UserId", userId)
     email.setHeader("X-MailboxId", mailboxId)
