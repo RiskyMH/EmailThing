@@ -7,13 +7,13 @@ export default async function Home() {
     return (
         <>
             <section className="flex flex-col gap-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
-                <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center" style={{ textWrap: "balance" }}>
+                <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center text-balance">
                     <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl block">
                         <span className='inline-block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-br from-[#FF9797] to-[#6D6AFF]'>EmailThing.me</span>{" "}
                         is your own contact page to make emailing easy!
                     </h1>
 
-                    <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8" style={{ textWrap: 'balance' }} >
+                    <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8 text-balance">
                         Very much WIP, but if you ever wanted a contact form that can email you with responses, here is the place!
                     </p>
                     <div className="flex gap-4">

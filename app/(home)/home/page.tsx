@@ -23,7 +23,7 @@ export default async function Home() {
           >
             Follow along on Discord
           </Link>
-          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl [.kawaii_&]:hidden block" style={{ textWrap: 'balance' }} >
+          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl [.kawaii_&]:hidden block text-balance">
             <span className='sr-only'>EmailThing is </span>
             <span className='uppercase'>a</span>n email app where you can receive and send emails!
           </h1>
@@ -31,7 +31,7 @@ export default async function Home() {
           <img src="/logo.svg" loading="lazy" className="hidden" alt="EmailThing logo" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/emailthing-kawaii.svg" loading="lazy" className="hidden [.kawaii_&]:flex sm:h-[20rem] self-center" alt="EmailThing kawaii logo by Alfonsusac" />
-          <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8" style={{ textWrap: 'balance' }} >
+          <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8 text-balance">
             I didn&apos;t like options for custom domains and email, so I decided to build an email app and make it open source.
           </p>
           <div className="flex gap-4">
