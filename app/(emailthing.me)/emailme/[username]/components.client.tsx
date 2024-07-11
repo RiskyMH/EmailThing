@@ -39,9 +39,10 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
                             suppressHydrationWarning
                             hidden={!!state?.success}
                         />
+                        <style>{`.cf-turnstile{line-height:0;height:0;z-index:10}`}</style>
                         <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=managed" />
                         {state?.error ? (
-                            <p className="text-red justify-center content-center sm:min-h-10 text-sm py-0.5">{state.error}</p>
+                            <p className="text-red justify-center content-center sm:min-h-10 text-sm py-0.5 z-20">{state.error}</p>
                         ) : (
                             <p className="text-muted-foreground justify-center content-center sm:min-h-10 text-sm overflow-auto py-0.5">
                                 You can also email <a href={`mailto:${publicEmail}`} className="font-bold hover:underline">{publicEmail}</a>
