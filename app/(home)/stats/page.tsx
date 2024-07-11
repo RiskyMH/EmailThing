@@ -4,7 +4,7 @@ import { cn } from "@/utils/tw"
 import { buttonVariants } from "@/components/ui/button"
 import { CheckIcon } from "lucide-react"
 import { notFound } from "next/navigation"
-import db, { Stats, User } from "@/db"
+import db, { Email, Mailbox, MailboxAlias, Stats, User } from "@/db"
 import { and, count, gte, inArray, lte } from "drizzle-orm"
 
 export const metadata = {
@@ -92,9 +92,25 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
       lte(User.createdAt, new Date(last30DaysDates.at(-1)!)),
       gte(User.createdAt, new Date(last30DaysPrevDates.at(-1)!))
     ))
-    )[0].count
+  )[0].count
 
   const usersChange = ((latestUsers - latestUsersPrev) / latestUsersPrev) * 100;
+
+
+  const allEmails = (await db
+    .select({ count: count() })
+    .from(Email)
+  )[0].count
+  const allMailboxes = (await db
+    .select({ count: count() })
+    .from(Mailbox)
+  )[0].count
+  const allAliases = (await db
+    .select({ count: count() })
+    .from(MailboxAlias)
+  )[0].count
+
+  // todo: more stats + prob also do last 30days also
 
   return (
     <section className="container flex flex-col gap-6 py-8 md:max-w-[64rem] md:py-12 min-h-screen ">
@@ -147,6 +163,30 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
           </span>
           <span className="text-muted-foreground ">
             <span className="font-bold">users created</span> in last 30 days
+          </span>
+        </div>
+        <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
+          <span className="text-3xl font-bold flex">
+            {allEmails.toLocaleString()}
+          </span>
+          <span className="text-muted-foreground ">
+            total emails stored
+          </span>
+        </div>
+        <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
+          <span className="text-3xl font-bold flex">
+            {allMailboxes}
+          </span>
+          <span className="text-muted-foreground ">
+            total mailboxes
+          </span>
+        </div>
+        <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
+          <span className="text-3xl font-bold flex">
+            {allAliases}
+          </span>
+          <span className="text-muted-foreground ">
+            total aliases
           </span>
         </div>
       </div>
