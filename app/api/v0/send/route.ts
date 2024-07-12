@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         ...(data.cc?.map(getInfoFromAddress).map(e => ({ addr: e.email, name: e.name, type: "Cc" } as const)) || []),
         ...(data.bcc?.map(getInfoFromAddress).map(e => ({ addr: e.email, name: e.name, type: "Bcc" } as const)) || []),
     ])
-    mail.setSubject("Your token has been compromised")
+    mail.setSubject(data.subject)
     if (data.text) mail.addMessage({
         contentType: "text/plain",
         data: data.text
