@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/utils/jwt";
 import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { CardForm, ClientInput, ClientSelect, ClientSwitch } from "../../components.client";
-import { changeBackupEmail, changePassword, changePublicEmail, changePublicEmailStatus, changeUsername, deletePasskey } from "../../actions";
+import { changePassword, changePublicEmail, changePublicEmailStatus, changeUsername, deletePasskey } from "../../actions";
 import { eq, inArray } from "drizzle-orm";
 import { db, Email, MailboxAlias, User } from "@/db";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";

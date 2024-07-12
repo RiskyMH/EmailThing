@@ -33,7 +33,8 @@ export function Header({ children, className }: PropsWithChildren<{ className?: 
             const isScrolled = window.scrollY > 0;
             setScrolled(isScrolled);
         };
-
+        
+        handleScroll()
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);

@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/utils/tw";
 
 
-export function CardForm({ children, action, subtitle, disabled }: { children: ReactNode, action: (_prev: any, data: FormData) => Promise<{ error?: string, success?: string } | void>, subtitle?: string, disabled?: boolean }) {
+export function CardForm({ children, action, subtitle, disabled }: { children: ReactNode, action: (_prev: any, data: FormData) => Promise<{ error?: string, success?: string, description?: string } | void>, subtitle?: string, disabled?: boolean }) {
     const [state, formAction] = useFormState(action, {})
 
     return (
@@ -35,7 +35,7 @@ export function CardForm({ children, action, subtitle, disabled }: { children: R
                 )}
                 <SaveButton disabled={disabled} />
             </CardFooter>
-            <Toaster message={state?.success} />
+            <Toaster message={state?.success} description={state?.description} />
         </form>
     );
 }
@@ -50,11 +50,11 @@ function SaveButton({ disabled }: { disabled?: boolean }) {
     )
 }
 
-function Toaster({ message }: { message?: string }) {
+function Toaster({ message, description }: { message?: string, description?: string }) {
     const state = useFormStatus()
     useEffect(() => {
         if (!state.pending && message) {
-            toast.success(message)
+            toast.success(message, { description })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.pending])

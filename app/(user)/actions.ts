@@ -2,18 +2,17 @@
 
 import { getCurrentUser, removeToken } from "@/utils/jwt"
 import { createPasswordHash, verifyPassword } from "@/utils/password"
-import { db, PasskeyCredentials, User, UserNotification } from "@/db";
+import { db, PasskeyCredentials, User } from "@/db";
 import { and, eq, not } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { sendNotification } from "@/utils/web-push";
 import { userAuthSchema } from "@/validations/auth"
-import { env } from "@/utils/env";
 import { verifyCredentials } from "@/utils/passkeys";
 import { impersonatingEmails } from "@/validations/invalid-emails";
 import { sendEmail } from "@/utils/send-email";
 import { createMimeMessage } from "mimetext";
+import { createId } from "@paralleldrive/cuid2";
 
 
 export async function changeUsername(_prevState: any, data: FormData) {
@@ -129,6 +128,8 @@ ${user.username} has added you as a backup email on EmailThing! 🎉
 
 This means that if they ever lose access to their account, they can use this email to recover it.
 
+Please click here to continue: https://emailthing.xyz/settings/authentication?verify=${createId()}
+
 If you did not expect this email or have any questions, please contact us at contact@emailthing.xyz
 `
     })
@@ -151,7 +152,10 @@ If you did not expect this email or have any questions, please contact us at con
     revalidatePath('/settings')
 
     if (redirectHome) redirect("/mail")
-    return { success: "Your backup email has been updated." }
+    return {
+        success: "Please verify your backup email to continue.",
+        description: "If you find our email in your spam folder, we would greatly appreciate it if you could mark it as 'Not Spam'."
+    }
 }
 
 

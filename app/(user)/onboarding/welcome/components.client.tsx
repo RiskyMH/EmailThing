@@ -22,19 +22,22 @@ export function Page({ githubStars, action }: any) {
     async function actionn(data: FormData) {
         startTransition(async () => {
             const res = await action(null, data, true)
-            
+
             if (res?.error) {
-               return void toast.error(res.error)
+                return void toast.error(res.error)
             }
-            
-            return void toast.success("Your backup email has been saved.")
+
+            return void toast.success("Please verify your backup email to continue.", {
+                description: "If you find our email in your spam folder, we would greatly appreciate it if you could mark it as 'Not Spam'.",
+                duration: 10_000
+            })
         })
     }
 
     return (
         <>
             <div className="pt-4 flex flex-col gap-3">
-                I made this for the myself but wanted to share it with others, 
+                I made this for the myself but wanted to share it with others,
                 so your support by starring my repo would mean lots to me.
                 <Link
                     className={buttonVariants({ variant: !show ? "default" : "secondary", className: "gap-2" })}

@@ -27,7 +27,10 @@ export async function GET() {
             columns: { mailboxId: true }
         })
         if (firstMailbox) {
-            cookies().set("mailboxId", firstMailbox.mailboxId)
+            cookies().set("mailboxId", firstMailbox.mailboxId, {
+                path: "/",
+                expires: new Date("2038-01-19 04:14:07")
+            })
             return redirect(`/mail/${firstMailbox.mailboxId}`)
         } else {
             removeToken()
