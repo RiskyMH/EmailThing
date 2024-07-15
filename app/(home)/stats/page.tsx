@@ -15,6 +15,8 @@ export const metadata = {
   },
 }
 
+export const runtime = "nodejs"
+
 const thirtyDaysAgo = new Date()
 thirtyDaysAgo.setDate(new Date().getDate() - 30);
 

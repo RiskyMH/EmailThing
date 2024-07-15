@@ -5,7 +5,7 @@ import Logo, { EmailThing, EmailthingText } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import UserNav from "@/components/user-navbar";
 
-export const runtime = process.env.STANDALONE ? "nodejs" : "edge"
+export const runtime = "edge"
 
 export default function HomeLayout({ children }: PropsWithChildren<{}>) {
     return (

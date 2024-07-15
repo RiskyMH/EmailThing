@@ -9,7 +9,7 @@ interface DocsLayoutProps {
     children: React.ReactNode
 }
 
-// export const runtime = process.env.STANDALONE ? "nodejs" : "edge"
+// export const runtime = "edge"
 
 export const metadata = {
     title: {

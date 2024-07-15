@@ -40,7 +40,7 @@ jobs:
         env:
           STANDALONE: "1"
 
-          DATABASE_URL: "file:db.db"
+          DATABASE_URL: "libsql://void.riskymh.dev"
           EMAIL_AUTH_TOKEN: "no"
           S3_KEY_ID: "no"
           NEXT_PUBLIC_APP_URL: "https://emailthing.xyz"
