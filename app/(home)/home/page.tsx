@@ -25,7 +25,9 @@ export default async function Home() {
           </Link>
           <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl [.kawaii_&]:hidden block text-balance">
             <span className='sr-only'>EmailThing is </span>
-            <span className='uppercase'>a</span>n email app where you can receive and send emails!
+            <span className='uppercase'>a</span>n{" "}
+            <span className='inline-block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-br from-[#FF9797] to-[#6D6AFF]'>email app</span>{" "}
+            where you can receive and send emails!
           </h1>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" loading="lazy" className="hidden" alt="EmailThing logo" />
