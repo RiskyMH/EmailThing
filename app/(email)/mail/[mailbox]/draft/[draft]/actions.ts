@@ -64,7 +64,9 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     })
     if (!alias) throw new Error("Alias not found")
 
-    const text = new Turndown().turndown(JSDOM.fragment(html))
+    const text = new Turndown()
+        .turndown(JSDOM.fragment(html))
+        .replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, '$1')
     const actualHTML = makeHtml(html)
 
     // now send email!
