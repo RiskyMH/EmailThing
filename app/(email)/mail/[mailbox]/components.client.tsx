@@ -8,7 +8,7 @@ import type { LucideIcon } from "lucide-react"
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, PropsWithChildren } from "react"
-import { useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
 
 
 export function ClientStar({ action, enabled, className }: { action: () => void, enabled: boolean, className?: string }) {
@@ -88,6 +88,14 @@ export function ContextMenuAction({ children, action, icon, fillIcon, tooltip, .
 export function RefreshButton({ className }: { className?: string }) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition();
+
+    useEffect(() => {
+        const focus = () => !document.hidden && startTransition(router.refresh);
+        document.addEventListener("visibilitychange", focus);
+
+        return () => document.removeEventListener("visibilitychange", focus)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     return (
         <Button
