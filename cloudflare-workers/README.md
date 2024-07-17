@@ -16,6 +16,9 @@ For anyone curious, all this is doing is receiving the email and then sending th
 
 ## [Sending Emails](./sending-emails.js)
 
+> [!WARNING]  
+> This no longer works and is only left for documentation purposes.
+
 > Only needed if you are selfhosting EmailThing 
 > *(if you found this page while trying to add your domain, you don't need this worker)*
 

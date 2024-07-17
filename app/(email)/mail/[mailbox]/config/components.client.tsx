@@ -139,19 +139,6 @@ export function AddCustomDomainForm({ mailboxId, cfWorkerCode, initialDomain = "
                                 </CopyButton>
                             </Button>
                         </div>
-
-                        {/* <Label htmlFor="_mailchannels">
-                            <code className="text-muted-foreground font-semibold">TXT</code> <span className="text-muted-foreground">_mailchannels.</span>{domain}
-                        </Label>
-                        <div className="flex items-center gap-2">
-                            <Input className="bg-secondary border-none" value="v=mc1 cfid=riskymh.workers.dev" id="_mailchannels" readOnly />
-                            <Button size="sm" className="px-3" asChild>
-                                <CopyButton text="v=mc1 cfid=riskymh.workers.dev">
-                                    <span className="sr-only">Copy</span>
-                                    <CopyIcon className="size-4" />
-                                </CopyButton>
-                            </Button>
-                        </div> */}
                     </div>
 
                     <div className="flex gap-2 sm:gap-4">

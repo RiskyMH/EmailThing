@@ -1,4 +1,5 @@
 /* eslint-disable */
+//! WARNING: this no longer works as mailchannels removed free offer
 
 export default {
     /**

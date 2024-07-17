@@ -69,7 +69,6 @@ Many individuals and organizations have contributed to the creation of this proj
 
 * [Vercel](https://vercel.com) for hosting the application and for developing Next.js.
 * [Cloudflare](https://cloudflare.com) for providing workers and email routing.
-<!-- * [MailChannels](https://mailchannels.com) for offering a straightforward transactional email API. -->
 * [Turso](https://turso.tech) for providing a good pricing for database.
 * [Alfonsusac](https://github.com/alfonsusac) for designing the logo and sticker.
 * [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.
