@@ -153,6 +153,27 @@ const nextConfig = {
                 permanent: false,
             },
             {
+                source: '/mail/~/:path',
+                has: [
+                    {
+                        type: 'cookie',
+                        key: 'token',
+                    },
+                    {
+                        type: 'cookie',
+                        key: 'mailboxId',
+                        value: '(?<mailbox>.*)'
+                    },
+                ],
+                destination: '/mail/:mailbox/:path',
+                permanent: false,
+            },
+            {
+                source: '/mail/:mailbox/inbox',
+                destination: '/mail/:mailbox',
+                permanent: false,
+            },
+            {
                 source: '/(login|register)',
                 destination: '/:from?from=',
                 permanent: false,

@@ -502,14 +502,14 @@ export default async function EmailConfig({
                             {mailbox.tokens.length ? (
                                 mailbox.tokens.map((row) => (
                                     <TableRow key={row.id}>
-                                        <TableCell className="font-medium py-3 flex flex-col">
+                                        <TableCell className="font-medium py-3">
                                             {row.name ? (
-                                                <>
+                                                <div className="flex flex-col">
                                                     <span>{row.name}</span>
                                                     <code className="text-muted-foreground">{hideToken(row.token)}</code>
-                                                </>
+                                                </div>
                                             ) : (
-                                                <code>{hideToken(row.token)}</code>
+                                                <code className="justify-center">{hideToken(row.token)}</code>
                                             )}
                                         </TableCell>
                                         <TableCell className="py-3">
