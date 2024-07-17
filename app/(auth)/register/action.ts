@@ -163,7 +163,7 @@ Best regards,
     const html = makeHtml(await marked.parse(msg))
 
     const email = createMimeMessage()
-    email.setSender({ addr: "system@riskymh.dev", name: "EmailThing" })
+    email.setSender({ addr: "system@emailthing.dev", name: "EmailThing" })
     email.setRecipient({ addr: `${username}@emailthing.xyz`, name: username })
     email.setSubject("Welcome to EmailThing!")
     email.addMessage({
@@ -179,7 +179,7 @@ Best regards,
     email.setHeader("Reply-To", new MimeMailbox("contact@emailthing.xyz"))
 
     return sendEmail({
-        from: "system@riskymh.dev",
+        from: "system@emailthing.dev",
         to: [`${username}@emailthing.xyz`],
         data: email.asRaw()
     })
