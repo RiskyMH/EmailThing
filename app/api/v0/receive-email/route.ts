@@ -238,11 +238,10 @@ function emailContent({ text, html }: { text?: string, html?: string }) {
     if (text) return text
     if (!html) return "(no body)"
 
-    const h = html.replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, "")
+    const h = html.replace(/<(head|style|script|meta|link|title)\b[^>]*>[\s\S]*?<\/\1>/gi, "");
     const _text = new Turndown()
         .turndown(JSDOM.fragment(h))
         .replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, '$1')
 
     return "<!-- Converted markdown from HTML -->\n" + _text
-
 }
