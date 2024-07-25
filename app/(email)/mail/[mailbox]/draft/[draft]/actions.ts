@@ -62,7 +62,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
             alias: true
         }
     })
-    if (!alias) throw new Error("Alias not found")
+    if (!alias) return { error: "Can't find your alias. Make sure you have access to it."}
 
     const text = new Turndown()
         .turndown(JSDOM.fragment(html))
