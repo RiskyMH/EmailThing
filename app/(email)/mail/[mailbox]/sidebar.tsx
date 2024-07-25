@@ -114,6 +114,10 @@ function LinkElement({ href, name, icon: Icon, disabled, className }: { href: st
                     <Suspense>
                         <ItemCount mailboxId={href.split("/")[2]} type="binned" />
                     </Suspense>
+                ) : name === "Temporary Mail" ? (
+                    <Suspense>
+                        <ItemCount mailboxId={href.split("/")[2]} type="temp" />
+                    </Suspense>
                 ) : null}
             </SidebarLink>
         </Button>
@@ -130,7 +134,8 @@ const getCounts = cache(async (mailboxId: string) => {
         .where(and(
             eq(Email.mailboxId, mailboxId),
             eq(Email.isRead, false),
-            isNull(Email.binnedAt)
+            isNull(Email.binnedAt),
+            isNull(Email.tempId),
         ))
         .execute()
 
@@ -149,15 +154,26 @@ const getCounts = cache(async (mailboxId: string) => {
         .where(eq(DraftEmail.mailboxId, mailboxId))
         .execute()
 
+    const tempEmails = await db
+        .select({ count: count() })
+        .from(Email)
+        .where(and(
+            eq(Email.mailboxId, mailboxId),
+            eq(Email.isRead, false),
+            isNotNull(Email.tempId),
+        ))
+        .execute()
+
     return {
         unread: unreadEmails[0].count,
         binned: binnedEmails[0].count,
         drafts: drafts[0].count,
+        temp: tempEmails[0].count,
     }
 })
 
 
-async function ItemCount({ mailboxId, type, primary = false }: { mailboxId: string, type: "unread" | "binned" | "drafts", primary?: boolean }) {
+async function ItemCount({ mailboxId, type, primary = false }: { mailboxId: string, type: "unread" | "binned" | "drafts" | "temp", primary?: boolean }) {
     // return <></>
     const counts = await getCounts(mailboxId)
     const item = counts[type]

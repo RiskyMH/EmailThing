@@ -91,9 +91,19 @@ export function RefreshButton({ className }: { className?: string }) {
 
     useEffect(() => {
         const focus = () => !document.hidden && startTransition(router.refresh);
-        document.addEventListener("visibilitychange", focus);
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "r" && (e.metaKey || e.ctrlKey)) {
+                startTransition(router.refresh)
+            }
+        }
 
-        return () => document.removeEventListener("visibilitychange", focus)
+        document.addEventListener("visibilitychange", focus);
+        document.addEventListener("keydown", onKeyDown);
+
+        return () => {
+            document.removeEventListener("visibilitychange", focus)
+            document.removeEventListener("keydown", onKeyDown)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
