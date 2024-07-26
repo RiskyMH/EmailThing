@@ -49,7 +49,7 @@ bun dev --turbo
 
 ## How it works
 
-EmailThing primarily handles the front-end aspect of the email management application. For sending and receiving emails, it makes use of [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) to incoming emails, and [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) to outgoing emails (currently experimenting with custom sending though).
+EmailThing primarily handles the front-end aspect of the email management application. For sending and receiving emails, it makes use of [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) to incoming emails, and a Vps For outgoing sending!.
 
 To do this locally, refer to [./cloudflare-workers/README.md](./cloudflare-workers/README.md) for more information.
 
