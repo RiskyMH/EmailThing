@@ -93,6 +93,7 @@ export function RefreshButton({ className }: { className?: string }) {
         const focus = () => !document.hidden && startTransition(router.refresh);
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "r" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault()
                 startTransition(router.refresh)
             }
         }
