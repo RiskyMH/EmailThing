@@ -1,37 +1,47 @@
 export interface Recipient {
-name: string | null,
-address: string,
-cc?: "cc" | "bcc" | null,
+    name: string | null,
+    address: string,
+    cc?: "cc" | "bcc" | null,
 }
 
 export interface SaveActionProps {
-body?: string,
-subject?: string,
-from?: string,
-to?: Recipient[],
-html?: string,
-preview?: string
+    body?: string,
+    subject?: string,
+    from?: string,
+    to?: Recipient[],
+    html?: string,
+    preview?: string,
+    headers?: { key: string, value: string }[]
 }
 
 
 export function getData(data: FormData): SaveActionProps {
-const body = data.get("body") as string | undefined
-const html = data.get("html") as string | undefined
-const preview = data.get("preview") as string | undefined
-const subject = data.get("subject") as string | undefined
-const from = data.get("from") as string | undefined
+    const body = data.get("body") as string | undefined
+    const html = data.get("html") as string | undefined
+    const preview = data.get("preview") as string | undefined
+    const subject = data.get("subject") as string | undefined
+    const from = data.get("from") as string | undefined
 
-const tos = data.getAll("to") as string[] | undefined
-const to = tos?.map(to => {
-const name = (data.get(`to:${to}:name`) || null) as string | null
-const address = data.get(`to:${to}:address`) as string | undefined
-const cc = (data.get(`to:${to}:cc`) || null) as "cc" | "bcc" | null
+    const tos = data.getAll("to") as string[] | undefined
+    const to = tos?.map(to => {
+        const name = (data.get(`to:${to}:name`) || null) as string | null
+        const address = data.get(`to:${to}:address`) as string | undefined
+        const cc = (data.get(`to:${to}:cc`) || null) as "cc" | "bcc" | null
 
-if (!address) return
-return { name, address, cc }
-}).filter(e => !!e)
+        if (!address) return
+        return { name, address, cc }
+    }).filter(e => !!e)
 
-return { body, subject, from, to, html, preview }
+    const headerss = data.getAll("to") as string[] | undefined
+    const headers = headerss?.map(id => {
+        const key = (data.get(`header:${id}:name`) || "") as string
+        const value = (data.get(`header:${id}:value`) || "") as string
+        
+        if (!key) return
+        return { key, value }
+    }).filter(e => !!e) || []
+
+    return { body, subject, from, to, html, preview, headers }
 }
 
 export function makeHtml(html: string) {

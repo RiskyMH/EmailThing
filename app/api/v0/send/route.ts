@@ -83,6 +83,7 @@ export async function POST(request: Request) {
         contentType: "text/html",
         data: data.html
     })
+    if (data.headers) mail.setHeaders(data.headers)
     if (data.reply_to) mail.setHeader("Reply-To", new MimeMailbox(getInfoFromAddress(data.reply_to).email))
     mail.setHeader("X-MailboxId", mailboxId)
 

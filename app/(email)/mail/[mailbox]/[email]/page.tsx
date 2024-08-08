@@ -233,6 +233,8 @@ export default async function EmailPage({
                 </ClientSuspense>
             </div>
 
+            {/* // TODO: show references snippets for email */}
+
         </div>
 
     )

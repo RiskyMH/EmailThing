@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { sqliteTable, int, integer, index, text, } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, int, integer, index, text } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
 import { Mailbox, MailboxCategory, TempAlias } from './mailbox';
 
@@ -18,6 +18,8 @@ export const Email = sqliteTable("emails", {
     size: int("size").default(0),
 
     replyTo: text("reply_to"),
+    givenId: text("given_message_id"),
+    givenReferences: text("given_references", { mode: "json" }).$type<string[]>(),
     categoryId: text("category_id", { length: 24 })
         .references(() => MailboxCategory.id, { onDelete: 'set null' }),
     tempId: text("temp_id", { length: 24 })
@@ -37,6 +39,7 @@ export const Email = sqliteTable("emails", {
         isStarredIdx: index("email_is_starred_idx").on(table.isStarred),
         binnedAtIdx: index("email_binned_at_idx").on(table.binnedAt),
         tempIdIdx: index("email_temp_id_idx").on(table.tempId),
+        givenIdIdx: index("email_given_id_idx").on(table.givenId),
 
         createdIdIdx: index("email_created_id_idx").on(table.createdAt, table.id),
     }
@@ -136,6 +139,8 @@ export const DraftEmail = sqliteTable("draft_emails", {
     from: text("from", { length: 255 }),
     to: text("to", { mode: "json" })
         .$type<{ address: string, name: string | null, cc?: "cc" | "bcc" | null }[]>(),
+    headers: text("headers", { mode: "json" })
+        .$type<{ key: string, value: string }[]>(),
 }, (table) => {
     return {
         mailboxIdx: index("draft_mailbox_idx").on(table.mailboxId),

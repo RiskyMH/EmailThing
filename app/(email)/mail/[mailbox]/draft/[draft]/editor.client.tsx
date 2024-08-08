@@ -4,13 +4,13 @@ import { Input } from '@/components/ui/input';
 import { useDebouncedCallback } from 'use-debounce';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Fragment, useEffect, useId, useState, useTransition, type MouseEvent } from 'react';
+import { Fragment, useEffect, useId, useState, useTransition, type FormEvent, type MouseEvent } from 'react';
 import { toast } from 'sonner';
-import { CircleAlertIcon, ExternalLinkIcon, Loader2, Trash2Icon, BoldIcon, ItalicIcon, UnderlineIcon, StrikethroughIcon, ListIcon, ListOrderedIcon, HeadingIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, LinkIcon, RemoveFormattingIcon, QuoteIcon } from 'lucide-react';
+import { CircleAlertIcon, ExternalLinkIcon, Loader2, Trash2Icon, BoldIcon, ItalicIcon, UnderlineIcon, StrikethroughIcon, ListIcon, ListOrderedIcon, HeadingIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, LinkIcon, RemoveFormattingIcon, QuoteIcon, PaperclipIcon, PlusIcon } from 'lucide-react';
 import { cn } from '@/utils/tw';
 import useMX from '@/requests/dns.client';
 import { Toggle } from "@/components/ui/toggle";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEditor, EditorContent } from '@tiptap/react'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextStyle from '@tiptap/extension-text-style'
@@ -39,6 +39,7 @@ import "./tiptap.css"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import TooltipText from '@/components/tooltip-text';
+import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from '@/components/ui/smart-drawer';
 
 
 function getJSON(data?: string) {
@@ -699,5 +700,105 @@ function RecipientPill({ name, address, onRemove }: { name: string | null, addre
                 </svg>
             </Button>
         </div>
+    )
+}
+
+
+export function UploadAttachment() {
+    return (
+        <Button variant="ghost" size="icon" className="shrink-0" onClick={() => toast.warning("Attachments not implemented yet")}>
+            <PaperclipIcon className='size-5' />
+        </Button>
+    )
+}
+
+export function HeaderModal({ initialHeaders, action }: { initialHeaders: { key: string, value: string }[], action: (data: FormData) => Promise<unknown> }) {
+    const [headers, setHeaders] = useState(initialHeaders)
+
+    const [isPending, startTransition] = useTransition();
+    useEffect(() => setHeaders(initialHeaders), [initialHeaders])
+
+    const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (isPending) return;
+
+        startTransition(async () => {
+            const formData = new FormData(event.target as HTMLFormElement)
+
+            await action(formData)
+            document.getElementById("smart-drawer:close")?.click()
+        })
+
+    }
+
+
+    return (
+        <SmartDrawer>
+            <DropdownMenuItem asChild>
+                <SmartDrawerTrigger className="gap-2 w-full">
+                    Change Headers
+                </SmartDrawerTrigger>
+            </DropdownMenuItem>
+            <SmartDrawerContent className="sm:max-w-[425px] h-min overflow-auto max-h-[calc(100vh-3rem)]">
+                <SmartDrawerHeader>
+                    <SmartDrawerTitle>Edit Headers</SmartDrawerTitle>
+                    <SmartDrawerDescription>Not that important but if you want to do more custom things!</SmartDrawerDescription>
+                </SmartDrawerHeader>
+
+                <form className="flex flex-col items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+                    <div className="flex flex-col gap-2">
+                        {headers.map(({ key, value }, i) => (
+                            <div key={i} className="flex gap-2">
+                                <input hidden name="header" value={i} readOnly />
+                                <div className="flex">
+                                    <Input
+                                        className="bg-secondary border-none"
+                                        name={`header:${i}:name`}
+                                        placeholder={i === 0 ? "In-Reply-To" : "Key"}
+                                        defaultValue={key}
+                                        disabled={isPending}
+                                        onChange={e => {
+                                            setHeaders(h => {
+                                                h[i].key = e.target.value
+                                                if (h.at(-1)?.key !== "") {
+                                                    h.push({ key: "", value: "" })
+                                                }
+                                                return [...h]
+                                            })
+                                        }}
+                                    />
+                                    <code className="self-center flex text-lg font-bold -mt-0.5">:</code>
+                                </div>
+                                <Input
+                                    className="bg-secondary border-none"
+                                    name={`header:${i}:value`}
+                                    placeholder={i === 0 ? "abcdef@emailthing.xyz" : "value"}
+                                    defaultValue={value}
+                                    disabled={isPending}
+                                    onChange={e => {
+                                        setHeaders(h => {
+                                            h[i].value = e.target.value
+                                            return [...h]
+                                        })
+                                    }}
+
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    <Button type="submit" disabled={isPending} className="gap-2">
+                        {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
+                        Save headers
+                    </Button>
+                </form>
+
+                <SmartDrawerFooter className="pt-2 flex sm:hidden">
+                    <SmartDrawerClose asChild>
+                        <Button variant="secondary">Cancel</Button>
+                    </SmartDrawerClose>
+                </SmartDrawerFooter>
+            </SmartDrawerContent>
+        </SmartDrawer >
+
     )
 }

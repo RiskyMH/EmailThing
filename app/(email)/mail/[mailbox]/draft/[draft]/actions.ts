@@ -37,7 +37,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     if (!mail) return { error: "Draft doesn't exist, make sure you haven't sent it already" }
 
     // let { body, subject, from, to } = mail
-    const { body, subject, from, to, html } = getData(data)
+    const { body, subject, from, to, html, headers } = getData(data)
 
     if (!subject) {
         return { error: "Subject is required" };
@@ -62,7 +62,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
             alias: true
         }
     })
-    if (!alias) return { error: "Can't find your alias. Make sure you have access to it."}
+    if (!alias) return { error: "Can't find your alias. Make sure you have access to it." }
 
     const text = new Turndown()
         .turndown(JSDOM.fragment(html))
@@ -83,6 +83,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
         encoding: "base64",
         data: Buffer.from(actualHTML).toString("base64")
     })
+    if (headers) email.setHeaders(headers.reduce((acc: Record<string, string>, { key, value }) => { acc[key] = value; return acc }, {} as Record<string, string>))
     email.setHeader("X-UserId", userId)
     email.setHeader("X-MailboxId", mailboxId)
 
@@ -179,4 +180,40 @@ export async function deleteDraftAction(mailboxId: string, draftId: string) {
         .execute()
 
     return redirect(`/mail/${mailboxId}`)
+};
+
+export async function saveDraftHeadersAction(mailboxId: string, draftId: string, data: FormData) {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) {
+        throw new Error("Mailbox not found");
+    }
+
+    const headers = data.getAll("header").map((id) => {
+        const key = (data.get(`header:${id}:name`) || "") as string
+        const value = (data.get(`header:${id}:value`) || "") as string
+
+        if (!key) return
+        return { key, value }
+    }).filter(e => !!e)
+
+    // temporary measure because mimetext only supports one value per key, so just force that
+    const seenKeys = new Set<string>();
+    const uniqueHeaders = headers.filter(header => {
+        if (seenKeys.has(header.key)) {
+            return false;
+        }
+        seenKeys.add(header.key);
+        return true;
+    });
+
+    await db.update(DraftEmail)
+        // .set({ headers })
+        .set({ headers: uniqueHeaders })
+        .where(and(
+            eq(DraftEmail.id, draftId),
+            eq(DraftEmail.mailboxId, mailboxId)
+        ))
+        .execute()
+
+    revalidatePath(`/mail/${mailboxId}/draft/${draftId}`)
 };

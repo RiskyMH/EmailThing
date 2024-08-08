@@ -38,6 +38,8 @@ export default async function Page({
                 body: true,
                 createdAt: true,
                 replyTo: true,
+                givenId: true,
+                givenReferences: true,
             },
             with: {
                 recipients: {
@@ -102,7 +104,13 @@ export default async function Page({
                 from,
                 body: emailBody,
                 subject,
-                to
+                to,
+                headers: email.givenId ? [
+                    { key: "In-Reply-To", value: `<${email.givenId}>` },
+                    {
+                        key: "References", value: [email.givenId, ...(email.givenReferences || [])].join(" ")
+                    },
+                ] : undefined
             })
             .execute()
 
