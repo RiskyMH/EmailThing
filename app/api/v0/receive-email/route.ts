@@ -56,8 +56,9 @@ export async function POST(request: Request) {
     }
 
     const emailSize = new Blob([rawEmail]).size
-    const references = new Set(email.inReplyTo)
-    email.references?.split(" ").forEach(id => references.add(id))
+    const references = new Set<string>()
+    if (email.inReplyTo) references.add(email.inReplyTo)
+    email.references?.split(" ").forEach((id) => references.add(id))
 
     const emailId = createId()
     await db.batch([
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
                 size: emailSize,
                 tempId,
                 givenId: email.messageId,
-                givenReferences: [...references],
+                givenReferences: references.size ? [...references] : undefined,
             }),
 
         db.insert(EmailRecipient)

@@ -106,9 +106,9 @@ export default async function Page({
                 subject,
                 to,
                 headers: email.givenId ? [
-                    { key: "In-Reply-To", value: `<${email.givenId}>` },
+                    { key: "In-Reply-To", value: email.givenId },
                     {
-                        key: "References", value: [email.givenId, ...(email.givenReferences || [])].join(" ")
+                        key: "References", value: email.givenReferences?.join(" ") ?? email.givenId
                     },
                 ] : undefined
             })
