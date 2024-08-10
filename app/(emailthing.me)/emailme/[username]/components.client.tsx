@@ -92,7 +92,7 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
             <script
                 suppressHydrationWarning
                 dangerouslySetInnerHTML={{
-                    __html: `{                    
+                    __html: `{
 const urlParams = new URLSearchParams(window.location.search);
 
 const mailtoLink = document.getElementById("mailto-link");
