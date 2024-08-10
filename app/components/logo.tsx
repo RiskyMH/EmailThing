@@ -26,20 +26,20 @@ export function EmailthingText({ className, text = "EmailThing" }: { className?:
 }
 
 
-const inject = `
+const inject = `{
 const urlParams = new URLSearchParams(window.location.search);
 const kawaiiParam = urlParams.get("uwu") || urlParams.get("kawaii");
 
 if (typeof kawaiiParam === 'string') {
     localStorage.setItem('kawaii', kawaiiParam);
-}
+};
 
-const item = localStorage.getItem('kawaii')
-    
+const item = localStorage.getItem('kawaii');
+
 if (item === 'true') {
-    document.documentElement.classList.add("kawaii")
-}    
-`;
+    document.documentElement.classList.add("kawaii");
+};
+}`.replaceAll("\n", " ");
 
 export function EmailThing() {
     return (
