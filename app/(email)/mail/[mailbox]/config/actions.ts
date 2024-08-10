@@ -163,7 +163,7 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
         if (emailPart.length <= 3) {
             return { error: "Email too short" }
         }
-        else if (impersonatingEmails.some(v => emailPart.includes(v.toLowerCase()))) {
+        else if (impersonatingEmails.toLowerCase().some(v => emailPart.includes(v))) {
             return { error: "Invalid alias" }
         }
     }
