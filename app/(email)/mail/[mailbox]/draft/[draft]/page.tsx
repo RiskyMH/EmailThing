@@ -79,7 +79,7 @@ export default async function DraftPage({
 
             <div className="flex gap-4">
                 <button type='submit' hidden></button>
-                <div className="flex gap-2">
+                <div className="flex gap-2 me-auto">
                     <DeleteButton delAction={deleteDraftAction.bind(null, params.mailbox, params.draft)} />
                     <UploadAttachment />
 
@@ -112,7 +112,7 @@ export default async function DraftPage({
 
                 </div>
 
-                <p className='ms-auto text-sm text-muted-foreground self-center'>
+                <p className='ms-auto text-sm text-muted-foreground self-center max-sm:hidden'>
                     Saved at <LocalTime type="hour-min/date" time={mail.updatedAt} />
                 </p>
                 {/* <Button variant="ghost" size="icon" onClick={() => toast.warning("Not implemented yet")}> */}

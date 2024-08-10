@@ -372,9 +372,9 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
 
             {/* //todo: maybe use json instead of html */}
             {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
-            <input hidden value={editor?.getHTML() || savedBody} name="body" />
-            <input hidden value={editor?.getHTML()?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")} name="html" />
-            <input hidden value={editor?.getText()?.slice(0, 250)} name="preview" />
+            <input hidden value={editor?.getHTML() || savedBody} name="body" readOnly />
+            <input hidden value={editor?.getHTML()?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")} name="html" readOnly />
+            <input hidden value={editor?.getText()?.slice(0, 250)} name="preview" readOnly />
             {/* </div > */}
         </EditorContent >
     );
@@ -552,7 +552,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
             if (elem?.contains(document.activeElement)) {
                 // do nothing
             } else {
-                setShowFull(false)
+                if (showFull) setShowFull(false)
                 // setShowCC(to?.some(r => r.cc === "cc") ?? false);
                 // setShowBCC(to?.some(r => r.cc === "bcc") ?? false);
             }
@@ -575,6 +575,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
             removeEventListener("focusin", fn)
             removeEventListener("keydown", onKeyDown)
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -739,13 +740,13 @@ export function HeaderModal({ initialHeaders, action }: { initialHeaders: { key:
                     Change Headers
                 </SmartDrawerTrigger>
             </DropdownMenuItem>
-            <SmartDrawerContent className="sm:max-w-[425px] h-min overflow-auto max-h-[calc(100vh-3rem)]">
+            <SmartDrawerContent className="sm:max-w-[425px] h-min sm:overflow-auto sm:max-h-[calc(100vh-3rem)] max-h-[calc(100vh-3rem)]">
                 <SmartDrawerHeader>
                     <SmartDrawerTitle>Edit Headers</SmartDrawerTitle>
                     <SmartDrawerDescription>Not that important but if you want to do more custom things!</SmartDrawerDescription>
                 </SmartDrawerHeader>
 
-                <form className="flex flex-col items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+                <form className="flex flex-col items-start gap-4 px-4 sm:px-0 max-sm:max-h-[calc(100vh-10rem)] max-sm:overflow-auto" onSubmit={formSubmit}>
                     <div className="flex flex-col gap-2">
                         {headers.map(({ key, value }, i) => (
                             <div key={i} className="flex gap-2">
@@ -786,9 +787,9 @@ export function HeaderModal({ initialHeaders, action }: { initialHeaders: { key:
                             </div>
                         ))}
                     </div>
-                    <Button type="submit" disabled={isPending} className="gap-2">
+                    <Button type="submit" disabled={isPending} className="gap-2 w-full">
                         {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
-                        Save headers
+                        Save Headers
                     </Button>
                 </form>
 
