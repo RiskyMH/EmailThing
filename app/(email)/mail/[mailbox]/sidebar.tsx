@@ -194,7 +194,7 @@ function MailboxesFallback() {
         <div className="w-full h-10 py-2 rounded-md bg-tertiary animate-pulse flex gap-3 px-3 sm:max-lg:px-1">
             <div className="size-7 bg-secondary animate-pulse rounded-full" />
 
-            <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-end sm:max-lg:hidden" />
+            <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-center sm:max-lg:hidden" />
         </div>
     )
 }
@@ -217,7 +217,7 @@ const Mailboxes = (async ({ mailbox: mailboxId }: { mailbox: string }) => {
                 </Avatar>
                 <span className="text-sm sm:max-lg:hidden text-foreground">{defaultAlias?.name}</span>
 
-                <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-end sm:max-lg:hidden" />
+                <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-center sm:max-lg:hidden" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 {mailboxes.map(m => (

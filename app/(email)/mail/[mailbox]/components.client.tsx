@@ -65,7 +65,7 @@ export function ContextMenuAction({ children, action, icon, fillIcon, tooltip, .
 
     const base = (
         <button {...props} onClick={onClick}>
-            {Icon && !isPending && <Icon className="size-5 text-muted-foreground" fill={fillIcon ? "currentColor" : "transparent"} />}
+            {Icon && !isPending && <Icon className={cn("size-5", children && "text-muted-foreground")} fill={fillIcon ? "currentColor" : "transparent"} />}
             {icon === "EmptyIcon" && !isPending && <EmptyIcon className="size-5 text-muted-foreground" />}
             {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
             {children}

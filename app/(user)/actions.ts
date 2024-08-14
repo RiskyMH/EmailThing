@@ -34,7 +34,7 @@ export async function changeUsername(_prevState: any, data: FormData) {
     const validUsername = userAuthSchema.safeParse({ username, password: "password" })
     if (!validUsername.success) return { error: validUsername.error.errors[0].message }
 
-    if (impersonatingEmails.some(v => validUsername.data.username.includes(v.toLowerCase()))) {
+    if (impersonatingEmails.some(v => validUsername.data.username.toLowerCase().includes(v))) {
         const user = await db.query.User.findFirst({
             where: eq(User.id, userId),
             columns: {

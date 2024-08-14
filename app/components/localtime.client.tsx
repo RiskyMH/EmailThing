@@ -18,8 +18,9 @@ export default function LocalTimeClient({ time, className, type = "date", initia
         <TooltipText
             text={time.toLocaleString([], { timeZone, day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             subtext={timeZone ? `(${timeZone})` : undefined}
+            suppressHydrationWarning
         >
-            <time dateTime={time.toISOString()} className={className}>
+            <time dateTime={time.toISOString()} className={className} suppressHydrationWarning>
                 {formatDate(time, type, timeZone)}
             </time>
         </TooltipText>

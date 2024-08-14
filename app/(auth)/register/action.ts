@@ -23,7 +23,7 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
         }
     }
 
-    if (impersonatingEmails.some(v => parsedData.data.username.includes(v.toLowerCase()))) {
+    if (impersonatingEmails.some(v => parsedData.data.username.toLowerCase().includes(v))) {
         return { error: "Invalid username" }
     }
 
