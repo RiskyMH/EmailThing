@@ -35,6 +35,7 @@ import { Paragraph } from '@tiptap/extension-paragraph'
 import { Strike } from '@tiptap/extension-strike'
 import { Text } from '@tiptap/extension-text'
 import { Underline } from '@tiptap/extension-underline'
+import { ListKeymap } from '@tiptap/extension-list-keymap'
 import "./tiptap.css"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -85,6 +86,7 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                 openOnClick: false,
                 defaultProtocol: 'https',
             }),
+            ListKeymap.configure(),
         ],
         // content: '<p>Hello World! 🌎️</p>',
         content: getJSON(savedBody),
@@ -552,7 +554,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
             if (elem?.contains(document.activeElement)) {
                 // do nothing
             } else {
-                if (showFull) setShowFull(false)
+                setShowFull(false)
                 // setShowCC(to?.some(r => r.cc === "cc") ?? false);
                 // setShowBCC(to?.some(r => r.cc === "bcc") ?? false);
             }
@@ -575,7 +577,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
             removeEventListener("focusin", fn)
             removeEventListener("keydown", onKeyDown)
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
