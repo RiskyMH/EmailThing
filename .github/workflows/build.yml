@@ -36,7 +36,7 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          bun --bun run build 2>&1 | tee -a build.log
+          bun run build 2>&1 | tee -a build.log
         env:
           STANDALONE: "1"
 
