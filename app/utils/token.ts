@@ -38,15 +38,19 @@ function generateChecksum(token: string) {
 }
 
 function generateRandomToken(length = 30) {
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-    // Generate cryptographically secure random values
-    const tokenArray = crypto.getRandomValues(new Uint8Array(length));
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const charsetLength = charset.length;
+    const maxValidValue = 256 - (256 % charsetLength); // Ensure no bias
 
     let token = '';
-    for (let i = 0; i < length; i++) {
-        // Map each random byte to a character from the charset
-        token += charset[tokenArray[i] % charset.length];
+    while (token.length < length) {
+        const randomValues = crypto.getRandomValues(new Uint8Array(length)); // Generate multiple random bytes
+        for (let i = 0; i < randomValues.length && token.length < length; i++) {
+            const randomValue = randomValues[i];
+            if (randomValue < maxValidValue) {
+                token += charset[randomValue % charsetLength];
+            }
+        }
     }
 
     return token;
