@@ -1,4 +1,4 @@
-import { db, DraftEmail, Email, TempAlias } from "@/db";
+import { db, DraftEmail, Email, EmailSender, TempAlias } from "@/db";
 import { and, bindIfParam, count, desc, eq, gt, isNotNull, isNull, like, lt, sql } from "drizzle-orm";
 
 export interface EmailListFindOptions {
@@ -13,51 +13,77 @@ export interface EmailListFindOptions {
 }
 type Curser = { emailId: string, createdAt: Date } | { offset: number }
 
-export function getJustEmailsList(mailboxId: string, options: EmailListFindOptions = {}, curser?: Curser) {
-    return db.query.Email.findMany({
-        where: and(
+export async function getJustEmailsList(mailboxId: string, options: EmailListFindOptions = {}, curser?: Curser) {
+    const emailsQuery = await db
+        .select({
+            id: Email.id,
+            snippet: Email.snippet,
+            subject: Email.subject,
+            body: Email.body,
+            createdAt: Email.createdAt,
+            isRead: Email.isRead,
+            isStarred: Email.isStarred,
+            binnedAt: Email.binnedAt,
+            categoryId: Email.categoryId,
+            fromName: EmailSender.name,
+            fromAddress: EmailSender.address,
+        })
+        .from(Email)
+        .leftJoin(EmailSender, eq(Email.id, EmailSender.emailId))
+        .where(and(
             eq(Email.mailboxId, mailboxId),
             options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
             options.isBinned ? undefined : eq(Email.isSender, options.isSender || false),
             options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
-            options.isTemp ?
-                and(
-                    isNotNull(Email.tempId),
-                    options.categoryId ? eq(Email.tempId, options.categoryId) : undefined
-                ) :
-                and(
-                    isNull(Email.tempId),
-                    options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined
-                ),
-
-            // cursor pagination
-            (curser && 'emailId' in curser) ? sql`(${Email.createdAt}, ${Email.id}) < (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})` : undefined,
+            options.isTemp
+                ? and(isNotNull(Email.tempId), options.categoryId ? eq(Email.tempId, options.categoryId) : undefined)
+                : and(isNull(Email.tempId), options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined),
+            curser && 'emailId' in curser
+                ? sql`(${Email.createdAt}, ${Email.id}) < (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`
+                : undefined,
             options.search ? like(Email.subject, `%${options.search}%`) : undefined
-        ),
-        columns: {
-            id: true,
-            snippet: true,
-            subject: true,
-            body: true,
-            createdAt: true,
-            isRead: true,
-            isStarred: true,
-            binnedAt: true,
-            categoryId: true
-        },
-        with: {
-            from: {
-                columns: {
-                    name: true,
-                    address: true
-                }
-            }
-        },
-        orderBy: options.isBinned ? desc(Email.binnedAt) : desc(Email.createdAt),
-        limit: options.take ? options.take + 1 : 11,
-        offset: (curser && 'offset' in curser) ? curser.offset : undefined
+        ))
+        .orderBy(options.isBinned ? desc(Email.binnedAt) : desc(Email.createdAt))
+        .limit(options.take ? options.take + 1 : 11)
+        .offset((curser && 'offset' in curser) ? curser.offset : 0)
+        .execute();
+    console.log({
+        query: db
+            .select({
+                id: Email.id,
+                snippet: Email.snippet,
+                subject: Email.subject,
+                body: Email.body,
+                createdAt: Email.createdAt,
+                isRead: Email.isRead,
+                isStarred: Email.isStarred,
+                binnedAt: Email.binnedAt,
+                categoryId: Email.categoryId,
+                fromName: EmailSender.name,
+                fromAddress: EmailSender.address,
+            })
+            .from(Email)
+            .leftJoin(EmailSender, eq(Email.id, EmailSender.emailId))
+            .where(and(
+                eq(Email.mailboxId, mailboxId),
+                options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
+                options.isBinned ? undefined : eq(Email.isSender, options.isSender || false),
+                options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
+                options.isTemp
+                    ? and(isNotNull(Email.tempId), options.categoryId ? eq(Email.tempId, options.categoryId) : undefined)
+                    : and(isNull(Email.tempId), options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined),
+                curser && 'emailId' in curser
+                    ? sql`(${Email.createdAt}, ${Email.id}) < (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`
+                    : undefined,
+                options.search ? like(Email.subject, `%${options.search}%`) : undefined
+            ))
+            .orderBy(options.isBinned ? desc(Email.binnedAt) : desc(Email.createdAt))
+            .limit(options.take ? options.take + 1 : 11)
+            .offset((curser && 'offset' in curser) ? curser.offset : 0)
+            .toSQL()
     })
 
+    return emailsQuery.map(email => ({ ...email, from: { name: email.fromName, address: email.fromAddress } }));
 }
 
 export function getEmailList(mailboxId: string, options: EmailListFindOptions = {}, curser?: Curser) {

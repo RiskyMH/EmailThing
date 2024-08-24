@@ -40,6 +40,8 @@ export const Email = sqliteTable("emails", {
         binnedAtIdx: index("email_binned_at_idx").on(table.binnedAt),
         tempIdIdx: index("email_temp_id_idx").on(table.tempId),
         givenIdIdx: index("email_given_id_idx").on(table.givenId),
+        allIdx: index("email_all_idx").on(table.mailboxId, table.binnedAt, table.isSender, table.categoryId, table.isStarred, table.tempId, table.createdAt, table.id),
+        all2Idx: index("email_all2_idx").on(table.mailboxId, table.binnedAt, table.isSender, table.tempId, table.createdAt, table.id),
 
         createdIdIdx: index("email_created_id_idx").on(table.createdAt, table.id),
     }
