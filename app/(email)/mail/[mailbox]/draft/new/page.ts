@@ -108,7 +108,9 @@ export default async function Page({
                 headers: email.givenId ? [
                     { key: "In-Reply-To", value: email.givenId },
                     {
-                        key: "References", value: email.givenReferences?.join(" ") ?? email.givenId
+                        key: "References",
+                        // prob heaps of better methods, but this works :) 
+                        value: [...(email.givenId ? [email.givenId] : []), ...(email.givenReferences || [])].join(" ")
                     },
                 ] : undefined
             })
