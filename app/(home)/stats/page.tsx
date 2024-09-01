@@ -1,8 +1,4 @@
-import Link from "next/link"
 
-import { cn } from "@/utils/tw"
-import { buttonVariants } from "@/components/ui/button"
-import { CheckIcon } from "lucide-react"
 import { notFound } from "next/navigation"
 import db, { Email, Mailbox, MailboxAlias, Stats, User } from "@/db"
 import { and, count, gte, inArray, lte } from "drizzle-orm"
@@ -17,101 +13,97 @@ export const metadata = {
 
 export const runtime = "nodejs"
 
-const thirtyDaysAgo = new Date()
-thirtyDaysAgo.setDate(new Date().getDate() - 30);
+// Utility function to get a date offset by a specific number of days
+const getDateOffset = (days: number): Date => {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date;
+};
 
-const sixtyDaysAgo = new Date()
-sixtyDaysAgo.setDate(new Date().getDate() - 60);
+// Generate last 30 days formatted dates
+function getLastNDaysDates(n: number, offset = 0): string[] {
+  return Array.from({ length: n }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - offset - i);
+    return date.toISOString().slice(0, 10);
+  });
+}
 
-function getLast30DaysDates(offset = 0) {
-  const today = new Date();
-  const dates = [] as `${number}-${number}-${number}`[];
+const thirtyDaysAgo = getDateOffset(30);
+const sixtyDaysAgo = getDateOffset(60);
+const last30DaysDates = getLastNDaysDates(30);
+const last30DaysPrevDates = getLastNDaysDates(30, 30);
 
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(today);
-    date.setDate((today.getDate() - offset) - i);
-    const formattedDate = date.toISOString().slice(0, 10);
-    dates.push(formattedDate as any);
+async function fetchAllStars() {
+  const stars: Date[] = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const response = await fetch(`https://api.github.com/repos/riskymh/emailthing/stargazers?per_page=100&page=${page}`, {
+      next: { revalidate: 60 },
+      headers: {
+        Accept: "application/vnd.github.v3.star+json"
+      }
+    });
+
+    const data = await response.json();
+    if (data.length > 0) {
+      stars.push(...data.map((e: Record<string, any>) => new Date(e.starred_at)));
+      page++;
+    } else {
+      hasMore = false;
+    }
   }
 
-  return dates;
+  return stars;
 }
-const last30DaysDates = getLast30DaysDates();
-const last30DaysPrevDates = getLast30DaysDates(30);
 
-export default async function PricingPage({ searchParams }: { searchParams?: { view: string } }) {
-  if (searchParams?.view != "true") return notFound()
+export default async function StatsPage({ searchParams }: { searchParams?: { view: string } }) {
+  if (searchParams?.view !== "true") return notFound();
 
-  const githubStars = (await (await fetch("https://api.github.com/repos/riskymh/emailthing/stargazers?per_page=10000&page=0", {
-    next: { revalidate: 60 },
-    headers: {
-      Accept: "application/vnd.github.v3.star+json"
-    }
-  })).json()).map((e: Record<string, any>) => new Date(e.starred_at)) as Date[];
+  const [githubStars, [stats, statsPrev]] = await Promise.all([
+    fetchAllStars(),
+    db.batch([
+      db.query.Stats.findMany({ where: inArray(Stats.time, last30DaysDates as any[]) }),
+      db.query.Stats.findMany({ where: inArray(Stats.time, last30DaysPrevDates as any[]) })
+    ])
+  ]);
 
-  const latestStars = githubStars.filter(date => date >= thirtyDaysAgo && date <= new Date())
-  const latestStarsPrev = githubStars.filter(date => date >= sixtyDaysAgo && date <= thirtyDaysAgo)
+  const latestStars = githubStars.filter(date => date >= thirtyDaysAgo && date <= new Date());
+  const latestStarsPrev = githubStars.filter(date => date >= sixtyDaysAgo && date <= thirtyDaysAgo);
   const starsChange = ((latestStars.length - latestStarsPrev.length) / latestStarsPrev.length) * 100;
 
-  const stats = await db.query.Stats.findMany({
-    where: inArray(Stats.time, last30DaysDates),
-  })
-  const statsPrev = await db.query.Stats.findMany({
-    where: inArray(Stats.time, last30DaysPrevDates),
-  })
+  const aggregateStats = (data: typeof stats) =>
+    data.reduce((acc, { type, value }) => {
+      acc[type] = (acc[type] || 0) + value;
+      return acc;
+    }, {} as Record<typeof stats[0]["type"], number>);
 
-  const latestStats = stats.reduce((acc, stat) => {
-    acc[stat.type] = (acc[stat.type] || 0) + stat.value;
-    return acc;
-  }, {} as Record<typeof stats[0]["type"], number>);
+  const latestStats = aggregateStats(stats);
+  const latestStatsPrev = aggregateStats(statsPrev);
 
-  const latestStatsPrev = statsPrev.reduce((acc, stat) => {
-    acc[stat.type] = (acc[stat.type] || 0) + stat.value;
-    return acc;
-  }, {} as Record<typeof stats[0]["type"], number>);
+  const latestStatsChange = Object.fromEntries(
+    Object.entries(latestStats).map(([type, value]) => {
+      const prevValue = latestStatsPrev[type as keyof typeof latestStats];
+      const change = prevValue ? ((value - prevValue) / prevValue) * 100 : "N/A";
+      return [type, typeof change === "number" ? change.toFixed(2) : change];
+    })
+  );
 
-  const latestStatsChange = {} as Record<typeof stats[0]["type"], string>;
-  for (const t in latestStats) {
-    const type = t as typeof stats[0]["type"]
-    if (latestStatsPrev[type]) {
-      const change = ((latestStats[type] - latestStatsPrev[type]) / latestStatsPrev[type]) * 100;
-      latestStatsChange[type] = change.toFixed(2);
-    } else {
-      latestStatsChange[type] = "N/A";
-    }
-  }
-
-  const users = (await db.select({ count: count() }).from(User))[0].count
-  const latestUsers = (await db
-    .select({ count: count() })
-    .from(User)
-    .where(gte(User.createdAt, new Date(last30DaysDates.at(-1)!)))
-  )[0].count
-  const latestUsersPrev = (await db
-    .select({ count: count() })
-    .from(User)
-    .where(and(
+  const [[{ count: users }], [{ count: latestUsers }], [{ count: latestUsersPrev }], [{ count: allEmails }], [{ count: allMailboxes }], [{ count: allAliases }]] = await db.batch([
+    db.select({ count: count() }).from(User),
+    db.select({ count: count() }).from(User).where(gte(User.createdAt, new Date(last30DaysDates.at(-1)!))),
+    db.select({ count: count() }).from(User).where(and(
       lte(User.createdAt, new Date(last30DaysDates.at(-1)!)),
       gte(User.createdAt, new Date(last30DaysPrevDates.at(-1)!))
-    ))
-  )[0].count
+    )),
+    db.select({ count: count() }).from(Email),
+    db.select({ count: count() }).from(Mailbox),
+    db.select({ count: count() }).from(MailboxAlias)
+  ]);
 
   const usersChange = ((latestUsers - latestUsersPrev) / latestUsersPrev) * 100;
-
-
-  const allEmails = (await db
-    .select({ count: count() })
-    .from(Email)
-  )[0].count
-  const allMailboxes = (await db
-    .select({ count: count() })
-    .from(Mailbox)
-  )[0].count
-  const allAliases = (await db
-    .select({ count: count() })
-    .from(MailboxAlias)
-  )[0].count
-
   // todo: more stats + prob also do last 30days also
 
   return (
@@ -142,7 +134,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
             </span>
           </span>
           <span className="text-muted-foreground ">
-            <span className="font-bold">emails received</span> in last 30 days
+            <span className="font-bold">Emails received</span> in last 30 days
           </span>
         </div>
         <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
@@ -153,7 +145,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
             </span>
           </span>
           <span className="text-muted-foreground ">
-            <span className="font-bold">emails sent</span> in last 30 days
+            <span className="font-bold">Emails sent</span> in last 30 days
           </span>
         </div>
         <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
@@ -164,7 +156,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
             </span>
           </span>
           <span className="text-muted-foreground ">
-            <span className="font-bold">users created</span> in last 30 days
+            <span className="font-bold">Users created</span> in last 30 days
           </span>
         </div>
         <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
@@ -172,7 +164,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
             {allEmails.toLocaleString()}
           </span>
           <span className="text-muted-foreground ">
-            total emails stored
+            Total emails stored
           </span>
         </div>
         <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
@@ -180,7 +172,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
             {allMailboxes}
           </span>
           <span className="text-muted-foreground ">
-            total mailboxes
+            Total mailboxes
           </span>
         </div>
         <div className="bg-secondary rounded-lg p-5 sm:p-7 w-full flex flex-col gap-2">
@@ -188,7 +180,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { v
             {allAliases}
           </span>
           <span className="text-muted-foreground ">
-            total aliases
+            Total aliases
           </span>
         </div>
       </div>

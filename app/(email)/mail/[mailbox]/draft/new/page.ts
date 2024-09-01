@@ -110,7 +110,7 @@ export default async function Page({
                     {
                         key: "References",
                         // prob heaps of better methods, but this works :) 
-                        value: [...(email.givenId ? [email.givenId] : []), ...(email.givenReferences || [])].join(" ")
+                        value: [email.givenId, ...(email.givenReferences || [])].join(" ")
                     },
                 ] : undefined
             })
