@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/utils/jwt";
 import { createId } from '@paralleldrive/cuid2';
 import { db, InviteCode, User } from "@/db";
 import { and, eq } from "drizzle-orm";
+import { headers } from "next/headers";
 
 export const revalidate = 0;
 
@@ -19,7 +20,10 @@ export async function GET() {
     })
 
     if (!user) {
-        return new Response('Unauthorized', { status: 401 })
+        // scamful way of getting bot :)
+        if (process.env.SECRET_SPECIAL_TOKEN_YAY !== headers().get("Authorization")) {
+            return new Response('Unauthorized', { status: 401 })
+        }
     }
 
     const inviteCode = createId()
