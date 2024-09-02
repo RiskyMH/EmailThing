@@ -32,7 +32,7 @@ export async function GET() {
         .values({
             code: inviteCode,
             expiresAt: new Date(Date.now() + 86400000),
-            createdBy: user.id
+            createdBy: user?.id ?? "p56vs4esg0tp4pys8l7dyszs"
         })
         .execute()
 
