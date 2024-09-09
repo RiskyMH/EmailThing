@@ -120,7 +120,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
                 emailId,
                 name: name ?? undefined,
                 address,
-                cc: !!cc ?? undefined
+                cc: !!cc
             }))),
 
         db.insert(EmailSender)
