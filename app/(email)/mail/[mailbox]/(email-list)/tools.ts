@@ -39,7 +39,7 @@ export async function getJustEmailsList(mailboxId: string, options: EmailListFin
                 ? and(isNotNull(Email.tempId), options.categoryId ? eq(Email.tempId, options.categoryId) : undefined)
                 : and(isNull(Email.tempId), options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined),
             curser && 'emailId' in curser
-                ? sql`(${Email.createdAt}, ${Email.id}) < (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`
+                ? sql`(${Email.createdAt}, ${Email.id}) <= (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`
                 : undefined,
             options.search ? like(Email.subject, `%${options.search}%`) : undefined
         ))
