@@ -171,7 +171,7 @@ export default async function UserSettingsPage() {
                             id="email"
                             className="border-none bg-background sm:w-[300px] w-full"
                             defaultValue={user.backupEmail || undefined}
-                            maxLength={20}
+                            maxLength={100}
                             minLength={4}
                             required
                             placeholder="emailthing@gmail.com"
