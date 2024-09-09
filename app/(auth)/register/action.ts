@@ -163,7 +163,7 @@ Best regards,
 
     // const html = makeHtml(await marked.parse(msg))
 
-    const snippet = "Hi @${username}, Welcome to EmailThing! We're excited to have you on board. With EmailThing, you can enjoy a range of features designed to make managing your emails a breeze"
+    const snippet = `Hi @${username}, Welcome to EmailThing! We're excited to have you on board. With EmailThing, you can enjoy a range of features designed to make managing your emails a breeze`
     const title = "Welcome to EmailThing!"
     // const email = createMimeMessage()
     // email.setSender({ addr: "system@emailthing.dev", name: "EmailThing" })
