@@ -1,6 +1,6 @@
 "use server";
 import { makeHtml } from "@/(email)/mail/[mailbox]/draft/[draft]/tools";
-import { db, Email, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User } from "@/db";
+import { db, Email, EmailRecipient, EmailSender, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User } from "@/db";
 import { addUserTokenToCookie } from "@/utils/jwt"
 import { createPasswordHash } from "@/utils/password";
 import { sendEmail } from "@/utils/send-email";
@@ -106,10 +106,11 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
                 usedAt: new Date(),
                 usedBy: userId
             })
-            .where(eq(InviteCode.code, inviteCode))
+            .where(eq(InviteCode.code, inviteCode)),
+
+        ...emailUser({ userId, mailboxId, username: parsedData.data.username })
     ])
 
-    await emailUser({ userId, mailboxId, username: parsedData.data.username })
 
     // add user token to cookie 
     await addUserTokenToCookie({ id: userId })
@@ -123,7 +124,7 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
 }
 
 
-async function emailUser({ userId, mailboxId, username }: { userId: string, mailboxId: string, username: string }) {
+function emailUser({ userId, mailboxId, username }: { userId: string, mailboxId: string, username: string }) {
 
     const msg =
         `### Hi **@${username}**,
@@ -160,28 +161,63 @@ Best regards,
 [contact page]: https://emailthing.xyz/settings/emailthing-me
 [GitHub]: https://github.com/RiskyMH/EmailThing`
 
-    const html = makeHtml(await marked.parse(msg))
+    // const html = makeHtml(await marked.parse(msg))
 
-    const email = createMimeMessage()
-    email.setSender({ addr: "system@emailthing.dev", name: "EmailThing" })
-    email.setRecipient({ addr: `${username}@emailthing.xyz`, name: username })
-    email.setSubject("Welcome to EmailThing!")
-    email.addMessage({
-        contentType: "text/plain",
-        data: msg
-    })
-    email.addMessage({
-        contentType: "text/html",
-        encoding: "base64",
-        data: Buffer.from(html).toString("base64")
-    })
-    email.setHeader("X-EmailThing", "official")
-    email.setHeader("Reply-To", new MimeMailbox("contact@emailthing.xyz"))
+    const snippet = "Hi @${username}, Welcome to EmailThing! We're excited to have you on board. With EmailThing, you can enjoy a range of features designed to make managing your emails a breeze"
+    const title = "Welcome to EmailThing!"
+    // const email = createMimeMessage()
+    // email.setSender({ addr: "system@emailthing.dev", name: "EmailThing" })
+    // email.setRecipient({ addr: `${username}@emailthing.xyz`, name: username })
+    // email.setSubject("Welcome to EmailThing!")
+    // email.addMessage({
+    //     contentType: "text/plain",
+    //     data: msg
+    // })
+    // email.addMessage({
+    //     contentType: "text/html",
+    //     encoding: "base64",
+    //     data: Buffer.from(html).toString("base64")
+    // })
+    // email.setHeader("X-EmailThing", "official")
+    // email.setHeader("Reply-To", new MimeMailbox("contact@emailthing.xyz"))
 
-    return sendEmail({
-        from: "system@emailthing.dev",
-        to: [`${username}@emailthing.xyz`],
-        data: email.asRaw()
-    })
+    // return sendEmail({
+    //     from: "system@emailthing.dev",
+    //     to: [`${username}@emailthing.xyz`],
+    //     data: email.asRaw()
+    // })
+    const emailId = createId()
+    return [
+        db.insert(Email)
+            .values({
+                id: emailId,
+                body: msg,
+                // html,
+                subject: title,
+                snippet,
+                raw: "draft",
+                mailboxId,
+                isRead: false,
+                replyTo: "hello@riskymh.dev",
+                size: 0,
+                createdAt: new Date(),
+            }),
+
+        db.insert(EmailRecipient)
+            .values({
+                emailId,
+                name: username,
+                address: `${username}@emailthing.xyz`
+            }),
+
+        db.insert(EmailSender)
+            .values({
+                emailId,
+                name: "EmailThing",
+                address: "system@emailthing.xyz"
+            }),
+
+    ] as const
+
     // TODO: maybe just directly add to db instead of weird proxy...
 }
