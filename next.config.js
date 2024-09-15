@@ -15,15 +15,16 @@ const cspHeader = `
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     experimental: {
-        // ppr: true,
+        ppr: true,
+        pprFallbacks: true,
         useLightningcss: process.env.TURBOPACK === "1",
-        outputFileTracingIncludes: {
-            '/mail/[mailbox]/config': ['./public/cloudflare-worker.js'],
-        },
         // optimizePackageImports: [
         //     'shiki',
         // ],
         // reactCompiler: !process.env.TURBOPACK
+    },
+    outputFileTracingIncludes: {
+        '/mail/[mailbox]/config': ['./public/cloudflare-worker.js'],
     },
     output: process.env.STANDALONE ? "standalone" : undefined,
     transpilePackages: [
