@@ -15,8 +15,8 @@ const cspHeader = `
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     experimental: {
-        ppr: true,
-        pprFallbacks: true,
+        // ppr: true,
+        // pprFallbacks: true,
         useLightningcss: process.env.TURBOPACK === "1",
         // optimizePackageImports: [
         //     'shiki',
