@@ -75,21 +75,21 @@ export async function withDKIM(message: string, dkim?: { domain: string, selecto
         return message
     }
 
-    const _message = message.replace(/\r?\n/g, '\r\n').trim() + '\r\n'
+    const _message = (message.replace(/\r?\n/g, '\r\n').trim() + '\r\n')
 
     const signResult = await dkimSign(
         _message,
         {
             canonicalization: 'relaxed/relaxed', // c=
-            algorithm: 'rsa-sha256',
-            signTime: new Date(),
+            // algorithm: 'rsa-sha256',
+            // signTime: new Date(),
 
             signatureData: [
                 {
                     signingDomain: dkim?.domain || 'emailthing.xyz', // d=
-                    selector: dkim?.selector || 'emailthing', // s=
+                    selector: dkim?.selector || 'emailthing.rsa', // s=
                     privateKey: dkim?.privateKey || env.EMAIL_DKIM_PRIVATE_KEY,
-                    algorithm: 'rsa-sha256',
+                    // algorithm: 'rsa-sha256',
                     canonicalization: 'relaxed/relaxed' // c=
                 }
             ]
@@ -104,5 +104,5 @@ export async function withDKIM(message: string, dkim?: { domain: string, selecto
     }
 
     // return signResult.signatures + message.replace(/^\n+/, '')
-    return (signResult.signatures + _message)
+    return signResult.signatures + _message;
 }
