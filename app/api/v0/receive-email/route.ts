@@ -5,6 +5,10 @@ import { createId } from '@paralleldrive/cuid2';
 import { and, eq, gt, sql } from "drizzle-orm";
 import { uploadFile } from '@/utils/s3';
 import { getTokenMailbox } from '../tools';
+import Turndown from "turndown"
+import { JSDOM } from "jsdom";
+import { notifyMailbox } from '@/utils/notifications';
+import { todayDate } from '@/utils/tools';
 
 export const revalidate = 0
 // export const runtime = 'edge';
@@ -232,11 +236,6 @@ async function getMailbox({ internal, zone, auth, to }: { internal: boolean, zon
 function slice(text: string, length: number) {
     return text.slice(0, length) + (length < text.length ? '…' : '')
 }
-
-import Turndown from "turndown"
-import { JSDOM } from "jsdom";
-import { notifyMailbox } from '@/utils/notifications';
-import { todayDate } from '@/utils/tools';
 
 function emailContent({ text, html }: { text?: string, html?: string }) {
     if (text === "\n") text = undefined

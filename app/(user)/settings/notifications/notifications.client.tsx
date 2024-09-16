@@ -13,16 +13,17 @@ const notificationsSupported = () =>
     'serviceWorker' in navigator &&
     'PushManager' in window
 
-const options: PushSubscriptionOptionsInit = {
-    applicationServerKey: env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
-    userVisibleOnly: true,
-}
 
-
-export default function NotificationsButton() {
+export default function NotificationsButton({ publicKey }: { publicKey: string }) {
     const [isPending, startTransition] = useTransition();
     const [isLoaded, setIsLoaded] = useState(false)
     const [isSubscribed, setIsSubscribed] = useState(false)
+
+    const options: PushSubscriptionOptionsInit = {
+        applicationServerKey: publicKey,
+        userVisibleOnly: true,
+    }
+
 
     useEffect(() => {
         setIsLoaded(true)

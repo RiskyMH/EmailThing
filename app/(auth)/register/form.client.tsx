@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { ExternalLinkIcon, Loader2 } from "lucide-react"
 import signUp from "./action"
 import { FormEvent, useTransition } from "react"
 import { useRouter } from "next/navigation"
@@ -24,6 +24,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             const signUpResult = await signUp(formData)
 
             if (signUpResult?.error) {
+                if ("link" in signUpResult && signUpResult.link) return void toast.error(signUpResult.error, { action: (<a href={signUpResult.link.l} target="blank" className='inline-flex items-center justify-center gap-2 shrink-0 bg-secondary rounded-lg p-2 hover:bg-secondary/80'>{signUpResult.link.m} <ExternalLinkIcon className='size-4 text-muted-foreground' /></a>) });
                 return void toast.error(signUpResult.error)
             }
 

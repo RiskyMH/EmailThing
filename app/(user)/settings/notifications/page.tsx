@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import NotificationsButton from "./notifications.client";
+import { env } from "@/utils/env";
 
 export const metadata = {
     title: "User Settings",
@@ -22,7 +23,7 @@ export default async function UserSettingsPage() {
                 </CardDescription>
             </div>
 
-            <NotificationsButton />
+            <NotificationsButton publicKey={env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY}/>
         </>
     );
 }

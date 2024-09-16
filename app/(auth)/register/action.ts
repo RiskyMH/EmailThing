@@ -13,9 +13,12 @@ import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext"
 
-const noInvite = "You need an invite code to signup right now"
+const noInvite = {
+    error: "You need an invite code to signup. Join the Discord to get it.",
+    link: { m: "Get Invite", l: "https://discord.gg/GT9Q2Yz4VS" }
+}
 
-export default async function signUp(data: FormData): Promise<{ error?: string | null }> {
+export default async function signUp(data: FormData): Promise<{ error?: string | null, link?: { m: string, l: string } }> {
     const parsedData = userAuthSchema.safeParse({ username: data.get("username"), password: data.get("password") })
     if (!parsedData.success) {
         return {
@@ -29,9 +32,9 @@ export default async function signUp(data: FormData): Promise<{ error?: string |
 
     // currently you require invite code to sign up
     const referer = headers().get("referer")
-    if (!referer) return { error: noInvite }
+    if (!referer) return noInvite
     const inviteCode = new URL(referer).searchParams?.get("invite")
-    if (!inviteCode) return { error: noInvite }
+    if (!inviteCode) return noInvite
 
     // check if invite code is valid
     const invite = await db.query.InviteCode.findFirst({
