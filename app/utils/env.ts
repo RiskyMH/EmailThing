@@ -26,7 +26,7 @@ export const env = createEnv({
         NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: process.env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
         WEB_NOTIFICATIONS_PRIVATE_KEY: process.env.WEB_NOTIFICATIONS_PRIVATE_KEY,
         EMAIL_AUTH_TOKEN: process.env.EMAIL_AUTH_TOKEN,
-        EMAIL_DKIM_PRIVATE_KEY: process.env.EMAIL_DKIM_PRIVATE_KEY,
+        EMAIL_DKIM_PRIVATE_KEY: process.env.EMAIL_DKIM_PRIVATE_KEY?.replaceAll(/(\r\n|\r|\n)/g, '\r\n'),
         JWT_TOKEN: process.env.JWT_TOKEN || createId(),
         S3_KEY_ID: process.env.S3_KEY_ID,
         S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,

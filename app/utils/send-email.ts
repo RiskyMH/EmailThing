@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm"
 import { todayDate } from "./tools"
 // @ts-expect-error types not there :(
 import { dkimSign } from 'mailauth/lib/dkim/sign';
+import { createMimeMessage } from "mimetext";
 
 export async function sendEmail(data: { from: string, to: string[], data: string, dkim?: { domain: string, selector?: string, privateKey: string } }) {
     // check if the "from" gives spf
@@ -74,8 +75,10 @@ export async function withDKIM(message: string, dkim?: { domain: string, selecto
         return message
     }
 
+    const _message = '\r\n' + message.replace(/\r?\n/g, '\r\n').trim() + '\r\n'
+
     const signResult = await dkimSign(
-        message,
+        _message,
         {
             canonicalization: 'relaxed/relaxed', // c=
             algorithm: 'rsa-sha256',
@@ -100,6 +103,6 @@ export async function withDKIM(message: string, dkim?: { domain: string, selecto
         return message
     }
 
-    return signResult.signatures + message.replace(/^\n+/, '')
+    // return signResult.signatures + message.replace(/^\n+/, '')
+    return (signResult.signatures + _message)
 }
-

@@ -9,6 +9,7 @@ const cspHeader = `
     form-action 'self';
     frame-src 'self' https://challenges.cloudflare.com;
     frame-ancestors 'none';
+    connect-src 'self' https://cloudflare-dns.com;
     upgrade-insecure-requests;
 `;
 
