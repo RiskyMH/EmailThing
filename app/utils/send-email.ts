@@ -75,7 +75,7 @@ export async function withDKIM(message: string, dkim?: { domain: string, selecto
         return message
     }
 
-    const _message = '\r\n' + message.replace(/\r?\n/g, '\r\n').trim() + '\r\n'
+    const _message = message.replace(/\r?\n/g, '\r\n').trim() + '\r\n'
 
     const signResult = await dkimSign(
         _message,
