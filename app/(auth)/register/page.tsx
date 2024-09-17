@@ -7,6 +7,8 @@ import { ChevronLeft, MailIcon } from "lucide-react"
 import { UserAuthForm } from "./form.client"
 import Logo from "@/components/logo"
 
+export const runtime = 'edge'
+
 export default async function LoginPage() {
     return (
         <div className="container flex min-h-screen h-screen w-screen flex-col items-center justify-center bg-background">

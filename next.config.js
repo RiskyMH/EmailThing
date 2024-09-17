@@ -4,7 +4,7 @@ const cspHeader = `
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://www.gravatar.com;
     font-src 'self' ${process.env.NODE_ENV === 'development' ? 'https://fonts.gstatic.com' : ''};
-    _object-src 'none';
+    object-src 'self';
     base-uri 'self';
     form-action 'self';
     frame-src 'self' https://challenges.cloudflare.com;
