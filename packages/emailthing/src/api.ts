@@ -11,7 +11,7 @@ export default class EmailThing {
         this.token = token
     }
 
-    baseURL = "https://emailthing.xyz/api/v0"
+    baseURL = "https://emailthing.app/api/v0"
     token: string
 
     private async fetch(pathname: string, method: "GET" | "POST" | "PATCH", json?: Record<string, any>, retryAmount = 10): Promise<Response> {

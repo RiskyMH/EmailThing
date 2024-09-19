@@ -18,7 +18,7 @@ export default async function Home() {
                     </p>
                     <div className="flex gap-4">
                         <Link
-                            href="https://emailthing.xyz/register?from=/settings/emailthing-me"
+                            href="https://emailthing.app/register?from=/settings/emailthing-me"
                             className={buttonVariants({ variant: "default", className: "h-11 rounded-md px-8" })}
                             target="_blank"
                         >

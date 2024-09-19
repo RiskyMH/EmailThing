@@ -117,7 +117,7 @@ export async function changeBackupEmail(_prevState: any, data: FormData, redirec
     if (!user) throw new Error("User not found")
 
     const mail = createMimeMessage()
-    mail.setSender({ addr: "system@emailthing.xyz", name: "EmailThing System" })
+    mail.setSender({ addr: "system@emailthing.app", name: "EmailThing System" })
     mail.setRecipient(email)
     mail.setSubject("Someone has added you as a backup email! 🎉")
     mail.addMessage({
@@ -128,13 +128,13 @@ ${user.username} has added you as a backup email on EmailThing! 🎉
 
 This means that if they ever lose access to their account, they can use this email to recover it.
 
-Please click here to continue: https://emailthing.xyz/settings/authentication?verify=${createId()}
+Please click here to continue: https://emailthing.app/settings/authentication?verify=${createId()}
 
-If you did not expect this email or have any questions, please contact us at contact@emailthing.xyz
+If you did not expect this email or have any questions, please contact us at contact@emailthing.app
 `
     })
 
-    const e = await sendEmail({ from: "system@emailthing.xyz", to: [email], data: mail.asRaw() })
+    const e = await sendEmail({ from: "system@emailthing.app", to: [email], data: mail.asRaw() })
 
     if (e?.error) {
         return { error: "Failed to send test email to your email address" }

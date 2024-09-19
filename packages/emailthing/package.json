@@ -32,5 +32,5 @@
     "build": "bun build src/cli.ts src/sdk.ts --outdir dist --splitting",
     "prepack": "bun exec \"rm -rf dist && bun run build\""
   },
-  "homepage": "https://emailthing.xyz/home"
+  "homepage": "https://emailthing.app/home"
 }

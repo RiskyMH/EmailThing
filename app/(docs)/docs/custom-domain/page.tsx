@@ -11,11 +11,11 @@ export const metadata = {
         siteName: "EmailThing",
         images: ["/logo.png"],
         locale: "en_US",
-        url: "https://emailthing.xyz/docs/custom-domain",
+        url: "https://emailthing.app/docs/custom-domain",
         type: "website"
     },
     alternates: {
-        canonical: "https://emailthing.xyz/docs/custom-domain",
+        canonical: "https://emailthing.app/docs/custom-domain",
     },
 
 } satisfies Metadata
@@ -38,7 +38,7 @@ export default function AboutPage() {
 
             <MD.h2 id="send-email">Send Emails</MD.h2>
             <MD.p>Make sure your <MD.a href="https://www.cloudflare.com/en-au/learning/dns/dns-records/dns-spf-record/" target="_blank">SPF TXT DNS record</MD.a> allows EmailThing to send emails on your behalf:</MD.p>
-            <MD.p><MD.code>v=spf1 include:_spf.mx.emailthing.xyz -all</MD.code></MD.p>
+            <MD.p><MD.code>v=spf1 include:_spf.mx.emailthing.app -all</MD.code></MD.p>
 
             {/* // TODO: DKIM */}
             <a></a>

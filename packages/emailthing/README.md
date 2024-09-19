@@ -1,6 +1,6 @@
 # EmailThing
 
-> This is a package with the SDK for [EmailThing](https://emailthing.xyz/home) to use with the API, and also has a CLI version so you can view your emails and send them from the terminal.
+> This is a package with the SDK for [EmailThing](https://emailthing.app/home) to use with the API, and also has a CLI version so you can view your emails and send them from the terminal.
 
 **NOTE:** This is v0 still and can contain breaking changes.
 
@@ -56,7 +56,7 @@ await emailthing.send({
 
 ## CLI
 
-A visual terminal interface for the [EmailThing](https://emailthing.xyz/home) site.
+A visual terminal interface for the [EmailThing](https://emailthing.app/home) site.
 
 > **Not done yet** - *It will have a CLI version so you can view your emails and send them from the terminal.*
 

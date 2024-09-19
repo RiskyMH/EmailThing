@@ -144,7 +144,7 @@ export default async function Home() {
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: "https://emailthing.xyz/home",
+    canonical: "https://emailthing.app/home",
   },
   title: {
     absolute: "EmailThing",

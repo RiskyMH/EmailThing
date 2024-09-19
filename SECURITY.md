@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The only supported version is the latest. This should be the latest code with all fixes and what users should see on https://emailthing.xyz.
+The only supported version is the latest. This should be the latest code with all fixes and what users should see on https://emailthing.app.
 
 ## Reporting a Vulnerability
 

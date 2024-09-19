@@ -7,7 +7,7 @@ export const metadata = {
   title: "Stats",
   description: "View some stats that could be of interest to anyone.",
   alternates: {
-    canonical: "https://emailthing.xyz/stats",
+    canonical: "https://emailthing.app/stats",
   },
 }
 

@@ -244,7 +244,7 @@ const nextConfig = {
                 has: [
                     {
                         type: 'host',
-                        value: 'emailthing.xyz'
+                        value: 'emailthing.app'
                     },
                 ],
             },
@@ -255,7 +255,7 @@ const nextConfig = {
                 has: [
                     {
                         type: 'host',
-                        value: 'emailthing.xyz'
+                        value: 'emailthing.app'
                     },
                 ],
             },

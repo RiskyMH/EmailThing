@@ -101,7 +101,7 @@ export async function POST(request: Request) {
             console.log(`Sending email to ${alias.alias} for token "${match.token}"`)
 
             const mail = createMimeMessage()
-            mail.setSender({ addr: "system@emailthing.xyz", name: "EmailThing System" })
+            mail.setSender({ addr: "system@emailthing.app", name: "EmailThing System" })
             mail.setRecipient(alias.alias)
             mail.setSubject("Your token has been compromised")
             mail.addMessage({
@@ -115,12 +115,12 @@ Your token was found here: ${match.url}
 
 Be more careful in the future, and make sure to not accidentally upload your token publicly!
 
-Obtain a New Token: https://emailthing.xyz/mail/${token.mailboxId}/config
+Obtain a New Token: https://emailthing.app/mail/${token.mailboxId}/config
 
 `
             })
 
-            const e = await sendEmail({ from: "system@emailthing.xyz", to: [alias.alias], data: mail.asRaw() })
+            const e = await sendEmail({ from: "system@emailthing.app", to: [alias.alias], data: mail.asRaw() })
 
         } else {
             console.log(`No alias found for mailbox ${token.mailboxId}, but still invalidated token "${match.token}"`)

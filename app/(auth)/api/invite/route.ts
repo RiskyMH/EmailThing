@@ -36,5 +36,5 @@ export async function GET() {
         })
         .execute()
 
-    return new Response(`https://emailthing.xyz/register?invite=${inviteCode}`, { status: 200, headers: { 'Content-Type': 'text/plain' } })
+    return new Response(`https://emailthing.app/register?invite=${inviteCode}`, { status: 200, headers: { 'Content-Type': 'text/plain' } })
 }

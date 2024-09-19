@@ -16,7 +16,7 @@ export default {
 
         if (env.forward) await message.forward(env.forward);
 
-        const req = await fetch("https://emailthing.xyz/api/v0/receive-email", {
+        const req = await fetch("https://emailthing.app/api/v0/receive-email", {
             method: "POST",
             headers: {
                 "content-type": "application/json",

@@ -1,6 +1,6 @@
 <h1 align="center">
-  <a href="https://emailthing.xyz/home" target="_blank">
-    <img src="https://emailthing.xyz/logo.png" alt="EmailThing Logo" width="84">
+  <a href="https://emailthing.app/home" target="_blank">
+    <img src="https://emailthing.app/logo.png" alt="EmailThing Logo" width="84">
   </a>
   <br>
   EmailThing

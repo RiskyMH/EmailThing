@@ -21,12 +21,12 @@ export async function sendEmail(data: { from: string, to: string[], data: string
     const json = await res.json();
 
     const txtRecords = json?.Answer?.filter((a: any) => a.type === 16) || [];
-    const allowed = txtRecords.some((r: any) => r.data.includes("v=spf1") && r.data.includes("include:_spf.mx.emailthing.xyz"));
+    const allowed = txtRecords.some((r: any) => r.data.includes("v=spf1") && (r.data.includes("include:_spf.mx.emailthing.xyz")) || r.data.includes("include:_spf.mx.emailthing.app"));
 
     if (!allowed) {
         return {
             error: `Make sure "${domain}" gives EmailThing permission to send their emails`,
-            link: "https://emailthing.xyz/docs/custom-domain#send-email"
+            link: "https://emailthing.app/docs/custom-domain#send-email"
         }
     }
 
@@ -86,7 +86,7 @@ export async function withDKIM(message: string, dkim?: { domain: string, selecto
 
             signatureData: [
                 {
-                    signingDomain: dkim?.domain || 'emailthing.xyz', // d=
+                    signingDomain: dkim?.domain || 'emailthing.app', // d=
                     selector: dkim?.selector || 'emailthing.rsa', // s=
                     privateKey: dkim?.privateKey || env.EMAIL_DKIM_PRIVATE_KEY,
                     // algorithm: 'rsa-sha256',

@@ -156,12 +156,12 @@ Best regards,
 
 <!-- Links -->
 [RiskyMH]: https://riskymh.dev
-[API]: https://emailthing.xyz/docs/api
-[own domain]: https://emailthing.xyz/mail/${mailboxId}/config
-[Invite others]: https://emailthing.xyz/mail/${mailboxId}/config
-[Get many here]: https://emailthing.xyz/mail/${mailboxId}/temp
-[Set up notifications]: https://emailthing.xyz/settings/notifications
-[contact page]: https://emailthing.xyz/settings/emailthing-me
+[API]: https://emailthing.app/docs/api
+[own domain]: https://emailthing.app/mail/${mailboxId}/config
+[Invite others]: https://emailthing.app/mail/${mailboxId}/config
+[Get many here]: https://emailthing.app/mail/${mailboxId}/temp
+[Set up notifications]: https://emailthing.app/settings/notifications
+[contact page]: https://emailthing.app/settings/emailthing-me
 [GitHub]: https://github.com/RiskyMH/EmailThing`
 
     // const html = makeHtml(await marked.parse(msg))
@@ -217,7 +217,7 @@ Best regards,
             .values({
                 emailId,
                 name: "EmailThing",
-                address: "system@emailthing.xyz"
+                address: "system@emailthing.app"
             }),
 
     ] as const

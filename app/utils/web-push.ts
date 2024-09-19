@@ -3,7 +3,7 @@ import { type PushSubscription, type PushMessage, type VapidKeys, buildPushPaylo
 import { env } from "./env";
 
 const vapid: VapidKeys = {
-    subject: "mailto:notifications@emailthing.xyz",
+    subject: "mailto:notifications@emailthing.app",
     publicKey: env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
     privateKey: env.WEB_NOTIFICATIONS_PRIVATE_KEY,
 };

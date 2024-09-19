@@ -23,7 +23,7 @@ export const metadata = {
     default: "EmailThing",
     template: "%s - EmailThing",
   },
-  metadataBase: new URL("https://emailthing.xyz"),
+  metadataBase: new URL("https://emailthing.app"),
   description: "A modern email client designed for simplicity and the web.",
   keywords: [
     "email",
@@ -39,7 +39,7 @@ export const metadata = {
       "/logo.png",
     ],
     locale: "en_US",
-    url: "https://emailthing.xyz/home",
+    url: "https://emailthing.app/home",
     type: "website"
   },
   authors: [
@@ -90,9 +90,9 @@ export default function RootLayout({
                 "name": "RiskyMH"
               },
               "description": "A modern email client designed for simplicity and the web.",
-              "logo": "https://emailthing.xyz/logo.png",
+              "logo": "https://emailthing.app/logo.png",
               "email": "contact@emailthing.xyz",
-              "url": "https://emailthing.xyz/"
+              "url": "https://emailthing.app/"
             })
           }} />
       </body>

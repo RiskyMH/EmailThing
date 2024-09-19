@@ -10,11 +10,11 @@ export const metadata = {
         siteName: "EmailThing",
         images: ["/logo.png"],
         locale: "en_US",
-        url: "https://emailthing.xyz/docs/api",
+        url: "https://emailthing.app/docs/api",
         type: "website"
     },
     alternates: {
-        canonical: "https://emailthing.xyz/docs/api",
+        canonical: "https://emailthing.app/docs/api",
     },
 } satisfies Metadata
 

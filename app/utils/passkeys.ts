@@ -3,8 +3,8 @@ import { verifyAuthenticationResponse, verifyRegistrationResponse } from "@simpl
 
 
 const HOST_SETTINGS = {
-    expectedOrigin: [process.env.VERCEL_URL ?? "http://localhost:3000", "https://emailthing.xyz"],
-    expectedRPID: [process.env.RPID ?? "localhost", "emailthing.xyz"],
+    expectedOrigin: [process.env.VERCEL_URL ?? "http://localhost:3000", "https://emailthing.app"],
+    expectedRPID: [process.env.RPID ?? "localhost", "emailthing.app"],
 };
 
 export async function verifyCredentials(challenge: string, credential: Credential & any) {

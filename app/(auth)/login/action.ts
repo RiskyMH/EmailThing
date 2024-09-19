@@ -196,7 +196,7 @@ export async function resetPassword(username: string) {
 
     // send email
     const mail = createMimeMessage()
-    mail.setSender({ addr: "system@emailthing.xyz", name: "EmailThing System" })
+    mail.setSender({ addr: "system@emailthing.app", name: "EmailThing System" })
     mail.setRecipient(user.backupEmail)
     mail.setSubject("Reset your password on EmailThing")
     mail.addMessage({
@@ -205,12 +205,12 @@ export async function resetPassword(username: string) {
 
 You have requested to reset your password on EmailThing. Click the link below to reset your password:
 
-https://emailthing.xyz/login/reset?token=${token}
+https://emailthing.app/login/reset?token=${token}
 
 If you did not request this, please ignore this email.`
     })
 
-    const e = await sendEmail({ from: "system@emailthing.xyz", to: [user.backupEmail], data: mail.asRaw() })
+    const e = await sendEmail({ from: "system@emailthing.app", to: [user.backupEmail], data: mail.asRaw() })
 
     if (e?.error) return e
 }

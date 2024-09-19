@@ -49,21 +49,21 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                         <EmailthingText className="flex" text="EmailThing.me" />
                     </Link>
                     <div className="flex gap-6">
-                        <MainNavItem href="https://emailthing.xyz/home" title="EmailThing" />
+                        <MainNavItem href="https://emailthing.app/home" title="EmailThing" />
                         {/* <MainNavItem href="/pricing" title="Pricing" mobileShow />
                         <MainNavItem href="/docs" title="Documentation" /> */}
                     </div>
                 </div>
                 <nav className="flex gap-2">
                     <Link
-                        href="https://emailthing.xyz/register?from=/settings/emailthing-me"
+                        href="https://emailthing.app/register?from=/settings/emailthing-me"
                         className={buttonVariants({ variant: "secondary", size: "sm", className: "px-4" })}
                         target="_blank"
                     >
                         Make your own
                     </Link>
                     {/* <Link
-                        href="https://emailthing.xyz/login?from=/settings"
+                        href="https://emailthing.app/login?from=/settings"
                         className={buttonVariants({ variant: "default", size: "sm", className: "px-4" })}
                         target="_blank"
                     >
@@ -78,7 +78,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
             <SiteFooter className="border-t">
                 {" and powered by "}
                 <a
-                    href="https://emailthing.xyz/home"
+                    href="https://emailthing.app/home"
                     target="_blank"
                     className="font-medium underline underline-offset-4"
                 >
@@ -97,7 +97,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                             "name": "RiskyMH"
                         },
                         "description": "EmailThing.me is your own contact page to make emailing easy!",
-                        "logo": "https://emailthing.xyz/logo.png",
+                        "logo": "https://emailthing.app/logo.png",
                         "email": "contact@emailthing.xyz",
                         "url": "https://emailthing.me/"
                     })

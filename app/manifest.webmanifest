@@ -6,6 +6,7 @@
   "theme_color": "#17171e",
   "background_color": "#292932",
   "description": "An email client!",
+  "id": ".",
   "icons": [
     {
       "src": "logo.png",

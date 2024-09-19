@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: { username: string 
             title: `Contact @${user.username}`,
             description: `Use this form to send a message to @${user.username}!`,
             images: [
-                "https://emailthing.xyz/logo.png"
+                "https://emailthing.app/logo.png"
             ]
         },
         twitter: {
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: { username: string 
             card: "summary",
             creator: "EmailThing_",
             images: [
-                "https://emailthing.xyz/logo.png"
+                "https://emailthing.app/logo.png"
             ]
         },
         alternates: {

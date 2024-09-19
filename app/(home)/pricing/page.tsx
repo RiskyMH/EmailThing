@@ -8,7 +8,7 @@ export const metadata = {
   title: "Pricing",
   description: "Whats included in FREE plan? Everything!",
   alternates: {
-    canonical: "https://emailthing.xyz/pricing",
+    canonical: "https://emailthing.app/pricing",
   },
 }
 
