@@ -52,7 +52,7 @@ export default async function Home() {
               className={cn(buttonVariants({ variant: "outline", size: "lg", className: "gap-1 font-medium px-5" }))}
             >
               <GitHubIcon className='size-4 mb-[0.1rem] me-1' />
-              Github
+              GitHub
               <span className="text-muted-foreground font-normal">• {githubStars}</span>
             </Link>
           </div>
