@@ -22,7 +22,7 @@ export const createUserToken = (user: { id: string }) => {
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .setNotBefore(Date.now() / 1000 - 60_000)
-        .setExpirationTime("7d")
+        .setExpirationTime("30d")
         .setSubject(user.id.toString())
         .sign(JWTToken)
 }
@@ -30,7 +30,7 @@ export const createUserToken = (user: { id: string }) => {
 export const addUserTokenToCookie = async (user: { id: string }) => {
     const token = await createUserToken(user)
     cookies().set("token", token, {
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         path: "/",
         sameSite: "lax",
         httpOnly: true,
