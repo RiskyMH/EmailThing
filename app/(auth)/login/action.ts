@@ -81,13 +81,16 @@ export default async function signIn(data: FormData, callback?: string | null): 
     })
 
     const possibleMailbox = cookies().get("mailboxId")?.value
-    if (possibleMailbox && mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)) {
-        redirect(`/mail/${possibleMailbox}`)
-    } else {
+    if (!possibleMailbox) {
         cookies().set("mailboxId", mailboxes[0].mailboxId, {
             path: "/",
             expires: new Date("2038-01-19 04:14:07")
         });
+    }
+    
+    if (possibleMailbox && mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)) {
+        redirect(`/mail/${possibleMailbox}`)
+    } else {
         redirect(`/mail/${mailboxes[0].mailboxId}`)
     }
 }
