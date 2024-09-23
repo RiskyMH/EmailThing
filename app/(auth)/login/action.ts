@@ -14,26 +14,13 @@ import { redirect } from "next/navigation"
 
 const errorMsg = "Invalid username or password"
 
-export default async function signIn(data: FormData, callback?: string | null): Promise<{ error?: string | null }> {
+export default async function signIn(data: FormData, callback?: string | null): Promise<{ error?: string | null } | void> {
     const parsedData = userAuthSchema.safeParse({ username: data.get("username"), password: data.get("password") })
     if (!parsedData.success) {
         return {
             error: errorMsg
         }
     }
-
-    if (!callback) {
-        const referer = headers().get("referer")
-        if (referer) {
-            callback = new URL(referer).searchParams?.get("from")
-        } else {
-            const mailboxId = cookies().get("mailboxId")
-            if (mailboxId) {
-                callback = `/mail/${mailboxId.value}`
-            }
-        }
-    }
-
 
     // find user
     const user = await db.query.User.findFirst({
@@ -64,50 +51,11 @@ export default async function signIn(data: FormData, callback?: string | null): 
 
     await addUserTokenToCookie(user)
 
-    if (!user.onboardingStatus?.initial) {
-        redirect("/onboarding/welcome")
-    }
-
-    if (callback) {
-        redirect(callback)
-    }
-
-    // get the user's mailbox then redirect to it
-    const mailboxes = await db.query.MailboxForUser.findMany({
-        where: eq(MailboxForUser.userId, user.id),
-        columns: {
-            mailboxId: true,
-        }
-    })
-
-    const possibleMailbox = cookies().get("mailboxId")?.value
-    if (!possibleMailbox) {
-        cookies().set("mailboxId", mailboxes[0].mailboxId, {
-            path: "/",
-            expires: new Date("2038-01-19 04:14:07")
-        });
-    }
-    
-    if (possibleMailbox && mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)) {
-        redirect(`/mail/${possibleMailbox}`)
-    } else {
-        redirect(`/mail/${mailboxes[0].mailboxId}`)
-    }
+    return await handleUserRedirection(user, callback);
 }
 
-export async function signInPasskey(credential: Credential, callback?: string | null): Promise<{ error?: string | null }> {
-    console.log(credential)
-    if (!callback) {
-        const referer = headers().get("referer")
-        if (referer) {
-            callback = new URL(referer).searchParams?.get("from")
-        } else {
-            const mailboxId = cookies().get("mailboxId")
-            if (mailboxId) {
-                callback = `/mail/${mailboxId.value}`
-            }
-        }
-    }
+export async function signInPasskey(credential: Credential, callback?: string | null): Promise<{ error?: string | null } | void> {
+    // console.log(credential)
 
     const cred = await db.query.PasskeyCredentials.findFirst({
         where: eq(PasskeyCredentials.credentialId, credential.id)
@@ -146,33 +94,53 @@ export async function signInPasskey(credential: Credential, callback?: string | 
 
     await addUserTokenToCookie(user)
 
+    return await handleUserRedirection(user, callback);
+}
+
+async function handleUserRedirection(user: { id: string, onboardingStatus: { initial?: boolean } | null }, callback?: string | null) {
+    await addUserTokenToCookie(user);
+
     if (!user.onboardingStatus?.initial) {
-        redirect("/onboarding/welcome")
+        redirect("/onboarding/welcome");
+    }
+
+    if (!callback) {
+        const referer = headers().get("referer");
+        if (referer) {
+            callback = new URL(referer).searchParams?.get("from");
+        } else {
+            const mailboxId = cookies().get("mailboxId");
+            if (mailboxId) {
+                callback = `/mail/${mailboxId.value}`;
+            }
+        }
     }
 
     if (callback) {
-        redirect(callback)
+        redirect(callback);
     }
 
-    // get the user's mailbox then redirect to it
+    // Get the user's mailbox then redirect to it
     const mailboxes = await db.query.MailboxForUser.findMany({
         where: eq(MailboxForUser.userId, user.id),
-        columns: {
-            mailboxId: true,
-        }
-    })
+        columns: { mailboxId: true },
+    });
 
-    const possibleMailbox = cookies().get("mailboxId")?.value
-    if (possibleMailbox && mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)) {
-        redirect(`/mail/${possibleMailbox}`)
-    } else {
+    const possibleMailbox = cookies().get("mailboxId")?.value;
+    if (!possibleMailbox) {
         cookies().set("mailboxId", mailboxes[0].mailboxId, {
             path: "/",
-            expires: new Date("2038-01-19 04:14:07")
+            expires: new Date("2038-01-19 04:14:07"),
         });
-        redirect(`/mail/${mailboxes[0].mailboxId}`)
+    }
+
+    if (possibleMailbox && mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)) {
+        redirect(`/mail/${possibleMailbox}`);
+    } else {
+        redirect(`/mail/${mailboxes[0].mailboxId}`);
     }
 }
+
 
 export async function resetPassword(username: string) {
     const user = await db.query.User.findFirst({
