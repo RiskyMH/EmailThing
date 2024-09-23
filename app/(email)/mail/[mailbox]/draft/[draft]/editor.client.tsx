@@ -279,8 +279,8 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                         </TooltipText>
                         <DialogContent className="sm:max-w-[425px]">
                             <form action={form => {
-                                const url = form.get("link") as string | undefined
-                                const text = form.get("link") as string | undefined
+                                const url = form.get("link") as string | null
+                                const text = form.get("link") as string | null
                                 if (!url || url === '') {
                                     return editor?.chain().focus().extendMarkRange('link').unsetLink().run()
                                 }
@@ -775,7 +775,7 @@ export function HeaderModal({ initialHeaders, action }: { initialHeaders: { key:
                                 <Input
                                     className="bg-secondary border-none"
                                     name={`header:${i}:value`}
-                                    placeholder={i === 0 ? "abcdef@emailthing.xyz" : "value"}
+                                    placeholder={i === 0 ? "<abcdef@emailthing.xyz>" : "value"}
                                     defaultValue={value}
                                     disabled={isPending}
                                     onChange={e => {

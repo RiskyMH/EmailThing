@@ -16,32 +16,40 @@ export interface SaveActionProps {
 
 
 export function getData(data: FormData): SaveActionProps {
-    const body = data.get("body") as string | undefined
-    const html = data.get("html") as string | undefined
-    const preview = data.get("preview") as string | undefined
-    const subject = data.get("subject") as string | undefined
-    const from = data.get("from") as string | undefined
+    const body = data.get("body") as string | null
+    const html = data.get("html") as string | null
+    const preview = data.get("preview") as string | null
+    const subject = data.get("subject") as string | null
+    const from = data.get("from") as string | null
 
-    const tos = data.getAll("to") as string[] | undefined
-    const to = tos?.map(to => {
+    const tos = data.getAll("to") as string[]
+    const to = tos.length && tos.map(to => {
         const name = (data.get(`to:${to}:name`) || null) as string | null
-        const address = data.get(`to:${to}:address`) as string | undefined
+        const address = data.get(`to:${to}:address`) as string | null
         const cc = (data.get(`to:${to}:cc`) || null) as "cc" | "bcc" | null
 
         if (!address) return
         return { name, address, cc }
-    }).filter(e => !!e)
+    }).filter(e => !!e) || undefined
 
-    const headerss = data.getAll("to") as string[] | undefined
-    const headers = headerss?.map(id => {
+    const headerss = data.getAll("header") as string[]
+    const headers = headerss.length && headerss.map(id => {
         const key = (data.get(`header:${id}:name`) || "") as string
         const value = (data.get(`header:${id}:value`) || "") as string
-        
+
         if (!key) return
         return { key, value }
-    }).filter(e => !!e) || []
+    }).filter(e => !!e) || undefined
 
-    return { body, subject, from, to, html, preview, headers }
+    return {
+        body: body ?? undefined,
+        subject: subject ?? undefined,
+        from: from ?? undefined,
+        to,
+        html: html ?? undefined,
+        preview: preview ?? undefined,
+        headers
+    }
 }
 
 export function makeHtml(html: string) {
