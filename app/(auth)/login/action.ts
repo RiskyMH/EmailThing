@@ -100,44 +100,44 @@ export async function signInPasskey(credential: Credential, callback?: string | 
 async function handleUserRedirection(user: { id: string, onboardingStatus: { initial?: boolean } | null }, callback?: string | null) {
     await addUserTokenToCookie(user);
 
-    if (!user.onboardingStatus?.initial) {
-        redirect("/onboarding/welcome");
-    }
-
-    if (!callback) {
-        const referer = headers().get("referer");
-        if (referer) {
-            callback = new URL(referer).searchParams?.get("from");
-        } else {
-            const mailboxId = cookies().get("mailboxId");
-            if (mailboxId) {
-                callback = `/mail/${mailboxId.value}`;
-            }
-        }
-    }
-
-    if (callback) {
-        redirect(callback);
-    }
-
-    // Get the user's mailbox then redirect to it
+    // Get the user's mailbox to possibly redirect to it
     const mailboxes = await db.query.MailboxForUser.findMany({
         where: eq(MailboxForUser.userId, user.id),
         columns: { mailboxId: true },
     });
 
     const possibleMailbox = cookies().get("mailboxId")?.value;
-    if (!possibleMailbox) {
+    const mailboxIdAllowed = mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)
+
+    if (!possibleMailbox || !mailboxIdAllowed) {
         cookies().set("mailboxId", mailboxes[0].mailboxId, {
             path: "/",
             expires: new Date("2038-01-19 04:14:07"),
         });
     }
 
-    if (possibleMailbox && mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox)) {
-        redirect(`/mail/${possibleMailbox}`);
+    // but if they need onboarding, send them there
+    if (!user.onboardingStatus?.initial) {
+        return redirect("/onboarding/welcome");
+    }
+
+    // if given callback url directly
+    if (callback) {
+        return redirect(callback);
+    }
+
+    // maybe ?from=/...
+    const referer = headers().get("referer");
+    if (referer) {
+        callback = new URL(referer).searchParams?.get("from");
+        if (callback) redirect(callback)
+    }
+
+    // ok they have to have mailboxId cookie right?
+    if (possibleMailbox && mailboxIdAllowed) {
+        return redirect(`/mail/${possibleMailbox}`);
     } else {
-        redirect(`/mail/${mailboxes[0].mailboxId}`);
+        return redirect(`/mail/${mailboxes[0].mailboxId}`);
     }
 }
 
