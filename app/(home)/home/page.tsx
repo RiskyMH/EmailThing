@@ -6,11 +6,10 @@ import { ShieldAlertIcon, CloudCogIcon, UsersIcon, SmartphoneIcon, TimerIcon, Lu
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { ReactNode } from 'react'
+import { ReactNode, Suspense } from 'react'
 
 export default async function Home() {
   const currentMailbox = cookies().get("mailboxId")?.value
-  const githubStars = (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing", { next: { revalidate: 60 } })).json()).stargazers_count;
 
   return (
     <>
@@ -53,7 +52,12 @@ export default async function Home() {
             >
               <GitHubIcon className='size-4 mb-[0.1rem] me-1' />
               GitHub
-              <span className="text-muted-foreground font-normal">• {githubStars}</span>
+              <span className="text-muted-foreground font-normal">
+                {" • "}
+                <Suspense fallback="∞">
+                  <GitHubStars />
+                </Suspense>
+              </span>
             </Link>
           </div>
         </div>
@@ -151,6 +155,10 @@ export const metadata: Metadata = {
   }
 }
 
+async function GitHubStars() {
+  const githubStars = (await(await fetch("https://api.github.com/repos/RiskyMH/EmailThing", { next: { revalidate: 60 } })).json()).stargazers_count;
+  return githubStars
+}
 
 function Feature({ title, description, icon: Icon }: { title: string, description: string | ReactNode, icon: LucideIcon }) {
   return (
