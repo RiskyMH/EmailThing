@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     const e = await sendEmail({
         from: alias.alias,
         to: [...data.to, ...(data.cc ?? []), ...(data.bcc ?? [])].map(e => getInfoFromAddress(e).email),
-        data: mail.asRaw()
+        data: mail
     })
 
     if (e?.error) return Response.json(e, { status: 500 })

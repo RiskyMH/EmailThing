@@ -181,7 +181,7 @@ https://emailthing.app/login/reset?token=${token}
 If you did not request this, please ignore this email.`
     })
 
-    const e = await sendEmail({ from: "system@emailthing.app", to: [user.backupEmail], data: mail.asRaw() })
+    const e = await sendEmail({ from: "system@emailthing.app", to: [user.backupEmail], data: mail })
 
     if (e?.error) return e
 }

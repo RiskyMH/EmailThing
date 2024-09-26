@@ -92,7 +92,7 @@ Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}
     })
     if (email) mail.setHeader("Reply-To", new Mailbox({ addr: email, name: name ?? undefined }))
 
-    const e = await sendEmail({ from: `${username}@emailthing.me`, to: [user.publicEmail || user.email], data: mail.asRaw() })
+    const e = await sendEmail({ from: `${username}@emailthing.me`, to: [user.publicEmail || user.email], data: mail })
 
     if (e?.error) return { error: "Failed to notify user" }
 

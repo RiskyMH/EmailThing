@@ -11,8 +11,10 @@ import { userAuthSchema } from "@/validations/auth"
 import { verifyCredentials } from "@/utils/passkeys";
 import { impersonatingEmails } from "@/validations/invalid-emails";
 import { sendEmail } from "@/utils/send-email";
-import { createMimeMessage } from "mimetext";
+import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext"
 import { createId } from "@paralleldrive/cuid2";
+import { marked } from "marked";
+import { makeHtml } from "@/(email)/mail/[mailbox]/draft/[draft]/tools";
 
 
 export async function changeUsername(_prevState: any, data: FormData) {
@@ -120,21 +122,35 @@ export async function changeBackupEmail(_prevState: any, data: FormData, redirec
     mail.setSender({ addr: "system@emailthing.app", name: "EmailThing System" })
     mail.setRecipient(email)
     mail.setSubject("Someone has added you as a backup email! 🎉")
-    mail.addMessage({
-        contentType: "text/plain",
-        data: `Hello!
+    const message = `Hello!
 
-${user.username} has added you as a backup email on EmailThing! 🎉
+**${user.username}** has added you as a backup email on EmailThing! 🎉
 
 This means that if they ever lose access to their account, they can use this email to recover it.
 
 Please click here to continue: https://emailthing.app/settings/authentication?verify=${createId()}
 
+---
+
 If you did not expect this email or have any questions, please contact us at contact@emailthing.app
 `
+    const html = makeHtml('\n'+await marked.parse(message))
+    
+    mail.addMessage({
+        contentType: "text/plain",
+        data: message
     })
+    mail.addMessage({
+        contentType: "text/html",
+        // encoding: "base64",
+        // data: Buffer.from(html).toString("base64")
+        data: html
+    })
+    mail.setHeader("X-EmailThing", "official")
+    mail.setHeader("X-Entity-Ref-ID", createId())
+    mail.setHeader("Reply-To", new MimeMailbox("contact@emailthing.app"))
 
-    const e = await sendEmail({ from: "system@emailthing.app", to: [email], data: mail.asRaw() })
+    const e = await sendEmail({ from: "system@emailthing.app", to: [email], data: mail })
 
     if (e?.error) {
         return { error: "Failed to send test email to your email address" }

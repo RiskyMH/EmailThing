@@ -4,9 +4,10 @@ import { sql } from "drizzle-orm"
 import { todayDate } from "./tools"
 // @ts-expect-error types not there :(
 import { dkimSign } from 'mailauth/lib/dkim/sign';
-import { createMimeMessage } from "mimetext";
+import { createMimeMessage, type MIMEMessage } from "mimetext";
+import { createId } from "@paralleldrive/cuid2";
 
-export async function sendEmail(data: { from: string, to: string[], data: string, dkim?: { domain: string, selector?: string, privateKey: string } }) {
+export async function sendEmail(data: { from: string, to: string[], data: string | MIMEMessage, dkim?: { domain: string, selector?: string, privateKey: string } }) {
     // check if the "from" gives spf
     // use 1.1.1.1 doh api
     const domain = data.from.split("@")[1]
@@ -32,6 +33,11 @@ export async function sendEmail(data: { from: string, to: string[], data: string
 
     if (data.to.length > 50) {
         return { error: "Too many recipients, please ensure you have under 50." }
+    }
+
+    if (typeof data.data !== "string" && 'asRaw' in data.data) {
+        data.data.setHeader("Message-ID", `<${createId()}@emailthing.app>`)
+        data.data = data.data.asRaw()
     }
 
     const signedData = await withDKIM(data.data, data.dkim)

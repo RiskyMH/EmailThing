@@ -120,7 +120,7 @@ Obtain a New Token: https://emailthing.app/mail/${token.mailboxId}/config
 `
             })
 
-            const e = await sendEmail({ from: "system@emailthing.app", to: [alias.alias], data: mail.asRaw() })
+            const e = await sendEmail({ from: "system@emailthing.app", to: [alias.alias], data: mail })
 
         } else {
             console.log(`No alias found for mailbox ${token.mailboxId}, but still invalidated token "${match.token}"`)

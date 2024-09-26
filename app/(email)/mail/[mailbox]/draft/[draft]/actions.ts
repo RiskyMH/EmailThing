@@ -90,7 +90,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     const e = await sendEmail({
         from: alias.alias,
         to: to.map(e => e.address),
-        data: email.asRaw()
+        data: email
     })
 
     if (e?.error) return e
