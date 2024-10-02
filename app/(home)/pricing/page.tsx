@@ -3,6 +3,8 @@ import Link from "next/link"
 import { cn } from "@/utils/tw"
 import { buttonVariants } from "@/components/ui/button"
 import { CheckIcon } from "lucide-react"
+import { Suspense } from "react"
+import TooltipText from "@/components/tooltip-text"
 
 export const metadata = {
   title: "Pricing",
@@ -67,8 +69,13 @@ export default function PricingPage() {
           If you would like to donate and keep the project free for everyone, you can do so on my{" "}
           <Link href="https://github.com/sponsors/RiskyMH" className="underline hover:text-foreground" target="_blank">
             donation page
-          </Link>.
+          </Link>{" "}
+          like these few people:
         </p>
+
+        <Suspense fallback={null}>
+          <Sponsors />
+        </Suspense>
       </div>
       <script type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -79,5 +86,44 @@ export default function PricingPage() {
           })
         }} />
     </section>
+  )
+}
+
+
+async function Sponsors() {
+  const res = await fetch("https://ghs.vercel.app/v3/sponsors/riskymh", { next: { revalidate: 1200 } })
+  const _sponsors = await res.json() as {
+    status: string,
+    sponsors: {
+      current: { username: string, avatar: string }[],
+      past: { username: string, avatar: string }[]
+    }
+  };
+
+  const sponsors = [
+    ..._sponsors.sponsors.current.map(sponsor => ({
+      username: sponsor.username,
+      avatar: sponsor.avatar,
+      type: 'current'
+    })).sort((a, b) => a.username.localeCompare(b.username)),
+
+    ..._sponsors.sponsors.past.map(sponsor => ({
+      username: sponsor.username,
+      avatar: sponsor.avatar,
+      type: 'past'
+    })).sort((a, b) => a.username.localeCompare(b.username)),
+  ];
+
+  return (
+    <div className="flex gap-4">
+      {sponsors.map(s => (
+        <TooltipText text={s.username} key={s.username} subtext={s.type === 'past' ? "(past sponsor)" : undefined}>
+          <a href={`https://github.com/${s.username}`} target="_blank" className="rounded-full size-12 data-[type=past]:grayscale" data-type={s.type}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={s.avatar} alt={`GitHub avatar for "${s.username}"`} className="size-full rounded-full" />
+          </a>
+        </TooltipText>
+      ))}
+    </div>
   )
 }
