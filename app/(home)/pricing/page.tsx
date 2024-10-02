@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { CheckIcon } from "lucide-react"
 import { Suspense } from "react"
 import TooltipText from "@/components/tooltip-text"
+import { unstable_cache } from "next/cache"
 
 export const metadata = {
   title: "Pricing",
@@ -67,7 +68,7 @@ export default function PricingPage() {
         <p className="max-w-[85%] leading-normal text-muted-foreground sm:leading-7">
           <strong>EmailThing is only a free app right now.</strong> {" "}
           If you would like to donate and keep the project free for everyone, you can do so on my{" "}
-          <Link href="https://github.com/sponsors/RiskyMH" className="underline hover:text-foreground" target="_blank">
+          <Link href="https://github.com/sponsors/RiskyMH" className="hover:underline text-blue-500" target="_blank">
             donation page
           </Link>{" "}
           like these awesome people:
@@ -90,37 +91,93 @@ export default function PricingPage() {
 }
 
 
-async function Sponsors() {
-  const res = await fetch("https://ghs.vercel.app/v3/sponsors/riskymh", { next: { revalidate: 1200 } })
-  const _sponsors = await res.json() as {
-    status: string,
-    sponsors: {
-      current: { username: string, avatar: string }[],
-      past: { username: string, avatar: string }[]
-    }
-  };
+// BELOW IS JUST GETTING AND SHOWING SPONSORS
+// not that related to pricing tbh
 
-  const sponsors = [
-    ..._sponsors.sponsors.current.map(sponsor => ({
-      username: sponsor.username,
-      avatar: sponsor.avatar,
-      type: 'current'
-    })).sort((a, b) => a.username.localeCompare(b.username)),
+function parseSponsors(html: string) {
+  const users = [];
 
-    ..._sponsors.sponsors.past.map(sponsor => ({
-      username: sponsor.username,
-      avatar: sponsor.avatar,
-      type: 'past'
-    })).sort((a, b) => a.username.localeCompare(b.username)),
+  const regex = /<a[^>]*href="\/([^"]+)"[^>]*>\s*<img[^>]*src="([^"]+)"[^>]*alt="[^"]*"\s*\/>/g;
+  let match;
+
+  while ((match = regex.exec(html)) !== null) {
+    const username = match[1];
+    const avatar = match[2];
+    users.push({ username, avatar, name: undefined });
+  }
+
+  return users;
+}
+
+async function getActiveSponsors(): Promise<{ username: string, avatar: string, name?: string }[]> {
+  if (!process.env.GITHUB_PAT) {
+    return fetch("https://github.com/sponsors/riskymh/sponsors_partial?filter=active")
+      .then(e => e.text())
+      .then(parseSponsors)
+  }
+
+  const res = await fetch("https://api.github.com/graphql", {
+    method: 'POST',
+    headers: {
+      authorization: `token ${process.env.GITHUB_PAT}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ query: `{ user(login: \"riskymh\") { ... on Sponsorable { sponsors(first: 100) { totalCount nodes { ... on User { login name avatarUrl } ... on Organization { login name avatarUrl } } } } } } }` })
+  })
+
+  const body = await res.json()
+
+  return body.data.user.sponsors.nodes.map((e: Record<string, string>) => ({
+    username: e.login,
+    name: e.name,
+    avatar: e.avatarUrl,
+  } as const))
+
+}
+
+const getSponsors = unstable_cache(async () => {
+  const [active, inactive] = await Promise.all([
+    getActiveSponsors(),
+
+    fetch("https://github.com/sponsors/riskymh/sponsors_partial?filter=inactive")
+      .then(e => e.text())
+      .then(parseSponsors),
+  ])
+
+  return [
+    ...active.map(sponsor => ({
+      ...sponsor,
+      type: 'current' as const
+    })),
+
+    ...inactive.map(sponsor => ({
+      ...sponsor,
+      type: 'past' as const
+    })),
   ];
+}, [], { revalidate: 1000 })
+
+async function Sponsors() {
+  const sponsors = await getSponsors()
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-6 overflow-auto flex-wrap justify-center">
+      <TooltipText text='RiskyMH 😀' subtext="(me, the creator)">
+        <a href="https://github.com/RiskyMH" target="_blank" className="rounded-full size-12">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="https://avatars.githubusercontent.com/RiskyMH" alt={`GitHub avatar for "RiskyMH"`} className="size-full rounded-full" loading="lazy" />
+        </a>
+      </TooltipText>
+
       {sponsors.map(s => (
-        <TooltipText text={s.username} key={s.username} subtext={s.type === 'past' ? "(past sponsor)" : undefined}>
+        <TooltipText
+          text={(s.name && s.name !== s.username) ? s.name : `@${s.username}`}
+          key={s.username}
+          subtext={s.type === 'past' ? "(past sponsor)" : ((s.name && s.name !== s.username) ? `@${s.username}` : undefined)}
+        >
           <a href={`https://github.com/${s.username}`} target="_blank" className="rounded-full size-12 data-[type=past]:grayscale" data-type={s.type}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.avatar} alt={`GitHub avatar for "${s.username}"`} className="size-full rounded-full" />
+            <img src={s.avatar} alt={`GitHub avatar for "${s.username}"`} className="size-full rounded-full" loading="lazy" />
           </a>
         </TooltipText>
       ))}
