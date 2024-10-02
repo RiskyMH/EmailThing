@@ -282,7 +282,7 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                                 const url = form.get("link") as string | null
                                 const text = form.get("link") as string | null
                                 if (!url || url === '') {
-                                    return editor?.chain().focus().extendMarkRange('link').unsetLink().run()
+                                    return void editor?.chain().focus().extendMarkRange('link').unsetLink().run()
                                 }
                                 editor?.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run()
                                 // if (editor?.getText() !== text) {

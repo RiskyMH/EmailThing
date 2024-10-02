@@ -70,7 +70,7 @@ export default function PricingPage() {
           <Link href="https://github.com/sponsors/RiskyMH" className="underline hover:text-foreground" target="_blank">
             donation page
           </Link>{" "}
-          like these few people:
+          like these awesome people:
         </p>
 
         <Suspense fallback={null}>
