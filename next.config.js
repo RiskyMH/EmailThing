@@ -3,7 +3,7 @@ const cspHeader = `
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://www.gravatar.com https://avatars.githubusercontent.com;
-    font-src 'self' ${process.env.NODE_ENV === 'development' ? 'https://fonts.gstatic.com' : ''};
+    font-src 'self' ${process.env.NODE_ENV === "development" ? "https://fonts.gstatic.com" : ""};
     object-src 'self';
     base-uri 'self';
     form-action 'self';
@@ -13,14 +13,13 @@ const cspHeader = `
     upgrade-insecure-requests;
 `;
 
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     experimental: {
         // ppr: true,
         useLightningcss: process.env.TURBOPACK === "1",
         outputFileTracingIncludes: {
-            '/mail/[mailbox]/config': ['./public/cloudflare-worker.js'],
+            "/mail/[mailbox]/config": ["./public/cloudflare-worker.js"],
         },
         // optimizePackageImports: [
         //     'shiki',
@@ -28,9 +27,7 @@ const nextConfig = {
         // reactCompiler: !process.env.TURBOPACK
     },
     output: process.env.STANDALONE ? "standalone" : undefined,
-    transpilePackages: [
-        "shiki"
-    ],
+    transpilePackages: ["shiki"],
     logging: {
         fetches: {
             fullUrl: true,
@@ -39,50 +36,50 @@ const nextConfig = {
     async headers() {
         return [
             {
-                source: '/(.*)',
+                source: "/(.*)",
                 headers: [
                     {
-                        key: 'X-Content-Type-Options',
-                        value: 'nosniff',
+                        key: "X-Content-Type-Options",
+                        value: "nosniff",
                     },
                     {
-                        key: 'X-Frame-Options',
-                        value: 'DENY',
+                        key: "X-Frame-Options",
+                        value: "DENY",
                     },
                     {
-                        key: 'Referrer-Policy',
-                        value: 'strict-origin-when-cross-origin',
+                        key: "Referrer-Policy",
+                        value: "strict-origin-when-cross-origin",
                     },
                     {
-                        key: 'Content-Security-Policy',
-                        value: cspHeader.replace(/\n/g, ''),
+                        key: "Content-Security-Policy",
+                        value: cspHeader.replace(/\n/g, ""),
                     },
                 ],
             },
             {
-                source: '/service.js',
+                source: "/service.js",
                 headers: [
                     {
-                        key: 'Content-Type',
-                        value: 'application/javascript; charset=utf-8',
+                        key: "Content-Type",
+                        value: "application/javascript; charset=utf-8",
                     },
                     {
-                        key: 'Cache-Control',
-                        value: 'no-cache, no-store, must-revalidate',
+                        key: "Cache-Control",
+                        value: "no-cache, no-store, must-revalidate",
                     },
                     {
-                        key: 'Content-Security-Policy',
+                        key: "Content-Security-Policy",
                         value: "default-src 'self'; script-src 'self'",
                     },
                 ],
             },
             {
-                source: '/_next/static/:path*',
+                source: "/_next/static/:path*",
                 headers: [
                     {
-                        key: 'Cache-Control',
-                        value: `public, max-age=31536000, immutable`,
-                    }
+                        key: "Cache-Control",
+                        value: "public, max-age=31536000, immutable",
+                    },
                 ],
             },
         ];
@@ -95,8 +92,8 @@ const nextConfig = {
                     destination: "/emailme",
                     has: [
                         {
-                            type: 'host',
-                            value: 'emailthing.me'
+                            type: "host",
+                            value: "emailthing.me",
                         },
                     ],
                 },
@@ -105,8 +102,8 @@ const nextConfig = {
                     destination: "/home",
                     missing: [
                         {
-                            type: 'cookie',
-                            key: 'mailboxId',
+                            type: "cookie",
+                            key: "mailboxId",
                         },
                     ],
                 },
@@ -115,12 +112,11 @@ const nextConfig = {
                     destination: "/emailme/404",
                     has: [
                         {
-                            type: 'host',
-                            value: 'emailthing.me'
+                            type: "host",
+                            value: "emailthing.me",
                         },
                     ],
                 },
-
             ],
             afterFiles: [
                 {
@@ -128,8 +124,8 @@ const nextConfig = {
                     destination: "/emailme/:path*",
                     has: [
                         {
-                            type: 'host',
-                            value: 'emailthing.me'
+                            type: "host",
+                            value: "emailthing.me",
                         },
                     ],
                 },
@@ -140,18 +136,18 @@ const nextConfig = {
     async redirects() {
         return [
             {
-                source: '/mail/:mailbox/:email/raw',
-                destination: '/mail/:mailbox/:email/email.eml',
+                source: "/mail/:mailbox/:email/raw",
+                destination: "/mail/:mailbox/:email/email.eml",
                 permanent: true,
             },
             {
-                source: '/api/recieve-email',
-                destination: '/api/v0/receive-email',
+                source: "/api/recieve-email",
+                destination: "/api/v0/receive-email",
                 permanent: true,
             },
             {
-                source: '/api-docs',
-                destination: '/docs/api',
+                source: "/api-docs",
+                destination: "/docs/api",
                 permanent: true,
             },
             {
@@ -159,8 +155,8 @@ const nextConfig = {
                 destination: "/login?from=/mail/:path*",
                 missing: [
                     {
-                        type: 'cookie',
-                        key: 'token',
+                        type: "cookie",
+                        key: "token",
                     },
                 ],
                 permanent: false,
@@ -168,62 +164,56 @@ const nextConfig = {
             {
                 source: "/",
                 destination: "/login",
-                has: [
-                    { type: 'cookie', key: 'mailboxId' },
-                ],
-                missing: [
-                    { type: 'cookie', key: 'token' },
-                ],
+                has: [{ type: "cookie", key: "mailboxId" }],
+                missing: [{ type: "cookie", key: "token" }],
                 permanent: false,
             },
             {
-                source: '/(login|register|login\/reset)?',
+                source: "/(login|register|login/reset)?",
                 has: [
                     {
-                        type: 'cookie',
-                        key: 'token',
+                        type: "cookie",
+                        key: "token",
                     },
                     {
-                        type: 'cookie',
-                        key: 'mailboxId',
-                        value: '(?<mailbox>.*)'
+                        type: "cookie",
+                        key: "mailboxId",
+                        value: "(?<mailbox>.*)",
                     },
                 ],
-                missing: [
-                    { type: 'query', key: 'from' }
-                ],
-                destination: '/mail/:mailbox',
+                missing: [{ type: "query", key: "from" }],
+                destination: "/mail/:mailbox",
                 permanent: false,
             },
             {
-                source: '/mail/~/:path',
+                source: "/mail/~/:path",
                 has: [
                     {
-                        type: 'cookie',
-                        key: 'token',
+                        type: "cookie",
+                        key: "token",
                     },
                     {
-                        type: 'cookie',
-                        key: 'mailboxId',
-                        value: '(?<mailbox>.*)'
+                        type: "cookie",
+                        key: "mailboxId",
+                        value: "(?<mailbox>.*)",
                     },
                 ],
-                destination: '/mail/:mailbox/:path',
+                destination: "/mail/:mailbox/:path",
                 permanent: false,
             },
             {
-                source: '/mail/:mailbox/inbox',
-                destination: '/mail/:mailbox',
+                source: "/mail/:mailbox/inbox",
+                destination: "/mail/:mailbox",
                 permanent: false,
             },
             {
-                source: '/(login|register)',
-                destination: '/:from?from=',
+                source: "/(login|register)",
+                destination: "/:from?from=",
                 permanent: false,
                 has: [
-                    { type: 'cookie', key: 'token' },
-                    { type: 'query', key: 'from' }
-                ]
+                    { type: "cookie", key: "token" },
+                    { type: "query", key: "from" },
+                ],
             },
             {
                 source: "/emailme",
@@ -231,9 +221,9 @@ const nextConfig = {
                 permanent: true,
                 has: [
                     {
-                        type: 'header',
-                        key: 'Host',
-                        value: 'emailthing.me'
+                        type: "header",
+                        key: "Host",
+                        value: "emailthing.me",
                     },
                 ],
             },
@@ -243,8 +233,8 @@ const nextConfig = {
                 permanent: false,
                 has: [
                     {
-                        type: 'host',
-                        value: 'emailthing.app'
+                        type: "host",
+                        value: "emailthing.app",
                     },
                 ],
             },
@@ -254,13 +244,13 @@ const nextConfig = {
                 permanent: false,
                 has: [
                     {
-                        type: 'host',
-                        value: 'emailthing.app'
+                        type: "host",
+                        value: "emailthing.app",
                     },
                 ],
             },
         ];
-    }
+    },
 };
 
 module.exports = nextConfig;

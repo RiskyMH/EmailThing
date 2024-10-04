@@ -11,15 +11,14 @@ export const metadata = {
         images: ["/logo.png"],
         locale: "en_US",
         url: "https://emailthing.app/docs/api",
-        type: "website"
+        type: "website",
     },
     alternates: {
         canonical: "https://emailthing.app/docs/api",
     },
-} satisfies Metadata
-
+} satisfies Metadata;
 
 export default function APIDocs() {
     // temp docs
-    redirect("https://github.com/RiskyMH/EmailThing/tree/main/app/api/v0#readme")
+    redirect("https://github.com/RiskyMH/EmailThing/tree/main/app/api/v0#readme");
 }

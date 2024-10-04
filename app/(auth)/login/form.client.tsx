@@ -1,44 +1,52 @@
-"use client"
+"use client";
 
-import { cn } from "@/utils/tw"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
-import { KeyRoundIcon, Loader2, Loader2Icon } from "lucide-react"
-import signIn, { resetPassword } from "./action"
-import { FormEvent, useState, useTransition } from "react"
-import Link from "next/link"
-import { SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerTrigger } from "@/components/ui/smart-drawer"
-import PasskeysLogin from "./passkeys.client"
-import { useRouter } from "next/navigation"
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    SmartDrawer,
+    SmartDrawerClose,
+    SmartDrawerContent,
+    SmartDrawerDescription,
+    SmartDrawerFooter,
+    SmartDrawerHeader,
+    SmartDrawerTitle,
+    SmartDrawerTrigger,
+} from "@/components/ui/smart-drawer";
+import { cn } from "@/utils/tw";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { type FormEvent, useState, useTransition } from "react";
+import { toast } from "sonner";
+import signIn, { resetPassword } from "./action";
+import PasskeysLogin from "./passkeys.client";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
-
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
-    const [hadAnError, setHadAnError] = useState<false | string>(false)
-    const [loading, setLoading] = useState(false)
-    const router = useRouter()
+    const [hadAnError, setHadAnError] = useState<false | string>(false);
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        setLoading(true)
+        event.preventDefault();
+        setLoading(true);
         startTransition(async () => {
-            const formData = new FormData(event.target as HTMLFormElement)
-            const signInResult = await signIn(formData)
+            const formData = new FormData(event.target as HTMLFormElement);
+            const signInResult = await signIn(formData);
 
             if (signInResult?.error) {
                 // @ts-expect-error yay types
-                setHadAnError(event.target?.username?.value ?? "unknown")
-                setLoading(false)
-                return void toast.error(signInResult.error)
+                setHadAnError(event.target?.username?.value ?? "unknown");
+                setLoading(false);
+                return void toast.error(signInResult.error);
             }
 
-            toast.success("Welcome back!")
-            router.refresh()
-            setLoading(false)
+            toast.success("Welcome back!");
+            router.refresh();
+            setLoading(false);
         });
     }
 
@@ -59,7 +67,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 autoCapitalize="none"
                                 autoComplete="username"
                                 autoCorrect="off"
-                                className="bg-secondary border-none"
+                                className="border-none bg-secondary"
                                 disabled={isPending}
                             />
                         </div>
@@ -74,15 +82,13 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 type="password"
                                 autoComplete="password"
                                 autoCorrect="off"
-                                className="bg-secondary border-none"
+                                className="border-none bg-secondary"
                                 disabled={isPending}
                             />
                         </div>
 
                         <Button disabled={isPending} type="submit">
-                            {loading && (
-                                <Loader2 className="me-2 size-4 animate-spin" />
-                            )}
+                            {loading && <Loader2 className="me-2 size-4 animate-spin" />}
                             Sign In
                         </Button>
                     </div>
@@ -93,24 +99,18 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     <span className="w-full border-t-2" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                        Or continue with
-                    </span>
+                    <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                 </div>
             </div>
             <PasskeysLogin transition={[isPending, startTransition]} />
-            <p className="px-8 text-center text-sm text-muted-foreground flex flex-col gap-2">
-                <Link
-                    href="/register"
-                    className="hover:text-muted-foreground underline underline-offset-4"
-                >
+            <p className="flex flex-col gap-2 px-8 text-center text-muted-foreground text-sm">
+                <Link href="/register" className="underline underline-offset-4 hover:text-muted-foreground">
                     Don&apos;t have an account? Sign Up
                 </Link>
                 {hadAnError && <ResetPasswordDiag username={hadAnError} />}
-
             </p>
         </>
-    )
+    );
 }
 
 function ResetPasswordDiag({ username }: { username: string }) {
@@ -118,44 +118,42 @@ function ResetPasswordDiag({ username }: { username: string }) {
 
     const resetPasswordAction = async () => {
         startTransition(async () => {
-            const res = await resetPassword(username)
+            const res = await resetPassword(username);
             if (res?.error) {
-                toast.error(res.error)
+                toast.error(res.error);
             } else {
-                toast.success("Check your email for the reset link.")
-                document.getElementById("smart-drawer:close")?.click()
+                toast.success("Check your email for the reset link.");
+                document.getElementById("smart-drawer:close")?.click();
             }
-        })
-    }
+        });
+    };
 
     return (
         <SmartDrawer>
             <SmartDrawerTrigger asChild>
-                <a className="hover:text-muted-foreground underline underline-offset-4 cursor-pointer">
+                <button
+                    className="cursor-pointer underline underline-offset-4 hover:text-muted-foreground"
+                    type="button"
+                >
                     Forgot your password?
-                </a>
+                </button>
             </SmartDrawerTrigger>
             <SmartDrawerContent className="sm:max-w-[425px]">
                 <SmartDrawerHeader>
                     <SmartDrawerTitle>Reset your password</SmartDrawerTitle>
                     <SmartDrawerDescription>
-                        We will send you an email the user <strong>{username}</strong>&lsquo;s back up email to reset your password.
-
-                        Are you sure you want to continue?
+                        We will send you an email the user <strong>{username}</strong>&lsquo;s back up email to reset
+                        your password. Are you sure you want to continue?
                     </SmartDrawerDescription>
                 </SmartDrawerHeader>
-                <SmartDrawerFooter className="pt-2 flex">
+                <SmartDrawerFooter className="flex pt-2">
                     <SmartDrawerClose className={buttonVariants({ variant: "secondary" })}>Close</SmartDrawerClose>
                     <Button onClick={resetPasswordAction} disabled={isPending} className="gap-2">
-                        {isPending && (
-                            <Loader2 className="me-2 size-4 animate-spin" />
-                        )}
+                        {isPending && <Loader2 className="me-2 size-4 animate-spin" />}
                         Continue
                     </Button>
                 </SmartDrawerFooter>
             </SmartDrawerContent>
         </SmartDrawer>
-
-    )
+    );
 }
-

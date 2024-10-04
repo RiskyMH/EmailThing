@@ -1,11 +1,9 @@
-"use server"
+"use server";
 
 import db, { UserNotification } from "@/db";
-import { getCurrentUser } from "@/utils/jwt"
-import { sendNotification } from "@/utils/web-push";
+import { getCurrentUser } from "@/utils/jwt";
 import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache"
-
+import { revalidatePath } from "next/cache";
 
 export async function saveSubscription(subscription: PushSubscriptionJSON) {
     const userId = await getCurrentUser();
@@ -25,8 +23,8 @@ export async function saveSubscription(subscription: PushSubscriptionJSON) {
 
     // if (!res.ok) throw new Error("Failed to send test notification: " + await res.text())
 
-
-    await db.insert(UserNotification)
+    await db
+        .insert(UserNotification)
         .values({
             userId,
             endpoint: subscription.endpoint,
@@ -34,7 +32,7 @@ export async function saveSubscription(subscription: PushSubscriptionJSON) {
             p256dh: subscription.keys.p256dh,
             auth: subscription.keys.auth,
         })
-        .execute()
+        .execute();
 }
 
 export async function deleteSubscription(endpoint: string) {
@@ -44,12 +42,10 @@ export async function deleteSubscription(endpoint: string) {
     // delete subscription
     if (!endpoint) throw new Error("Subscription endpoint is missing");
 
-    await db.delete(UserNotification)
-        .where(and(
-            eq(UserNotification.userId, userId),
-            eq(UserNotification.endpoint, endpoint)
-        ))
-        .execute()
+    await db
+        .delete(UserNotification)
+        .where(and(eq(UserNotification.userId, userId), eq(UserNotification.endpoint, endpoint)))
+        .execute();
 
-    revalidatePath('/settings')
+    revalidatePath("/settings");
 }

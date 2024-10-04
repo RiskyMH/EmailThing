@@ -1,26 +1,25 @@
-import { pageMailboxAccess } from "../../tools"
-import { Metadata } from "next"
-import EmailList from "../email-list"
+import type { Metadata } from "next";
+import { pageMailboxAccess } from "../../tools";
+import EmailList from "../email-list";
 
 export const metadata = {
     title: "Starred",
-} as Metadata
-
+} as Metadata;
 
 export default async function Mailbox({
     params,
-    searchParams
+    searchParams,
 }: {
     params: {
-        mailbox: string
-    },
+        mailbox: string;
+    };
     searchParams?: {
-        category?: string
-        take?: string
-        q?: string
-    }
+        category?: string;
+        take?: string;
+        q?: string;
+    };
 }) {
-    await pageMailboxAccess(params.mailbox)
+    await pageMailboxAccess(params.mailbox);
 
     return (
         <EmailList
@@ -30,5 +29,5 @@ export default async function Mailbox({
             categoryId={searchParams?.category}
             search={searchParams?.q}
         />
-    )
+    );
 }

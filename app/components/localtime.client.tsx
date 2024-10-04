@@ -1,22 +1,34 @@
-'use client'
-import { useState, useEffect } from "react";
+"use client";
+import { useEffect, useState } from "react";
+import { type DateStyle, formatDate } from "../utils/tools";
 import TooltipText from "./tooltip-text";
-import { formatDate, type DateStyle } from "../utils/tools";
 
 export interface LocalTimeProps {
-    time: Date
-    className?: string
-    type?: DateStyle
+    time: Date;
+    className?: string;
+    type?: DateStyle;
 }
 
-export default function LocalTimeClient({ time, className, type = "date", initialTimeZone }: (LocalTimeProps & { initialTimeZone?: string })) {
-    const [timeZone, setTimeZone] = useState<string | undefined>(initialTimeZone)
+export default function LocalTimeClient({
+    time,
+    className,
+    type = "date",
+    initialTimeZone,
+}: LocalTimeProps & { initialTimeZone?: string }) {
+    const [timeZone, setTimeZone] = useState<string | undefined>(initialTimeZone);
 
-    useEffect(() => setTimeZone(undefined), [])
+    useEffect(() => setTimeZone(undefined), []);
 
     return (
         <TooltipText
-            text={time.toLocaleString([], { timeZone, day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            text={time.toLocaleString([], {
+                timeZone,
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+            })}
             subtext={timeZone ? `(${timeZone})` : undefined}
             suppressHydrationWarning
         >
@@ -24,7 +36,5 @@ export default function LocalTimeClient({ time, className, type = "date", initia
                 {formatDate(time, type, timeZone)}
             </time>
         </TooltipText>
-
-    )
+    );
 }
-
