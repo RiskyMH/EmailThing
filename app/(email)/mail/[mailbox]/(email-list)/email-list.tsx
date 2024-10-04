@@ -140,7 +140,10 @@ export default async function EmailList({
                                     size="sm"
                                     className="-my-1 h-auto py-1"
                                     // biome-ignore lint/complexity/useOptionalChain: <explanation>
-                                    disabled={(categories && categories?.length || 0) >= tempEmailsLimit[mailboxPlan?.plan ?? "FREE"]}
+                                    disabled={
+                                        ((categories && categories?.length) || 0) >=
+                                        tempEmailsLimit[mailboxPlan?.plan ?? "FREE"]
+                                    }
                                 >
                                     Create email
                                 </Button>
