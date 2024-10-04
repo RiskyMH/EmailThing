@@ -1,0 +1,28 @@
+name: Publish `emailthing` Package to npmjs
+on:
+ push:
+  paths: packages/emailthing/package.json
+  branches: main
+
+jobs:
+ npm-publish:
+  runs-on: ubuntu-latest
+  permissions:
+   contents: read
+   id-token: write
+  steps:
+   - uses: actions/checkout@v4
+   # Setup .npmrc file to publish to npm
+   - uses: actions/setup-node@v4
+     with:
+      node-version: "*"
+      registry-url: "https://registry.npmjs.org"
+   - uses: oven-sh/setup-bun@v1
+   - run: bun install --frozen-lockfile
+   - run: bun pm pack
+     working-directory: packages/emailthing
+   - run: npm publish emailthing-*.tgz --provenance --access public || true
+     name: Publish to npm
+     working-directory: packages/emailthing
+     env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

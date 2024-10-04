@@ -1,6 +1,6 @@
 {
   "name": "emailthing",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A web app for receiving and sending your emails!",
   "repository": {
     "type": "git",
