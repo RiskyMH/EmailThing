@@ -39,13 +39,13 @@ export async function getJustEmailsList(mailboxId: string, options: EmailListFin
                 options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
                 options.isTemp
                     ? and(
-                        isNotNull(Email.tempId),
-                        options.categoryId ? eq(Email.tempId, options.categoryId) : undefined,
-                    )
+                          isNotNull(Email.tempId),
+                          options.categoryId ? eq(Email.tempId, options.categoryId) : undefined,
+                      )
                     : and(
-                        isNull(Email.tempId),
-                        options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined,
-                    ),
+                          isNull(Email.tempId),
+                          options.categoryId ? eq(Email.categoryId, options.categoryId) : undefined,
+                      ),
                 curser && "emailId" in curser
                     ? sql`(${Email.createdAt}, ${Email.id}) <= (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`
                     : undefined,
@@ -69,23 +69,23 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
 
         options.selectCategories
             ? db
-                .select({
-                    count: count(),
-                    categoryId: options.isTemp ? Email.tempId : Email.categoryId,
-                })
-                .from(Email)
-                .where(
-                    and(
-                        eq(Email.mailboxId, mailboxId),
-                        options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
-                        // biome-ignore lint/complexity/useSimplifiedLogicExpression: wrong
-                        options.isBinned ? undefined : eq(Email.isSender, options.isSender || false),
-                        options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
-                        options.search ? like(Email.subject, `%${options.search}%`) : undefined,
-                        options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId),
-                    ),
-                )
-                .groupBy(options.isTemp ? Email.tempId : Email.categoryId)
+                  .select({
+                      count: count(),
+                      categoryId: options.isTemp ? Email.tempId : Email.categoryId,
+                  })
+                  .from(Email)
+                  .where(
+                      and(
+                          eq(Email.mailboxId, mailboxId),
+                          options.isBinned ? isNotNull(Email.binnedAt) : isNull(Email.binnedAt),
+                          // biome-ignore lint/complexity/useSimplifiedLogicExpression: wrong
+                          options.isBinned ? undefined : eq(Email.isSender, options.isSender || false),
+                          options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
+                          options.search ? like(Email.subject, `%${options.search}%`) : undefined,
+                          options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId),
+                      ),
+                  )
+                  .groupBy(options.isTemp ? Email.tempId : Email.categoryId)
             : null,
 
         db

@@ -9,7 +9,7 @@ export const runtime = "edge";
 
 export default function HomeLayout({ children }: PropsWithChildren) {
     return (
-        <>
+        <div className="bg-background" vaul-drawer-wrapper="">
             <Header className="container sticky top-0 z-40 flex h-20 w-full items-center justify-between py-6 transition-[height]">
                 <div className="flex gap-6 md:gap-10">
                     <Link href="/home" className="group flex items-center gap-1">
@@ -25,8 +25,8 @@ export default function HomeLayout({ children }: PropsWithChildren) {
                     <UserNav fallbackLogin={true} />
                 </nav>
             </Header>
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 bg-background">{children}</main>
             <SiteFooter />
-        </>
+        </div>
     );
 }

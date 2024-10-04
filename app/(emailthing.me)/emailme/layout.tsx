@@ -38,7 +38,7 @@ export const metadata = {
 export default function DocsLayout({ children }: DocsLayoutProps) {
     return (
         <>
-            <Header className="container sticky top-0 z-40 flex h-20 w-full items-center justify-between py-6 transition-[height]">
+            <Header className="container sticky top-0 z-40 flex h-20 w-full items-center justify-between bg-background py-6 transition-[height]" vaul-drawer-wrapper="">
                 <div className="flex gap-6 md:gap-10">
                     <Link href="/" className="group flex items-center gap-1">
                         <Logo className="flex size-7 shrink-0" />
