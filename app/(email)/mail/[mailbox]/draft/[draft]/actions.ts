@@ -72,7 +72,10 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     // now send email!
     const email = createMimeMessage()
     email.setSender({ addr: alias.alias, name: alias.name ?? undefined })
-    email.setRecipients(to.map(e => ({ addr: e.address, name: e.name || undefined, type: e.cc == "cc" ? "Cc" : e.cc === "bcc" ? "Bcc" : "To" }) as const))
+    email.setRecipients(to.map(e => ({
+        addr: e.address, name: e.name || undefined,
+        type: e.cc == "cc" ? "Cc" : e.cc === "bcc" ? "Bcc" : "To"
+    }) as const))
     email.setSubject(subject || "(no subject)")
     email.addMessage({
         contentType: "text/plain",

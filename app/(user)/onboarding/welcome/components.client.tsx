@@ -8,15 +8,23 @@ import Link from "next/link";
 import { useState, useEffect, useTransition } from "react";
 import { cn } from "@/utils/tw";
 import { toast } from "sonner";
+import type { changeBackupEmail } from "@/(user)/actions";
 // import { changeBackupEmail } from "@/(user)/actions";
 
 
-export function Page({ githubStars, action }: any) {
+interface WelcomePageProps {
+    githubStars: number;
+    action: typeof changeBackupEmail;
+}
+
+
+export function Page({ githubStars, action }: WelcomePageProps) {
     const [show, setShow] = useState(false)
     const [pending, startTransition] = useTransition();
 
     useEffect(() => {
-        setTimeout(() => setShow(true), 1000)
+        const timeout = setTimeout(() => setShow(true), 1000);
+        return () => clearTimeout(timeout);
     }, [])
 
     async function actionn(data: FormData) {

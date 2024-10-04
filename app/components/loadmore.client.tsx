@@ -31,13 +31,14 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
                 if (abortController?.signal.aborted) return;
 
                 setLoadMoreNodes((prev) => [...prev, ...node]);
+
                 if (next === null) {
                     currentOffsetRef.current ??= undefined;
                     setDisabled(true);
-                    return;
+                } else {
+                    currentOffsetRef.current = next;
                 }
 
-                currentOffsetRef.current = next;
             }),
         [loadMoreAction]
     );
@@ -74,7 +75,7 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
     useEffect(() => {
         const num = loadMoreNodes.length + initialLength
         if (num === 0 || (initialLength === 10 && loadMoreNodes.length === 0)) return;
-        
+
         const urlparams = new URLSearchParams(window.location.search);
         urlparams.set('take', num.toString());
         window.history.replaceState(null, '', '?' + urlparams.toString());

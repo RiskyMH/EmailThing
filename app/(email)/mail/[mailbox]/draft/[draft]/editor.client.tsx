@@ -173,7 +173,8 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                                 size="icon-sm"
                                 aria-label="Toggle bold"
                                 pressed={editor?.isActive("bold")}
-                                onClick={() => editor?.chain().focus().toggleBold().run()} className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                                onClick={() => editor?.chain().focus().toggleBold().run()}
+                                className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
                             >
                                 <BoldIcon className="size-4" />
                             </Toggle>
@@ -200,7 +201,8 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                                 size="icon-sm"
                                 aria-label="Toggle underline"
                                 pressed={editor?.isActive("underline")}
-                                onClick={() => editor?.chain().focus().toggleUnderline().run()} className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
+                                onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                                className='hover:bg-background data-[state=on]:bg-tertiary focus:z-20 shrink-0'
                             >
                                 <UnderlineIcon className="size-4" />
                             </Toggle>
@@ -364,13 +366,11 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                 <span className='h-0 w-full border-b-2 border-background/75 rounded-sm shrink-0 grow-0 flex' />
             </div>
 
-            {
-                !editor && (
-                    <div className='w-full flex items-center justify-center overflow-auto h-[calc(100%-2.75rem)]'>
-                        <Loader2 className='animate-spin size-12 text-muted-foreground' />
-                    </div>
-                )
-            }
+            {!editor && (
+                <div className='w-full flex items-center justify-center overflow-auto h-[calc(100%-2.75rem)]'>
+                    <Loader2 className='animate-spin size-12 text-muted-foreground' />
+                </div>
+            )}
 
             {/* //todo: maybe use json instead of html */}
             {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
@@ -442,7 +442,12 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
                 if (res.link) return void toast.error(res.error, {
                     id: t,
                     action: (
-                        <a href={res.link} target="blank" className='inline-flex items-center justify-center gap-2 shrink-0 bg-secondary rounded-lg p-2 hover:bg-secondary/80'>Learn More <ExternalLinkIcon className='size-4 text-muted-foreground' /></a>
+                        <a
+                            href={res.link}
+                            target="blank"
+                            className='inline-flex items-center justify-center gap-2 shrink-0 bg-secondary rounded-lg p-2 hover:bg-secondary/80'>
+                            Learn More <ExternalLinkIcon className='size-4 text-muted-foreground' />
+                        </a>
                     )
                 });
                 return void toast.error(res.error, { id: t })
@@ -550,7 +555,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
 
     useEffect(() => {
         const elem = document.getElementById("recipients-full")
-        const fn = (() => {
+        const onFocusin = () => {
             if (elem?.contains(document.activeElement)) {
                 // do nothing
             } else {
@@ -558,7 +563,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                 // setShowCC(to?.some(r => r.cc === "cc") ?? false);
                 // setShowBCC(to?.some(r => r.cc === "bcc") ?? false);
             }
-        })
+        }
 
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
@@ -571,10 +576,10 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
             }
         }
 
+        addEventListener("focusin", onFocusin)
         addEventListener("keydown", onKeyDown)
-        addEventListener("focusin", fn);
         return () => {
-            removeEventListener("focusin", fn)
+            removeEventListener("focusin", onFocusin)
             removeEventListener("keydown", onKeyDown)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
