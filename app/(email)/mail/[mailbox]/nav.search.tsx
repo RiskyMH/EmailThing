@@ -1,31 +1,30 @@
-'use client'
+"use client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
-import { SearchIcon, ChevronDownIcon, Loader2 } from "lucide-react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useRef, useEffect, useTransition } from "react";
+import { ChevronDownIcon, Loader2, SearchIcon } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useTransition } from "react";
 
-export function Search({ className, mailboxId }: { className?: string, mailboxId: string }) {
-    const router = useRouter()
+export function Search({ className, mailboxId }: { className?: string; mailboxId: string }) {
+    const router = useRouter();
     const searchParams = useSearchParams();
-    const pathname = usePathname()
+    const pathname = usePathname();
     const [isPending, startTransition] = useTransition();
 
-    const ref = useRef<HTMLInputElement>(null)
+    const ref = useRef<HTMLInputElement>(null);
     useEffect(() => {
         if (ref.current) {
-            ref.current.value = searchParams.get("q") || ""
+            ref.current.value = searchParams.get("q") || "";
         }
-    }, [searchParams, pathname])
-
+    }, [searchParams, pathname]);
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const form = e.currentTarget
-        const q = form.q.value
+        e.preventDefault();
+        const form = e.currentTarget;
+        const q = form.q.value;
 
         startTransition(() => {
-            if (!q) return router.push(pathname)
+            if (!q) return router.push(pathname);
             const validPaths = [
                 `/mail/${mailboxId}`,
                 // `/mail/${mailboxId}/inbox`,
@@ -34,22 +33,27 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
                 `/mail/${mailboxId}/trash`,
                 `/mail/${mailboxId}/starred`,
                 `/mail/${mailboxId}/temp`,
-            ]
+            ];
             if (!validPaths.includes(pathname)) {
-                router.push(`/mail/${mailboxId}?q=${encodeURIComponent(q)}`)
-            }
-
-            else router.push(`?q=${encodeURIComponent(q)}`)
-
-        })
-    }
+                router.push(`/mail/${mailboxId}?q=${encodeURIComponent(q)}`);
+            } else router.push(`?q=${encodeURIComponent(q)}`);
+        });
+    };
 
     return (
         <form
-            onSubmit={onSubmit} 
-            className={cn("group h-10 w-full py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-background dark:bg-secondary rounded flex self-center px-1 gap-2", className)}
+            onSubmit={onSubmit}
+            className={cn(
+                "group flex h-10 w-full gap-2 self-center rounded bg-background px-1 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-secondary",
+                className,
+            )}
         >
-            <Button size="icon-sm" variant="ghost" className="self-center text-muted-foreground rounded-full shrink-0 m-0.5 p-1.5 focus-visible:ring-offset-0 focus-visible:ring-1" type="submit">
+            <Button
+                size="icon-sm"
+                variant="ghost"
+                className="m-0.5 shrink-0 self-center rounded-full p-1.5 text-muted-foreground focus-visible:ring-1 focus-visible:ring-offset-0"
+                type="submit"
+            >
                 {isPending ? (
                     <Loader2 className="animate-spin self-center text-muted-foreground" />
                 ) : (
@@ -61,9 +65,9 @@ export function Search({ className, mailboxId }: { className?: string, mailboxId
                 type="search"
                 name="q"
                 placeholder="Search emails..."
-                className="w-full focus-visible:outline-none bg-transparent border-none"
+                className="w-full border-none bg-transparent focus-visible:outline-none"
             />
-            <ChevronDownIcon className="self-center text-muted-foreground me-2" />
+            <ChevronDownIcon className="me-2 self-center text-muted-foreground" />
         </form>
-    )
+    );
 }

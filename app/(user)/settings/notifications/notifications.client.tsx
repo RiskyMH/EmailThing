@@ -1,110 +1,99 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useTransition } from 'react'
-import { registerServiceWorker, resetServiceWorker, unregisterServiceWorkers } from '@/utils/service-worker'
-import { env } from '@/utils/env'
-import { Button } from '@/components/ui/button'
-import { deleteSubscription, saveSubscription } from './actions'
-import { toast } from "sonner"
-import { Loader2, Trash2 } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { registerServiceWorker, unregisterServiceWorkers } from "@/utils/service-worker";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
+import { deleteSubscription, saveSubscription } from "./actions";
 
 const notificationsSupported = () =>
-    'Notification' in window &&
-    'serviceWorker' in navigator &&
-    'PushManager' in window
-
+    "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
 
 export default function NotificationsButton({ publicKey }: { publicKey: string }) {
     const [isPending, startTransition] = useTransition();
-    const [isLoaded, setIsLoaded] = useState(false)
-    const [isSubscribed, setIsSubscribed] = useState(false)
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [isSubscribed, setIsSubscribed] = useState(false);
 
     const options: PushSubscriptionOptionsInit = {
         applicationServerKey: publicKey,
         userVisibleOnly: true,
-    }
-
+    };
 
     useEffect(() => {
-        setIsLoaded(true)
+        setIsLoaded(true);
         if (notificationsSupported()) {
             navigator.serviceWorker.ready.then(async (swRegistration) => {
-                const subscription = await swRegistration.pushManager.getSubscription()
-                setIsSubscribed(!!subscription)
-            })
+                const subscription = await swRegistration.pushManager.getSubscription();
+                setIsSubscribed(!!subscription);
+            });
         }
-    }, [])
-
+    }, []);
 
     const requestPermission = async () => {
         if (!notificationsSupported()) {
-            return toast.error('Notifications are not supported on this device');
+            return toast.error("Notifications are not supported on this device");
         }
 
         if (window?.Notification?.permission === "denied") {
-            return toast.error('You have denied notifications');
+            return toast.error("You have denied notifications");
         }
 
         startTransition(async () => {
-            const receivedPermission = await window?.Notification.requestPermission()
+            const receivedPermission = await window?.Notification.requestPermission();
 
-            if (receivedPermission === 'granted') {
-                await subscribe()
+            if (receivedPermission === "granted") {
+                await subscribe();
             }
-        })
-    }
+        });
+    };
 
     const subscribe = async (tryAgain = true) => {
-        const swRegistration = await registerServiceWorker()
+        const swRegistration = await registerServiceWorker();
 
         try {
-            if (!swRegistration.active) return void await subscribe(false);
-            const subscription = await swRegistration.pushManager.subscribe(options)
+            if (!swRegistration.active) return void (await subscribe(false));
+            const subscription = await swRegistration.pushManager.subscribe(options);
 
-            await saveSubscription(subscription.toJSON())
-            setIsSubscribed(true)
-            toast('You have successfully subscribed to notifications');
-
+            await saveSubscription(subscription.toJSON());
+            setIsSubscribed(true);
+            toast("You have successfully subscribed to notifications");
         } catch (err) {
-            console.error('Error', err);
-            return toast.error('Failed to subscribe to notifications');
+            console.error("Error", err);
+            return toast.error("Failed to subscribe to notifications");
         }
-    }
-
+    };
 
     const unSubscribe = () => {
         startTransition(async () => {
-
-            const swRegistration = (await navigator.serviceWorker.ready).pushManager
+            const swRegistration = (await navigator.serviceWorker.ready).pushManager;
 
             try {
-                const subscription = await swRegistration.getSubscription()
-                if (!subscription) return void toast('You are not subscribed to notifications');
+                const subscription = await swRegistration.getSubscription();
+                if (!subscription) return void toast("You are not subscribed to notifications");
 
-                await subscription.unsubscribe()
-                await unregisterServiceWorkers()
-                await deleteSubscription(subscription.endpoint)
-                setIsSubscribed(false)
-                toast('Unsubscribed from notifications');
-
+                await subscription.unsubscribe();
+                await unregisterServiceWorkers();
+                await deleteSubscription(subscription.endpoint);
+                setIsSubscribed(false);
+                toast("Unsubscribed from notifications");
             } catch (err) {
-                console.error('Error', err)
-                return void toast.error('Failed to unsubscribe to notifications');
+                console.error("Error", err);
+                return void toast.error("Failed to unsubscribe to notifications");
             }
-        })
-    }
+        });
+    };
 
     return (
         <Button
-            onClick={() => isSubscribed ? unSubscribe() : requestPermission()}
+            onClick={() => (isSubscribed ? unSubscribe() : requestPermission())}
             disabled={isPending || !isLoaded}
-            className='flex gap-2 w-min'
+            className="flex w-min gap-2"
             // variant={isSubscribed ? "destructive" : "secondary"}
             variant="default"
         >
             {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
-            {isSubscribed ? 'Disable notifications' : 'Enable notifications'}
+            {isSubscribed ? "Disable notifications" : "Enable notifications"}
         </Button>
-    )
+    );
 }
-

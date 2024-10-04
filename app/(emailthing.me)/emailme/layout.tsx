@@ -1,12 +1,12 @@
-import { Header, MainNavItem } from "@/(home)/components.client"
-import Logo, { EmailthingText } from "@/components/logo"
-import { SiteFooter } from "@/components/site-footer"
-import { buttonVariants } from "@/components/ui/button"
-import type { Metadata } from "next"
-import Link from "next/link"
+import { Header, MainNavItem } from "@/(home)/components.client";
+import Logo, { EmailthingText } from "@/components/logo";
+import { SiteFooter } from "@/components/site-footer";
+import { buttonVariants } from "@/components/ui/button";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 interface DocsLayoutProps {
-    children: React.ReactNode
+    children: React.ReactNode;
 }
 
 // export const runtime = "edge"
@@ -14,38 +14,34 @@ interface DocsLayoutProps {
 export const metadata = {
     title: {
         default: "EmailThing.me",
-        template: "%s - EmailThing.me"
+        template: "%s - EmailThing.me",
     },
     description: "EmailThing.me is your own contact page to make emailing easy!",
     openGraph: {
         title: "EmailThing.me",
         description: "EmailThing.me is your own contact page to make emailing easy!",
         siteName: "EmailThing.me",
-        images: [
-            "/logo.png",
-        ],
+        images: ["/logo.png"],
         locale: "en_US",
         url: "https://emailthing.me",
-        type: "website"
+        type: "website",
     },
     twitter: {
         title: "EmailThing.me",
         description: "EmailThing.me is your own contact page to make emailing easy!",
         card: "summary",
-        images: [
-            "/logo.png",
-        ],
-        creator: "EmailThing_"
+        images: ["/logo.png"],
+        creator: "EmailThing_",
     },
-} satisfies Metadata
+} satisfies Metadata;
 
 export default function DocsLayout({ children }: DocsLayoutProps) {
     return (
         <>
-            <Header className="container z-40 top-0 sticky flex h-20 items-center justify-between py-6 w-full transition-[height]">
+            <Header className="container sticky top-0 z-40 flex h-20 w-full items-center justify-between py-6 transition-[height]">
                 <div className="flex gap-6 md:gap-10">
-                    <Link href="/" className="items-center gap-1 flex group">
-                        <Logo className="size-7 shrink-0 flex" />
+                    <Link href="/" className="group flex items-center gap-1">
+                        <Logo className="flex size-7 shrink-0" />
                         <EmailthingText className="flex" text="EmailThing.me" />
                     </Link>
                     <div className="flex gap-6">
@@ -57,7 +53,11 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                 <nav className="flex gap-2">
                     <Link
                         href="https://emailthing.app/register?from=/settings/emailthing-me"
-                        className={buttonVariants({ variant: "secondary", size: "sm", className: "px-4" })}
+                        className={buttonVariants({
+                            variant: "secondary",
+                            size: "sm",
+                            className: "px-4",
+                        })}
                         target="_blank"
                     >
                         Make your own
@@ -71,9 +71,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                     </Link> */}
                 </nav>
             </Header>
-            <main className="flex-1">
-                {children}
-            </main>
+            <main className="flex-1">{children}</main>
 
             <SiteFooter className="border-t">
                 {" and powered by "}
@@ -81,27 +79,31 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                     href="https://emailthing.app/home"
                     target="_blank"
                     className="font-medium underline underline-offset-4"
+                    rel="noreferrer"
                 >
                     EmailThing
                 </a>
             </SiteFooter>
 
-            <script type="application/ld+json"
+            <script
+                type="application/ld+json"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
                 dangerouslySetInnerHTML={{
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "WebSite",
-                        "name": "EmailThing.me",
-                        "author": {
+                        name: "EmailThing.me",
+                        author: {
                             "@type": "Person",
-                            "name": "RiskyMH"
+                            name: "RiskyMH",
                         },
-                        "description": "EmailThing.me is your own contact page to make emailing easy!",
-                        "logo": "https://emailthing.app/logo.png",
-                        "email": "contact@emailthing.xyz",
-                        "url": "https://emailthing.me/"
-                    })
-                }} />
+                        description: "EmailThing.me is your own contact page to make emailing easy!",
+                        logo: "https://emailthing.app/logo.png",
+                        email: "contact@emailthing.xyz",
+                        url: "https://emailthing.me/",
+                    }),
+                }}
+            />
         </>
-    )
+    );
 }

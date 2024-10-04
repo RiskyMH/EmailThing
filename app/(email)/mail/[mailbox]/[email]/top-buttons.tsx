@@ -1,29 +1,34 @@
-import { ArrowLeftIcon, TagIcon, ReplyIcon, ReplyAllIcon, ForwardIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { ContextMenuAction } from "../components.client"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import TooltipText from "@/components/tooltip-text"
+import TooltipText from "@/components/tooltip-text";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon } from "lucide-react";
+import Link from "next/link";
+import { updateEmail as updateEmailAction } from "../actions";
+import { ContextMenuAction } from "../components.client";
 import { mailboxCategories } from "../tools";
+import { BackButton } from "./components.client";
 import { getEmail } from "./tools";
-import { updateEmail as updateEmailAction } from "../actions"
-import { BackButton } from "./components.client"
 
 interface TopButtonsProps {
     mailboxId: string;
-    emailId: string
+    emailId: string;
 }
 
 export default async function TopButtons({ mailboxId, emailId }: TopButtonsProps) {
-    const email = await getEmail(mailboxId, emailId)
-    const categories = await mailboxCategories(mailboxId)
+    const email = await getEmail(mailboxId, emailId);
+    const categories = await mailboxCategories(mailboxId);
     if (!email) return;
-    const updateEmail = updateEmailAction.bind(null, mailboxId, emailId, 'mail-page')
+    const updateEmail = updateEmailAction.bind(null, mailboxId, emailId, "mail-page");
 
     return (
-        <div className="flex flex-row w-full min-w-0 pb-3 border-b-2 -mt-1 gap-6 text-muted-foreground">
+        <div className="-mt-1 flex w-full min-w-0 flex-row gap-6 border-b-2 pb-3 text-muted-foreground">
             <BackButton fallbackUrl={`/mail/${mailboxId}`} />
-            <div className="border-e-2 -mx-2" />
+            <div className="-mx-2 border-e-2" />
 
             <ContextMenuAction
                 icon="StarIcon"
@@ -40,51 +45,76 @@ export default async function TopButtons({ mailboxId, emailId }: TopButtonsProps
             <DropdownMenu>
                 <TooltipText text="Categorize as">
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground">
+                        <Button
+                            variant="ghost"
+                            size="auto"
+                            className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground"
+                        >
                             <TagIcon className="size-5" />
                         </Button>
                     </DropdownMenuTrigger>
                 </TooltipText>
                 <DropdownMenuContent>
-                    <DropdownMenuItem asChild className="flex gap-2 cursor-pointer w-full">
-                        <ContextMenuAction icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
+                    <DropdownMenuItem asChild className="flex w-full cursor-pointer gap-2">
+                        <ContextMenuAction
+                            icon={!email.category?.id ? "CheckIcon" : "EmptyIcon"}
+                            action={updateEmail.bind(null, { category: null })}
+                        >
                             None
                         </ContextMenuAction>
                     </DropdownMenuItem>
-                    {categories?.map(category => (
-                        <DropdownMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer w-full" >
-                            <ContextMenuAction icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: category.id })}>
+                    {categories?.map((category) => (
+                        <DropdownMenuItem key={category.id} asChild className="flex w-full cursor-pointer gap-2">
+                            <ContextMenuAction
+                                icon={email.category?.id === category.id ? "CheckIcon" : "EmptyIcon"}
+                                action={updateEmail.bind(null, {
+                                    category: category.id,
+                                })}
+                            >
                                 {category.name}
                             </ContextMenuAction>
                         </DropdownMenuItem>
                     ))}
-
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <div className="border-e-2 -mx-2" />
+            <div className="-mx-2 border-e-2" />
             <TooltipText text="Reply">
-                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
+                <Button
+                    variant="ghost"
+                    size="auto"
+                    className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground"
+                    asChild
+                >
                     <Link href={`/mail/${mailboxId}/draft/new?reply=${emailId}`}>
                         <ReplyIcon className="size-5" />
                     </Link>
                 </Button>
             </TooltipText>
             <TooltipText text="Reply All">
-                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
+                <Button
+                    variant="ghost"
+                    size="auto"
+                    className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground"
+                    asChild
+                >
                     <Link href={`/mail/${mailboxId}/draft/new?replyAll=${emailId}`}>
                         <ReplyAllIcon className="size-5" />
                     </Link>
                 </Button>
             </TooltipText>
             <TooltipText text="Forward">
-                <Button variant="ghost" size="auto" className="rounded-full p-2 -m-2 text-muted-foreground hover:text-foreground" asChild>
+                <Button
+                    variant="ghost"
+                    size="auto"
+                    className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground"
+                    asChild
+                >
                     <Link href={`/mail/${mailboxId}/draft/new?forward=${emailId}`}>
                         <ForwardIcon className="size-5" />
                     </Link>
                 </Button>
             </TooltipText>
-        </div >
-
-    )
+        </div>
+    );
 }

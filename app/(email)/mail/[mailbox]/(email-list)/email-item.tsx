@@ -1,13 +1,22 @@
 import LocalTime from "@/components/localtime";
 import TooltipText from "@/components/tooltip-text";
+import {
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuSeparator,
+    ContextMenuSub,
+    ContextMenuSubContent,
+    ContextMenuSubTrigger,
+    ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { cn } from "@/utils/tw";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/components/ui/context-menu";
+import { ExternalLink, ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon } from "lucide-react";
 import Link from "next/link";
+import { deleteEmail, updateEmail as updateEmailAction } from "../actions";
 import { ClientStar, ContextMenuAction } from "../components.client";
-import { getJustEmailsList, getDraftJustEmailsList } from "./tools";
-import { ReplyIcon, ReplyAllIcon, ForwardIcon, TagIcon, ExternalLink } from "lucide-react";
-import { mailboxCategories } from "../tools";
-import { deleteEmail, updateEmail as updateEmailAction } from "../actions"
+import type { mailboxCategories } from "../tools";
+import type { getDraftJustEmailsList, getJustEmailsList } from "./tools";
 
 export interface EmailItemProps {
     email: Awaited<ReturnType<typeof getJustEmailsList>>[0] | Awaited<ReturnType<typeof getDraftJustEmailsList>>[0];
@@ -17,54 +26,67 @@ export interface EmailItemProps {
 }
 
 export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps) {
-    const emailId = email.id
-    const updateEmail = updateEmailAction.bind(null, mailboxId, emailId, type)
+    const emailId = email.id;
+    const updateEmail = updateEmailAction.bind(null, mailboxId, emailId, type);
 
-    const category = categories?.find(c => c.id === email.categoryId)
-    const link = `/mail/${mailboxId}/${type === 'drafts' ? "draft/" : ""}${email.id}`
+    const category = categories?.find((c) => c.id === email.categoryId);
+    const link = `/mail/${mailboxId}/${type === "drafts" ? "draft/" : ""}${email.id}`;
 
     return (
         <ContextMenu>
             <ContextMenuTrigger asChild>
                 <Link
                     href={link}
-                    className={cn("rounded h-16 px-5 py-1.5 inline-flex gap-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", email.isRead ? "hover:bg-card/60" : "text-card-foreground bg-card hover:bg-card/60 shadow-sm")}
+                    className={cn(
+                        "inline-flex h-16 gap-4 rounded px-5 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        email.isRead ? "hover:bg-card/60" : "bg-card text-card-foreground shadow-sm hover:bg-card/60",
+                    )}
                 >
                     <TooltipText text={category?.name ?? "No category"}>
                         <span
-                            className="self-center rounded-full size-3 m-2 inline-block mx-auto shrink-0"
-                            style={{ backgroundColor: category?.color ?? "grey" }}
+                            className="m-2 mx-auto inline-block size-3 shrink-0 self-center rounded-full"
+                            style={{
+                                backgroundColor: category?.color ?? "grey",
+                            }}
                         />
                     </TooltipText>
 
-                    <TooltipText text={email.from?.name || email.from?.address || "There should be an email here"} subtext={email.from?.name && email.from?.address ? `(${email.from?.address})` : ''}>
-                        <span className="self-center w-56 truncate">
-                            {email.from?.name || email.from?.address}
-                        </span>
+                    <TooltipText
+                        text={email.from?.name || email.from?.address || "There should be an email here"}
+                        subtext={email.from?.name && email.from?.address ? `(${email.from?.address})` : ""}
+                    >
+                        <span className="w-56 self-center truncate">{email.from?.name || email.from?.address}</span>
                     </TooltipText>
 
                     <TooltipText text={email.subject || "No subject was provided"}>
-                        <span className={cn("self-center w-80 font-bold truncate", !email.subject && "italic")}>
+                        <span className={cn("w-80 self-center truncate font-bold", !email.subject && "italic")}>
                             {email.subject || "(no subject)"}
                         </span>
                     </TooltipText>
 
-                    <span className="self-center w-full hidden sm:inline-flex gap-4 shrink-[2]">
+                    <span className="hidden w-full shrink-[2] gap-4 self-center sm:inline-flex">
                         {!email.isRead && (
-                            <span className="select-none bg-red self-center text-white text-xs rounded px-3 py-1 font-bold inline h-6">
+                            <span className="inline h-6 select-none self-center rounded bg-red px-3 py-1 font-bold text-white text-xs">
                                 NEW
                             </span>
                         )}
-                        <span className="text-muted-foreground line-clamp-2 text-sm break-all">
-                            {email.snippet}
-                        </span>
+                        <span className="line-clamp-2 break-all text-muted-foreground text-sm">{email.snippet}</span>
                     </span>
-                    <ClientStar enabled={!!email.isStarred} action={updateEmail.bind(null, { isStarred: !email.isStarred })} className="self-center text-muted-foreground hover:text-foreground shrink-0 ms-auto -me-2 hidden sm:inline-block" />
-                    <LocalTime type="hour-min/date" time={email.createdAt} className="float-right self-center text-muted-foreground text-sm shrink-0 w-16 text-right" />
+                    <ClientStar
+                        enabled={!!email.isStarred}
+                        action={updateEmail.bind(null, {
+                            isStarred: !email.isStarred,
+                        })}
+                        className="-me-2 ms-auto hidden shrink-0 self-center text-muted-foreground hover:text-foreground sm:inline-block"
+                    />
+                    <LocalTime
+                        type="hour-min/date"
+                        time={email.createdAt}
+                        className="float-right w-16 shrink-0 self-center text-right text-muted-foreground text-sm"
+                    />
                 </Link>
             </ContextMenuTrigger>
             <ContextMenuContent>
-
                 {!["drafts", "temp"].includes(type) ? (
                     <>
                         <ContextMenuItem className="flex gap-2" asChild>
@@ -87,25 +109,44 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         </ContextMenuItem>
                         <ContextMenuSeparator />
 
-                        <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                            <ContextMenuAction icon="StarIcon" fillIcon={email.isStarred} action={updateEmail.bind(null, { isStarred: !email.isStarred })}>
+                        <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+                            <ContextMenuAction
+                                icon="StarIcon"
+                                fillIcon={email.isStarred}
+                                action={updateEmail.bind(null, {
+                                    isStarred: !email.isStarred,
+                                })}
+                            >
                                 {email.isStarred ? "Unstar" : "Star"}
                             </ContextMenuAction>
                         </ContextMenuItem>
-                        <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                            <ContextMenuAction icon={!email.binnedAt ? "Trash2Icon" : "ArchiveRestoreIcon"} action={updateEmail.bind(null, { binned: !email.binnedAt })}>
+                        <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+                            <ContextMenuAction
+                                icon={!email.binnedAt ? "Trash2Icon" : "ArchiveRestoreIcon"}
+                                action={updateEmail.bind(null, {
+                                    binned: !email.binnedAt,
+                                })}
+                            >
                                 {!email.binnedAt ? "Delete" : "Restore to inbox"}
                             </ContextMenuAction>
                         </ContextMenuItem>
                         {email.binnedAt && (
-                            <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                                <ContextMenuAction icon="Trash2Icon" action={deleteEmail.bind(null, mailboxId, emailId, type)}>
+                            <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+                                <ContextMenuAction
+                                    icon="Trash2Icon"
+                                    action={deleteEmail.bind(null, mailboxId, emailId, type)}
+                                >
                                     Delete forever
                                 </ContextMenuAction>
                             </ContextMenuItem>
                         )}
-                        <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
-                            <ContextMenuAction icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"} action={updateEmail.bind(null, { isRead: !email.isRead })}>
+                        <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+                            <ContextMenuAction
+                                icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"}
+                                action={updateEmail.bind(null, {
+                                    isRead: !email.isRead,
+                                })}
+                            >
                                 {email.isRead ? "Mark as unread" : "Mark as read"}
                             </ContextMenuAction>
                         </ContextMenuItem>
@@ -113,20 +154,34 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
 
                         {type !== "temp" && (
                             <ContextMenuSub>
-                                <ContextMenuSubTrigger className="flex gap-2 cursor-pointer w-full">
+                                <ContextMenuSubTrigger className="flex w-full cursor-pointer gap-2">
                                     <TagIcon className="size-5 text-muted-foreground" />
                                     Categorize as
                                 </ContextMenuSubTrigger>
                                 <ContextMenuSubContent className="w-48">
-                                    <ContextMenuItem asChild className="flex gap-2 cursor-pointer w-full" >
-                                        <ContextMenuAction icon={!email.categoryId ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: null })}>
+                                    <ContextMenuItem asChild className="flex w-full cursor-pointer gap-2">
+                                        <ContextMenuAction
+                                            icon={!email.categoryId ? "CheckIcon" : "EmptyIcon"}
+                                            action={updateEmail.bind(null, {
+                                                category: null,
+                                            })}
+                                        >
                                             None
                                         </ContextMenuAction>
                                     </ContextMenuItem>
 
-                                    {categories?.map(category => (
-                                        <ContextMenuItem key={category.id} asChild className="flex gap-2 cursor-pointer w-full" >
-                                            <ContextMenuAction icon={email.categoryId === category.id ? "CheckIcon" : "EmptyIcon"} action={updateEmail.bind(null, { category: category.id })}>
+                                    {categories?.map((category) => (
+                                        <ContextMenuItem
+                                            key={category.id}
+                                            asChild
+                                            className="flex w-full cursor-pointer gap-2"
+                                        >
+                                            <ContextMenuAction
+                                                icon={email.categoryId === category.id ? "CheckIcon" : "EmptyIcon"}
+                                                action={updateEmail.bind(null, {
+                                                    category: category.id,
+                                                })}
+                                            >
                                                 {category.name}
                                             </ContextMenuAction>
                                         </ContextMenuItem>
@@ -136,7 +191,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         )}
                     </>
                 ) : (
-                    <ContextMenuItem className="flex gap-2 cursor-pointer w-full" asChild>
+                    <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
                         <ContextMenuAction icon="Trash2Icon" action={deleteEmail.bind(null, mailboxId, emailId, type)}>
                             Delete forever
                         </ContextMenuAction>
@@ -144,7 +199,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                 )}
                 <ContextMenuSeparator />
 
-                <ContextMenuItem className="flex gap-2 cursor-pointer" asChild>
+                <ContextMenuItem className="flex cursor-pointer gap-2" asChild>
                     <Link href={link} target="_blank">
                         <ExternalLink className="size-5 text-muted-foreground" />
                         Open in new tab
@@ -152,6 +207,5 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                 </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>
-
-    )
+    );
 }

@@ -1,7 +1,7 @@
 import { MailIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-export function SiteFooter({ className, children }: { className?: string, children?: ReactNode }) {
+export function SiteFooter({ className, children }: { className?: string; children?: ReactNode }) {
     return (
         <footer className={className}>
             <div className="container flex flex-col items-center justify-between gap-4 py-10 md:h-24 md:flex-row md:py-0">
@@ -13,15 +13,16 @@ export function SiteFooter({ className, children }: { className?: string, childr
                             href="https://riskymh.dev"
                             target="_blank"
                             className="font-medium underline underline-offset-4"
+                            rel="noreferrer"
                         >
                             RiskyMH
                         </a>
-                        {children}
-                        . The source code is available on{" "}
+                        {children}. The source code is available on{" "}
                         <a
                             href="https://github.com/RiskyMH/EmailThing"
                             target="_blank"
                             className="font-medium underline underline-offset-4"
+                            rel="noreferrer"
                         >
                             GitHub
                         </a>
@@ -30,5 +31,5 @@ export function SiteFooter({ className, children }: { className?: string, childr
                 </div>
             </div>
         </footer>
-    )
+    );
 }
