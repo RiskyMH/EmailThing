@@ -1,5 +1,5 @@
-import "server-only";
-import { type PushMessage, type PushSubscription, type VapidKeys, buildPushPayload } from "@block65/webcrypto-web-push";
+import "server-only"
+import { type PushSubscription, type PushMessage, type VapidKeys, buildPushPayload } from '@block65/webcrypto-web-push';
 import { env } from "./env";
 
 const vapid: VapidKeys = {
@@ -8,8 +8,8 @@ const vapid: VapidKeys = {
     privateKey: env.WEB_NOTIFICATIONS_PRIVATE_KEY,
 };
 
-export async function sendNotification({ data, subscription }: { data: string; subscription: PushSubscription }) {
+export async function sendNotification({ data, subscription }: { data: string, subscription: PushSubscription }) {
     const message: PushMessage = { data };
     const payload = await buildPushPayload(message, subscription, vapid);
     return fetch(subscription.endpoint, payload);
-}
+};

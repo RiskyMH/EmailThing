@@ -1,8 +1,16 @@
-"use client";
+'use client'
 
-import { logout } from "@/actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
     Drawer,
     DrawerClose,
@@ -12,57 +20,52 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Link from "next/link";
-import { useState } from "react";
+} from "@/components/ui/drawer"
+import Link from "next/link"
 import { useMediaQuery } from "usehooks-ts";
+import { useState } from "react"
+import { logout } from "@/actions"
+
 
 interface UserProps {
     user: {
-        name: string;
-        image?: string;
-        secondary: string;
-    };
+        name: string,
+        image?: string,
+        secondary: string,
+    },
 }
 
 function getInitials(name: string) {
     // first 2 characters of name
-    return name.slice(0, 2).toUpperCase();
+    return name.slice(0, 2).toUpperCase()
 }
 
 export function UserDropDown({ user }: UserProps) {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false)
     const isDesktop = useMediaQuery("(min-width: 640px)");
 
     const userIcon = (
         <Button
             variant="ghost"
-            className="size-8 self-center rounded-full bg-transparent hover:bg-transparent"
+            className="size-8 rounded-full self-center bg-transparent hover:bg-transparent"
             suppressHydrationWarning // i give up with sanity
         >
             <Avatar className="size-8 rounded-full">
                 <AvatarImage src={user.image} alt={user.name} />
-                <AvatarFallback className="bg-primary/80 text-white transition-all hover:bg-primary/70 dark:bg-secondary dark:text-foreground dark:hover:bg-secondary/80">
+                <AvatarFallback className="bg-primary/80 text-white dark:text-foreground dark:bg-secondary dark:hover:bg-secondary/80 hover:bg-primary/70 transition-all">
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
         </Button>
-    );
+    )
 
     // Mobile
     if (!isDesktop) {
         return (
             <Drawer open={open} onOpenChange={setOpen}>
-                <DrawerTrigger asChild>{userIcon}</DrawerTrigger>
+                <DrawerTrigger asChild>
+                    {userIcon}
+                </DrawerTrigger>
                 <DrawerContent>
                     <DrawerHeader>
                         <DrawerTitle>{user.name}</DrawerTitle>
@@ -97,19 +100,26 @@ export function UserDropDown({ user }: UserProps) {
                         </DrawerClose>
                     </DrawerFooter>
                 </DrawerContent>
-            </Drawer>
-        );
+            </Drawer >
+
+        )
     }
 
     // Desktop
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
-            <DropdownMenuTrigger asChild>{userIcon}</DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
+                {userIcon}
+            </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col gap-1">
-                        <h3 className="truncate font-medium text-sm">{user.name}</h3>
-                        <p className="truncate text-muted-foreground text-xs">{user.secondary}</p>
+                        <h3 className="text-sm truncate font-medium">
+                            {user.name}
+                        </h3>
+                        <p className="text-xs truncate text-muted-foreground">
+                            {user.secondary}
+                        </p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -134,11 +144,11 @@ export function UserDropDown({ user }: UserProps) {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                    <button className="w-full cursor-pointer" onClick={() => void logout()} type="button">
+                    <button className="w-full cursor-pointer" onClick={() => void logout()}>
                         Sign out
                     </button>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-    );
+    )
 }

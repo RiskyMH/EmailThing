@@ -1,63 +1,45 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DraftEmail, Email, db } from "@/db";
-import { getCurrentUser } from "@/utils/jwt";
-import { gravatar } from "@/utils/tools";
-import { cn } from "@/utils/tw";
-import { and, count, eq, isNotNull, isNull } from "drizzle-orm";
-import {
-    CheckIcon,
-    ChevronsUpDownIcon,
-    FileIcon,
-    InboxIcon,
-    PenSquareIcon,
-    PlusCircleIcon,
-    SendIcon,
-    SettingsIcon,
-    ShieldAlertIcon,
-    StarIcon,
-    TimerIcon,
-    Trash2Icon,
-} from "lucide-react";
+import { db, DraftEmail, Email } from "@/db";
+import { FileIcon, InboxIcon, PenSquareIcon, SendIcon, ShieldAlertIcon, StarIcon, Trash2Icon, SettingsIcon, TimerIcon, CheckIcon, ChevronsUpDownIcon, PlusCircleIcon } from "lucide-react";
 import Link from "next/link";
-import { Suspense, cache } from "react";
-import { MailboxLink } from "./components.client";
 import { SidebarLink } from "./sidebar.client";
+import { Suspense, cache } from "react";
+import { cn } from "@/utils/tw";
+import { getCurrentUser } from "@/utils/jwt";
 import { mailboxAliases, userMailboxAccess, userMailboxes } from "./tools";
+import { and, count, eq, isNotNull, isNull } from "drizzle-orm";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MailboxLink } from "./components.client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { gravatar } from "@/utils/tools";
 
-export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string; className?: string }) => {
+export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: string, className?: string }) => {
+
     const items = [
         {
             name: "Inbox",
             icon: InboxIcon,
-            href: `/mail/${mailboxId}`,
+            href: `/mail/${mailboxId}`
         },
         {
             name: "Draft",
             icon: FileIcon,
-            href: `/mail/${mailboxId}/drafts`,
+            href: `/mail/${mailboxId}/drafts`
         },
         {
             name: "Starred",
             icon: StarIcon,
-            href: `/mail/${mailboxId}/starred`,
+            href: `/mail/${mailboxId}/starred`
         },
         {
             name: "Sent",
             icon: SendIcon,
-            href: `/mail/${mailboxId}/sent`,
+            href: `/mail/${mailboxId}/sent`
         },
         {
             name: "Trash",
             icon: Trash2Icon,
-            href: `/mail/${mailboxId}/trash`,
+            href: `/mail/${mailboxId}/trash`
         },
         {
             name: "Temporary Mail",
@@ -68,20 +50,16 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
             name: "Spam",
             icon: ShieldAlertIcon,
             href: `/mail/${mailboxId}/#spam`,
-            disabled: true,
+            disabled: true
         },
-    ];
+    ]
 
     return (
-        <div
-            className={cn(
-                "flex min-h-screen flex-col overflow-y-auto text-tertiary-foreground sm:shrink-0 sm:bg-tertiary sm:p-3 lg:w-60",
-                className,
-            )}
-        >
+        <div className={cn("min-h-screen sm:bg-tertiary text-tertiary-foreground lg:w-60 sm:p-3 sm:shrink-0 flex flex-col overflow-y-auto", className)}>
+
             <br className="sm:hidden" />
 
-            <Button asChild variant="secondary" className="my-3 w-full gap-2 rounded p-6 px-4 font-bold lg:px-6">
+            <Button asChild variant="secondary" className="rounded w-full gap-2 p-6 px-4 lg:px-6 font-bold my-3">
                 <Link href={`/mail/${mailboxId}/draft/new`}>
                     <PenSquareIcon className="size-5" />
                     <span className="sm:max-lg:hidden">New Message</span>
@@ -89,9 +67,7 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
             </Button>
 
             <div className="flex flex-col gap-2 py-2 text-sm">
-                {items.map((item) => (
-                    <LinkElement key={item.href} {...item} />
-                ))}
+                {items.map(item => (<LinkElement key={item.href} {...item} />))}
 
                 {/* <hr className="bg-border w-full" />
                 <LinkElement
@@ -101,8 +77,8 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
                 /> */}
             </div>
 
-            <div className="mt-auto flex flex-col justify-end gap-1">
-                <hr className="w-full bg-border " />
+            <div className="flex mt-auto justify-end flex-col gap-1">
+                <hr className="bg-border w-full " />
                 <LinkElement
                     name="Mailbox Config"
                     icon={SettingsIcon}
@@ -114,33 +90,15 @@ export const Sidebar = cache(({ mailbox: mailboxId, className }: { mailbox: stri
                 </Suspense>
             </div>
         </div>
-    );
-});
+    )
+
+})
 
 export default Sidebar;
 
-function LinkElement({
-    href,
-    name,
-    icon: Icon,
-    disabled,
-    className,
-}: {
-    href: string;
-    name: string;
-    icon: any;
-    disabled?: boolean;
-    className?: string;
-}) {
+function LinkElement({ href, name, icon: Icon, disabled, className }: { href: string, name: string, icon: any, disabled?: boolean, className?: string }) {
     return (
-        <Button
-            asChild
-            variant="ghost"
-            className={cn(
-                "flex w-full justify-normal gap-4 self-center px-3 py-6 text-center font-bold transition-colors hover:text-foreground lg:self-auto",
-                className,
-            )}
-        >
+        <Button asChild variant="ghost" className={cn("flex py-6 px-3 gap-4 hover:text-foreground font-bold transition-colors justify-normal self-center w-full lg:self-auto text-center", className)}>
             <SidebarLink href={href} className="" disabled={disabled}>
                 <Icon className="size-6 self-center sm:max-lg:mx-auto" />
                 <span className="self-center sm:max-lg:hidden">{name}</span>
@@ -163,113 +121,109 @@ function LinkElement({
                 ) : null}
             </SidebarLink>
         </Button>
-    );
+    )
 }
 
 const getCounts = cache(async (mailboxId: string) => {
-    const userId = await getCurrentUser();
-    if (!(await userMailboxAccess(mailboxId, userId))) return {};
+    const userId = await getCurrentUser()
+    if (!await userMailboxAccess(mailboxId, userId)) return {}
 
     const unreadEmails = await db
         .select({ count: count() })
         .from(Email)
-        .where(
-            and(eq(Email.mailboxId, mailboxId), eq(Email.isRead, false), isNull(Email.binnedAt), isNull(Email.tempId)),
-        )
-        .execute();
+        .where(and(
+            eq(Email.mailboxId, mailboxId),
+            eq(Email.isRead, false),
+            isNull(Email.binnedAt),
+            isNull(Email.tempId),
+        ))
+        .execute()
 
     const binnedEmails = await db
         .select({ count: count() })
         .from(Email)
-        .where(and(eq(Email.mailboxId, mailboxId), isNotNull(Email.binnedAt)))
-        .execute();
+        .where(and(
+            eq(Email.mailboxId, mailboxId),
+            isNotNull(Email.binnedAt)
+        ))
+        .execute()
 
     const drafts = await db
         .select({ count: count() })
         .from(DraftEmail)
         .where(eq(DraftEmail.mailboxId, mailboxId))
-        .execute();
+        .execute()
 
     const tempEmails = await db
         .select({ count: count() })
         .from(Email)
-        .where(and(eq(Email.mailboxId, mailboxId), eq(Email.isRead, false), isNotNull(Email.tempId)))
-        .execute();
+        .where(and(
+            eq(Email.mailboxId, mailboxId),
+            eq(Email.isRead, false),
+            isNotNull(Email.tempId),
+        ))
+        .execute()
 
     return {
         unread: unreadEmails[0].count,
         binned: binnedEmails[0].count,
         drafts: drafts[0].count,
         temp: tempEmails[0].count,
-    };
-});
+    }
+})
 
-async function ItemCount({
-    mailboxId,
-    type,
-    primary = false,
-}: {
-    mailboxId: string;
-    type: "unread" | "binned" | "drafts" | "temp";
-    primary?: boolean;
-}) {
+
+async function ItemCount({ mailboxId, type, primary = false }: { mailboxId: string, type: "unread" | "binned" | "drafts" | "temp", primary?: boolean }) {
     // return <></>
-    const counts = await getCounts(mailboxId);
-    const item = counts[type];
+    const counts = await getCounts(mailboxId)
+    const item = counts[type]
     if (!item || item === 0) {
-        return <></>;
+        return <></>
     }
 
     return (
-        <span
-            className={`${primary ? "bg-blue text-blue-foreground" : "bg-secondary text-foreground"} float-right ms-auto select-none self-center rounded px-3 py-1 font-bold text-xs sm:max-lg:hidden`}
-        >
+        <span className={`${primary ? "bg-blue text-blue-foreground" : "bg-secondary text-foreground"} rounded font-bold px-3 py-1 text-xs ms-auto float-right self-center select-none sm:max-lg:hidden`}>
             {item}
         </span>
-    );
+    )
 }
+
 
 function MailboxesFallback() {
     return (
-        <div className="flex h-10 w-full animate-pulse gap-3 rounded-md bg-tertiary px-3 py-2 sm:max-lg:px-1">
-            <div className="size-7 animate-pulse rounded-full bg-secondary" />
+        <div className="w-full h-10 py-2 rounded-md bg-tertiary animate-pulse flex gap-3 px-3 sm:max-lg:px-1">
+            <div className="size-7 bg-secondary animate-pulse rounded-full" />
 
-            <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
+            <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-center sm:max-lg:hidden" />
         </div>
-    );
+    )
 }
 
-const Mailboxes = async ({ mailbox: mailboxId }: { mailbox: string }) => {
-    const userId = await getCurrentUser();
-    if (!(userId && (await userMailboxAccess(mailboxId, userId)))) return null;
+const Mailboxes = (async ({ mailbox: mailboxId }: { mailbox: string }) => {
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(mailboxId, userId)) return null
 
     const mailboxes = await userMailboxes(userId);
     const { default: defaultAlias } = await mailboxAliases(mailboxId);
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger
-                className={cn(buttonVariants({ variant: "ghost" }), "flex w-full gap-3 px-3 text-left sm:max-lg:px-1")}
-            >
+            <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost" }), "flex gap-3 px-3 sm:max-lg:px-1 w-full text-left")}>
                 <Avatar className="size-7">
                     <AvatarImage className="rounded-full" src={await gravatar(defaultAlias?.alias ?? "ab@c.com")} />
-                    <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
+                    <AvatarFallback className="rounded-full text-muted-foreground bg-secondary p-1 text-xs size-full">
                         {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                 </Avatar>
-                <span className="text-foreground text-sm sm:max-lg:hidden">{defaultAlias?.name}</span>
+                <span className="text-sm sm:max-lg:hidden text-foreground">{defaultAlias?.name}</span>
 
-                <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
+                <ChevronsUpDownIcon className="text-muted-foreground size-5 ms-auto self-center sm:max-lg:hidden" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                {mailboxes.map((m) => (
-                    <DropdownMenuItem key={m.id} asChild className="flex cursor-pointer gap-2">
+                {mailboxes.map(m => (
+                    <DropdownMenuItem key={m.id} asChild className="flex gap-2 cursor-pointer">
                         <MailboxLink mailboxId={m.id}>
-                            {m.id === mailboxId ? (
-                                <CheckIcon className="size-4 text-muted-foreground" />
-                            ) : (
-                                <span className="w-4" />
-                            )}
+                            {m.id === mailboxId ? <CheckIcon className="text-muted-foreground size-4" /> : <span className="w-4" />}
                             {m.name}
                         </MailboxLink>
                     </DropdownMenuItem>
@@ -281,5 +235,5 @@ const Mailboxes = async ({ mailbox: mailboxId }: { mailbox: string }) => {
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-    );
-};
+    )
+})

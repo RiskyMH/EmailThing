@@ -1,8 +1,8 @@
-import { Email, db } from "@/db";
-import { getCurrentUser } from "@/utils/jwt";
+import { getCurrentUser } from "@/utils/jwt"
+import { db, Email } from "@/db";
+import { notFound, redirect } from "next/navigation"
+import { userMailboxAccess } from "../../tools"
 import { and, eq } from "drizzle-orm";
-import { notFound, redirect } from "next/navigation";
-import { userMailboxAccess } from "../../tools";
 
 // export const runtime = 'edge'
 
@@ -12,30 +12,35 @@ export async function GET(
         params,
     }: {
         params: {
-            mailbox: string;
-            email: string;
-        };
-    },
+            mailbox: string
+            email: string
+        }
+    }
 ) {
-    const userId = await getCurrentUser();
-    if (!(userId && (await userMailboxAccess(params.mailbox, userId)))) return notFound();
+    const userId = await getCurrentUser()
+    if (!userId || !await userMailboxAccess(params.mailbox, userId)) return notFound();
 
     const mail = await db.query.Email.findFirst({
-        where: and(eq(Email.id, params.email), eq(Email.mailboxId, params.mailbox)),
+        where: and(
+            eq(Email.id, params.email),
+            eq(Email.mailboxId, params.mailbox),
+        ),
         columns: {
-            html: true,
-        },
-    });
+            html: true
+        }
+    })
 
-    if (!mail) return notFound();
+
+    if (!mail) return notFound()
     if (!mail.html) {
-        return redirect(`/mail/${params.mailbox}/${params.email}/email.txt`);
+        return redirect(`/mail/${params.mailbox}/${params.email}/email.txt`)
     }
 
     // return new Response(await parseHTML(mail.html), {
-    return new Response(mail.html, {
+    return new Response((mail.html), {
         headers: {
-            "Content-Type": "text/html",
+            'Content-Type': 'text/html',
         },
-    });
+    })
+
 }

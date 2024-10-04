@@ -1,6 +1,7 @@
-import type { PropsWithChildren } from "react";
-import { DocsSidebarNav } from "./components.client";
-import { docsNav } from "./pages";
+import type { PropsWithChildren } from "react"
+import { DocsSidebarNav } from "./components.client"
+import { docsNav } from "./pages"
+
 
 export default function DocsLayout({ children }: PropsWithChildren) {
     return (
@@ -10,5 +11,5 @@ export default function DocsLayout({ children }: PropsWithChildren) {
             </aside>
             {children}
         </div>
-    );
+    )
 }

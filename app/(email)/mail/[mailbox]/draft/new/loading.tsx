@@ -1,1 +1,1 @@
-export { default } from "../[draft]/loading";
+export {default as default} from "../[draft]/loading";

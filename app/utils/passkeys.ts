@@ -1,4 +1,6 @@
+import type { PublicKeyCredentialWithAttestationJSON } from "@github/webauthn-json";
 import { verifyAuthenticationResponse, verifyRegistrationResponse } from "@simplewebauthn/server";
+
 
 const HOST_SETTINGS = {
     expectedOrigin: [process.env.VERCEL_URL ?? "http://localhost:3000", "https://emailthing.app"],
@@ -6,13 +8,17 @@ const HOST_SETTINGS = {
 };
 
 export async function verifyCredentials(challenge: string, credential: Credential & any) {
+    console.log(credential)
+
     if (credential == null) {
         throw new Error("Invalid Credentials");
     }
 
     const verification = await verifyRegistrationResponse({
         response: credential,
-        expectedChallenge: Buffer.from(challenge).toString("base64").replace("==", ""),
+        expectedChallenge: Buffer.from(challenge)
+            .toString('base64')
+            .replace("==", ''),
         requireUserVerification: true,
         ...HOST_SETTINGS,
     });
@@ -34,23 +40,23 @@ export async function verifyCredentials(challenge: string, credential: Credentia
     };
 }
 
-export async function verifyCredentialss(
-    challenge: string,
-    credential: Credential & any,
-    existing: { id: string; publicKey: string },
-) {
+export async function verifyCredentialss(challenge: string, credential: Credential & any, existing: { id: string, publicKey: string }) {
+    console.log(credential)
+
     if (credential == null) {
         throw new Error("Invalid Credentials");
     }
 
     const verification = await verifyAuthenticationResponse({
         response: credential,
-        expectedChallenge: Buffer.from(challenge).toString("base64").replaceAll("=", ""),
+        expectedChallenge: Buffer.from(challenge)
+            .toString('base64')
+            .replaceAll("=", ''),
         requireUserVerification: true,
         authenticator: {
             credentialID: existing.id,
-            credentialPublicKey: Buffer.from(existing.publicKey, "base64"),
-            counter: 0,
+            credentialPublicKey: Buffer.from(existing.publicKey, 'base64'),
+            counter: 0
         },
         ...HOST_SETTINGS,
     });

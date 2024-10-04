@@ -1,42 +1,74 @@
 import { cn } from "@/utils/tw";
 // import { codeToHtml } from "shiki";
-import Link from "next/link";
+import Link from "next/link"
 
 // TODO: fix types as these seem to be nothing extra
 export const Components = {
     h1: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h1 className={cn("mt-2 scroll-m-20 font-bold text-4xl tracking-tight", className)} {...props} />
+        <h1
+            className={cn(
+                "mt-2 scroll-m-20 text-4xl font-bold tracking-tight",
+                className
+            )}
+            {...props}
+        />
     ),
     h2: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
         <h2
             className={cn(
-                "mt-10 scroll-m-20 border-b pb-1 font-semibold text-3xl tracking-tight first:mt-0",
-                className,
+                "mt-10 scroll-m-20 border-b pb-1 text-3xl font-semibold tracking-tight first:mt-0",
+                className
             )}
             {...props}
         />
     ),
     h3: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h3 className={cn("mt-8 scroll-m-20 font-semibold text-2xl tracking-tight", className)} {...props} />
+        <h3
+            className={cn(
+                "mt-8 scroll-m-20 text-2xl font-semibold tracking-tight",
+                className
+            )}
+            {...props}
+        />
     ),
     h4: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h4 className={cn("mt-8 scroll-m-20 font-semibold text-xl tracking-tight", className)} {...props} />
+        <h4
+            className={cn(
+                "mt-8 scroll-m-20 text-xl font-semibold tracking-tight",
+                className
+            )}
+            {...props}
+        />
     ),
     h5: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h5 className={cn("mt-8 scroll-m-20 font-semibold text-lg tracking-tight", className)} {...props} />
+        <h5
+            className={cn(
+                "mt-8 scroll-m-20 text-lg font-semibold tracking-tight",
+                className
+            )}
+            {...props}
+        />
     ),
     h6: ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-        <h6 className={cn("mt-8 scroll-m-20 font-semibold text-base tracking-tight", className)} {...props} />
+        <h6
+            className={cn(
+                "mt-8 scroll-m-20 text-base font-semibold tracking-tight",
+                className
+            )}
+            {...props}
+        />
     ),
-    a: ({
-        className,
-        ...props
-    }: React.HTMLAttributes<HTMLAnchorElement> & {
-        href?: string;
-        target?: string;
-    }) => <a className={cn("font-medium underline underline-offset-4", className)} {...props} />,
+    a: ({ className, ...props }: React.HTMLAttributes<HTMLAnchorElement> & { href?: string, target?: string }) => (
+        <a
+            className={cn("font-medium underline underline-offset-4", className)}
+            {...props}
+        />
+    ),
     p: ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
-        <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)} {...props} />
+        <p
+            className={cn("leading-7 [&:not(:first-child)]:mt-6", className)}
+            {...props}
+        />
     ),
     ul: ({ className, ...props }: React.HTMLAttributes<HTMLUListElement>) => (
         <ul className={cn("my-6 ml-6 list-disc", className)} {...props} />
@@ -48,11 +80,20 @@ export const Components = {
         <li className={cn("mt-2", className)} {...props} />
     ),
     blockquote: ({ className, ...props }: React.HTMLAttributes<HTMLQuoteElement>) => (
-        <blockquote className={cn("mt-6 border-l-2 pl-6 italic [&>*]:text-muted-foreground", className)} {...props} />
+        <blockquote
+            className={cn(
+                "mt-6 border-l-2 pl-6 italic [&>*]:text-muted-foreground",
+                className
+            )}
+            {...props}
+        />
     ),
-    img: ({ className, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    img: ({
+        className,
+        alt,
+        ...props
+    }: React.ImgHTMLAttributes<HTMLImageElement>) => (
         // eslint-disable-next-line @next/next/no-img-element
-        // biome-ignore lint/a11y/useAltText: <explanation>
         <img className={cn("rounded-md border", className)} alt={alt} {...props} />
     ),
     hr: ({ ...props }) => <hr className="my-4 md:my-8" {...props} />,
@@ -62,13 +103,16 @@ export const Components = {
         </div>
     ),
     tr: ({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) => (
-        <tr className={cn("m-0 border-t p-0 even:bg-muted", className)} {...props} />
+        <tr
+            className={cn("m-0 border-t p-0 even:bg-muted", className)}
+            {...props}
+        />
     ),
     th: ({ className, ...props }: React.HTMLAttributes<HTMLTableCellElement>) => (
         <th
             className={cn(
                 "border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right",
-                className,
+                className
             )}
             {...props}
         />
@@ -77,41 +121,58 @@ export const Components = {
         <td
             className={cn(
                 "border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right",
-                className,
+                className
             )}
             {...props}
         />
     ),
     pre: ({ className, ...props }: React.HTMLAttributes<HTMLPreElement>) => (
-        <pre className={cn("mt-6 mb-4 overflow-x-auto rounded-lg border bg-black py-4", className)} {...props} />
-    ),
-    code: ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => (
-        <code
-            className={cn("relative rounded border px-[0.3rem] py-[0.2rem] font-mono text-sm", className)}
+        <pre
+            className={cn(
+                "mb-4 mt-6 overflow-x-auto rounded-lg border bg-black py-4",
+                className
+            )}
             {...props}
         />
     ),
-};
-
-export default Components;
-
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-    href?: string;
-    disabled?: boolean;
+    code: ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => (
+        <code
+            className={cn(
+                "relative rounded border px-[0.3rem] py-[0.2rem] font-mono text-sm",
+                className
+            )}
+            {...props}
+        />
+    ),
 }
 
-export function MdxCard({ href, className, children, disabled, ...props }: CardProps) {
+export default Components
+
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+    href?: string
+    disabled?: boolean
+}
+
+export function MdxCard({
+    href,
+    className,
+    children,
+    disabled,
+    ...props
+}: CardProps) {
     return (
         <div
             className={cn(
-                "group relative rounded-lg border bg-secondary p-6 shadow-md transition-shadow hover:shadow-lg",
+                "group relative rounded-lg border p-6 shadow-md transition-shadow hover:shadow-lg bg-secondary",
                 disabled && "cursor-not-allowed opacity-60",
-                className,
+                className
             )}
             {...props}
         >
             <div className="flex flex-col justify-between gap-4">
-                <div className="[&>h3]:!mt-0 [&>h4]:!mt-0 space-y-2 [&>p]:text-muted-foreground">{children}</div>
+                <div className="space-y-2 [&>h3]:!mt-0 [&>h4]:!mt-0 [&>p]:text-muted-foreground">
+                    {children}
+                </div>
             </div>
             {href && (
                 <Link href={disabled ? "#" : href} className="absolute inset-0">
@@ -119,21 +180,28 @@ export function MdxCard({ href, className, children, disabled, ...props }: CardP
                 </Link>
             )}
         </div>
-    );
+    )
 }
 
 interface CalloutProps {
-    icon?: string;
-    children?: React.ReactNode;
+    icon?: string
+    children?: React.ReactNode
 }
 
-export function Callout({ children, icon, ...props }: CalloutProps) {
+export function Callout({
+    children,
+    icon,
+    ...props
+}: CalloutProps) {
     return (
-        <div className="my-6 flex items-start rounded-md border border-l-4 p-4" {...props}>
+        <div
+            className={"my-6 flex items-start rounded-md border border-l-4 p-4"}
+            {...props}
+        >
             {icon && <span className="mr-4 text-2xl">{icon}</span>}
             <div>{children}</div>
         </div>
-    );
+    )
 }
 
 // export async function CodeBlock({lang, theme = "github-dark", code}: {lang: string, theme?: string, code: string}) {

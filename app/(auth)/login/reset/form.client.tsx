@@ -1,31 +1,32 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/utils/tw";
-import { Loader2 } from "lucide-react";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import { resetPasswordWithToken } from "../action";
+import { cn } from "@/utils/tw"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
+import { useTransition } from "react"
+import { resetPasswordWithToken } from "../action"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
-    username: string;
-    token: string;
+    username: string
+    token: string
 }
+
 
 export function UserAuthForm({ className, username, token, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
 
     async function onSubmit(data: FormData) {
         startTransition(async () => {
-            const signInResult = await resetPasswordWithToken(token, data.get("password") as string);
+            const signInResult = await resetPasswordWithToken(token, data.get("password") as string)
 
             if (signInResult?.error) {
-                return void toast.error(signInResult.error);
+                return void toast.error(signInResult.error)
             }
 
-            return void toast.success("Now login with your new password!");
+            return void toast.success("Now login with your new password!")
         });
     }
 
@@ -45,7 +46,7 @@ export function UserAuthForm({ className, username, token, ...props }: UserAuthF
                             autoCapitalize="none"
                             autoComplete="username"
                             autoCorrect="off"
-                            className="border-none bg-secondary"
+                            className="bg-secondary border-none"
                             readOnly
                             value={username}
                         />
@@ -61,17 +62,20 @@ export function UserAuthForm({ className, username, token, ...props }: UserAuthF
                             type="password"
                             autoComplete="password"
                             autoCorrect="off"
-                            className="border-none bg-secondary"
+                            className="bg-secondary border-none"
                             disabled={isPending}
                         />
                     </div>
 
                     <Button disabled={isPending} type="submit">
-                        {isPending && <Loader2 className="me-2 size-4 animate-spin" />}
+                        {isPending && (
+                            <Loader2 className="me-2 size-4 animate-spin" />
+                        )}
                         Sign In
                     </Button>
                 </form>
             </div>
         </>
-    );
+    )
 }
+

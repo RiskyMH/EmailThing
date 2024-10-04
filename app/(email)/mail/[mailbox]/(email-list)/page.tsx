@@ -1,22 +1,23 @@
-import type { Metadata } from "next";
-import EmailList from "./email-list";
+import { Metadata } from "next"
+import EmailList from "./email-list"
 
 export const metadata = {
     title: "Inbox",
-} as Metadata;
+} as Metadata
+
 
 export default async function Mailbox({
     params,
-    searchParams,
+    searchParams
 }: {
     params: {
-        mailbox: string;
-    };
+        mailbox: string
+    },
     searchParams?: {
-        category?: string;
-        take?: string;
-        q?: string;
-    };
+        category?: string
+        take?: string
+        q?: string
+    }
 }) {
     return (
         <EmailList
@@ -26,5 +27,5 @@ export default async function Mailbox({
             categoryId={searchParams?.category}
             search={searchParams?.q}
         />
-    );
+    )
 }

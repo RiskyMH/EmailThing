@@ -3,15 +3,14 @@
 export default {
     /**
      * The main email function:
-     * @param {ForwardableEmailMessage} message
-     * @param {{token: string, forward?: string}} env
+     * @param {ForwardableEmailMessage} message 
+     * @param {{token: string, forward?: string}} env 
      */
     async email(message, env, ctx) {
-        if (!message.raw)
-            throw new Error(
-                "Raw email content not present.\n" +
-                    "Make sure this email was sent correctly (and not using the demo one)",
-            );
+        if (!message.raw) throw new Error(
+            "Raw email content not present.\n" +
+            "Make sure this email was sent correctly (and not using the demo one)"
+        );
         const rawEmail = await streamToArrayBuffer(message.raw, message.rawSize);
         const raw = new TextDecoder("utf-8").decode(rawEmail);
 
@@ -21,13 +20,13 @@ export default {
             method: "POST",
             headers: {
                 "content-type": "application/json",
-                authorization: `Bearer ${env.token}`,
+                "authorization": `Bearer ${env.token}`
             },
             body: JSON.stringify({
                 email: raw,
                 from: message.from,
                 to: message.to,
-            }),
+            })
         });
 
         if (!req.ok) {
@@ -35,16 +34,17 @@ export default {
             message.setReject(error);
             console.error(error);
         }
-    },
+    }
 };
 
+
 /**
- *
+ * 
  * @param {ReadableStream<any>} stream
  * @param {number} streamSize
  */
 async function streamToArrayBuffer(stream, streamSize) {
-    const result = new Uint8Array(streamSize);
+    let result = new Uint8Array(streamSize);
     let bytesRead = 0;
     const reader = stream.getReader();
     while (true) {
@@ -56,4 +56,5 @@ async function streamToArrayBuffer(stream, streamSize) {
         bytesRead += value.length;
     }
     return result;
-}
+};
+

@@ -1,6 +1,6 @@
-import { DocsPage } from "@/components/docs-page";
-import { Callout, Components as MD, MdxCard } from "@/components/docs-page-components";
-import type { Metadata } from "next";
+import { DocsPage } from "@/components/docs-page"
+import { Components as MD, MdxCard, Callout } from "@/components/docs-page-components"
+import type { Metadata } from "next"
 
 export const metadata = {
     title: "Documentation",
@@ -12,12 +12,13 @@ export const metadata = {
         images: ["/logo.png"],
         locale: "en_US",
         url: "https://emailthing.app/docs",
-        type: "website",
+        type: "website"
     },
     alternates: {
         canonical: "https://emailthing.app/docs",
     },
-} satisfies Metadata;
+} satisfies Metadata
+
 
 export default function AboutPage() {
     return (
@@ -30,29 +31,25 @@ export default function AboutPage() {
                     href: "#features",
                     children: [
                         { title: "API", href: "#api" },
-                        { title: "Custom Domain", href: "#custom-domain" },
-                    ],
+                        { title: "Custom Domain", href: "#custom-domain" }
+                    ]
                 },
             ]}
-            pager={{
-                next: { title: "Custom Domain", href: "/docs/custom-domain" },
-            }}
+            pager={{ next: { title: "Custom Domain", href: "/docs/custom-domain" } }}
         >
             <MD.p>
-                EmailThing is a basic email client things of sending and receiving email through a website. The main
-                reason I made this was so I can use my custom domain to send emails with (and this is probably the only
-                reason you may want to use).
+                EmailThing is a basic email client things of sending and receiving email through a website.
+                The main reason I made this was so I can use my custom domain to send emails with (and this is probably the only reason you may want to use).
             </MD.p>
 
             <Callout>
                 <MD.p>
-                    This site is a work in progress. If you see dummy text on a page, it means I&apos;m still working on
-                    it. You can follow updates on Discord.
+                    This site is a work in progress. If you see dummy text on a page, it means I&apos;m still working on it. You can follow updates on Discord.
                 </MD.p>
             </Callout>
 
             <MD.h2 id="features">Features</MD.h2>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="grid sm:grid-cols-2 gap-4 mt-6">
                 <MdxCard href="/docs/api">
                     <MD.h3 id="api">API</MD.h3>
                     <MD.p>Another way of sending emails!</MD.p>
@@ -64,5 +61,6 @@ export default function AboutPage() {
                 </MdxCard>
             </div>
         </DocsPage>
-    );
+    )
 }
+

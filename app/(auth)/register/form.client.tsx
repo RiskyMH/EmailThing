@@ -1,45 +1,35 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/utils/tw";
-import { ExternalLinkIcon, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { type FormEvent, useTransition } from "react";
-import { toast } from "sonner";
-import signUp from "./action";
+import { cn } from "@/utils/tw"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
+import { ExternalLinkIcon, Loader2 } from "lucide-react"
+import signUp from "./action"
+import { FormEvent, useTransition } from "react"
+import { useRouter } from "next/navigation"
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
+
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
-    const router = useRouter();
+    const router = useRouter()
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
+        event.preventDefault()
         startTransition(async () => {
-            const formData = new FormData(event.target as HTMLFormElement);
-            const signUpResult = await signUp(formData);
+            const formData = new FormData(event.target as HTMLFormElement)
+            const signUpResult = await signUp(formData)
 
             if (signUpResult?.error) {
-                if ("link" in signUpResult && signUpResult.link)
-                    return void toast.error(signUpResult.error, {
-                        action: (
-                            <a
-                                href={signUpResult.link.l}
-                                target="blank"
-                                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
-                            >
-                                {signUpResult.link.m} <ExternalLinkIcon className="size-4 text-muted-foreground" />
-                            </a>
-                        ),
-                    });
-                return void toast.error(signUpResult.error);
+                if ("link" in signUpResult && signUpResult.link) return void toast.error(signUpResult.error, { action: (<a href={signUpResult.link.l} target="blank" className='inline-flex items-center justify-center gap-2 shrink-0 bg-secondary rounded-lg p-2 hover:bg-secondary/80'>{signUpResult.link.m} <ExternalLinkIcon className='size-4 text-muted-foreground' /></a>) });
+                return void toast.error(signUpResult.error)
             }
 
-            toast.success("Welcome!");
-            router.refresh();
+            toast.success("Welcome!")
+            router.refresh()
         });
     }
 
@@ -52,10 +42,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             Username
                         </Label>
                         <div
-                            className={cn(
-                                "group flex h-10 w-full gap-2 self-center rounded bg-secondary px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-                                isPending && "cursor-not-allowed opacity-50",
-                            )}
+                            className={cn("group h-10 w-full py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 bg-secondary rounded flex self-center px-3 gap-2", isPending && "cursor-not-allowed opacity-50")}
                         >
                             <input
                                 id="username"
@@ -65,11 +52,13 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 autoCapitalize="none"
                                 autoComplete="new-password"
                                 autoCorrect="off"
-                                className="w-full bg-transparent focus-visible:outline-none"
+                                className="w-full focus-visible:outline-none bg-transparent"
                                 disabled={isPending}
                                 required
                             />
-                            <span>@emailthing.xyz</span>
+                            <span>
+                                @emailthing.xyz
+                            </span>
                         </div>
                     </div>
                     <div className="grid gap-1">
@@ -83,7 +72,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                             type="password"
                             autoComplete="new-password"
                             autoCorrect="off"
-                            className="border-none bg-secondary"
+                            className="bg-secondary border-none"
                             disabled={isPending}
                             required
                         />
@@ -95,6 +84,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     </Button>
                 </div>
             </form>
+
         </div>
-    );
+    )
 }

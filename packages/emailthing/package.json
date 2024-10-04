@@ -6,7 +6,11 @@
     "type": "git",
     "url": "git+https://github.com/RiskyMH/EmailThing.git"
   },
-  "keywords": ["cli", "sdk", "email"],
+  "keywords": [
+    "cli",
+    "sdk",
+    "email"
+  ],
   "author": "RiskyMH (https://riskymh.dev)",
   "bugs": {
     "url": "https://github.com/RiskyMH/EmailThing/issues"

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
     Dialog,
     DialogClose,
@@ -19,7 +19,7 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer";
-import type { ComponentProps } from "react";
+import { ComponentProps } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
 const SmartDrawer = (props: ComponentProps<typeof Drawer>) => {
@@ -28,7 +28,7 @@ const SmartDrawer = (props: ComponentProps<typeof Drawer>) => {
         return <Dialog {...props} />;
     }
     return <Drawer {...props} />;
-};
+}
 SmartDrawer.displayName = "SmartDrawer";
 
 const SmartDrawerTrigger = (props: ComponentProps<typeof DrawerTrigger>) => {
@@ -37,7 +37,7 @@ const SmartDrawerTrigger = (props: ComponentProps<typeof DrawerTrigger>) => {
         return <DialogTrigger {...props} />;
     }
     return <DrawerTrigger {...props} />;
-};
+}
 SmartDrawerTrigger.displayName = "SmartDrawerTrigger";
 
 const SmartDrawerHeader = (props: ComponentProps<typeof DrawerHeader>) => {
@@ -46,7 +46,7 @@ const SmartDrawerHeader = (props: ComponentProps<typeof DrawerHeader>) => {
         return <DialogHeader {...props} />;
     }
     return <DrawerHeader {...props} />;
-};
+}
 SmartDrawerHeader.displayName = "SmartDrawerHeader";
 
 const SmartDrawerTitle = (props: ComponentProps<typeof DrawerTitle>) => {
@@ -55,7 +55,7 @@ const SmartDrawerTitle = (props: ComponentProps<typeof DrawerTitle>) => {
         return <DialogTitle {...props} />;
     }
     return <DrawerTitle {...props} />;
-};
+}
 SmartDrawerTitle.displayName = "SmartDrawerTitle";
 
 const SmartDrawerDescription = (props: ComponentProps<typeof DrawerDescription>) => {
@@ -64,7 +64,7 @@ const SmartDrawerDescription = (props: ComponentProps<typeof DrawerDescription>)
         return <DialogDescription {...props} />;
     }
     return <DrawerDescription {...props} />;
-};
+}
 SmartDrawerDescription.displayName = "SmartDrawerDescription";
 
 const SmartDrawerContent = (props: ComponentProps<typeof DrawerContent>) => {
@@ -73,7 +73,7 @@ const SmartDrawerContent = (props: ComponentProps<typeof DrawerContent>) => {
         return <DialogContent {...props} />;
     }
     return <DrawerContent {...props} />;
-};
+}
 SmartDrawerContent.displayName = "SmartDrawerContent";
 
 const SmartDrawerFooter = (props: ComponentProps<typeof DrawerFooter>) => {
@@ -82,7 +82,7 @@ const SmartDrawerFooter = (props: ComponentProps<typeof DrawerFooter>) => {
         return <DialogFooter {...props} />;
     }
     return <DrawerFooter {...props} />;
-};
+}
 SmartDrawerFooter.displayName = "SmartDrawerFooter";
 
 const SmartDrawerClose = (props: ComponentProps<typeof DrawerClose>) => {
@@ -91,7 +91,7 @@ const SmartDrawerClose = (props: ComponentProps<typeof DrawerClose>) => {
         return <DialogClose id="smart-drawer:close" {...props} />;
     }
     return <DrawerClose id="smart-drawer:close" {...props} />;
-};
+}
 SmartDrawerClose.displayName = "SmartDrawerClose";
 
 export {
@@ -103,4 +103,4 @@ export {
     SmartDrawerContent,
     SmartDrawerFooter,
     SmartDrawerClose,
-};
+}
