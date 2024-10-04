@@ -1,37 +1,40 @@
-'use client'
+"use client";
 
-import { useEffect, useState, type TransitionStartFunction } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
-import { Loader2Icon, KeyRoundIcon } from "lucide-react";
+import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
+import { KeyRoundIcon, Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { type TransitionStartFunction, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { signInPasskey } from "./action";
-import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
-import { useRouter } from "next/navigation";
 
-export default function PasskeysLogin({ transition, challenge = "login" }: { transition: [boolean, TransitionStartFunction], challenge?: string }) {
-    const [isPending, startTransition] = transition
+export default function PasskeysLogin({
+    transition,
+    challenge = "login",
+}: { transition: [boolean, TransitionStartFunction]; challenge?: string }) {
+    const [isPending, startTransition] = transition;
     const [support, setSupport] = useState(false);
     useEffect(() => {
         setSupport(supported());
     }, []);
 
-    const [loading, setLoading] = useState(false)
-    const router = useRouter()
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const handleLogin = async (event: any) => {
         event.preventDefault();
-        setLoading(true)
+        setLoading(true);
         startTransition(async () => {
             try {
                 const credential = await get(
                     parseRequestOptionsFromJSON({
                         publicKey: {
-                            challenge: Buffer.from(challenge).toString('base64'),
+                            challenge: Buffer.from(challenge).toString("base64"),
                             timeout: 60000,
                             userVerification: "required",
                             rpId: window.location.hostname,
-                        }
+                        },
                     }),
                 );
                 // const credential = await navigator.credentials.get({
@@ -44,28 +47,27 @@ export default function PasskeysLogin({ transition, challenge = "login" }: { tra
                 // });
 
                 if (!credential) {
-                    setLoading(false)
-                    return void toast.error("No passkey")
+                    setLoading(false);
+                    return void toast.error("No passkey");
                 }
 
-
-                const signInResult = await signInPasskey(credential)
+                const signInResult = await signInPasskey(credential);
 
                 if (signInResult?.error) {
-                    setLoading(false)
-                    return void toast.error(signInResult.error)
+                    setLoading(false);
+                    return void toast.error(signInResult.error);
                 }
 
-                toast.success("Welcome back!")
-                router.refresh()
-                setLoading(false)
+                toast.success("Welcome back!");
+                router.refresh();
+                setLoading(false);
             } catch (err) {
-                console.error(err)
-                toast.error("Failed to sign in with passkey")
-                setLoading(false)
+                console.error(err);
+                toast.error("Failed to sign in with passkey");
+                setLoading(false);
             }
-        })
-    }
+        });
+    };
 
     return (
         <button
@@ -74,14 +76,8 @@ export default function PasskeysLogin({ transition, challenge = "login" }: { tra
             onClick={handleLogin}
             disabled={isPending || !support}
         >
-            {loading ? (
-                <Loader2Icon className="mr-2 size-4 animate-spin" />
-            ) : (
-                <KeyRoundIcon className="mr-2 size-4" />
-            )}
+            {loading ? <Loader2Icon className="mr-2 size-4 animate-spin" /> : <KeyRoundIcon className="mr-2 size-4" />}
             Passkey
         </button>
-
-    )
-
+    );
 }

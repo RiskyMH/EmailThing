@@ -1,10 +1,8 @@
+import { createVerify } from "node:crypto";
 import db, { MailboxAlias, MailboxTokens } from "@/db";
-import { env } from "@/utils/env";
 import { sendEmail } from "@/utils/send-email";
-import { createVerify } from "crypto";
 import { asc, eq } from "drizzle-orm";
 import { createMimeMessage } from "mimetext";
-
 
 const GITHUB_KEYS_URI = "https://api.github.com/meta/public_keys/secret_scanning";
 export const revalidate = 0;
@@ -28,9 +26,11 @@ const verify_signature = async (payload: string, signature: string, keyID: strin
         return { error: "Invalid keyID" };
     }
 
-    const keys: Record<string, any> = await (await fetch(GITHUB_KEYS_URI, { next: { revalidate: 60 * 60 * 24 } })).json();
+    const keys: Record<string, any> = await (
+        await fetch(GITHUB_KEYS_URI, { next: { revalidate: 60 * 60 * 24 } })
+    ).json();
 
-    if (!(keys?.public_keys instanceof Array) || keys.length === 0) {
+    if (!Array.isArray(keys?.public_keys) || keys.length === 0) {
         return { error: "No public keys found" };
     }
 
@@ -47,12 +47,10 @@ const verify_signature = async (payload: string, signature: string, keyID: strin
     return { success: true };
 };
 
-
 export async function POST(request: Request) {
     const payload = await request.text();
     const signature = request.headers.get("Github-Public-Key-Signature");
     const keyID = request.headers.get("Github-Public-Key-Identifier");
-
 
     const verify = await verify_signature(payload, signature!, keyID!);
     if (!verify.success) {
@@ -60,10 +58,10 @@ export async function POST(request: Request) {
     }
 
     const json = JSON.parse(payload) as {
-        token: string,
-        type: string,
-        url: string,
-        source: string
+        token: string;
+        type: string;
+        url: string;
+        source: string;
     }[];
 
     for (const match of json) {
@@ -71,39 +69,39 @@ export async function POST(request: Request) {
             where: eq(MailboxTokens.token, match.token),
             columns: {
                 token: true,
-                mailboxId: true
-            }
+                mailboxId: true,
+            },
         });
 
         if (!token) {
-            console.log(`Token "${match.token}" not found`)
             continue;
         }
 
-
         // get default mailbox alias and send email
-        const [alias,] = await db.batch([
+        const [alias] = await db.batch([
             db.query.MailboxAlias.findFirst({
                 where: eq(MailboxAlias.mailboxId, token.mailboxId),
                 columns: {
                     alias: true,
-                    name: true
+                    name: true,
                 },
-                orderBy: asc(MailboxAlias.default)
+                orderBy: asc(MailboxAlias.default),
             }),
 
             // invalidate it
-            db.delete(MailboxTokens)
-                .where(eq(MailboxTokens.token, match.token))
-        ])
+            db
+                .delete(MailboxTokens)
+                .where(eq(MailboxTokens.token, match.token)),
+        ]);
         // send email
         if (alias) {
-            console.log(`Sending email to ${alias.alias} for token "${match.token}"`)
-
-            const mail = createMimeMessage()
-            mail.setSender({ addr: "system@emailthing.app", name: "EmailThing System" })
-            mail.setRecipient(alias.alias)
-            mail.setSubject("Your token has been compromised")
+            const mail = createMimeMessage();
+            mail.setSender({
+                addr: "system@emailthing.app",
+                name: "EmailThing System",
+            });
+            mail.setRecipient(alias.alias);
+            mail.setSubject("Your token has been compromised");
             mail.addMessage({
                 contentType: "text/plain",
                 data: `Hey, ${alias.name || alias.alias}!
@@ -117,18 +115,19 @@ Be more careful in the future, and make sure to not accidentally upload your tok
 
 Obtain a New Token: https://emailthing.app/mail/${token.mailboxId}/config
 
-`
-            })
+`,
+            });
 
-            const e = await sendEmail({ from: "system@emailthing.app", to: [alias.alias], data: mail })
-
+            const e = await sendEmail({
+                from: "system@emailthing.app",
+                to: [alias.alias],
+                data: mail,
+            });
         } else {
-            console.log(`No alias found for mailbox ${token.mailboxId}, but still invalidated token "${match.token}"`)
         }
     }
 
     return new Response("ok", { status: 200 });
-
 }
 
 // console.log(await verify_signature(

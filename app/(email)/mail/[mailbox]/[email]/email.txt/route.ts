@@ -1,8 +1,8 @@
-import { getCurrentUser } from "@/utils/jwt"
-import { db, Email } from "@/db";
-import { notFound } from "next/navigation"
-import { userMailboxAccess } from "../../tools"
+import { Email, db } from "@/db";
+import { getCurrentUser } from "@/utils/jwt";
 import { and, eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
+import { userMailboxAccess } from "../../tools";
 
 // export const runtime = 'edge'
 
@@ -12,24 +12,21 @@ export async function GET(
         params,
     }: {
         params: {
-            mailbox: string
-            email: string
-        }
-    }
+            mailbox: string;
+            email: string;
+        };
+    },
 ) {
-    const userId = await getCurrentUser()
-    if (!userId || !await userMailboxAccess(params.mailbox, userId)) return notFound();
+    const userId = await getCurrentUser();
+    if (!(userId && (await userMailboxAccess(params.mailbox, userId)))) return notFound();
 
     const mail = await db.query.Email.findFirst({
-        where: and(
-            eq(Email.id, params.email),
-            eq(Email.mailboxId, params.mailbox),
-        ),
+        where: and(eq(Email.id, params.email), eq(Email.mailboxId, params.mailbox)),
         columns: {
-            body: true
-        }
-    })
-    if (!mail) return notFound()
+            body: true,
+        },
+    });
+    if (!mail) return notFound();
 
-    return new Response(mail.body)
+    return new Response(mail.body);
 }

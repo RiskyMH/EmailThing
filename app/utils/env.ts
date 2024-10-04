@@ -1,6 +1,6 @@
-import { createId } from "@paralleldrive/cuid2"
-import { createEnv } from "@t3-oss/env-nextjs"
-import { z } from "zod"
+import { createId } from "@paralleldrive/cuid2";
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
 
 export const env = createEnv({
     server: {
@@ -13,7 +13,7 @@ export const env = createEnv({
         S3_KEY_ID: z.string(),
         S3_SECRET_ACCESS_KEY: z.string(),
         S3_URL: z.string(),
-        TURNSTILE_SECRET_KEY: z.string().optional()
+        TURNSTILE_SECRET_KEY: z.string().optional(),
     },
     client: {
         NEXT_PUBLIC_APP_URL: z.string().min(1),
@@ -26,11 +26,11 @@ export const env = createEnv({
         NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: process.env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
         WEB_NOTIFICATIONS_PRIVATE_KEY: process.env.WEB_NOTIFICATIONS_PRIVATE_KEY,
         EMAIL_AUTH_TOKEN: process.env.EMAIL_AUTH_TOKEN,
-        EMAIL_DKIM_PRIVATE_KEY: process.env.EMAIL_DKIM_PRIVATE_KEY?.replaceAll(/(\r\n|\r|\n)/g, '\r\n'),
+        EMAIL_DKIM_PRIVATE_KEY: process.env.EMAIL_DKIM_PRIVATE_KEY?.replaceAll(/(\r\n|\r|\n)/g, "\r\n"),
         JWT_TOKEN: process.env.JWT_TOKEN || createId(),
         S3_KEY_ID: process.env.S3_KEY_ID,
         S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
         S3_URL: process.env.S3_URL,
         TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     },
-})
+});

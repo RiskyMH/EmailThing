@@ -1,30 +1,34 @@
-'use client'
+"use client";
 
+import { ClientInput, ClientTextarea } from "@/(user)/components.client";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, Loader2 } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { emailMeForm } from "./action";
-import { ClientInput, ClientTextarea } from "@/(user)/components.client";
 
-export function Form({ publicEmail, username }: { className?: string, publicEmail?: string, username?: string }) {
-    const [state, formAction] = useFormState(emailMeForm, {})
+export function Form({ publicEmail, username }: { className?: string; publicEmail?: string; username?: string }) {
+    const [state, formAction] = useFormState(emailMeForm, {});
 
     useEffect(() => {
         if (state?.error) {
-            (window as any)?.turnstile?.reset()
+            (window as any)?.turnstile?.reset();
         }
-    }, [state])
+    }, [state]);
 
     return (
         <>
-            <form action={formAction} className="flex flex-col gap-2 max-w-[35rem] self-center w-full" suppressHydrationWarning>
+            <form
+                action={formAction}
+                className="flex w-full max-w-[35rem] flex-col gap-2 self-center"
+                suppressHydrationWarning
+            >
                 <input name="username" value={username} hidden />
-                <div className="flex gap-2 sm:flex-row flex-col">
+                <div className="flex flex-col gap-2 sm:flex-row">
                     <ClientInput
                         placeholder="Name *"
-                        className="w-full sm:w-1/2 border-none bg-secondary"
+                        className="w-full border-none bg-secondary sm:w-1/2"
                         name="name"
                         autoComplete="name"
                         disabled={!!state?.success}
@@ -34,7 +38,7 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
                     />
                     <ClientInput
                         placeholder="Email"
-                        className="w-full sm:w-1/2 border-none bg-secondary"
+                        className="w-full border-none bg-secondary sm:w-1/2"
                         name="email"
                         type="email"
                         disabled={!!state?.success}
@@ -61,10 +65,13 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
                     suppressHydrationWarning
                 />
 
-                <div className="flex mt-2 sm:mt-1 sm:min-h-10 flex-col-reverse sm:flex-row gap-3" suppressHydrationWarning>
-                    <div suppressHydrationWarning className="flex flex-col sm:min-h-10 items-center">
+                <div
+                    className="mt-2 flex flex-col-reverse gap-3 sm:mt-1 sm:min-h-10 sm:flex-row"
+                    suppressHydrationWarning
+                >
+                    <div suppressHydrationWarning className="flex flex-col items-center sm:min-h-10">
                         <div
-                            className={`cf-turnstile`}
+                            className="cf-turnstile"
                             data-appearance="interaction-only"
                             data-action="emailthing-me"
                             data-sitekey="0x4AAAAAAAb9U2XXs4z4cJUN"
@@ -72,14 +79,22 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
                             suppressHydrationWarning
                             hidden={!!state?.success}
                         />
+                        {/* biome-ignore lint/style/noUnusedTemplateLiteral: <explanation> */}
                         <style>{`.cf-turnstile{line-height:0;height:0;z-index:10}`}</style>
                         <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=managed" />
                         {state?.error ? (
-                            <p className="text-red justify-center content-center sm:min-h-10 text-sm py-0.5 z-20">{state.error}</p>
+                            <p className="z-20 content-center justify-center py-0.5 text-red text-sm sm:min-h-10">
+                                {state.error}
+                            </p>
                         ) : (
-                            <p className="text-muted-foreground justify-center content-center sm:min-h-10 text-sm overflow-auto py-0.5">
-                                You can also email {" "}
-                                    <a href={`mailto:${publicEmail}`} id="mailto-link" className="font-bold hover:underline" suppressHydrationWarning>
+                            <p className="content-center justify-center overflow-auto py-0.5 text-muted-foreground text-sm sm:min-h-10">
+                                You can also email{" "}
+                                <a
+                                    href={`mailto:${publicEmail}`}
+                                    id="mailto-link"
+                                    className="font-bold hover:underline"
+                                    suppressHydrationWarning
+                                >
                                     {publicEmail}
                                 </a>
                             </p>
@@ -87,10 +102,11 @@ export function Form({ publicEmail, username }: { className?: string, publicEmai
                     </div>
                     <SendButton success={!!state?.success} />
                 </div>
-            </form >
+            </form>
             <Toaster message={state?.success} />
             <script
                 suppressHydrationWarning
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
                 dangerouslySetInnerHTML={{
                     __html: `{
 const urlParams = new URLSearchParams(window.location.search);
@@ -112,31 +128,37 @@ if (name && nameElem) nameElem.value = name;
 if (email && emailElem) emailElem.value = email;
 if (subject && subjectElem) subjectElem.value = subject;
 if (message && messageElem) messageElem.value = message;
-}`.replaceAll("\n", " ")}}
+}`.replaceAll("\n", " "),
+                }}
             />
         </>
     );
 }
 
 function SendButton({ success }: { success?: boolean }) {
-    const state = useFormStatus()
+    const state = useFormStatus();
     return (
-        <Button type="submit" className="w-full sm:w-min sm:ms-auto px-7 flex gap-2" disabled={state.pending || success} >
-            {state.pending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
-            {success && <CheckIcon className="size-5 text-green-500 -ms-1" />}
+        <Button
+            type="submit"
+            className="flex w-full gap-2 px-7 sm:ms-auto sm:w-min"
+            disabled={state.pending || success}
+        >
+            {state.pending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+            {success && <CheckIcon className="-ms-1 size-5 text-green-500" />}
             {success ? "Sent Message" : "Send Message"}
         </Button>
-    )
+    );
 }
 
 function Toaster({ message }: { message?: string }) {
-    const state = useFormStatus()
+    const state = useFormStatus();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: uh
     useEffect(() => {
         if (!state.pending && message) {
-            toast.success(message)
+            toast.success(message);
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [state.pending])
-    return <></>
+    }, [state.pending]);
+    return <></>;
 }

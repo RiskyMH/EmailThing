@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { PropsWithChildren, useRef, useState, useCallback, useEffect, useTransition } from "react";
+import { type PropsWithChildren, useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 const LoadMore = <T extends string | number | Record<string, any> = any>({
     children,
@@ -27,7 +27,7 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
             startTransition(async () => {
                 if (currentOffsetRef.current === undefined) return;
 
-                const [node, next] = await loadMoreAction(currentOffsetRef.current)
+                const [node, next] = await loadMoreAction(currentOffsetRef.current);
                 if (abortController?.signal.aborted) return;
 
                 setLoadMoreNodes((prev) => [...prev, ...node]);
@@ -38,9 +38,8 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
                 } else {
                     currentOffsetRef.current = next;
                 }
-
             }),
-        [loadMoreAction]
+        [loadMoreAction],
     );
 
     useEffect(() => {
@@ -73,12 +72,12 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
     }, [startId, refreshId]);
 
     useEffect(() => {
-        const num = loadMoreNodes.length + initialLength
+        const num = loadMoreNodes.length + initialLength;
         if (num === 0 || (initialLength === 10 && loadMoreNodes.length === 0)) return;
 
         const urlparams = new URLSearchParams(window.location.search);
-        urlparams.set('take', num.toString());
-        window.history.replaceState(null, '', '?' + urlparams.toString());
+        urlparams.set("take", num.toString());
+        window.history.replaceState(null, "", `?${urlparams.toString()}`);
     }, [loadMoreNodes, initialLength]);
 
     return (
@@ -94,7 +93,7 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
                 disabled={disabled || isPending}
                 onClick={() => loadMore()}
             >
-                {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />}
+                {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
                 {isPending ? "Loading..." : disabled ? "You have reached the bottom" : "Load More"}
             </Button>
         </>
