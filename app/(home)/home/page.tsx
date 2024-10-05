@@ -35,7 +35,7 @@ export default async function Home() {
                         {"n "}
                         <span className="inline-block whitespace-nowrap bg-gradient-to-br from-[#FF9797] to-[#6D6AFF] bg-clip-text text-transparent">
                             email app
-                        </span>
+                        </span>{" "}
                         where you can receive and send emails!
                     </h1>
                     {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -97,7 +97,7 @@ export default async function EmailPage({
             <TopButtons mailboxId={params.mailbox} emailId={params.email} />
             {!email.isRead && <MarkRead action={markRead} />}
 
-            <h1 className="mt-3 break-words font-bold text-3xl">{email.subject}</h1>
+            <h1 className="mt-3 break-words font-bold text-2xl sm:text-3xl">{email.subject}</h1>
             <div className="flex flex-col gap-3 rounded-md bg-card p-3">
                 {/* from info and gravatar */}
                 <div className="flex gap-2">

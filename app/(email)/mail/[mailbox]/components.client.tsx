@@ -40,12 +40,16 @@ export function ClientStar({
             size="auto"
             onClick={onClick as any}
             aria-disabled={isPending}
-            className={cn(className, "rounded-full ring-offset-5 hover:bg-transparent", enabled && "text-blue/80")}
+            className={cn(
+                className,
+                "rounded-full ring-offset-5 hover:bg-transparent hover:text-amber-500",
+                enabled && "text-amber-500 hover:text-foreground",
+            )}
         >
             {isPending ? (
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                <Loader2 className="size-4 animate-spin text-muted-foreground" />
             ) : (
-                <StarIcon fill={enabled ? "currentColor" : "transparent"} className="size-5" />
+                <StarIcon fill={enabled ? "currentColor" : "transparent"} className="size-4" />
             )}
         </Button>
     );
@@ -68,6 +72,7 @@ interface ContextMenuActionProps {
     icon: keyof typeof iconMap | "EmptyIcon";
     fillIcon?: boolean | null;
     tooltip?: string;
+    size?: "small" | "normal";
 }
 
 export function ContextMenuAction({
@@ -76,6 +81,7 @@ export function ContextMenuAction({
     icon,
     fillIcon,
     tooltip,
+    size,
     ...props
 }: PropsWithChildren<ContextMenuActionProps>) {
     const Icon: LucideIcon | null = iconMap[icon] ?? null;
@@ -93,12 +99,16 @@ export function ContextMenuAction({
         <button {...props} onClick={onClick}>
             {Icon && !isPending && (
                 <Icon
-                    className={cn("size-5", children && "text-muted-foreground")}
+                    className={cn("size-5", size === "small" && "size-4", children && "text-muted-foreground")}
                     fill={fillIcon ? "currentColor" : "transparent"}
                 />
             )}
-            {icon === "EmptyIcon" && !isPending && <EmptyIcon className="size-5 text-muted-foreground" />}
-            {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+            {icon === "EmptyIcon" && !isPending && (
+                <EmptyIcon className={cn("size-5 text-muted-foreground", size === "small" && "size-4")} />
+            )}
+            {isPending && (
+                <Loader2 className={cn("size-5 animate-spin text-muted-foreground", size === "small" && "size-4")} />
+            )}
             {children}
         </button>
     );

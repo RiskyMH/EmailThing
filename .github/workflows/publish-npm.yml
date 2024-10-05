@@ -1,4 +1,4 @@
-name: Publish `emailthing` Package to npmjs
+name: Publish npm packages
 on:
  push:
   paths: packages/emailthing/package.json

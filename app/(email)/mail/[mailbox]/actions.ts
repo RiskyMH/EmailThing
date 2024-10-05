@@ -96,3 +96,5 @@ export async function deleteEmail(mailboxId: string, emailId: string, type: Emai
 
     return revalidatePath(baseUrl);
 }
+
+export async function nothing() {}

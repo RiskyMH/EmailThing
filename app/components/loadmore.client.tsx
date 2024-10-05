@@ -47,11 +47,14 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
 
         const element = ref.current;
 
-        const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting && element?.disabled === false) {
-                loadMore(signal);
-            }
-        });
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && element?.disabled === false) {
+                    loadMore(signal);
+                }
+            },
+            { rootMargin: "150px" },
+        );
 
         if (element) {
             observer.observe(element);
@@ -73,7 +76,7 @@ const LoadMore = <T extends string | number | Record<string, any> = any>({
 
     useEffect(() => {
         const num = loadMoreNodes.length + initialLength;
-        if (num === 0 || (initialLength === 10 && loadMoreNodes.length === 0)) return;
+        if (num === 0 || (initialLength === 25 && loadMoreNodes.length === 0)) return;
 
         const urlparams = new URLSearchParams(window.location.search);
         urlparams.set("take", num.toString());

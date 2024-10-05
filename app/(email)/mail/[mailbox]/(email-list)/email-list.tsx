@@ -31,7 +31,7 @@ export default async function EmailList({
 }: EmailListProps) {
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 
-    const take = initialTake ? Number.parseInt(initialTake) : 10;
+    const take = initialTake ? Number.parseInt(initialTake) : 25;
     const emailFetchOptions = {
         isBinned: type === "trash",
         isSender: type === "sent",
@@ -80,18 +80,18 @@ export default async function EmailList({
                       {
                           ...emailFetchOptions,
                           selectCategories: false,
-                          take: 10,
+                          take: 25,
                       },
                       curser,
                   )
-                : await getDraftJustEmailsList(mailboxId, { take: 10, search }, curser);
+                : await getDraftJustEmailsList(mailboxId, { take: 25, search }, curser);
 
         if (emails.length === 0) {
             console.error("No more emails");
             return [[], null] as [JSX.Element[], null];
         }
 
-        const nextPageEmail = emails.length >= 11 ? emails.pop() : null;
+        const nextPageEmail = emails.length >= 26 ? emails.pop() : null;
         const categories = type === "temp" ? undefined : await mailboxCategories(mailboxId);
 
         return [
@@ -109,10 +109,10 @@ export default async function EmailList({
 
     return (
         <>
-            <div className="flex w-full min-w-0 flex-col gap-2 p-5">
-                <div className="-mt-4 sticky top-0 z-10 flex w-full min-w-0 flex-row gap-6 overflow-y-auto border-b-2 bg-background pt-3 pb-3">
-                    <input type="checkbox" disabled id="select" className="mt-1 mr-2 size-4 shrink-0 self-start" />
-                    <div className="-mb-3 flex w-full min-w-0 flex-row gap-6 overflow-y-auto pb-3">
+            <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
+                <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2">
+                    <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
+                    <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
                         <CategoryItem
                             circleColor={null}
                             name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
@@ -153,8 +153,8 @@ export default async function EmailList({
                             </SmartDrawerContent>
                         </SmartDrawer>
                     )}
-                    <div className="ms-auto me-2 shrink-0">
-                        <RefreshButton />
+                    <div className="ms-auto flex h-6 shrink-0 items-center justify-center">
+                        <RefreshButton className="shrink-0" />
                     </div>
                 </div>
                 {type === "trash" && (
@@ -245,7 +245,7 @@ export function CategoryItem({
             )}
         >
             {circleColor && <div className="mr-1 size-2.5 rounded-full" style={{ backgroundColor: circleColor }} />}
-            <span className="font-medium group-hover:text-muted-foreground">{name}</span>
+            <span className="font-medium text-base group-hover:text-muted-foreground">{name}</span>
             <span className="text-muted-foreground text-sm group-hover:text-muted-foreground/50">({count})</span>
         </Link>
     );

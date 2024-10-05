@@ -1,3 +1,5 @@
+import { format, isSameDay, isSameYear } from "date-fns";
+
 export function todayDate(): `${number}-${number}-${number}` {
     return new Date().toISOString().slice(0, 10) as any;
 }
@@ -12,7 +14,7 @@ export function dateDay(date: Date, timeZone: string | undefined) {
     });
 }
 
-export type DateStyle = "normal" | "hour-min" | "hour-min/date" | "full" | "date" | "ago";
+export type DateStyle = "normal" | "hour-min" | "hour-min/date" | "full" | "date" | "ago" | "smart";
 export function formatDate(date: Date, type: DateStyle, timeZone: string | undefined) {
     const todayWithTz = dateDay(new Date(), timeZone);
 
@@ -52,6 +54,15 @@ export function formatDate(date: Date, type: DateStyle, timeZone: string | undef
     }
     if (type === "ago") {
         return formatTimeAgo(date);
+    }
+    if (type === "smart") {
+        if (isSameDay(date, new Date())) {
+            return format(date, "hh:mm a"); // For the same day
+        }
+        if (isSameYear(date, new Date())) {
+            return format(date, "MMM d"); // For the same year
+        }
+        return format(date, "dd/MM/yyyy"); // For a different year
     }
     return date.toLocaleDateString([], { timeZone });
 }
