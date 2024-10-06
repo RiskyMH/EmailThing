@@ -76,7 +76,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "server-only": "^0.0.1",
-    "shiki": "1.17.7",
+    "shiki": "1.21.1",
     "sonner": "^1.5.0",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.3",
@@ -116,7 +116,6 @@
     "@peculiar/asn1-rsa": "^2.3.8",
     "@peculiar/asn1-schema": "^2.3.8",
     "@peculiar/asn1-x509": "^2.3.8",
-    "@peculiar/asn1-x509-logotype": "^2.3.8",
-    "shiki": "1.17.7"
+    "@peculiar/asn1-x509-logotype": "^2.3.8"
   }
 }
