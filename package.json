@@ -79,7 +79,7 @@
     "shiki": "1.17.7",
     "sonner": "^1.5.0",
     "swr": "^2.2.5",
-    "tailwind-merge": "^2.5.2",
+    "tailwind-merge": "^2.5.3",
     "tailwindcss-animate": "^1.0.7",
     "turndown": "^7.2.0",
     "ua-parser-js": "^1.0.39",
@@ -90,7 +90,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
-    "@cloudflare/workers-types": "^4.20240925.0",
+    "@cloudflare/workers-types": "^4.20241004.0",
     "@types/bun": "^1.1.10",
     "@types/dompurify": "^3.0.5",
     "@types/jsdom": "^21.1.7",
@@ -116,6 +116,7 @@
     "@peculiar/asn1-rsa": "^2.3.8",
     "@peculiar/asn1-schema": "^2.3.8",
     "@peculiar/asn1-x509": "^2.3.8",
-    "@peculiar/asn1-x509-logotype": "^2.3.8"
+    "@peculiar/asn1-x509-logotype": "^2.3.8",
+    "shiki": "1.17.7"
   }
 }
