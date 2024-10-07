@@ -1,5 +1,6 @@
 "use client";
 
+import MailUnreadIcon from "@/components/icons/mail-unread";
 import TooltipText from "@/components/tooltip-text";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
@@ -62,6 +63,7 @@ function EmptyIcon(props: any) {
 const iconMap: Record<string, LucideIcon> = {
     StarIcon: StarIcon,
     BellDotIcon: BellDotIcon,
+    MailUnreadIcon: MailUnreadIcon,
     Trash2Icon: Trash2Icon,
     ArchiveRestoreIcon: ArchiveRestoreIcon,
     MailOpenIcon: MailOpenIcon,

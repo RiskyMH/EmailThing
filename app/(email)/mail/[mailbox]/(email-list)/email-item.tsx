@@ -102,7 +102,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                     />
                     <div className="float-right ms-auto me-1.5 hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
                         <ContextMenuAction
-                            icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"}
+                            icon={email.isRead ? "MailUnreadIcon" : "MailOpenIcon"}
                             action={updateEmail.bind(null, {
                                 isRead: !email.isRead,
                             })}
@@ -183,7 +183,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         )}
                         <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
                             <ContextMenuAction
-                                icon={email.isRead ? "BellDotIcon" : "MailOpenIcon"}
+                                icon={email.isRead ? "MailUnreadIcon" : "MailOpenIcon"}
                                 action={updateEmail.bind(null, {
                                     isRead: !email.isRead,
                                 })}
