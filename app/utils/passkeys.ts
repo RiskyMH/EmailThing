@@ -21,7 +21,7 @@ export async function verifyCredentials(challenge: string, credential: Credentia
         throw new Error("Invalid Credentials - Registration verification failed.");
     }
 
-    const { credentialID, credentialPublicKey } = verification.registrationInfo ?? {};
+    const { id: credentialID, publicKey: credentialPublicKey } = verification.registrationInfo?.credential ?? {};
 
     if (credentialID == null || credentialPublicKey == null) {
         throw new Error("Registration failed");
@@ -47,10 +47,10 @@ export async function verifyCredentialss(
         response: credential,
         expectedChallenge: Buffer.from(challenge).toString("base64").replaceAll("=", ""),
         requireUserVerification: true,
-        authenticator: {
-            credentialID: existing.id,
-            credentialPublicKey: Buffer.from(existing.publicKey, "base64"),
+        credential: {
+            id: existing.id,
             counter: 0,
+            publicKey: Buffer.from(existing.publicKey, "base64")
         },
         ...HOST_SETTINGS,
     });

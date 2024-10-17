@@ -10,7 +10,8 @@ interface DocsLayoutProps {
     children: React.ReactNode;
 }
 
-export const runtime = "edge";
+// todo: maybe re-enable edge
+// export const runtime = "edge";
 
 export const metadata = {
     title: {

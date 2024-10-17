@@ -7,7 +7,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { UserAuthForm } from "./form.client";
 
-export const runtime = "edge";
+// todo: maybe re-enable edge
+// export const runtime = "edge";
 
 export default async function LoginPage() {
     return (

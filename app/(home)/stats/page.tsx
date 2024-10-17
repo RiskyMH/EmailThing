@@ -10,7 +10,8 @@ export const metadata = {
     },
 };
 
-export const runtime = "nodejs";
+// todo: maybe re-enable edge
+// export const runtime = "edge";
 
 // Utility function to get a date offset by a specific number of days
 const getDateOffset = (days: number): Date => {

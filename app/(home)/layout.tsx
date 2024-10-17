@@ -5,7 +5,8 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import { Header, MainNavItem } from "./components.client";
 
-export const runtime = "edge";
+// todo: maybe re-enable edge
+// export const runtime = "edge";
 
 export default function HomeLayout({ children }: PropsWithChildren) {
     return (
