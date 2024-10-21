@@ -9,16 +9,15 @@ import { userMailboxAccess } from "../../../tools";
 
 export async function GET(
     request: Request,
-    {
-        params,
-    }: {
-        params: {
+    props: {
+        params: Promise<{
             mailbox: string;
             email: string;
             attachment: string;
-        };
-    },
+        }>;
+    }
 ) {
+    const params = await props.params;
     const userId = await getCurrentUser();
     if (!(userId && (await userMailboxAccess(params.mailbox, userId)))) return notFound();
 

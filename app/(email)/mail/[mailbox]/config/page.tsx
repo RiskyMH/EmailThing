@@ -60,14 +60,15 @@ export const metadata: Metadata = {
     title: "Config",
 };
 
-export default async function EmailConfig({
-    params,
-}: {
-    params: {
-        mailbox: string;
-        email: string;
-    };
-}) {
+export default async function EmailConfig(
+    props: {
+        params: Promise<{
+            mailbox: string;
+            email: string;
+        }>;
+    }
+) {
+    const params = await props.params;
     const userId = await pageMailboxAccess(params.mailbox);
     if (!userId) return notFound();
 

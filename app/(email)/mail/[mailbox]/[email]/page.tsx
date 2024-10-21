@@ -39,11 +39,11 @@ import { getEmail } from "./tools";
 import TopButtons from "./top-buttons";
 
 export async function generateMetadata(props: {
-    params: { mailbox: string; email: string };
+    params: Promise<{ mailbox: string; email: string }>;
 }): Promise<Metadata> {
-    if (!(await pageMailboxAccess(props.params.mailbox, false))) return {};
+    if (!(await pageMailboxAccess((await props.params).mailbox, false))) return {};
 
-    const mail = await getEmail(props.params.mailbox, props.params.email);
+    const mail = await getEmail((await props.params).mailbox, (await props.params).email);
     if (!mail) return notFound();
 
     return {
@@ -51,18 +51,19 @@ export async function generateMetadata(props: {
     };
 }
 
-export default async function EmailPage({
-    params,
-    searchParams,
-}: {
-    params: {
-        mailbox: string;
-        email: string;
-    };
-    searchParams: {
-        view?: "text" | "markdown" | "html";
-    };
-}) {
+export default async function EmailPage(
+    props: {
+        params: Promise<{
+            mailbox: string;
+            email: string;
+        }>;
+        searchParams: Promise<{
+            view?: "text" | "markdown" | "html";
+        }>;
+    }
+) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
     await pageMailboxAccess(params.mailbox, false);
     const email = await getEmail(params.mailbox, params.email);
     if (!email) return notFound();

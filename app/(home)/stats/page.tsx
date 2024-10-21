@@ -62,7 +62,8 @@ async function fetchAllStars() {
     return stars;
 }
 
-export default async function StatsPage({ searchParams }: { searchParams?: { view: string } }) {
+export default async function StatsPage(props: { searchParams?: Promise<{ view: string }> }) {
+    const searchParams = await props.searchParams;
     if (searchParams?.view !== "true") return notFound();
 
     const [githubStars, [stats, statsPrev]] = await Promise.all([

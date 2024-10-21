@@ -33,7 +33,7 @@ export default async function signUp(
     }
 
     // currently you require invite code to sign up
-    const referer = headers().get("referer");
+    const referer = (await headers()).get("referer");
     if (!referer) return noInvite;
     const inviteCode = new URL(referer).searchParams?.get("invite");
     if (!inviteCode) return noInvite;
@@ -111,7 +111,7 @@ export default async function signUp(
 
     // add user token to cookie
     await addUserTokenToCookie({ id: userId });
-    cookies().set("mailboxId", mailboxId, {
+    (await cookies()).set("mailboxId", mailboxId, {
         path: "/",
         expires: new Date("2038-01-19 04:14:07"),
     });

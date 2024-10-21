@@ -12,13 +12,14 @@ import { UserAuthForm } from "./form.client";
 
 export const revalidate = 0;
 
-export default async function LoginPage({
-    searchParams,
-}: {
-    searchParams: {
-        token: string;
-    };
-}) {
+export default async function LoginPage(
+    props: {
+        searchParams: Promise<{
+            token: string;
+        }>;
+    }
+) {
+    const searchParams = await props.searchParams;
     if (!searchParams.token) return notFound();
 
     const token = await db.query.ResetPasswordToken.findFirst({

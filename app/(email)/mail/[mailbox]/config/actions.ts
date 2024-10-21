@@ -608,6 +608,6 @@ export async function leaveMailbox(mailboxId: string) {
     revalidateTag(`user-mailbox-access-${mailboxId}-${currentUserId}`);
     revalidateTag(`user-mailboxes-${currentUserId}`);
     revalidatePath(`/mail/${mailboxId}/config`);
-    cookies().delete("mailboxId");
+    (await cookies()).delete("mailboxId");
     redirect("/mail");
 }

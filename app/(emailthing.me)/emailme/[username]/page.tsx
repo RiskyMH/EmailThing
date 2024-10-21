@@ -7,7 +7,8 @@ import { Form } from "./components.client";
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { username: string } }) {
+export async function generateMetadata(props: { params: Promise<{ username: string }> }) {
+    const params = await props.params;
     const user = await getUser(params.username);
 
     return {
@@ -55,7 +56,8 @@ const getUser = async (username: string) => {
     return user;
 };
 
-export default async function ContactUserPage({ params }: { params: { username: string } }) {
+export default async function ContactUserPage(props: { params: Promise<{ username: string }> }) {
+    const params = await props.params;
     const user = await getUser(params.username);
     return (
         <main className="container flex min-h-[calc(100vh-10.5rem)] max-w-[65rem] flex-col gap-5 py-11 sm:my-16 sm:min-h-[calc(100vh-13rem)]">

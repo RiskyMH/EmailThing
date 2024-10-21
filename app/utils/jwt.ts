@@ -27,7 +27,7 @@ export const createUserToken = (user: { id: string }) => {
 
 export const addUserTokenToCookie = async (user: { id: string }) => {
     const token = await createUserToken(user);
-    cookies().set("token", token, {
+    (await cookies()).set("token", token, {
         expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         path: "/",
         sameSite: "lax",
@@ -37,7 +37,7 @@ export const addUserTokenToCookie = async (user: { id: string }) => {
 };
 
 export const getCurrentUser = async () => {
-    const token = cookies().get("token");
+    const token = (await cookies()).get("token");
     if (!token?.value) return null;
     try {
         return await getUserByToken(token.value);
@@ -46,4 +46,4 @@ export const getCurrentUser = async () => {
     }
 };
 
-export const removeToken = () => cookies().delete("token");
+export const removeToken = async () => (await cookies()).delete("token");

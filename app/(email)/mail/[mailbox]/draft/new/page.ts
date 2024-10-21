@@ -8,19 +8,20 @@ import { parseHTML } from "../../[email]/parse-html";
 import { mailboxAliases, pageMailboxAccess } from "../../tools";
 import type { Recipient } from "../[draft]/tools";
 
-export default async function Page({
-    params,
-    searchParams,
-}: {
-    params: {
-        mailbox: string;
-    };
-    searchParams: {
-        reply?: string;
-        replyAll?: string;
-        forward?: string;
-    };
-}) {
+export default async function Page(
+    props: {
+        params: Promise<{
+            mailbox: string;
+        }>;
+        searchParams: Promise<{
+            reply?: string;
+            replyAll?: string;
+            forward?: string;
+        }>;
+    }
+) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
     // make new draft
     await pageMailboxAccess(params.mailbox);
 
@@ -91,7 +92,7 @@ export default async function Page({
             }
         }
 
-        const timeZone = headers().get("x-vercel-ip-timezone") || undefined;
+        const timeZone = (await headers()).get("x-vercel-ip-timezone") || undefined;
         const emailBody = await parseHTML(
             await marked.parse(
                 `<br>\n<br>\nOn ${email.createdAt.toLocaleString([], { timeZone })}, ${email.from?.name ? `${email.from.name} &lt;${email.from.address}&gt;` : `${email.from.address}`} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`,

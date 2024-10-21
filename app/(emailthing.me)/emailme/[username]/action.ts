@@ -34,7 +34,7 @@ export async function emailMeForm(
         // formData.append("secret", "1x0000000000000000000000000000000AA")
         formData.append("secret", env.TURNSTILE_SECRET_KEY);
         formData.append("response", data.get("cf-turnstile-response") as string);
-        formData.append("remoteip", headers().get("CF-Connecting-IP") as string);
+        formData.append("remoteip", (await headers()).get("CF-Connecting-IP") as string);
 
         const turnstile = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
             method: "POST",

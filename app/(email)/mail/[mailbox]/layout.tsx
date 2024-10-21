@@ -3,7 +3,8 @@ import Header from "./header";
 import Sidebar from "./sidebar";
 import { mailboxAliases, pageMailboxAccess } from "./tools";
 
-export async function generateMetadata({ params }: { params: { mailbox: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ mailbox: string }> }): Promise<Metadata> {
+    const params = await props.params;
     await pageMailboxAccess(params.mailbox);
 
     const { default: defaultAlias } = await mailboxAliases(params.mailbox);
@@ -17,15 +18,20 @@ export async function generateMetadata({ params }: { params: { mailbox: string }
     };
 }
 
-export default async function MailLayout({
-    children,
-    params,
-}: {
-    children: React.ReactNode;
-    params: {
-        mailbox: string;
-    };
-}) {
+export default async function MailLayout(
+    props: {
+        children: React.ReactNode;
+        params: Promise<{
+            mailbox: string;
+        }>;
+    }
+) {
+    const params = await props.params;
+
+    const {
+        children
+    } = props;
+
     // const userId = await getCurrentUser()
     // if (!userId) return redirect("/login?from=/mail/" + params.mailbox)
 
