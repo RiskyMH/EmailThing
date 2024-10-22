@@ -13,6 +13,7 @@ import { mailboxCategories, userMailboxAccess } from "../tools";
 import { EmailItem } from "./email-item";
 import { CreateTempEmailForm } from "./temp/modal";
 import { getDraftEmailList, getDraftJustEmailsList, getEmailList, getJustEmailsList, getTempAliases } from "./tools";
+import type { JSX } from "react";
 
 interface EmailListProps {
     mailboxId: string;
