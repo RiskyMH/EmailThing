@@ -43,6 +43,7 @@ jobs:
         env:
           STANDALONE: "1"
           TURBOPACK_BUILD: 1
+          TURBOPACK: 1
           TURBO: 1
 
           DATABASE_URL: "libsql://void.riskymh.dev"
