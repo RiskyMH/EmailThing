@@ -39,7 +39,13 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          bun run build 2>&1 | tee -a build.log
+          {
+            bun run build | tee -a build.log
+          } || exit_code=$?
+          echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
+          cat build.log >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          [[ -n "${exit_code}" ]] && exit ${exit_code}
         env:
           STANDALONE: "1"
           # TURBOPACK_BUILD: 1
