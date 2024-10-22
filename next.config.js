@@ -18,15 +18,15 @@ const nextConfig = {
     experimental: {
         // ppr: true,
         useLightningcss: process.env.TURBOPACK === "1",
-        outputFileTracingIncludes: {
-            "/mail/[mailbox]/config": ["./public/cloudflare-worker.js"],
-        },
         // optimizePackageImports: [
         //     'shiki',
         // ],
         // reactCompiler: !process.env.TURBOPACK
     },
     output: process.env.STANDALONE ? "standalone" : undefined,
+    outputFileTracingIncludes: {
+        "/mail/[mailbox]/config": ["./public/cloudflare-worker.js"],
+    },
     transpilePackages: ["shiki"],
     logging: {
         fetches: {

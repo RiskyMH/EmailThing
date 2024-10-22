@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { type PropsWithChildren, useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { type PropsWithChildren, useCallback, useEffect, useRef, useState, useTransition, type JSX } from "react";
 
 const LoadMore = <T extends string | number | Record<string, any> = any>({
     children,
