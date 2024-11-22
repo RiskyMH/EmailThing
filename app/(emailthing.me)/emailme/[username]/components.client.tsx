@@ -1,15 +1,17 @@
 "use client";
 
 import { ClientInput, ClientTextarea } from "@/(user)/components.client";
+import DisableFormReset from "@/components/disable-reset.client";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { useEffect } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { emailMeForm } from "./action";
 
 export function Form({ publicEmail, username }: { className?: string; publicEmail?: string; username?: string }) {
-    const [state, formAction] = useFormState(emailMeForm, {});
+    const [state, formAction] = useActionState(emailMeForm, {});
 
     useEffect(() => {
         if (state?.error) {
@@ -23,6 +25,7 @@ export function Form({ publicEmail, username }: { className?: string; publicEmai
                 action={formAction}
                 className="flex w-full max-w-[35rem] flex-col gap-2 self-center"
                 suppressHydrationWarning
+                id="emailme-form"
             >
                 <input name="username" value={username} hidden />
                 <div className="flex flex-col gap-2 sm:flex-row">
@@ -102,6 +105,7 @@ export function Form({ publicEmail, username }: { className?: string; publicEmai
                     </div>
                     <SendButton success={!!state?.success} />
                 </div>
+                <DisableFormReset formId="emailme-form" />
             </form>
             <Toaster message={state?.success} />
             <script

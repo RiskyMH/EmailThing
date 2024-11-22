@@ -1,5 +1,6 @@
 "use client";
 
+import DisableFormReset from "@/components/disable-reset.client";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
 import { Input, type InputProps } from "@/components/ui/input";
@@ -12,8 +13,9 @@ import type { SwitchProps } from "@radix-ui/react-switch";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type ReactNode, useEffect } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { type ReactNode, useEffect, useId } from "react";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
 export function CardForm({
@@ -37,10 +39,12 @@ export function CardForm({
     subtitle?: string;
     disabled?: boolean;
 }) {
-    const [state, formAction] = useFormState(action, {});
+    const [state, formAction] = useActionState(action, {});
+
+    const id = useId();
 
     return (
-        <form action={formAction}>
+        <form action={formAction} id={id}>
             {children}
             <CardFooter className="border-muted-foreground/30 border-t px-6 py-4">
                 {state?.error ? (
@@ -51,6 +55,7 @@ export function CardForm({
                 <SaveButton disabled={disabled} />
             </CardFooter>
             <Toaster message={state?.success} description={state?.description} />
+            <DisableFormReset formId={id} />
         </form>
     );
 }

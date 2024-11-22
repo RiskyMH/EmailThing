@@ -8,6 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     SmartDrawer,
@@ -55,7 +56,6 @@ import {
     EditAliasForm,
     InviteUserForm,
 } from "./components.client";
-import { Progress } from "@/components/ui/progress"
 
 export const metadata: Metadata = {
     title: "Config",
@@ -142,7 +142,10 @@ export default async function EmailConfig(props: {
 
             <div className="flex max-w-[20rem] flex-col gap-2">
                 <h2 className="font-semibold text-lg">Storage</h2>
-                <Progress className="max-w-[20rem]" value={((mailbox.storageUsed / storageLimit[mailbox.plan]) || 0.01) * 100} />
+                <Progress
+                    className="max-w-[20rem]"
+                    value={(mailbox.storageUsed / storageLimit[mailbox.plan] || 0.01) * 100}
+                />
                 <p>
                     Used: {Math.ceil((mailbox.storageUsed / 1e6) * 10) / 10}MB / {storageLimit[mailbox.plan] / 1e6}MB
                 </p>
@@ -457,7 +460,7 @@ export default async function EmailConfig(props: {
             <div className="max-w-[40rem]">
                 <div className="flex pb-2">
                     <h2 className="font-semibold text-lg">
-                        Custom domains {" "}
+                        Custom domains{" "}
                         <span className="text-muted-foreground text-sm">({mailbox.customDomains.length}/3)</span>
                     </h2>
                     <SmartDrawer>
@@ -676,7 +679,7 @@ export default async function EmailConfig(props: {
                     </Table>
                 </div>
                 <br />
-                If you would like to send emails via the API, see the documentation here: {" "}
+                If you would like to send emails via the API, see the documentation here:{" "}
                 <a href="/docs/api" target="_blank" className="font-bold hover:underline" rel="noreferrer">
                     API Documentation
                 </a>

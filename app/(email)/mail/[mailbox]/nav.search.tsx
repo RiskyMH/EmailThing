@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { ChevronDownIcon, Loader2, SearchIcon } from "lucide-react";
+import Form from "next/form";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useTransition } from "react";
 
@@ -41,8 +42,9 @@ export function Search({ className, mailboxId }: { className?: string; mailboxId
     };
 
     return (
-        <form
+        <Form
             onSubmit={onSubmit}
+            action={`/mail/${mailboxId}`}
             className={cn(
                 "group flex h-10 w-full gap-2 self-center rounded bg-background px-1 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-secondary",
                 className,
@@ -68,6 +70,6 @@ export function Search({ className, mailboxId }: { className?: string; mailboxId
                 className="w-full border-none bg-transparent focus-visible:outline-none"
             />
             <ChevronDownIcon className="me-2 self-center text-muted-foreground" />
-        </form>
+        </Form>
     );
 }
