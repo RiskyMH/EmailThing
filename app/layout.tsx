@@ -62,7 +62,10 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
+            <head>
+                <link rel="preload" href="https://unpkg.com/react-scan/dist/auto.global.js" fetchPriority="high" as="script" />
+                <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
+            </head>
             <body
                 className={cn(
                     "min-h-screen bg-background font-sans antialiased",
