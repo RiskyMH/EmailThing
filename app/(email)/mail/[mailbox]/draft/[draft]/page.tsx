@@ -51,12 +51,14 @@ const fetchDraft = cache(async (mailboxId: string, draftId: string) => {
     });
 });
 
-export default async function DraftPage(props: {
-    params: Promise<{
-        mailbox: string;
-        draft: string;
-    }>;
-}) {
+export default async function DraftPage(
+    props: {
+        params: Promise<{
+            mailbox: string;
+            draft: string;
+        }>;
+    }
+) {
     const params = await props.params;
     await pageMailboxAccess(params.mailbox);
 

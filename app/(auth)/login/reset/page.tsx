@@ -10,13 +10,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UserAuthForm } from "./form.client";
 
-export const dynamic = "force-static";
+export const dynamic = 'force-static'
 
-export default async function LoginPage(props: {
-    searchParams: Promise<{
-        token: string;
-    }>;
-}) {
+export default async function LoginPage(
+    props: {
+        searchParams: Promise<{
+            token: string;
+        }>;
+    }
+) {
     const searchParams = await props.searchParams;
     if (!searchParams.token) return notFound();
 

@@ -8,12 +8,12 @@ import { formatTimeAgo } from "@/utils/tools";
 import { cn } from "@/utils/tw";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import type { JSX } from "react";
 import { RefreshButton } from "../components.client";
 import { mailboxCategories, userMailboxAccess } from "../tools";
 import { EmailItem } from "./email-item";
 import { CreateTempEmailForm } from "./temp/modal";
 import { getDraftEmailList, getDraftJustEmailsList, getEmailList, getJustEmailsList, getTempAliases } from "./tools";
+import type { JSX } from "react";
 
 interface EmailListProps {
     mailboxId: string;

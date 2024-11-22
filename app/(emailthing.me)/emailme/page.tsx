@@ -2,7 +2,7 @@ import { buttonVariants } from "@/components/ui/button";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const dynamic = "force-static";
+export const dynamic = 'force-static'
 
 export default async function Home() {
     return (

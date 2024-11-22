@@ -18,15 +18,19 @@ export async function generateMetadata(props: { params: Promise<{ mailbox: strin
     };
 }
 
-export default async function MailLayout(props: {
-    children: React.ReactNode;
-    params: Promise<{
-        mailbox: string;
-    }>;
-}) {
+export default async function MailLayout(
+    props: {
+        children: React.ReactNode;
+        params: Promise<{
+            mailbox: string;
+        }>;
+    }
+) {
     const params = await props.params;
 
-    const { children } = props;
+    const {
+        children
+    } = props;
 
     // const userId = await getCurrentUser()
     // if (!userId) return redirect("/login?from=/mail/" + params.mailbox)

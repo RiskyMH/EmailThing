@@ -9,7 +9,7 @@ import { UserAuthForm } from "./form.client";
 
 // todo: maybe re-enable edge
 // export const runtime = "edge";
-export const dynamic = "force-static";
+export const dynamic = 'force-static'
 
 export default async function LoginPage() {
     return (
