@@ -1,6 +1,6 @@
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com https://unpkg.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://www.gravatar.com https://avatars.githubusercontent.com;
     font-src 'self' ${process.env.NODE_ENV === "development" ? "https://fonts.gstatic.com" : ""};
@@ -53,6 +53,10 @@ const nextConfig = {
                     {
                         key: "Content-Security-Policy",
                         value: cspHeader.replace(/\n/g, ""),
+                    },
+                    {
+                        key: 'X-Accel-Buffering',
+                        value: 'no',
                     },
                 ],
             },
