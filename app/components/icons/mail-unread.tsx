@@ -6,26 +6,26 @@ export const MailUnreadIcon = createLucideIcon("MailUnread", [
     [
         "path",
         {
-            d: "M10.97 12.7 2 7"
-        }
+            d: "M10.97 12.7 2 7",
+        },
     ],
     [
         "path",
         {
-            d: "M13 12.713a1.94 1.94 0 0 1-2.06 0"
-        }
+            d: "M13 12.713a1.94 1.94 0 0 1-2.06 0",
+        },
     ],
     [
         "path",
         {
-            d: "m15.5 11-2.47 1.7"
-        }
+            d: "m15.5 11-2.47 1.7",
+        },
     ],
     [
         "path",
         {
-            d: "M22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9.5"
-        }
+            d: "M22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9.5",
+        },
     ],
     [
         "circle",
@@ -34,12 +34,11 @@ export const MailUnreadIcon = createLucideIcon("MailUnread", [
             cy: "6",
             r: "3",
             // fill="currentColor"
-        }
-    ]
+        },
+    ],
 ]);
 
 export { MailUnreadIcon as default };
-
 
 // export default function MailUnreadIcon(props: any) {
 //     return (

@@ -15,7 +15,7 @@ export async function GET(
             email: string;
             attachment: string;
         }>;
-    }
+    },
 ) {
     const params = await props.params;
     const userId = await getCurrentUser();

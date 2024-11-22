@@ -6,18 +6,16 @@ export const metadata = {
     title: "Temporary Email",
 } as Metadata;
 
-export default async function Mailbox(
-    props: {
-        params: Promise<{
-            mailbox: string;
-        }>;
-        searchParams?: Promise<{
-            category?: string;
-            take?: string;
-            q?: string;
-        }>;
-    }
-) {
+export default async function Mailbox(props: {
+    params: Promise<{
+        mailbox: string;
+    }>;
+    searchParams?: Promise<{
+        category?: string;
+        take?: string;
+        q?: string;
+    }>;
+}) {
     const searchParams = await props.searchParams;
     const params = await props.params;
     await pageMailboxAccess(params.mailbox);
