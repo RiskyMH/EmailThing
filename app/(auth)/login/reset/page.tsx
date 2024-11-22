@@ -10,7 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UserAuthForm } from "./form.client";
 
-export const revalidate = 0;
+export const dynamic = 'force-static'
 
 export default async function LoginPage(
     props: {

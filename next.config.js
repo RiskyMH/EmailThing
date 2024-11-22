@@ -22,16 +22,23 @@ const nextConfig = {
         //     'shiki',
         // ],
         // reactCompiler: !process.env.TURBOPACK
+        staleTimes: {
+            dynamic: 30,
+            static: 180,
+        },
     },
     output: process.env.STANDALONE ? "standalone" : undefined,
     outputFileTracingIncludes: {
         "/mail/[mailbox]/config": ["./public/cloudflare-worker.js"],
     },
-    transpilePackages: ["shiki"],
+    // transpilePackages: ["shiki"],
     logging: {
         fetches: {
             fullUrl: true,
         },
+    },
+    images: {
+        unoptimized: true
     },
     async headers() {
         return [
