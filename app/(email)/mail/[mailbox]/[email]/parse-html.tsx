@@ -9,7 +9,7 @@ function isElement(node: Node): node is Element {
 }
 
 DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-    if (!isElement(node)) return
+    if (!isElement(node)) return;
 
     // set all elements owning target to target=_blank
     if ("target" in node) {

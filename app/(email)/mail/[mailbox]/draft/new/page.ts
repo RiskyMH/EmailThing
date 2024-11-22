@@ -8,18 +8,16 @@ import { parseHTML } from "../../[email]/parse-html";
 import { mailboxAliases, pageMailboxAccess } from "../../tools";
 import type { Recipient } from "../[draft]/tools";
 
-export default async function Page(
-    props: {
-        params: Promise<{
-            mailbox: string;
-        }>;
-        searchParams: Promise<{
-            reply?: string;
-            replyAll?: string;
-            forward?: string;
-        }>;
-    }
-) {
+export default async function Page(props: {
+    params: Promise<{
+        mailbox: string;
+    }>;
+    searchParams: Promise<{
+        reply?: string;
+        replyAll?: string;
+        forward?: string;
+    }>;
+}) {
     const searchParams = await props.searchParams;
     const params = await props.params;
     // make new draft

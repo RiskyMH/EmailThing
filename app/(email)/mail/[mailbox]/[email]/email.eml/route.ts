@@ -14,7 +14,7 @@ export async function GET(
             mailbox: string;
             email: string;
         }>;
-    }
+    },
 ) {
     const params = await props.params;
     const userId = await getCurrentUser();

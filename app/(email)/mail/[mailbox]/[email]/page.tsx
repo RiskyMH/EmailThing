@@ -51,17 +51,15 @@ export async function generateMetadata(props: {
     };
 }
 
-export default async function EmailPage(
-    props: {
-        params: Promise<{
-            mailbox: string;
-            email: string;
-        }>;
-        searchParams: Promise<{
-            view?: "text" | "markdown" | "html";
-        }>;
-    }
-) {
+export default async function EmailPage(props: {
+    params: Promise<{
+        mailbox: string;
+        email: string;
+    }>;
+    searchParams: Promise<{
+        view?: "text" | "markdown" | "html";
+    }>;
+}) {
     const searchParams = await props.searchParams;
     const params = await props.params;
     await pageMailboxAccess(params.mailbox, false);
