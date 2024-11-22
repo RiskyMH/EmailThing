@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { cn } from "@/utils/tw";
 import type { ReactNode } from "react";
+import Script from "next/script";
 
 const fontSans = FontSans({
     subsets: ["latin"],
@@ -63,8 +64,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <head>
-                <link rel="preload" href="https://unpkg.com/react-scan/dist/auto.global.js" fetchPriority="high" as="script" />
-                <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
+                <Script src="https://unpkg.com/react-scan/dist/auto.global.js" async strategy="beforeInteractive" />
             </head>
             <body
                 className={cn(
