@@ -50,7 +50,7 @@ export async function verifyCredentialss(
         credential: {
             id: existing.id,
             counter: 0,
-            publicKey: Buffer.from(existing.publicKey, "base64")
+            publicKey: Buffer.from(existing.publicKey, "base64"),
         },
         ...HOST_SETTINGS,
     });

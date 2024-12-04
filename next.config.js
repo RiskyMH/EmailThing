@@ -18,20 +18,27 @@ const nextConfig = {
     experimental: {
         // ppr: true,
         useLightningcss: process.env.TURBOPACK === "1",
-        outputFileTracingIncludes: {
-            "/mail/[mailbox]/config": ["./public/cloudflare-worker.js"],
-        },
         // optimizePackageImports: [
         //     'shiki',
         // ],
         // reactCompiler: !process.env.TURBOPACK
+        staleTimes: {
+            dynamic: 30,
+            static: 180,
+        },
     },
     output: process.env.STANDALONE ? "standalone" : undefined,
-    transpilePackages: ["shiki"],
+    outputFileTracingIncludes: {
+        "/mail/[mailbox]/config": ["./public/cloudflare-worker.js"],
+    },
+    // transpilePackages: ["shiki"],
     logging: {
         fetches: {
             fullUrl: true,
         },
+    },
+    images: {
+        unoptimized: true
     },
     async headers() {
         return [

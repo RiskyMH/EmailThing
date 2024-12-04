@@ -5,19 +5,18 @@ export const metadata = {
     title: "Inbox",
 } as Metadata;
 
-export default async function Mailbox({
-    params,
-    searchParams,
-}: {
-    params: {
+export default async function Mailbox(props: {
+    params: Promise<{
         mailbox: string;
-    };
-    searchParams?: {
+    }>;
+    searchParams?: Promise<{
         category?: string;
         take?: string;
         q?: string;
-    };
+    }>;
 }) {
+    const searchParams = await props.searchParams;
+    const params = await props.params;
     return (
         <EmailList
             mailboxId={params.mailbox}

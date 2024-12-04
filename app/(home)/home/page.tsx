@@ -16,7 +16,7 @@ import Link from "next/link";
 import { type ReactNode, Suspense } from "react";
 
 export default async function Home() {
-    const currentMailbox = cookies().get("mailboxId")?.value;
+    const currentMailbox = (await cookies()).get("mailboxId")?.value;
 
     return (
         <>

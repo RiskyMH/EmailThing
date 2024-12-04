@@ -8,6 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     SmartDrawer,
@@ -60,14 +61,13 @@ export const metadata: Metadata = {
     title: "Config",
 };
 
-export default async function EmailConfig({
-    params,
-}: {
-    params: {
+export default async function EmailConfig(props: {
+    params: Promise<{
         mailbox: string;
         email: string;
-    };
+    }>;
 }) {
+    const params = await props.params;
     const userId = await pageMailboxAccess(params.mailbox);
     if (!userId) return notFound();
 
@@ -140,8 +140,12 @@ export default async function EmailConfig({
         <div className="flex min-w-0 flex-col gap-5 p-5">
             <h1 className="font-semibold text-2xl">Mailbox Config</h1>
 
-            <div>
+            <div className="flex max-w-[20rem] flex-col gap-2">
                 <h2 className="font-semibold text-lg">Storage</h2>
+                <Progress
+                    className="max-w-[20rem]"
+                    value={(mailbox.storageUsed / storageLimit[mailbox.plan] || 0.01) * 100}
+                />
                 <p>
                     Used: {Math.ceil((mailbox.storageUsed / 1e6) * 10) / 10}MB / {storageLimit[mailbox.plan] / 1e6}MB
                 </p>
@@ -456,7 +460,7 @@ export default async function EmailConfig({
             <div className="max-w-[40rem]">
                 <div className="flex pb-2">
                     <h2 className="font-semibold text-lg">
-                        Custom domains
+                        Custom domains{" "}
                         <span className="text-muted-foreground text-sm">({mailbox.customDomains.length}/3)</span>
                     </h2>
                     <SmartDrawer>
@@ -675,7 +679,7 @@ export default async function EmailConfig({
                     </Table>
                 </div>
                 <br />
-                If you would like to send emails via the API, see the documentation here:
+                If you would like to send emails via the API, see the documentation here:{" "}
                 <a href="/docs/api" target="_blank" className="font-bold hover:underline" rel="noreferrer">
                     API Documentation
                 </a>

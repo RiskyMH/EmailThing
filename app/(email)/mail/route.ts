@@ -13,12 +13,12 @@ export async function GET() {
     const userId = await getCurrentUser();
 
     if (!userId) {
-        removeToken();
+        await removeToken();
         return redirect("/login");
     }
 
     // get the mailbox based on mailboxId cookie
-    const mailboxId = cookies().get("mailboxId");
+    const mailboxId = (await cookies()).get("mailboxId");
 
     if (mailboxId) {
         return redirect(`/mail/${mailboxId.value}`);
@@ -28,13 +28,13 @@ export async function GET() {
         columns: { mailboxId: true },
     });
     if (firstMailbox) {
-        cookies().set("mailboxId", firstMailbox.mailboxId, {
+        (await cookies()).set("mailboxId", firstMailbox.mailboxId, {
             path: "/",
             expires: new Date("2038-01-19 04:14:07"),
         });
         return redirect(`/mail/${firstMailbox.mailboxId}`);
     }
-    removeToken();
-    cookies().delete("mailboxId");
+    await removeToken();
+    (await cookies()).delete("mailboxId");
     return redirect("/login");
 }

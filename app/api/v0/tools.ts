@@ -2,15 +2,15 @@ import db, { MailboxTokens } from "@/db";
 import { and, eq, gt, isNull, or } from "drizzle-orm";
 import { headers } from "next/headers";
 
-function getToken() {
-    const h = headers();
+async function getToken() {
+    const h = await headers();
     const auth = h.get("authorization");
     if (auth) return auth.replace("Bearer ", "");
     return h.get("x-auth");
 }
 
 export async function getTokenMailbox(): Promise<string | null> {
-    const auth = getToken();
+    const auth = await getToken();
     if (!auth) return null;
 
     const token = await db.query.MailboxTokens.findFirst({

@@ -113,11 +113,11 @@ async function handleUserRedirection(
         columns: { mailboxId: true },
     });
 
-    const possibleMailbox = cookies().get("mailboxId")?.value;
+    const possibleMailbox = (await cookies()).get("mailboxId")?.value;
     const mailboxIdAllowed = mailboxes.some(({ mailboxId }) => mailboxId === possibleMailbox);
 
     if (!(possibleMailbox && mailboxIdAllowed)) {
-        cookies().set("mailboxId", mailboxes[0].mailboxId, {
+        (await cookies()).set("mailboxId", mailboxes[0].mailboxId, {
             path: "/",
             expires: new Date("2038-01-19 04:14:07"),
         });
@@ -134,7 +134,7 @@ async function handleUserRedirection(
     }
 
     // maybe ?from=/...
-    const referer = headers().get("referer");
+    const referer = (await headers()).get("referer");
     if (referer) {
         // biome-ignore lint: i lazy
         callback = new URL(referer).searchParams?.get("from");

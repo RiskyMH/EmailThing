@@ -85,6 +85,10 @@ const DropdownMenuItem = React.forwardRef<
             inset && "pl-8",
             className,
         )}
+        // TODO: do this better and on places with dialog do this themself
+        // or have abstraction with it automatically
+        // but this is simple enough to get next 15 working
+        onSelect={(e) => e.preventDefault()}
         {...props}
     />
 ));

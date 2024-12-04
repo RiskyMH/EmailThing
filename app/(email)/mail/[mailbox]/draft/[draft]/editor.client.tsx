@@ -700,8 +700,8 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                     cc: type === "to" ? null : (type as any),
                 },
             ]);
-            update();
             element.value = "";
+            update();
         } else if (toastOnError) {
             toast.error("Invalid email address");
         }
@@ -855,6 +855,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                                 }}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
                                         if (!e.currentTarget.value) return toast.warning("Please add an email first");
                                         validate(e.currentTarget, type);
                                     } else if (e.key === "Backspace" && e.currentTarget.value === "") {

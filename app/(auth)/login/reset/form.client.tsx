@@ -1,5 +1,6 @@
 "use client";
 
+import DisableFormReset from "@/components/disable-reset.client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +33,7 @@ export function UserAuthForm({ className, username, token, ...props }: UserAuthF
     return (
         <>
             <div className={cn("grid gap-6", className)} {...props}>
-                <form action={onSubmit} className="grid gap-2">
+                <form action={onSubmit} className="grid gap-2" id="reset-pwd-form">
                     <div className="grid gap-1">
                         <Label className="sr-only" htmlFor="email">
                             Username
@@ -70,6 +71,7 @@ export function UserAuthForm({ className, username, token, ...props }: UserAuthF
                         {isPending && <Loader2 className="me-2 size-4 animate-spin" />}
                         Sign In
                     </Button>
+                    <DisableFormReset formId="reset-pwd-form" />
                 </form>
             </div>
         </>

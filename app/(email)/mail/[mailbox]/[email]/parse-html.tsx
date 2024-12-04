@@ -4,7 +4,13 @@ import { JSDOM } from "jsdom";
 
 const DOMPurify = createDOMPurify((globalThis as any).window || new JSDOM("").window);
 
+function isElement(node: Node): node is Element {
+    return node.nodeType === node.ELEMENT_NODE;
+}
+
 DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+    if (!isElement(node)) return;
+
     // set all elements owning target to target=_blank
     if ("target" in node) {
         node.setAttribute("target", "_blank");

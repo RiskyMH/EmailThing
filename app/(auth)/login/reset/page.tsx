@@ -10,15 +10,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UserAuthForm } from "./form.client";
 
-export const revalidate = 0;
+export const dynamic = "force-static";
 
-export default async function LoginPage({
-    searchParams,
-}: {
-    searchParams: {
+export default async function LoginPage(props: {
+    searchParams: Promise<{
         token: string;
-    };
+    }>;
 }) {
+    const searchParams = await props.searchParams;
     if (!searchParams.token) return notFound();
 
     const token = await db.query.ResetPasswordToken.findFirst({

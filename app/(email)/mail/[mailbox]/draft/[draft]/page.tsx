@@ -27,11 +27,11 @@ import {
 } from "./editor.client";
 
 export async function generateMetadata(props: {
-    params: { mailbox: string; draft: string };
+    params: Promise<{ mailbox: string; draft: string }>;
 }) {
-    if (!(await pageMailboxAccess(props.params.mailbox, false))) return {};
+    if (!(await pageMailboxAccess((await props.params).mailbox, false))) return {};
 
-    const mail = await fetchDraft(props.params.mailbox, props.params.draft);
+    const mail = await fetchDraft((await props.params).mailbox, (await props.params).draft);
     return {
         title: mail?.subject || "(Unnamed draft)",
     };
@@ -51,14 +51,13 @@ const fetchDraft = cache(async (mailboxId: string, draftId: string) => {
     });
 });
 
-export default async function DraftPage({
-    params,
-}: {
-    params: {
+export default async function DraftPage(props: {
+    params: Promise<{
         mailbox: string;
         draft: string;
-    };
+    }>;
 }) {
+    const params = await props.params;
     await pageMailboxAccess(params.mailbox);
 
     const { aliases, default: defaultAlias } = await mailboxAliases(params.mailbox);

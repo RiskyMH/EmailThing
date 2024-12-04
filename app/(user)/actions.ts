@@ -90,8 +90,8 @@ export async function changePassword(_prevState: any, data: FormData) {
 }
 
 export async function logout() {
-    removeToken();
-    cookies().delete("mailboxId");
+    await removeToken();
+    (await cookies()).delete("mailboxId");
 
     redirect("/login");
 }
