@@ -4,9 +4,15 @@ on:
   push:
     branches: 
       - main
+    paths: 
+      - apps/web/*
+      - packages/db/*
   pull_request: 
     branches:
       - main
+    paths:
+      - apps/web/*
+      - packages/db/*
 
 permissions:
   contents: read
@@ -29,7 +35,7 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: .next/cache
+          path: apps/web/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}
           restore-keys: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}
 
@@ -40,6 +46,7 @@ jobs:
         run: |
           set -o pipefail
           bun run build 2>&1 | tee -a build.log
+        working-directory: apps/web
         env:
           STANDALONE: "1"
           # TURBOPACK_BUILD: 1
@@ -58,23 +65,24 @@ jobs:
       - name: Echo build log to $GITHUB_STEP_SUMMARY
         run: |
           echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
-          cat build.log >> $GITHUB_STEP_SUMMARY
+          cat apps/web/build.log >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
         
       - name: Copy static asset files
+        working-directory: apps/web
         run: |
           mkdir --parents ./.next/standalone/public/_next/static 
           cp ./public -r ./.next/standalone
           cp ./.next/static -r ./.next/standalone/public/_next
 
-          cp ./node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.js 
-          cp ./node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.cjs 
-          cp ./node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.cjs 
-          cp ./node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.mjs 
+          cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.js 
+          cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.cjs 
+          cp ../../node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.cjs 
+          cp ../../node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.mjs 
 
       - uses: actions/upload-artifact@v4
         with:
-          path: .next/standalone
+          path: apps/web/.next/standalone
           name: Standalone Next.js
           compression-level: 1
           include-hidden-files: true

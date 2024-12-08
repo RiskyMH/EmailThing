@@ -1,4 +1,5 @@
-import { InviteCode, User, db } from "@/db";
+import { db } from "@emailthing/db/connect";
+import { InviteCode, User } from "@emailthing/db";
 import { getCurrentUser } from "@/utils/jwt";
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq } from "drizzle-orm";
