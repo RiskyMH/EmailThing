@@ -5,8 +5,8 @@ on:
     branches: 
       - main
     paths: 
-      - apps/web/*
-      - packages/db/*
+      - apps/web/**/*
+      - packages/db/**/*
   pull_request: 
     branches:
       - main
