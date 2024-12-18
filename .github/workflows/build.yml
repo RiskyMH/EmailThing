@@ -78,11 +78,6 @@ jobs:
           cp ./public -r ./.next/standalone
           cp ./.next/static -r ./.next/standalone/public/_next
 
-          cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.js 
-          cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.cjs 
-          cp ../../node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.cjs 
-          cp ../../node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.mjs 
-
       - uses: actions/upload-artifact@v4
         with:
           path: apps/web/.next/standalone
