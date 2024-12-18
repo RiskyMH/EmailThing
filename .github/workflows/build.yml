@@ -39,11 +39,11 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: apps/web/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}
-          restore-keys: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}
+          restore-keys: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}
 
       - name: Install deps
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile && touch bun.lockb
 
       - name: Build
         run: |
@@ -74,9 +74,20 @@ jobs:
       - name: Copy static asset files
         working-directory: apps/web
         run: |
+          ls .next/standalone/*
           mkdir --parents ./.next/standalone/public/_next/static 
           cp ./public -r ./.next/standalone
           cp ./.next/static -r ./.next/standalone/public/_next
+
+          (mv ./.next/standalone/public/* ./.next/standalone/apps/web/public) || true
+          (mv ./.next/standalone/apps/web/* ./.next/standalone) || true
+          (mv ./.next/standalone/apps/web/.[!.]* ./.next/standalone) || true
+
+          cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.js 
+          cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.cjs 
+          cp ../../node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.cjs 
+
+
 
       - uses: actions/upload-artifact@v4
         with:
