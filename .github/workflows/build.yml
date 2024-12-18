@@ -78,10 +78,6 @@ jobs:
           cp ./public -r ./.next/standalone
           cp ./.next/static -r ./.next/standalone/public/_next
 
-          (mv ./.next/standalone/public/* ./.next/standalone/apps/web/public) || true
-          (mv ./.next/standalone/apps/web/* ./.next/standalone) || true
-          (mv ./.next/standalone/apps/web/.[!.]* ./.next/standalone) || true
-
           cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.js 
           cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.cjs 
           cp ../../node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.cjs 
