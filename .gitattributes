@@ -1,2 +1,2 @@
 *.lockb binary diff=lockb
-bun.lock linguist-generated=true linguist-language=jsonc
+bun.lock linguist-generated=true linguist-language=json
