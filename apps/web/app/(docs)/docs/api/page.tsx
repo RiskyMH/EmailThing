@@ -20,5 +20,5 @@ export const metadata = {
 
 export default function APIDocs() {
     // temp docs
-    redirect("https://github.com/RiskyMH/EmailThing/tree/main/app/api/v0#readme");
+    redirect("https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme");
 }
