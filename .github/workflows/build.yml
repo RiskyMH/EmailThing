@@ -61,7 +61,7 @@ jobs:
           S3_KEY_ID: "no"
           NEXT_PUBLIC_APP_URL: "https://emailthing.xyz"
           WEB_NOTIFICATIONS_PRIVATE_KEY: "no"
-          NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY:  ${{ vars.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY }}
+          NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY:  ${{ vars.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY || "just pls dont error" }}
           S3_URL: "no"
           S3_SECRET_ACCESS_KEY: "no"
       
@@ -86,8 +86,6 @@ jobs:
           cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.js 
           cp ../../node_modules/@libsql/isomorphic-fetch/node.js ./.next/standalone/node_modules/@libsql/isomorphic-fetch/web.cjs 
           cp ../../node_modules/@libsql/isomorphic-ws/node.mjs ./.next/standalone/node_modules/@libsql/isomorphic-ws/web.cjs 
-
-
 
       - uses: actions/upload-artifact@v4
         with:
