@@ -61,7 +61,7 @@ jobs:
           S3_KEY_ID: "no"
           NEXT_PUBLIC_APP_URL: "https://emailthing.xyz"
           WEB_NOTIFICATIONS_PRIVATE_KEY: "no"
-          NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY:  ${{ vars.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY || "just pls dont error" }}
+          NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY:  ${{ vars.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY || 'just pls dont error' }}
           S3_URL: "no"
           S3_SECRET_ACCESS_KEY: "no"
       
