@@ -147,7 +147,7 @@ export async function POST(request: Request) {
     for (const attachment of email.attachments) {
         const name = attachment.filename || attachment.mimeType || createId();
 
-        const attContent = Buffer.from(attachment.content);
+        const attContent = Buffer.from(attachment.content as ArrayBuffer);
         const attId = createId();
         await db
             .insert(EmailAttachments)
