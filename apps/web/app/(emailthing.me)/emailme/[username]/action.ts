@@ -43,7 +43,7 @@ export async function emailMeForm(
 
         const result = await turnstile.json();
         if (!result.success) {
-            return { error: "Failed turnstile recapture test" };
+            return { error: "Failed cloudflare turnstile recapture test..." };
         }
         // return { success: "test done" }
     } else {

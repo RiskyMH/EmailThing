@@ -16,6 +16,10 @@ export function Form({ publicEmail, username }: { className?: string; publicEmai
     useEffect(() => {
         if (state?.error) {
             (window as any)?.turnstile?.reset();
+
+            if (!document.querySelector(".cf-turnstile > div")) {
+                toast.error("Oh no, cloudflare is having issues displaying the verification to you :(", { description: () => <p className="text-foreground! italic">May need to refresh page to reset and try again</p>})
+            }
         }
     }, [state]);
 
@@ -27,7 +31,7 @@ export function Form({ publicEmail, username }: { className?: string; publicEmai
                 suppressHydrationWarning
                 id="emailme-form"
             >
-                <input name="username" value={username} hidden />
+                <input name="username" value={username} hidden readOnly />
                 <div className="flex flex-col gap-2 sm:flex-row">
                     <ClientInput
                         placeholder="Name *"
@@ -110,9 +114,11 @@ export function Form({ publicEmail, username }: { className?: string; publicEmai
             <Toaster message={state?.success} />
             <script
                 suppressHydrationWarning
+                type="text/javascript"
                 // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
                 dangerouslySetInnerHTML={{
                     __html: `{
+const fn = () => {
 const urlParams = new URLSearchParams(window.location.search);
 
 const mailtoLink = document.getElementById("mailto-link");
@@ -132,6 +138,9 @@ if (name && nameElem) nameElem.value = name;
 if (email && emailElem) emailElem.value = email;
 if (subject && subjectElem) subjectElem.value = subject;
 if (message && messageElem) messageElem.value = message;
+};
+document.addEventListener("DOMContentLoaded", fn);
+document.addEventListener("load", fn);
 }`.replaceAll("\n", " "),
                 }}
             />
