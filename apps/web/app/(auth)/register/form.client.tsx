@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useTransition } from "react";
 import { toast } from "sonner";
 import signUp from "./action";
+import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -20,7 +21,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         event.preventDefault();
         startTransition(async () => {
             const formData = new FormData(event.target as HTMLFormElement);
-            const signUpResult = await signUp(formData);
+            const signUpResult = await signUp(formData).catch(catchRedirectError);
 
             if (signUpResult?.error) {
                 if ("link" in signUpResult && signUpResult.link)

@@ -2,8 +2,8 @@
     "name": "@emailthing/db",
     "private": true,
     "dependencies": {
-        "drizzle-kit": "^0.28.1",
-        "drizzle-orm": "^0.36.4",
+        "drizzle-kit": "^0.30.2",
+        "drizzle-orm": "^0.38.4",
         "@paralleldrive/cuid2": "^2.2.2"
     },
     "main": "index.ts",

@@ -4,6 +4,7 @@ import type { changeBackupEmail } from "@/(user)/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 import { cn } from "@/utils/tw";
 import { ChevronRight, Github, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -27,7 +28,7 @@ export function Page({ githubStars, action }: WelcomePageProps) {
 
     async function actionn(data: FormData) {
         startTransition(async () => {
-            const res = await action(null, data, true);
+            const res = await action(null, data, true).catch(catchRedirectError);
 
             if (res?.error) {
                 return void toast.error(res.error);

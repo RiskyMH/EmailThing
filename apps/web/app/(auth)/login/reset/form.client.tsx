@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { resetPasswordWithToken } from "../action";
+import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
     username: string;
@@ -20,7 +21,7 @@ export function UserAuthForm({ className, username, token, ...props }: UserAuthF
 
     async function onSubmit(data: FormData) {
         startTransition(async () => {
-            const signInResult = await resetPasswordWithToken(token, data.get("password") as string);
+            const signInResult = await resetPasswordWithToken(token, data.get("password") as string).catch(catchRedirectError);
 
             if (signInResult?.error) {
                 return void toast.error(signInResult.error);

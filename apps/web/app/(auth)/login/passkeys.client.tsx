@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { type TransitionStartFunction, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { signInPasskey } from "./action";
+import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
 export default function PasskeysLogin({
     transition,
@@ -51,7 +52,7 @@ export default function PasskeysLogin({
                     return void toast.error("No passkey");
                 }
 
-                const signInResult = await signInPasskey(credential);
+                const signInResult = await signInPasskey(credential).catch(catchRedirectError);
 
                 if (signInResult?.error) {
                     setLoading(false);

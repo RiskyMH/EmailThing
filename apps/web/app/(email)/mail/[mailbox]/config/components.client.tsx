@@ -122,12 +122,20 @@ export function AddCustomDomainForm({
                         <Input className="border-none bg-secondary" value="TXT" id="type" readOnly />
 
                         <Label htmlFor="value">Value</Label>
-                        <Input
-                            className="border-none bg-secondary"
-                            value={`mailbox=${mailboxId}`}
-                            id="value"
-                            readOnly
-                        />
+                        <div className="flex items-center gap-2">
+                            <Input
+                                className="border-none bg-secondary"
+                                value={`mailbox=${mailboxId}`}
+                                id="value"
+                                readOnly
+                            />
+                            <Button size="sm" className="px-3" asChild>
+                                <CopyButton text={`mailbox=${mailboxId}`}>
+                                    <span className="sr-only">Copy</span>
+                                    <CopyIcon className="size-4" />
+                                </CopyButton>
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="flex gap-2 sm:gap-4">

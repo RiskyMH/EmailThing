@@ -21,6 +21,7 @@ import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
 import signIn, { resetPassword } from "./action";
 import PasskeysLogin from "./passkeys.client";
+import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -35,7 +36,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setLoading(true);
         startTransition(async () => {
             const formData = new FormData(event.target as HTMLFormElement);
-            const signInResult = await signIn(formData);
+            const signInResult = await signIn(formData).catch(catchRedirectError);
 
             if (signInResult?.error) {
                 // @ts-expect-error yay types
@@ -118,7 +119,7 @@ function ResetPasswordDiag({ username }: { username: string }) {
 
     const resetPasswordAction = async () => {
         startTransition(async () => {
-            const res = await resetPassword(username);
+            const res = await resetPassword(username).catch(catchRedirectError);
             if (res?.error) {
                 toast.error(res.error);
             } else {

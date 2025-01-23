@@ -88,6 +88,7 @@ import {
     SmartDrawerTitle,
     SmartDrawerTrigger,
 } from "@/components/ui/smart-drawer";
+import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
 function getJSON(data?: string) {
     if (!data) return;
@@ -572,7 +573,7 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
         startTransition(async () => {
             const t = toast.loading("Sending your email...");
             const data = new FormData(e.currentTarget?.parentElement?.parentElement as HTMLFormElement);
-            const res = await sendAction(data);
+            const res = await sendAction(data).catch(catchRedirectError);
 
             if (res?.error) {
                 // if (res.link) return void toast.error(res.error + "nooo", { id: t, action: { label: "Learn More 🔗", onClick: () => window.open(res.link, "_blank") } });
@@ -931,7 +932,7 @@ function RecipientPill({
         <div
             className={cn(
                 "flex items-center gap-1 break-all rounded bg-tertiary px-2 py-1 text-sm",
-                mx === null && "outline outline-2 outline-destructive",
+                mx === null && "outline-2 outline-destructive",
             )}
         >
             {/* {mx === null && <span className='bg-destructive rounded-full size-4 flex items-center justify-center text-center text-xs' title="Cant't find email record for domain from DNS">!</span>} */}

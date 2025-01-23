@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, PropsWithChildren } from "react";
 import { useEffect, useTransition } from "react";
+import { toast } from "sonner";
 
 export function ClientStar({
     action,
@@ -63,7 +64,7 @@ function EmptyIcon(props: any) {
 const iconMap: Record<string, LucideIcon> = {
     StarIcon: StarIcon,
     BellDotIcon: BellDotIcon,
-    MailUnreadIcon: MailUnreadIcon,
+    MailUnreadIcon: MailUnreadIcon as any,
     Trash2Icon: Trash2Icon,
     ArchiveRestoreIcon: ArchiveRestoreIcon,
     MailOpenIcon: MailOpenIcon,
@@ -165,7 +166,7 @@ export function RefreshButton({ className }: { className?: string }) {
             }}
             className={cn(className, "-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground ")}
         >
-            <RotateCcwIcon className={cn(isPending && "animate-reverse-spin", "size-5 text-muted-foreground")} />
+            <RotateCcwIcon className={cn(isPending && "animate-spin animate-direction-reverse", "size-5 text-muted-foreground")} />
         </Button>
     );
 }

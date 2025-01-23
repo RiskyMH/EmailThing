@@ -109,6 +109,14 @@
 	max-width: 1400px;
 }
 
+@utility animate-direction-reverse {
+	animation-direction: reverse;
+}
+
+.toaster {
+	--normal-bg: var(--tertiary) !important
+}
+
 @keyframes fadeIn {
 	0% {
 		opacity: 0;
