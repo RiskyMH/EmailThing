@@ -2,6 +2,8 @@
 
 import { exec as _exec } from 'child_process';
 
+export const dynamic = "force-static";
+
 async function exec(command: string): Promise<string> {
     return new Promise((resolve, reject) => {
         _exec(command, (error, stdout, stderr) => {
