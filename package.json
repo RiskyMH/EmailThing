@@ -6,6 +6,9 @@
     "web:dev": "cd apps/web && cp ../../.env .env && next dev --turbo",
     "web:build": "cd apps/web && next build",
     "web:start": "cd apps/web && next start",
+    "pwa:dev": "cd apps/pwa && bun run dev",
+    "pwa:build": "cd apps/pwa && bun run build",
+    "pwa:start": "cd apps/pwa && bun run preview",
     "lint": "echo idk",
     "db:push": "drizzle-kit push --config=./packages/db/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config=./packages/db/drizzle.config.ts"
