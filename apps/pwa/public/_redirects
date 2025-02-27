@@ -1,3 +1,7 @@
+/docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
+
+
+
 
 /home/all/* /home 200
 /mail/:id /mail/[mailboxId] 200
@@ -9,6 +13,6 @@
 /mail/:id/inbox /mail/[mailboxId]/inbox 200
 /mail/:id/sent /mail/[mailboxId]/sent 200
 /mail/:id/starred /mail/[mailboxId]/starred 200
-/mail/:id/:id2 /mail/[mailboxId]/[mailId] 200
+/mail/:id/:mailId /mail/[mailboxId]/[mailId] 200
 
-/docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
+/mail/:splat* /mail/[mailboxId] 200

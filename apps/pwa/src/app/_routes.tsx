@@ -1,5 +1,6 @@
 import type { RouteObject } from "react-router-dom";
 import EmailList from "./email-list";
+import MailItem from "./mail-item";
 
 export const routes = [
     {
@@ -8,7 +9,7 @@ export const routes = [
     },
     {
         path: "/mail/:mailboxId/:mailId",
-        element: <h1>TODO: Mail list</h1>,
+        element: <MailItem />,
     },
     {
         path: "/mail/:mailboxId/drafts",
