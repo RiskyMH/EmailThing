@@ -25,7 +25,7 @@ const router = createBrowserRouter(routes, {
       }
     }
 
-    else if (path.startsWith("/mail")) {
+    else if (path.startsWith("/mail") || ["/settings", "/admin"].includes(path)) {
       const { routes } = await import("./app/_routes")
       if (routes) {
         patch(null, routes)

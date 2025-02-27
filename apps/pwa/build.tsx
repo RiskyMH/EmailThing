@@ -144,7 +144,7 @@ for (const route of routes) {
     if (route.path === "*") continue;
 
     const path = route.path
-        .replace(/:(\w*)/, '[$1]')
+        .replaceAll(/:(\w*)/g, '[$1]')
 
     const context = await query(new Request(`http://localhost${path}`));
 

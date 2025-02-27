@@ -1,3 +1,14 @@
 
 /home/all/* /home 200
 /mail/:id /mail/[mailboxId] 200
+/mail/:id/config /mail/[mailboxId]/config 200
+/mail/:id/draft/:draftId /mail/[mailboxId]/draft/[draftId] 200
+/mail/:id/draft/new /mail/[mailboxId]/draft/new 200
+/mail/:id/temp /mail/[mailboxId]/temp 200
+/mail/:id/trash /mail/[mailboxId]/trash 200
+/mail/:id/inbox /mail/[mailboxId]/inbox 200
+/mail/:id/sent /mail/[mailboxId]/sent 200
+/mail/:id/starred /mail/[mailboxId]/starred 200
+/mail/:id/:id2 /mail/[mailboxId]/[mailId] 200
+
+/docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
