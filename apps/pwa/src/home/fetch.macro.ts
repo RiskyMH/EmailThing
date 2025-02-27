@@ -1,6 +1,12 @@
 export async function getGithubStars() {
     if (typeof window === "undefined" && process.platform === "win32") return "∞"
-    return (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing")).json()).stargazers_count
+    
+    const fn = async () => (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing")).json()).stargazers_count
+    
+    if (import.meta.hot) {
+        return (import.meta.hot.data.githubStars ??= await fn())
+    }
+    return await fn()
 }
 
 
@@ -58,8 +64,9 @@ async function getActiveSponsors(): Promise<{ username: string; avatar: string; 
 export const getSponsors = async () => {
     if (typeof window === "undefined" && process.platform === "win32") return []
 
-    const [active, inactive] = await Promise.all([
-        getActiveSponsors(),
+    const fn = async () => {
+        const [active, inactive] = await Promise.all([
+            getActiveSponsors(),
 
         fetch("https://github.com/sponsors/riskymh/sponsors_partial?filter=inactive")
             .then((e) => e.text())
@@ -73,8 +80,14 @@ export const getSponsors = async () => {
         })),
 
         ...inactive.map((sponsor) => ({
-            ...sponsor,
-            type: "past" as const,
-        })),
-    ];
+                ...sponsor,
+                type: "past" as const,
+            })),
+        ];
+    }
+
+    if (import.meta.hot) {
+        return (import.meta.hot.data.sponsors ??= await fn())
+    }
+    return await fn()
 }

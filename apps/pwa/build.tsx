@@ -70,13 +70,14 @@ for (const file of result.outputs) {
   if (file.path.endsWith(".css")) {
     const content = (await Bun.file(file.path).text())
       .replaceAll("./files/", "/_bun/fonts/")
-      .replace("../public/", "/")
+      .replaceAll("../public/", "/")
     await Bun.write(file.path, content)
   }
 
   else if (file.path.endsWith(".html")) {
     const content = (await Bun.file(file.path).text())
       .replaceAll("./_bun/", "/_bun/")
+      .replaceAll("../public/", "/")
     await Bun.write(file.path, content)
   }
 }
