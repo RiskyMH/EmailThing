@@ -8,6 +8,8 @@ const server = serve({
     "/": home,
     "/home": home,
     "/pricing": home,
+    "/login": home,
+    "/register": home,
 
     "/mail/:a": app,
 

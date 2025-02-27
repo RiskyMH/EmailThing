@@ -33,7 +33,7 @@ function UserNavLogin() {
 }
 
 export function UserNavv() {
-    const user = "a".includes('a') ? false : { username: "hi", email: "Michael@riskymh.dev" }
+    const user = document.cookie.includes('test') ? { username: "hi", email: "test@emailthing.app" } : false
     if (!user) return <UserNavLogin />;
     // if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
 
