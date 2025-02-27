@@ -77,7 +77,7 @@ export default function Home() {
                             GitHub
                             <span className="font-normal text-muted-foreground">
                                 •
-                                <Suspense fallback="∞">
+                                <Suspense fallback={defaultStars}>
                                     <GitHubStars />
                                 </Suspense>
                             </span>
@@ -195,17 +195,20 @@ export const metadata: Metadata = {
 // }
 
 import useSWR from "swr"
+import { getGithubStars } from "./fetch.macro";
+import { getGithubStars as _getGithubStars } from "./fetch.macro" with { type: "macro" };
+const defaultStars = _getGithubStars()
+
 
 function GitHubStars() {
     const { data, error, isLoading } = useSWR(
         "/github-stars",
-        async () => (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing")).json()).stargazers_count,
+        getGithubStars,
         { suspense: true, revalidateOnFocus: false }
     )
 
     if (error) return null
-    if (isLoading) return '∞'
-
+    if (isLoading) return defaultStars
 
     return (data)
 }
