@@ -1,51 +1,52 @@
 import type { RouteObject } from "react-router-dom";
 import EmailList from "./email-list";
 import MailItem from "./mail-item";
+import MailLayout from "./mail/root-layout";
 
 export const routes = [
     {
         path: "/mail/:mailboxId",
-        element: <EmailList filter="inbox" />,
+        element: <MailLayout><EmailList filter="inbox" /></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/:mailId",
-        element: <MailItem />,
+        element: <MailLayout><MailItem /></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/drafts",
-        element: <EmailList filter="drafts" />,
+        element: <MailLayout><EmailList filter="drafts" /></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/sent",
-        element: <EmailList filter="sent" />,
+        element: <MailLayout><EmailList filter="sent" /></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/starred",
-        element: <EmailList filter="starred" />,
+        element: <MailLayout><EmailList filter="starred" /></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/temp",
-        element: <EmailList filter="temp" />,
+        element: <MailLayout><EmailList filter="temp" /></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/trash",
-        element: <EmailList filter="trash" />,
+        element: <MailLayout><EmailList filter="trash" /></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/config",
-        element: <h1>TODO: Mail config</h1>,
+        element: <MailLayout><h1>TODO: Mail config</h1></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/draft/:draftId",
-        element: <h1>TODO: Mail draft</h1>,
+        element: <MailLayout><h1>TODO: Mail draft</h1></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/draft/new",
-        element: <h1>TODO: Mail draft (new)</h1>,
+        element: <MailLayout><h1>TODO: Mail draft (new)</h1></MailLayout>,
     },
     {
         path: "/mail/:mailboxId/config",
-        element: <h1>TODO: Mail config</h1>,
+        element: <MailLayout><h1>TODO: Mail config</h1></MailLayout>,
     },
     {
         path: "/settings",

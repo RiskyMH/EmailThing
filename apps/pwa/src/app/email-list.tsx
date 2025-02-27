@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom"
 import useSWR from "swr"
+import MailLayout from "./mail/root-layout"
 
 
 export default function EmailList({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {

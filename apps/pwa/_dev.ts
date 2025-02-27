@@ -6,6 +6,9 @@ const nextPatchdata = `
       "next/navigation": [
         "../pwa/src/components/next-pathname.tsx"
       ],
+      "next/form": [
+        "../pwa/src/components/next-form.tsx"
+      ],
       "@/(home)/components.client": [
        "../pwa/src/home/layout.tsx"
       ],

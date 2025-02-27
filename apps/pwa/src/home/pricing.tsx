@@ -89,7 +89,7 @@ export default function Pricing() {
 }
 
 function Sponsors() {
-    const sponsors = getSponsors();
+    const sponsors = getSponsors() as any as Awaited<ReturnType<typeof getSponsors>>;
 
     return (
         <div className="flex flex-wrap justify-center gap-6 overflow-auto">

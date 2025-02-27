@@ -4,7 +4,7 @@ export default function AuthPage() {
       <h1>Login/Register :)</h1>
       <button onClick={() => {
         document.cookie = "test=true"
-        window.location = '/'
+        window.location.href = '/'
       }}>
         [login as test]
       </button>

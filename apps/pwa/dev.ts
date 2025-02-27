@@ -11,10 +11,10 @@ const server = serve({
     "/login": home,
     "/register": home,
 
-    "/mail/:a": app,
+    "/mail/*": app,
 
     "/docs": docs,
-    "/docs/:a": docs,
+    "/docs/*": docs,
   },
     development: true,
     fetch: () => new Response("404", {status: 404})

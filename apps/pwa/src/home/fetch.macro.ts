@@ -62,7 +62,6 @@ async function getActiveSponsors(): Promise<{ username: string; avatar: string; 
 
 
 export const getSponsors = async () => {
-    if (typeof window === "undefined" && process.platform === "win32") return []
 
     const fn = async () => {
         const [active, inactive] = await Promise.all([
@@ -86,8 +85,10 @@ export const getSponsors = async () => {
         ];
     }
 
+    if (typeof window === "undefined" && process.platform === "win32") return [] as Awaited<ReturnType<typeof fn>>
+
     if (import.meta.hot) {
-        return (import.meta.hot.data.sponsors ??= await fn())
+        return (import.meta.hot.data.sponsors ??= await fn()) as Awaited<ReturnType<typeof fn>>
     }
-    return await fn()
+    return await fn() as Awaited<ReturnType<typeof fn>>
 }
