@@ -5,6 +5,7 @@ import { cn } from "@/utils/tw";
 import { CheckIcon } from "lucide-react";
 import { Suspense } from "react";
 import TooltipText from "@/components/tooltip-text";
+import { getSponsors } from "./fetch.macro" with { type: "macro" };
 
 export default function Pricing() {
 
@@ -88,9 +89,7 @@ export default function Pricing() {
 }
 
 function Sponsors() {
-    // const sponsors = await getSponsors();
-
-    const sponsors = []
+    const sponsors = getSponsors();
 
     return (
         <div className="flex flex-wrap justify-center gap-6 overflow-auto">
