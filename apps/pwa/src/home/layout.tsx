@@ -1,7 +1,8 @@
 import { EmailThing } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import UserNav from "@/components/user-navbar";
-import { Link, useMatch } from "react-router-dom";
+import { useMatch } from "react-router-dom";
+import Link from "@/components/link";
 import { useEffect, useState, type PropsWithChildren } from "react";
 import { cn } from "@/utils/tw";
 import { ExternalLinkIcon } from "lucide-react"
@@ -11,7 +12,7 @@ export default function HomeLayout({ children }: PropsWithChildren) {
         <div className="bg-background" vaul-drawer-wrapper="">
             <Header className="container sticky top-0 z-40 flex h-20 w-full items-center justify-between py-6 transition-[height]">
                 <div className="flex gap-6 md:gap-10">
-                    <Link to="/home" className="group flex items-center gap-1">
+                    <Link href="/home" className="group flex items-center gap-1">
                         <EmailThing />
                     </Link>
                     <div className="flex gap-6">
@@ -47,7 +48,7 @@ export function MainNavItem({
 
     return (
         <Link
-            to={disabled ? "#" : href}
+            href={disabled ? "#" : href}
             target={href.startsWith("http") ? "_blank" : undefined}
             className={cn(
                 "hidden items-center gap-2 font-medium text-sm transition-colors hover:text-foreground/80 md:flex",

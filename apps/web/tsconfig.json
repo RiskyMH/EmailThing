@@ -21,7 +21,7 @@
     "paths": {
       "@/db": ["./app/utils/db.ts"],
       "@/*": ["./app/*"],
-      "@emailthing/dbb": ["../../packages/db/index.ts"]
+      "@emailthing/dbb": ["../../packages/db/index.ts"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../../packages/db/**/*.ts"],

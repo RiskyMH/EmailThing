@@ -15,7 +15,23 @@ const routes = ([
 ] satisfies RouteObject[])
   .map(e => ({ errorElement: <ErrorPage />, ...e, }))
 
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(routes, {
+  patchRoutesOnNavigation: async ({ matches, patch, path, signal }) => {
+    if (path.startsWith("/docs")) {
+      const { routes } = await import("./docs/_routes")
+      if (routes) {
+        patch(null, routes)
+      }
+    }
+
+    else if (path.startsWith("/mail")) {
+      const { routes } = await import("./app/_routes")
+      if (routes) {
+        patch(null, routes)
+      }
+    }
+  }
+});
 
 const elem = document.getElementById("root")!;
 const app = (

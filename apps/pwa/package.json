@@ -8,7 +8,14 @@
     "build:tsc": "tsc -b && bun build.tsx",
     "build": "NODE_ENV=production bun build.tsx",
     "lint": "eslint .",
-    "preview": "bun x serve dist"
+    "preview": "bun x serve dist",
+
+
+    "predev": "bun _dev.ts patch",
+    "prebuild": "bun _dev.ts patch",
+    "postbuild": "bun _dev.ts revert",
+    "postdev": "bun _dev.ts revert",
+    "install": "bun _dev.ts revert"
   },
   "dependencies": {
     "@fontsource/inter": "^5.1.1",

@@ -4,8 +4,6 @@ import Pricing from "./pricing";
 import { lazy, Suspense } from 'react';
 
 
-const Docs = import('../docs/1-introduction')
-
 export const routes = [
     {
         path: "/",
@@ -19,16 +17,38 @@ export const routes = [
         path: "/pricing",
         element: <Pricing />,
     },
-    {
-        path: "/docs",
-        element: <Reload />,
-        preferTemplate: "docs.html",
-    },
-    {
-        path: "/mail/:mailboxId",
-        element: <Reload />,
-        preferTemplate: "app.html",
-    },
+    // {
+    //     path: "/docs",
+    //     lazy: async () => {
+    //         const { routes } = await import("../docs/_routes")
+    //         return {
+    //             element: routes.find(e => e.path === "/docs")?.element,
+    //             loader: async () => {}
+    //         }
+    //     },
+    //     preferTemplate: "docs.html",
+    // },
+    // {
+    //     path: "/docs/:path",
+    //     lazy: async () => {
+    //         const { routes } = await import("../docs/_routes")
+    //         return {
+    //             element: routes.find(e => e.path )?.element,
+    //             loader: async () => {}
+    //         }
+    //     },
+    //     preferTemplate: "docs.html",
+    // },
+    // {
+    //     path: "/docs",
+    //     element: <Reload />,
+    //     preferTemplate: "docs.html",
+    // },
+    // {
+    //     path: "/mail/:mailboxId",
+    //     element: <Reload />,
+    //     preferTemplate: "app.html",
+    // },
 
 ] satisfies RouteObject[]
 

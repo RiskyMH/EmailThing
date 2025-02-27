@@ -16,7 +16,23 @@ const routes = ([
   .map(e => ({ errorElement: <ErrorPage />, ...e, }))
 
 
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(routes, {
+  patchRoutesOnNavigation: async ({ matches, patch, path, signal }) => {
+    if (["/", "/pricing", "/home", "/login", "/register"].includes(path)) {
+      const { routes } = await import("./home/_routes")
+      if (routes) {
+        patch(null, routes)
+      }
+    }
+
+    else if (path.startsWith("/mail")) {
+      const { routes } = await import("./app/_routes")
+      if (routes) {
+        patch(null, routes)
+      }
+    }
+  }
+});
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
 ReactDOM.createRoot(document.getElementById("root")!).render(

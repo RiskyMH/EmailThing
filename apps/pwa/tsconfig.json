@@ -10,15 +10,18 @@
     "forceConsistentCasingInFileNames": true,
 
     "paths": {
-      "@/*": [
-        "./src/*",
-        "../web/app/*"
-      ],
       "next/link": [
         "./src/components/next-link.tsx"
       ],
-      "next/*": [
-        "./src/components/next-link.tsx"
+      "next/navigation": [
+        "./src/components/next-pathname.tsx"
+      ],
+      "@/(home)/components.client": [
+        "./src/home/layout.tsx"
+      ],
+      "@/*": [
+        "./src/*",
+        "../web/app/*"
       ],
     }
   },

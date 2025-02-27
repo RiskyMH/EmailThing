@@ -19,17 +19,17 @@ export const metadata = {
     },
 } satisfies Metadata;
 
-export default function AboutPage() {
+export default function CustomDomainPage() {
     return (
         <DocsPage
             title="Custom Domain"
             description="How to add your custom domain to a mailbox"
             toc={[
                 { title: "Send Emails", href: "#send-email" },
-                { title: "Receive Emails", href: "#receive-emails" },
+                { title: "Receive Emails", href: "#receive-email" },
                 {
                     title: "Receive Emails (advanced)",
-                    href: "#receive-emails-advanced",
+                    href: "#receive-email-advanced",
                 },
             ]}
             // pager={{ prev: { title: "About", href: "/docs" }, next: { title: "B", href: "/docs/b" } }}
