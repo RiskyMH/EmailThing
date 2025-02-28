@@ -17,6 +17,10 @@ export const Email = sqliteTable(
         createdAt: integer("created_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
 
         subject: text("subject", { length: 255 }),
         snippet: text("snippet", { length: 255 }),

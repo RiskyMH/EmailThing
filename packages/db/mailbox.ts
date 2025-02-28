@@ -14,6 +14,10 @@ export const Mailbox = sqliteTable("mailboxes", {
     createdAt: integer("created_at", { mode: "timestamp" })
         .notNull()
         .$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+        // .notNull()
+        .$defaultFn(() => new Date())
+        .$onUpdateFn(() => new Date()),
     storageUsed: int("storage_used").default(0).notNull(),
     plan: text("plan", { enum: ["FREE", "UNLIMITED"] })
         .default("FREE")
@@ -45,6 +49,10 @@ export const MailboxAlias = sqliteTable(
         createdAt: integer("created_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
         default: int("default", { mode: "boolean" }).default(false).notNull(),
     },
     (table) => {
@@ -79,6 +87,10 @@ export const TempAlias = sqliteTable(
         createdAt: integer("created_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
         expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
     },
     (table) => {
@@ -111,6 +123,10 @@ export const MailboxCustomDomain = sqliteTable(
         addedAt: integer("created_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
         domain: nocaseText("domain").notNull(),
     },
     (table) => {
@@ -140,6 +156,10 @@ export const MailboxTokens = sqliteTable("mailbox_token", {
     createdAt: integer("created_at", { mode: "timestamp" })
         .notNull()
         .$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+        // .notNull()
+        .$defaultFn(() => new Date())
+        .$onUpdateFn(() => new Date()),
     expiresAt: integer("expires_at", { mode: "timestamp" }),
     name: text("name"),
 });
@@ -167,6 +187,10 @@ export const MailboxCategory = sqliteTable(
         createdAt: integer("created_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
     },
     (table) => {
         return {
@@ -197,6 +221,10 @@ export const MailboxForUser = sqliteTable(
         role: text("role", { enum: ["OWNER", "ADMIN"] })
             .default("ADMIN")
             .notNull(),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
     },
     (table) => {
         return {

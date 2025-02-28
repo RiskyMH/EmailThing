@@ -14,6 +14,7 @@ export default function EmailListSuspenced({ filter }: { filter: "inbox" | "draf
 
 function EmailList({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     const params = useParams<"mailboxId">()
+    
     const { data, error, isLoading } = useSWR(`/api/emails/${params.mailboxId}?filter=${filter}`, async () => {
         await new Promise(resolve => setTimeout(resolve, 300));
         return [1, 2, 3, 4,];

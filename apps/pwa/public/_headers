@@ -6,8 +6,8 @@
     X-Frame-Options: DENY
     # Content-Security-Policy: TODO
 
-/_bun/static/*
-    Cache-Control: public, max-age=31536000, immutable
+# /_bun/static/*
+#     Cache-Control: public, max-age=31536000, immutable
 
 /service.js
     Content-Type: application/javascript; charset=utf-8

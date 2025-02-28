@@ -4,6 +4,10 @@ import MailItem from "./mail-item";
 import MailLayout from "./mail/root-layout";
 
 export const routes = [
+    // { // TODO: make this redirect to the demo/mailboxId cookie value
+    //     path: "/mail",
+    //     element: <MailLayout><EmailList filter="inbox" /></MailLayout>,
+    // },
     {
         path: "/mail/:mailboxId",
         element: <MailLayout><EmailList filter="inbox" /></MailLayout>,

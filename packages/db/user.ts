@@ -15,6 +15,10 @@ export const User = sqliteTable(
         createdAt: int("created_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
+        updatedAt: int("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
         username: nocaseText("username", { length: 20 }).notNull(),
         password: text("password", { length: 200 }).notNull(),
         admin: int("admin", { mode: "boolean" }).default(false),
@@ -53,6 +57,10 @@ export const PasskeyCredentials = sqliteTable("passkey_credentials", {
     createdAt: int("created_at", { mode: "timestamp" })
         .notNull()
         .$defaultFn(() => new Date()),
+    updatedAt: int("updated_at", { mode: "timestamp" })
+        // .notNull()
+        .$defaultFn(() => new Date())
+        .$onUpdateFn(() => new Date()),
     name: text("name"),
     publicKey: text("public_key").notNull(),
 });

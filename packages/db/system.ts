@@ -13,6 +13,10 @@ export const DefaultDomain = sqliteTable(
         createdAt: integer("created_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
         domain: nocaseText("domain").notNull().unique(),
         authKey: text("auth_key", { length: 24 })
             .notNull()
