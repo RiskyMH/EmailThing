@@ -33,11 +33,12 @@ function UserNavLogin() {
 }
 
 export function UserNavv() {
-    const user = document.cookie.includes('test') ? { username: "hi", email: "test@emailthing.app" } : false
+    const user = document.cookie.includes('test') ? { username: "Demo", email: "demo@emailthing.xyz" } : false
     if (!user) return <UserNavLogin />;
     // if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
 
-    const img = use<string | undefined>(user.email ? gravatar(user.email) : Promise.resolve(undefined))
+    // const img = use<string | undefined>(user.email ? gravatar(user.email) : Promise.resolve(undefined))
+    const img = gravatar(user.email)
 
     return (
         <UserDropDown

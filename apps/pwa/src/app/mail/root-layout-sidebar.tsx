@@ -210,26 +210,28 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     // const mailboxes = await userMailboxes(userId);
     // const { default: defaultAlias } = await mailboxAliases(mailboxId);
     const userId = "a"
-    const mailboxes= [
+    
+    type _mailboxes = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["userMailboxes"]>>
+    const mailboxes = [
         {
             id: mailboxId,
-            name: "Inbox",
-            alias: "Inbox",
-            role: "ADMIN",
+            name: "demo@emailthing.xyz",
+            alias: "demo@emailthing.xyz",
+            role: "DEMO",
             isDefault: true,
         },
-    ] satisfies Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["userMailboxes"]>> 
-    
-    const { default: defaultAlias }: Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["mailboxAliases"]>> = { 
-        aliases: [],
+    ]
+
+    type _defaultAlias = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["mailboxAliases"]>>
+    const { default: defaultAlias } = {
         default: {
-            alias: "Inbox",
-            name: "Inbox"
+            alias: "demo@emailthing.xyz",
+            name: "Demo"
         }
     }
 
     // const gravatarImg = use(gravatar(defaultAlias?.alias ?? "ab@c.com"))
-    const gravatarImg = "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50"
+    const gravatarImg = "https://riskymh.dev/fire.svg"
 
     return (
         <DropdownMenu>

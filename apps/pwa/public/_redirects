@@ -6,6 +6,7 @@
 /home/all/* /home 200
 /mail/:id /mail/[mailboxId] 200
 /mail/:id/config /mail/[mailboxId]/config 200
+/mail/:id/drafts /mail/[mailboxId]/drafts 200
 /mail/:id/draft/:draftId /mail/[mailboxId]/draft/[draftId] 200
 /mail/:id/draft/new /mail/[mailboxId]/draft/new 200
 /mail/:id/temp /mail/[mailboxId]/temp 200

@@ -12,6 +12,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@fontsource/inter": "^5.1.1",
+        "@paralleldrive/cuid2": "^2.2.2",
         "@tailwindcss/typography": "^0.5.16",
         "@types/bun": "^1.2.3",
         "bun-plugin-tailwind": "^0.0.14",

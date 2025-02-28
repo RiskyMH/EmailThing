@@ -22,13 +22,13 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Suspense, use, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
 interface UserProps {
     user: {
         name: string;
-        image?: string;
+        image?: Promise<string>;
         secondary: string;
     };
 }
@@ -43,6 +43,7 @@ function getInitials(name: string) {
 export function UserDropDown({ user }: UserProps) {
     const [open, setOpen] = useState(false);
     const isDesktop = useMediaQuery("(min-width: 640px)");
+    const image = use<string | undefined>(user?.image ?? Promise.resolve(''))
 
     const userIcon = (
         <Button
@@ -51,9 +52,9 @@ export function UserDropDown({ user }: UserProps) {
             suppressHydrationWarning // i give up with sanity
         >
             <Avatar className="size-8 rounded-full">
-                <AvatarImage src={user.image} alt={user.name} />
+                <AvatarImage src={image} alt={user?.name} />
                 <AvatarFallback className="bg-primary/80 text-white transition-all hover:bg-primary/70 dark:bg-secondary dark:text-foreground dark:hover:bg-secondary/80">
-                    {getInitials(user.name)}
+                    {user?.name ? getInitials(user?.name) : ""}
                 </AvatarFallback>
             </Avatar>
         </Button>

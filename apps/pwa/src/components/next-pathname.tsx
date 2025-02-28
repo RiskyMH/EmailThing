@@ -9,7 +9,6 @@ export const useRouter = () => {
     const navigate = useNavigate()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    console.log(searchParams)
 
     return {
         navigate,
