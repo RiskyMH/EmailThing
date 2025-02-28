@@ -1,4 +1,4 @@
-import { useHref, useNavigate, useSearchParams as useSearchParamsReact } from "react-router-dom";
+import { useHref, useNavigate, useSearchParams as useSearchParamsReact, } from "react-router-dom";
 
 export const usePathname = () => {
     const pathname = useHref({})
@@ -16,6 +16,7 @@ export const useRouter = () => {
         searchParams,
         push: (path: string) => navigate(path),
         replace: (path: string) => navigate(path, { replace: true }),
+        refresh: async () => new Promise((resolve) => setTimeout(resolve, 100)),
     }
 }
 

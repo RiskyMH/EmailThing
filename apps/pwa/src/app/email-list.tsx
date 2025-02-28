@@ -1,10 +1,22 @@
 "use client"
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import useSWR from "swr"
-import MailLayout from "./mail/root-layout"
-import { Suspense } from "react"
+import { Suspense, useRef } from "react"
 import Loading from "@/(email)/mail/[mailbox]/(email-list)/loading"
-// import { createId } from "@paralleldrive/cuid2"
+import { demoEmails, demoEmailsDraft, sentEmails, demoCategories, tempEmails } from "./demo-data"
+import { Button } from "@/components/ui/button"
+import { RefreshButton } from "@/(email)/mail/[mailbox]/components.client"
+import { SmartDrawer, SmartDrawerTrigger, SmartDrawerContent } from "@/components/ui/smart-drawer"
+import { tempEmailsLimit } from "@/utils/limits";
+import { CreateTempEmailForm } from "./email-list-temp-modal"
+import { EmailItem } from "./email-list-item"
+import Link from "@/components/link"
+import { cn } from "@/utils/tw"
+import { formatTimeAgo } from "@/utils/tools"
+import { RotateCcwIcon } from "lucide-react"
+import { toast } from "sonner"
+import {useSearchParams} from "react-router-dom"
+
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     return <Suspense fallback={<Loading />}>
@@ -12,22 +24,218 @@ export default function EmailListSuspenced({ filter }: { filter: "inbox" | "draf
     </Suspense>
 }
 
-function EmailList({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
+
+export interface Email {
+    id: string
+    subject: string
+    snippet?: string
+    body?: string
+    html?: string
+    createdAt: Date
+    isRead?: boolean
+    isStarred?: boolean
+    binnedAt?: Date | null
+    categoryId?: string | null
+    /** if draft, its actually the recipient */
+    from: {
+        name: string
+        address: string
+    }
+}
+
+export interface Category {
+    id: string
+    name: string
+    /** hex color */
+    color?: string
+}
+
+
+function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     const params = useParams<"mailboxId">()
+    const searchParams = useSearchParams()[0]
+    const categoryId = searchParams.get("category") as string | null
+    const search = searchParams.get("search") as string | null
+    const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
     
-    const { data, error, isLoading } = useSWR(`/api/emails/${params.mailboxId}?filter=${filter}`, async () => {
+
+    const { data: emails, error, isLoading } = useSWR(`/api/emails/${mailboxId}?filter=${type}&search=${search}&category=${categoryId}`, async () => {
         await new Promise(resolve => setTimeout(resolve, 300));
-        return [1, 2, 3, 4,];
+
+        // Get base email list based on type
+        const baseEmails = (() => {
+            switch (type) {
+                case "inbox":
+                    return demoEmails.filter(e => !e.binnedAt);
+                case "drafts":
+                    return demoEmailsDraft;
+                case "sent":
+                    return sentEmails;
+                case "starred":
+                    return demoEmails.filter(e => e.isStarred);
+                case "trash":
+                    return demoEmails.filter(e => e.binnedAt);
+                case "temp":
+                    return tempEmails;
+                default:
+                    return [];
+            }
+        })();
+
+        // Apply category filter if specified
+        const categoryFiltered = categoryId
+            ? baseEmails.filter(e => 'categoryId' in e && e.categoryId === categoryId)
+            : baseEmails;
+
+        // Apply search filter if specified
+        const searchFiltered = search
+            ? categoryFiltered.filter(e =>
+                e.subject.toLowerCase().includes(search.toLowerCase())
+            )
+            : categoryFiltered;
+
+        return searchFiltered;
     }, {})
 
-    if (error) return <div>failed to load {filter} ({error})</div>
-    if (isLoading) return <Loading />
+    const categories = demoCategories
+    const categoryCounts = [{ categoryId: "1", count: 1 }, { categoryId: "2", count: 2 }]
+    const mailboxPlan = { plan: "DEMO" }
 
+    if (error) return <div>failed to load {type} ({error})</div>
+    if (isLoading || !emails) return <Loading />
+
+    const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 
     return (
-        <div>
-            {data?.map(e => <p key={e}>{e}</p>)}
-            {params.mailboxId} ({filter})
-        </div>
-    )
+        <>
+            <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
+                <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2">
+                    <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
+                    <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
+                        <CategoryItem
+                            circleColor={null}
+                            name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
+                            count={emails.length}
+                            link={baseUrl}
+                            category={null}
+                            isCurrent={!categoryId}
+                        />
+                        {(categories || []).map((category) => (
+                            <CategoryItem
+                                isCurrent={category.id === categoryId}
+                                key={category.id}
+                                circleColor={category.color || "grey"}
+                                name={category.name}
+                                count={categoryCounts?.find((c) => c.categoryId === category.id)?.count || 0}
+                                link={baseUrl}
+                                category={category.id}
+                            />
+                        ))}
+                    </div>
+                    {type === "temp" && (
+                        <SmartDrawer>
+                            <SmartDrawerTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    className="-my-1 h-auto py-1"
+                                    disabled={
+                                        // biome-ignore lint/complexity/useOptionalChain: <explanation>
+                                        ((categories && categories?.length) || 0) >=
+                                        tempEmailsLimit[mailboxPlan?.plan ?? "FREE"]
+                                    }
+                                >
+                                    Create email
+                                </Button>
+                            </SmartDrawerTrigger>
+                            <SmartDrawerContent className="sm:max-w-[425px]">
+                                <CreateTempEmailForm mailboxId={mailboxId} />
+                            </SmartDrawerContent>
+                        </SmartDrawer>
+                    )}
+                    <div className="ms-auto flex h-6 shrink-0 items-center justify-center">
+                        {/* <RefreshButton className="shrink-0" /> */}
+                        <Button
+                            variant="ghost"
+                            size="auto"
+                            className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground "
+                            onClick={() => toast.success("Refreshed")}
+                        >
+                            <RotateCcwIcon className="size-5 text-muted-foreground" />
+                        </Button>
+
+                    </div>
+                </div>
+                {type === "trash" && (
+                    <div className="text-center font-bold text-muted-foreground">
+                        Messages that have been in the Bin for more than 30 days will be deleted automatically
+                    </div>
+                )}
+                {type === "temp" && (
+                    <div className="text-center font-bold text-muted-foreground">
+                        {categoryId
+                            ? // @ts-expect-error types are boring
+                            `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
+                            : "Email addresses will be automatically deleted in 24 hours after creation."}
+                        {categoryId && (
+                            <p className="pt-1 font-normal">
+                                {/* @ts-expect-error types are boring */}
+                                {currentCategory?.alias}
+                            </p>
+                        )}
+                    </div>
+                )}
+                {emails.length === 0 && (
+                    <div className="text-center text-muted-foreground">
+                        {search
+                            ? `Couldn't find any emails matching "${search}"`
+                            : type === "drafts"
+                                ? "No drafts"
+                                : "No emails"}
+                    </div>
+                )}
+                {emails.map((email) => (
+                    <EmailItem
+                        key={email.id}
+                        email={email}
+                        categories={categories || undefined}
+                        mailboxId={mailboxId}
+                        type={type}
+                    />
+                ))}
+            </div>
+        </>
+    );
 }
+
+export function CategoryItem({
+    circleColor,
+    name,
+    count,
+    link,
+    category,
+    isCurrent = false,
+}: {
+    circleColor: string | null;
+    name: string;
+    count: number;
+    link: string;
+    category: string | null;
+    isCurrent: boolean;
+}) {
+    return (
+        <Link
+            href={link + (category ? `?category=${category}` : "")}
+            className={cn(
+                "group inline-flex w-auto max-w-fit shrink-0 items-center gap-1 border-transparent border-b-3 px-1 font-bold",
+                isCurrent && "border-blue",
+            )}
+        >
+            {circleColor && <div className="mr-1 size-2.5 rounded-full" style={{ backgroundColor: circleColor }} />}
+            <span className="font-medium text-base group-hover:text-muted-foreground">{name}</span>
+            <span className="text-muted-foreground text-sm group-hover:text-muted-foreground/50">({count})</span>
+        </Link>
+    );
+}
+
+
+
