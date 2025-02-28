@@ -57,19 +57,19 @@ const result = await build({
   },
   naming: {
     entry: "/[dir]/[name].[ext]",
-    chunk: "/_bun/chunks/[dir]/[name].[hash].[ext]",
+    chunk: "/_bun/static/[dir]/[name].[hash].[ext]",
     asset: "/[dir]/[name].[hash].[ext]",
   }
 });
 
 await cp(path.join(import.meta.dir, "./public"), path.join(import.meta.dir, "./dist"), {recursive: true})
 await cp(path.join(import.meta.dir, "../web/public"), path.join(import.meta.dir, "./dist"), {recursive: true})
-await cp(path.join(require.resolve("@fontsource/inter"), "/../files"), path.join(import.meta.dir, "./dist/_bun/fonts"), {recursive: true})
+await cp(path.join(require.resolve("@fontsource/inter"), "/../files"), path.join(import.meta.dir, "./dist/_bun/static/fonts"), {recursive: true})
 
 for (const file of result.outputs) {
   if (file.path.endsWith(".css")) {
     const content = (await Bun.file(file.path).text())
-      .replaceAll("./files/", "/_bun/fonts/")
+      .replaceAll("./files/", "/_bun/static/fonts/")
       .replaceAll("../public/", "/")
     await Bun.write(file.path, content)
   }
