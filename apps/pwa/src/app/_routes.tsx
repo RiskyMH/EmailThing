@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router-dom";
-import EmailList from "./email-list";
-import MailItem from "./mail-item";
+import EmailList from "./email-list/email-list";
+import MailItem from "./email-item/mail-item";
 import MailLayout from "./mail/root-layout";
 
 export const routes = [

@@ -2,8 +2,8 @@
 import { useParams, useSearchParams } from "react-router-dom"
 import useSWR from "swr"
 import { Suspense, useRef } from "react"
-import Loading from "@/(email)/mail/[mailbox]/(email-list)/loading"
-import { demoEmails, demoEmailsDraft, sentEmails, demoCategories, tempEmails } from "./demo-data"
+import Loading from "./email-list-loading"
+import { demoEmails, demoEmailsDraft, sentEmails, demoCategories, tempEmails } from "../demo-data"
 import { Button } from "@/components/ui/button"
 import { RefreshButton } from "@/(email)/mail/[mailbox]/components.client"
 import { SmartDrawer, SmartDrawerTrigger, SmartDrawerContent } from "@/components/ui/smart-drawer"
@@ -15,7 +15,8 @@ import { cn } from "@/utils/tw"
 import { formatTimeAgo } from "@/utils/tools"
 import { RotateCcwIcon } from "lucide-react"
 import { toast } from "sonner"
-import {useSearchParams} from "react-router-dom"
+import { getEmailList } from "@/utils/data/queries/email-list"
+import { useLiveQuery } from 'dexie-react-hooks';
 
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
@@ -55,54 +56,26 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
     const params = useParams<"mailboxId">()
     const searchParams = useSearchParams()[0]
     const categoryId = searchParams.get("category") as string | null
-    const search = searchParams.get("search") as string | null
+    const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
     
+    const data = useLiveQuery(async () => {
+        const emails = await getEmailList({
+            mailboxId,
+            type,
+            categoryId: categoryId ?? undefined,
+            search: search ?? undefined,
+        })
+        return emails
+    }, [mailboxId, type, categoryId, search])
 
-    const { data: emails, error, isLoading } = useSWR(`/api/emails/${mailboxId}?filter=${type}&search=${search}&category=${categoryId}`, async () => {
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Get base email list based on type
-        const baseEmails = (() => {
-            switch (type) {
-                case "inbox":
-                    return demoEmails.filter(e => !e.binnedAt);
-                case "drafts":
-                    return demoEmailsDraft;
-                case "sent":
-                    return sentEmails;
-                case "starred":
-                    return demoEmails.filter(e => e.isStarred);
-                case "trash":
-                    return demoEmails.filter(e => e.binnedAt);
-                case "temp":
-                    return tempEmails;
-                default:
-                    return [];
-            }
-        })();
-
-        // Apply category filter if specified
-        const categoryFiltered = categoryId
-            ? baseEmails.filter(e => 'categoryId' in e && e.categoryId === categoryId)
-            : baseEmails;
-
-        // Apply search filter if specified
-        const searchFiltered = search
-            ? categoryFiltered.filter(e =>
-                e.subject.toLowerCase().includes(search.toLowerCase())
-            )
-            : categoryFiltered;
-
-        return searchFiltered;
-    }, {})
-
-    const categories = demoCategories
-    const categoryCounts = [{ categoryId: "1", count: 1 }, { categoryId: "2", count: 2 }]
-    const mailboxPlan = { plan: "DEMO" }
+    const isLoading = !data
+    const error = null
 
     if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !emails) return <Loading />
+    if (isLoading || !data) return <Loading />
+
+    const { emails, categories, mailboxPlan, allCount } = data
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 
@@ -115,18 +88,18 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
                         <CategoryItem
                             circleColor={null}
                             name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
-                            count={emails.length}
+                            count={allCount}
                             link={baseUrl}
                             category={null}
                             isCurrent={!categoryId}
                         />
-                        {(categories || []).map((category) => (
+                        { (type !== "drafts" && type !== "temp" && !search) && (categories || []).map((category) => (
                             <CategoryItem
                                 isCurrent={category.id === categoryId}
                                 key={category.id}
                                 circleColor={category.color || "grey"}
                                 name={category.name}
-                                count={categoryCounts?.find((c) => c.categoryId === category.id)?.count || 0}
+                                count={category.count || 0}
                                 link={baseUrl}
                                 category={category.id}
                             />
@@ -141,7 +114,7 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
                                     disabled={
                                         // biome-ignore lint/complexity/useOptionalChain: <explanation>
                                         ((categories && categories?.length) || 0) >=
-                                        tempEmailsLimit[mailboxPlan?.plan ?? "FREE"]
+                                        tempEmailsLimit[mailboxPlan?.plan as keyof typeof tempEmailsLimit]
                                     }
                                 >
                                     Create email

@@ -9,8 +9,6 @@
     "build": "NODE_ENV=production bun build.tsx",
     "lint": "eslint .",
     "preview": "bun x serve dist",
-
-
     "predev": "bun _dev.ts patch",
     "prebuild": "bun _dev.ts patch",
     "postbuild": "bun _dev.ts revert",
@@ -24,6 +22,8 @@
     "@types/bun": "^1.2.3",
     "bun-plugin-tailwind": "^0.0.14",
     "clsx": "^2.1.1",
+    "dexie": "^4.0.11",
+    "dexie-react-hooks": "^1.1.7",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

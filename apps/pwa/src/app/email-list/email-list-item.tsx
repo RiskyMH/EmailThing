@@ -14,21 +14,47 @@ import { cn } from "@/utils/tw";
 import { ExternalLink, ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon } from "lucide-react";
 import Link from "next/link";
 import { ClientStar, ContextMenuAction } from "@/(email)/mail/[mailbox]/components.client";
-import type { Email } from "./email-list";
 import { toast } from "sonner";
+import { updateEmailProperties, deleteEmailLocally } from "@/utils/data/queries/email-list";
 
 export interface EmailItemProps {
-    email: Email;
+    email: {
+        id: string;
+        subject: string;
+        snippet?: string;
+        body?: string;
+        html?: string;
+        createdAt: Date;
+        isRead?: boolean;
+        isStarred?: boolean;
+        binnedAt?: Date | null;
+        categoryId?: string | null;
+        from?: {
+            name?: string;
+            address: string;
+        };
+        to?: Array<{
+            name?: string;
+            address: string;
+        }>;
+    };
     mailboxId: string;
     type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
-    categories?: {id: string, name: string, color: string}[] | null;
+    categories?: { id: string, name: string, color?: string }[] | null;
 }
 
 export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps) {
     const emailId = email.id;
-    const updateEmail = async (...args: any[]) => {toast("Updating isn't avalivle in demo", {description: "But if this was a real email, it would be updated"})}
-    const deleteEmail = async (...args: any[]) => {toast("Deleting isn't avalivle in demo", {description: "But if this was a real email, it would be deleted"})}
-    const nothing = async (...args: any[]) => {}
+    
+    const updateEmail = async (updates: any) => {
+        const result = await updateEmailProperties(mailboxId, emailId, updates);
+        toast(result.message, { description: result.description });
+    };
+
+    const deleteEmail = async () => {
+        const result = await deleteEmailLocally(mailboxId, emailId, type);
+        toast(result.message, { description: result.description });
+    };
 
     const category = categories?.find((c) => c.id === email.categoryId);
     const link = `/mail/${mailboxId}/${type === "drafts" ? "draft/" : ""}${email.id}`;
@@ -43,7 +69,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         email.isRead ? "hover:bg-card/60" : "bg-card text-card-foreground shadow-sm hover:bg-card/60",
                     )}
                 >
-                    {/* //todo: use the icon here, and find some other place for category */}
+                    {/* Category indicator */}
                     <TooltipText text={category?.name ?? "No category"}>
                         <span
                             className="inline-block size-4 shrink-0 self-center rounded-full"
@@ -53,10 +79,10 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         />
                     </TooltipText>
 
+                    {/* Star button */}
                     <ClientStar
                         enabled={!!email.isStarred}
-                        // todo: drafts can be starred
-                        action={type !== "drafts" ? updateEmail.bind(null, { isStarred: !email.isStarred }) : nothing}
+                        action={type !== "drafts" ? () => updateEmail({ isStarred: !email.isStarred }) : async () => {}}
                         className="hidden shrink-0 self-center text-muted-foreground hover:text-foreground sm:inline-block"
                     />
 
@@ -69,9 +95,13 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                             "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56",
                             !email.isRead ? "font-bold" : "text-foreground/80",
                         )}
-                        title={email.from?.address ?? "uh?"}
+                        title={type === 'drafts' ? 
+                          email.to?.[0]?.address ?? 'No recipient' : 
+                          email.from?.address ?? 'No sender'}
                     >
-                        {email.from?.name || email.from?.address}
+                        {type === 'drafts' ? 
+                          (email.to?.[0]?.name || email.to?.[0]?.address || 'No recipient') :
+                          (email.from?.name || email.from?.address || 'No sender')}
                     </span>
                     {/* </TooltipText> */}
 
@@ -102,25 +132,29 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         className="float-right ms-auto w-auto shrink-0 self-center text-right text-muted-foreground text-xs group-hover:sm:hidden"
                     />
                     <div className="float-right ms-auto me-1.5 hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
-                        <ContextMenuAction
+                        {type !== "drafts" && <ContextMenuAction
                             icon={email.isRead ? "MailUnreadIcon" : "MailOpenIcon"}
-                            action={updateEmail.bind(null, {
-                                isRead: !email.isRead,
-                            })}
-                            tooltip={email.isRead ? "Mark as unread" : "Mark as read"}
+                            action={() => updateEmail({ isRead: !email.isRead })}
                             size="small"
-                        />
+                            tooltip={email.isRead ? "Mark as unread" : "Mark as read"}
+                        />}
+                        {/* <ContextMenuAction
+                            icon="Trash2Icon"
+                            action={deleteEmail}
+                            size="small"
+                            tooltip="Delete forever"
+                        /> */}
                         {!["drafts", "temp"].includes(type) ? (
                             <ContextMenuAction
                                 icon={!email.binnedAt ? "Trash2Icon" : "ArchiveRestoreIcon"}
-                                action={updateEmail.bind(null, { binned: !email.binnedAt })}
+                                action={() => updateEmail({ binnedAt: email.binnedAt ? null : new Date() })}
                                 tooltip={!email.binnedAt ? "Delete" : "Restore to inbox"}
                                 size="small"
                             />
                         ) : (
                             <ContextMenuAction
                                 icon="Trash2Icon"
-                                action={deleteEmail.bind(null, mailboxId, emailId, type)}
+                                action={deleteEmail}
                                 tooltip="Delete forever"
                                 size="small"
                             />
@@ -155,9 +189,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                             <ContextMenuAction
                                 icon="StarIcon"
                                 fillIcon={email.isStarred}
-                                action={updateEmail.bind(null, {
-                                    isStarred: !email.isStarred,
-                                })}
+                                action={() => updateEmail({ isStarred: !email.isStarred })}
                             >
                                 {email.isStarred ? "Unstar" : "Star"}
                             </ContextMenuAction>
@@ -165,9 +197,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
                             <ContextMenuAction
                                 icon={!email.binnedAt ? "Trash2Icon" : "ArchiveRestoreIcon"}
-                                action={updateEmail.bind(null, {
-                                    binned: !email.binnedAt,
-                                })}
+                                action={() => updateEmail({ binnedAt: email.binnedAt ? null : new Date() })}
                             >
                                 {!email.binnedAt ? "Delete" : "Restore to inbox"}
                             </ContextMenuAction>
@@ -176,7 +206,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                             <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
                                 <ContextMenuAction
                                     icon="Trash2Icon"
-                                    action={deleteEmail.bind(null, mailboxId, emailId, type)}
+                                    action={deleteEmail}
                                 >
                                     Delete forever
                                 </ContextMenuAction>
@@ -185,9 +215,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
                             <ContextMenuAction
                                 icon={email.isRead ? "MailUnreadIcon" : "MailOpenIcon"}
-                                action={updateEmail.bind(null, {
-                                    isRead: !email.isRead,
-                                })}
+                                action={() => updateEmail({ isRead: !email.isRead })}
                             >
                                 {email.isRead ? "Mark as unread" : "Mark as read"}
                             </ContextMenuAction>
@@ -204,9 +232,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                                     <ContextMenuItem asChild className="flex w-full cursor-pointer gap-2">
                                         <ContextMenuAction
                                             icon={!email.categoryId ? "CheckIcon" : "EmptyIcon"}
-                                            action={updateEmail.bind(null, {
-                                                category: null,
-                                            })}
+                                            action={() => updateEmail({ categoryId: null })}
                                         >
                                             None
                                         </ContextMenuAction>
@@ -220,9 +246,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                                         >
                                             <ContextMenuAction
                                                 icon={email.categoryId === category.id ? "CheckIcon" : "EmptyIcon"}
-                                                action={updateEmail.bind(null, {
-                                                    category: category.id,
-                                                })}
+                                                action={() => updateEmail({ categoryId: category.id })}
                                             >
                                                 {category.name}
                                             </ContextMenuAction>
@@ -234,7 +258,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                     </>
                 ) : (
                     <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
-                        <ContextMenuAction icon="Trash2Icon" action={deleteEmail.bind(null, mailboxId, emailId, type)}>
+                        <ContextMenuAction icon="Trash2Icon" action={deleteEmail}>
                             Delete forever
                         </ContextMenuAction>
                     </ContextMenuItem>

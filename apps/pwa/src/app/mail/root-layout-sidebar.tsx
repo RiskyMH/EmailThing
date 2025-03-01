@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import Link from "@/components/link";
 import { Suspense, use } from "react";
+import { getEmailCount } from "@/utils/data/queries/email-list";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export const Sidebar = ({ mailbox: mailboxId, className }: { mailbox: string; className?: string }) => {
     const items = [
@@ -142,21 +144,13 @@ function LinkElement({
                 <Icon className="size-6 self-center sm:max-lg:mx-auto" />
                 <span className="self-center sm:max-lg:hidden">{name}</span>
                 {name === "Inbox" ? (
-                    <Suspense>
-                        <ItemCount mailboxId={href.split("/")[2]} type="unread" primary />
-                    </Suspense>
+                    <ItemCount mailboxId={href.split("/")[2]} type="unread" primary />
                 ) : name === "Draft" ? (
-                    <Suspense>
-                        <ItemCount mailboxId={href.split("/")[2]} type="drafts" />
-                    </Suspense>
+                    <ItemCount mailboxId={href.split("/")[2]} type="drafts" />
                 ) : name === "Trash" ? (
-                    <Suspense>
-                        <ItemCount mailboxId={href.split("/")[2]} type="binned" />
-                    </Suspense>
+                    <ItemCount mailboxId={href.split("/")[2]} type="binned" />
                 ) : name === "Temporary Mail" ? (
-                    <Suspense>
-                        <ItemCount mailboxId={href.split("/")[2]} type="temp" />
-                    </Suspense>
+                    <ItemCount mailboxId={href.split("/")[2]} type="temp" />
                 ) : null}
             </SidebarLink>
         </Button>
@@ -173,22 +167,16 @@ function ItemCount({
     type: "unread" | "binned" | "drafts" | "temp";
     primary?: boolean;
 }) {
-    const counts = {
-        unread: 1,
-        binned: 0,
-        drafts: 0,
-        temp: 0,
-    }
-    const item = counts[type];
-    if (!item || item === 0) {
-        return <></>;
-    }
+    const count = useLiveQuery(async () => {
+        return await getEmailCount(mailboxId, type);
+    });
+    if (!count || count === 0) return <></>
 
     return (
         <span
             className={`${primary ? "bg-blue text-blue-foreground" : "bg-secondary text-foreground"} float-right ms-auto select-none self-center rounded px-3 py-1 font-bold text-xs sm:max-lg:hidden`}
         >
-            {item}
+            {count}
         </span>
     );
 }
@@ -210,7 +198,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     // const mailboxes = await userMailboxes(userId);
     // const { default: defaultAlias } = await mailboxAliases(mailboxId);
     const userId = "a"
-    
+
     type _mailboxes = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["userMailboxes"]>>
     const mailboxes = [
         {

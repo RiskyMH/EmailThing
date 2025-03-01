@@ -17,6 +17,7 @@ export const useRouter = () => {
         push: (path: string) => navigate(path),
         replace: (path: string) => navigate(path, { replace: true }),
         refresh: async () => new Promise((resolve) => setTimeout(resolve, 100)),
+        back: () => navigate(-1),
     }
 }
 
