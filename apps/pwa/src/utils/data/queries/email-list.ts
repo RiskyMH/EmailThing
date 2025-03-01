@@ -113,7 +113,7 @@ export async function getEmailList({
     }
 
     // Get all emails sorted by creation date
-    const emails = await emailQuery
+    const emails = emailQuery
         .reverse() // Newest first
         .sortBy('createdAt');
 
@@ -177,7 +177,7 @@ export async function getEmailList({
 
     // Get sender/recipient info for each email
     const emailsWithDetails = await Promise.all(
-        emails.map(async (email) => {
+        (await emails).map(async (email) => {
             if (type === 'drafts') {
                 return {
                     ...email,
