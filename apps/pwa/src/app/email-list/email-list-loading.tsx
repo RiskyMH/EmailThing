@@ -2,7 +2,7 @@ import { StarIcon } from "lucide-react";
 
 export default function Loading() {
     return (
-        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
+        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0 fade-in">
             <div className="sticky top-0 z-10 flex h-12 w-full min-w-0 animate-pulse flex-row items-center justify-center gap-3 border-b-2 bg-background px-2">
                 <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 self-start" />
                 <div className="inline-flex h-6 w-auto max-w-fit items-center justify-center gap-1 border-transparent border-b-3 px-1 font-bold">

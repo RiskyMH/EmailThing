@@ -1,5 +1,5 @@
 /docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
-/mail/:id/:mailId/raw https://emailthing.app/mail/[mailboxId]/[mailId]/raw 307
+/mail/:id/:mailId/raw https://emailthing.app/mail/:id/:mailId/raw 307
 
 
 
