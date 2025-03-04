@@ -16,10 +16,10 @@
     "install": "bun _dev.ts revert"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.1.1",
+    "@fontsource/inter": "^5.2.5",
     "@paralleldrive/cuid2": "^2.2.2",
     "@tailwindcss/typography": "^0.5.16",
-    "@types/bun": "^1.2.3",
+    "@types/bun": "^1.2.4",
     "bun-plugin-tailwind": "^0.0.14",
     "clsx": "^2.1.1",
     "dexie": "^4.0.11",
@@ -40,10 +40,10 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "eslint": "^9.21.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
     "typescript": "~5.7.3",
-    "typescript-eslint": "^8.25.0"
+    "typescript-eslint": "^8.26.0"
   }
 }
