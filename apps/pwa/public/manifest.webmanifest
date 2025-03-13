@@ -1,7 +1,7 @@
 {
   "name": "EmailThing",
   "short_name": "EmailThing",
-  "start_url": ".",
+  "start_url": "/mail",
   "display": "standalone",
   "theme_color": "#17171e",
   "background_color": "#292932",

@@ -1,13 +1,14 @@
-import type { RouteObject } from "react-router-dom";
+import { type RouteObject, Navigate } from "react-router-dom";
 import EmailList from "./email-list/email-list";
 import MailItem from "./email-item/mail-item";
 import MailLayout from "./mail/root-layout";
+import EmailListLoading from "./email-list/email-list-loading";
 
 export const routes = [
-    // { // TODO: make this redirect to the demo/mailboxId cookie value
-    //     path: "/mail",
-    //     element: <MailLayout><EmailList filter="inbox" /></MailLayout>,
-    // },
+    { // TODO: make this redirect to the demo/mailboxId cookie value
+        path: "/mail",
+        element: <RedirectToMail />,
+    },
     {
         path: "/mail/:mailboxId",
         element: <MailLayout><EmailList filter="inbox" /></MailLayout>,
@@ -61,6 +62,14 @@ export const routes = [
         element: <h1>TODO: Admin</h1>,
     },
 ] satisfies RouteObject[]
+
+
+function RedirectToMail() {
+    if (typeof window === "undefined") return <MailLayout><EmailListLoading /></MailLayout>;
+    // const mailboxId = document.cookie.split("; ").find(row => row.startsWith("mailboxId="))?.split("=")[1];
+    const mailboxId = "demo";
+    return <MailLayout><EmailListLoading /><Navigate to={`/mail/${mailboxId}`} replace /></MailLayout> 
+}
 
 
 export default routes
