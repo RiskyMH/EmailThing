@@ -2,6 +2,8 @@
 import { useEffect } from "react";
 import { loadDemoData } from "@/utils/data/demo-data";
 import { initializeDB } from "@/utils/data/db";
+import { registerServiceWorker } from "@/utils/service-worker";
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     useEffect(() => {
@@ -14,6 +16,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             } catch (error) {
                 console.error('Failed to initialize:', error);
             }
+
+            // Register service worker
+            if (navigator.onLine) await registerServiceWorker();
         }
         
         init();

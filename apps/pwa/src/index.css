@@ -2,7 +2,7 @@
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
 @source  "../../web/app";
-/* @source  "." */
+@source  "../src";
 
 /* @import "@fontsource/inter/200.css";
 @import "@fontsource/inter/300.css";
