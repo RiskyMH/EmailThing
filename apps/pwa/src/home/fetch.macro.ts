@@ -6,7 +6,7 @@ export async function getGithubStars() {
     if (import.meta.hot) {
         return (import.meta.hot.data.githubStars ??= await fn())
     }
-    return await fn()
+    return await fn().catch(() => "∞")
 }
 
 

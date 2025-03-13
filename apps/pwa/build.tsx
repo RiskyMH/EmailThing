@@ -189,14 +189,15 @@ const generateServiceWorkerAssets = async () => {
   staticAssets.add('/offline');
   // staticAssets.add('/index.css');
   staticAssets.add('/logo.svg');
+  staticAssets.add('/icon.svg');
   staticAssets.add('/service.js');
   staticAssets.add('/manifest.webmanifest');
 
-  // Add font files
-  const distFiles = await readdir(path.join(import.meta.dir, "./dist/_bun"), { recursive: true });
-  for (const file of distFiles) {
-    staticAssets.add(`/_bun/${file.replace(/\\/g, '/')}`);
+  // Add static files from bun build
+  for (const file of result.outputs) {
+    staticAssets.add(path.relative(import.meta.dir + "/dist", file.path).replaceAll("\\", "/"))
   }
+
 
   // Update service worker with asset list
   const serviceWorkerPath = path.join(outdir, 'service.js');
