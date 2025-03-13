@@ -1,7 +1,7 @@
-export const registerServiceWorker = async () => {
+export const registerServiceWorker = async (hash?: string) => {
     if ('serviceWorker' in navigator) {
         try {
-            return await navigator.serviceWorker.register("/service.js");
+            return await navigator.serviceWorker.register(`/service.js?${hash ?? ""}`);
             // return navigator.serviceWorker.register("/service.js", {
             //     scope: '/'
             // });
