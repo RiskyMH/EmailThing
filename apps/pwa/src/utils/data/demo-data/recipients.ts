@@ -5,7 +5,7 @@ export const demoEmailRecipients: DBEmailRecipient[] = [
         id: "rec1", 
         emailId: "1",
         name: "EmailThing Team",
-        address: "team@emailthing.com",
+        address: "team@emailthing.app",
         cc: false,
     },
     {
@@ -19,14 +19,14 @@ export const demoEmailRecipients: DBEmailRecipient[] = [
         id: "rec3",
         emailId: "3",
         name: "EmailThing Updates",
-        address: "updates@emailthing.com", 
+        address: "updates@emailthing.app", 
         cc: false,
     },
     {
         id: "rec4",
         emailId: "4",
-        name: "Netflix",
-        address: "info@netflix.com",
+        name: "Microsoft",
+        address: "windows@microsoft.com",
         cc: false,
     },
     {
@@ -59,23 +59,30 @@ export const demoEmailRecipients: DBEmailRecipient[] = [
     },
     {
         id: "rec9",
+        emailId: "9",
+        name: "RiskyMH",
+        address: "risky@emailthing.app",
+        cc: false,
+    },
+    {
+        id: "rec10",
         emailId: "16",
         name: "Project Team",
         address: "team@company.com", 
         cc: false,
     },
     {
-        id: "rec10",
+        id: "rec11",
         emailId: "16",
         name: "Manager",
         address: "manager@company.com",
         cc: true,
     },
     {
-        id: "rec11",
+        id: "rec12",
         emailId: "17",
         name: "Security Alert",
-        address: "security@emailthing.com",
+        address: "security@emailthing.xyz",
         cc: false,
     }
 ];

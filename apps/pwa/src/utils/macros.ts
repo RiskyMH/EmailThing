@@ -1,5 +1,10 @@
+
+const defaultSvgl = {
+    "emailthing.app": "https://pwa.emailthing.app/icon.svg",
+}
+
 export async function getSvgl(): Promise<Record<string, string>> {
-    if (typeof window === "undefined" && process.platform === "win32") return ({})
+    if (typeof window === "undefined" && process.platform === "win32") return defaultSvgl
 
     const fn = async () => {
         try {
@@ -10,10 +15,10 @@ export async function getSvgl(): Promise<Record<string, string>> {
                 acc[url] = typeof svgl.route === "string" ? svgl.route : svgl.route.dark ?? svgl.route.light
                 return acc
             }, {})
-            return mapping
+            return { ...mapping, ...defaultSvgl }
         } catch (e) {
             console.error(e)
-            return {}
+            return defaultSvgl
         }
     }
 

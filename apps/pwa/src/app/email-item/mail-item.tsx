@@ -16,6 +16,7 @@ import TopButtons from "./mail-item-top-buttons";
 import LocalTime from "@/components/localtime.client";
 import { ViewSelect } from "@/(email)/mail/[mailbox]/[email]/components.client";
 import { useEmailImage } from "@/utils/fetching";
+import { cn } from "@/utils/tw";
 
 
 export default function MailItemSuspense() {
@@ -67,10 +68,9 @@ function MailItem() {
             <div className="flex flex-col gap-3 rounded-md bg-card p-3">
                 {/* from info and gravatar */}
                 <div className="flex gap-2">
-                    <Avatar className="size-12">
-                        {/* <AvatarImage className="rounded-full bg-tertiary" src={gravatar(email.sender?.address)} /> */}
-                        <AvatarImage className="rounded-full bg-tertiary" src={gravatar} />
-                        <AvatarFallback className="rounded-full bg-tertiary">
+                    <Avatar className={cn("size-12 bg-tertiary transition-all", (!gravatar || gravatar.startsWith("https://www.gravatar.com/avatar/") )? "rounded-full" : "rounded-lg" )}>
+                        <AvatarImage src={gravatar} className={cn(gravatar?.startsWith("https://www.gravatar.com/avatar/") ? "" : "p-2 rounded-[20%]")} />
+                        <AvatarFallback className="bg-tertiary">
                             {(email.sender?.name || email.sender?.address)?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>

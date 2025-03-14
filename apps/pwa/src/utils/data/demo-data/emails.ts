@@ -69,15 +69,15 @@ export const demoEmails: DBEmail[] = [
     {
         id: "4", 
         mailboxId: demoMailboxId,
-        subject: "Your Netflix subscription",
-        snippet: "We're having trouble with your payment method",
-        body: "Please update your payment information to continue enjoying Netflix.",
+        subject: "Your Windows subscription",
+        snippet: "We're so hapy to see you again!",
+        body: "We're so hapy to see you again! We've missed you!",
         createdAt: new Date("2024-01-12T16:45:00"),
         updatedAt: new Date("2024-01-12T16:45:00"),
         isRead: false,
         isStarred: false,
         isSender: false,
-        html: "<p>Please update your payment information to continue enjoying Netflix.</p>",
+        html: "<p>We're so hapy to see you again! We've missed you!</p>",
         size: 456,
         raw: "s3",
         replyTo: null,
@@ -169,7 +169,29 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: null,
         binnedAt: null
-    }
+    },
+    {
+        id: "9",
+        mailboxId: demoMailboxId,
+        subject: "You got a new GitHub star!",
+        snippet: "RiskyMH starred your repo EmailThing",
+        body: "RiskyMH starred your repo EmailThing",
+        createdAt: new Date("2024-01-12T16:45:00"),
+        updatedAt: new Date("2024-01-12T16:45:00"),
+        isRead: false,
+        isStarred: false,
+        isSender: false,
+        html: "<p>RiskyMH starred your repo EmailThing</p>",
+        size: 456,
+        raw: "s3",
+        replyTo: null,
+        givenId: null,
+        givenReferences: [],
+        tempId: null,
+        categoryId: null,
+        binnedAt: null
+    },
+
 ];
 
 // Sent emails
