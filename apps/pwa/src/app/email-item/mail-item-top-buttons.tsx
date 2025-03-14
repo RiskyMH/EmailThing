@@ -31,7 +31,7 @@ interface TopButtonsProps {
 export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }: TopButtonsProps) {
     const data = useLiveQuery(async () => {
         // const email = getEmail(mailboxId, emailId)
-        //     .then(email => ({ isStarred: email?.isStarred, binnedAt: email?.binnedAt, category: email?.categoryId }))
+        //     .then(email => ({ isStarred: email?.isStarred, binnedAt: email?.binnedAt, categoryid: email?.categoryId }))
         const categories = getCategories(mailboxId)
 
         return Promise.all([email, categories])
@@ -73,7 +73,7 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
                 <DropdownMenuContent>
                     <DropdownMenuItem asChild className="flex w-full cursor-pointer gap-2">
                         <ContextMenuAction
-                            icon={!email.category ? "CheckIcon" : "EmptyIcon"}
+                            icon={!email.categoryId ? "CheckIcon" : "EmptyIcon"}
                             action={() => onUpdateEmail({ categoryId: null })}
                         >
                             None
@@ -82,7 +82,7 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
                     {categories?.map((category) => (
                         <DropdownMenuItem key={category.id} asChild className="flex w-full cursor-pointer gap-2">
                             <ContextMenuAction
-                                icon={email.category === category.id ? "CheckIcon" : "EmptyIcon"}
+                                icon={email.categoryId === category.id ? "CheckIcon" : "EmptyIcon"}
                                 action={() => onUpdateEmail({
                                     categoryId: category.id,
                                 })}

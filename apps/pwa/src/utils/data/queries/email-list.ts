@@ -16,7 +16,7 @@ interface BaseEmail {
     isStarred?: boolean;
     isSender?: boolean;
     binnedAt: Date | null;
-    tempId?: string;
+    tempId?: string | null;
 }
 
 interface EmailWithRecipients extends BaseEmail {
@@ -38,7 +38,15 @@ interface EmailListResult {
     categories: {
         id: string;
         name: string;
-        color?: string;
+        color?: string | null;
+    }[];
+    allCount: number;
+}
+interface EmailCategoriesListResult {
+    categories: {
+        id: string;
+        name: string;
+        color?: string | null;
         count: number;
     }[];
     allCount: number;
@@ -57,7 +65,7 @@ export async function getEmailList({
     let emailQuery = (type === 'drafts'
         ? db.draftEmails.where('mailboxId').equals(mailboxId)
         : db.emails.where('mailboxId').equals(mailboxId)
-    ) as  ReturnType<typeof db.emails.where> 
+    ) as ReturnType<typeof db.emails.where>
 
     // Apply filters based on type
     if (type !== 'drafts') {
@@ -117,6 +125,63 @@ export async function getEmailList({
         .reverse() // Newest first
         .sortBy('createdAt');
 
+    // Get sender/recipient info for each email
+    const emailsWithDetails = await Promise.all(
+        (await emails).map(async (email) => {
+            if (type === 'drafts') {
+                return {
+                    ...email,
+                    from: {
+                        name: "demo@emailthing.app",
+                        address: "demo@emailthing.app"
+                    },
+                    to: email.to || [],
+                    isRead: true,
+                };
+            } else {
+                // For regular emails, get the sender and recipients
+                const [sender, recipients] = await Promise.all([
+                    db.emailSenders
+                        .where('emailId')
+                        .equals(email.id)
+                        .first(),
+                    db.emailRecipients
+                        .where('emailId')
+                        .equals(email.id)
+                        .toArray()
+                ]);
+
+                return {
+                    ...email,
+                    from: sender || {
+                        name: "Unknown",
+                        address: "unknown@emailthing.com"
+                    },
+                    recipients: recipients || []
+                };
+            }
+        })
+    );
+
+    // a list of names/ids/colors
+    const categories = type === 'drafts' ? [] :
+        await db.mailboxCategories
+            .where('mailboxId')
+            .equals(mailboxId)
+            .toArray()
+
+
+    return {
+        emails: emailsWithDetails,
+        categories
+    };
+}
+
+
+export async function getEmailCategoriesList({
+    mailboxId,
+    type,
+}: EmailListOptions): Promise<EmailCategoriesListResult> {
     // Get total count of all emails for this mailbox based on the query (just excluding category filtering)
     const allCount = type === 'drafts'
         ? await db.draftEmails.where('mailboxId').equals(mailboxId).count()
@@ -131,7 +196,7 @@ export async function getEmailList({
 
 
     // Get categories with counts based on current query
-    const categories = db.transaction('r',
+    const categories = await db.transaction('r',
         [db.emails, db.mailboxCategories],
         async () => {
             const cats = await db.mailboxCategories
@@ -175,51 +240,10 @@ export async function getEmailList({
         }
     );
 
-    // Get sender/recipient info for each email
-    const emailsWithDetails = await Promise.all(
-        (await emails).map(async (email) => {
-            if (type === 'drafts') {
-                return {
-                    ...email,
-                    from: {
-                        name: "demo@emailthing.app",
-                        address: "demo@emailthing.app"
-                    },
-                    to: email.to || [],
-                    isRead: true,
-                };
-            } else {
-                // For regular emails, get the sender and recipients
-                const [sender, recipients] = await Promise.all([
-                    db.emailSenders
-                        .where('emailId')
-                        .equals(email.id)
-                        .first(),
-                    db.emailRecipients
-                        .where('emailId')
-                        .equals(email.id)
-                        .toArray()
-                ]);
-
-                return {
-                    ...email,
-                    from: sender || {
-                        name: "Unknown",
-                        address: "unknown@emailthing.com"
-                    },
-                    recipients: recipients || []
-                };
-            }
-        })
-    );
-
-    await Promise.all([emailsWithDetails, categories])
-
     return {
-        emails: await emailsWithDetails,
-        categories: await categories,
+        categories: categories,
         allCount,
-        mailboxPlan: mailboxId === 'demo' ? { plan: 'DEMO' } : undefined
+        mailboxPlan: mailboxId === 'demo' ? { plan: 'DEMO' } : undefined,
     };
 }
 
@@ -399,7 +423,7 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
             case "unread":
                 query = query.filter(email => !email.isRead && !email.isSender && !email.binnedAt && !email.tempId);
                 break;
-            case "binned": 
+            case "binned":
                 query = query.filter(email => !!email.binnedAt && !email.isSender && !email.tempId);
                 break;
             case "drafts":

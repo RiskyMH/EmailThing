@@ -1,7 +1,7 @@
 "use client"
 import { useParams, useSearchParams } from "react-router-dom"
 import { Suspense } from "react"
-import Loading from "./email-list-loading"
+import Loading, { EmailListLoadingSkeleton, EmailListCategoryLoadingSkeleton } from "./email-list-loading"
 import { Button } from "@/components/ui/button"
 import RefreshButton from "./refresh-button"
 import { SmartDrawer, SmartDrawerTrigger, SmartDrawerContent } from "@/components/ui/smart-drawer"
@@ -11,7 +11,7 @@ import { EmailItem } from "./email-list-item"
 import Link from "@/components/link"
 import { cn } from "@/utils/tw"
 import { formatTimeAgo } from "@/utils/tools"
-import { getEmailList } from "@/utils/data/queries/email-list"
+import { getEmailList, getEmailCategoriesList } from "@/utils/data/queries/email-list"
 import { useLiveQuery } from 'dexie-react-hooks';
 
 
@@ -49,6 +49,20 @@ export interface Category {
 
 
 function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
+
+    return (
+        <>
+            <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
+                <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2">
+                    <Categories filter={type} />
+                </div>
+
+                <Emails filter={type} />
+            </div>
+        </>
+    );
+}
+function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     const params = useParams<"mailboxId">()
     const searchParams = useSearchParams()[0]
     const categoryId = searchParams.get("category") as string | null
@@ -69,99 +83,125 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
     const error = null
 
     if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !data) return <Loading />
+    if (isLoading || !data) return <EmailListLoadingSkeleton />
 
-    const { emails, categories, mailboxPlan, allCount } = data
+    const { emails, categories } = data
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 
     return (
         <>
-            <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
-                <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2">
-                    <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
-                    <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
-                        <CategoryItem
-                            circleColor={null}
-                            name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
-                            count={allCount}
-                            link={baseUrl}
-                            category={null}
-                            isCurrent={!categoryId}
-                        />
-                        {(type !== "drafts" && type !== "temp" && !search) && (categories || []).map((category) => (
-                            <CategoryItem
-                                isCurrent={category.id === categoryId}
-                                key={category.id}
-                                circleColor={category.color || "grey"}
-                                name={category.name}
-                                count={category.count || 0}
-                                link={baseUrl}
-                                category={category.id}
-                            />
-                        ))}
-                    </div>
-                    {type === "temp" && (
-                        <SmartDrawer>
-                            <SmartDrawerTrigger asChild>
-                                <Button
-                                    size="sm"
-                                    className="-my-1 h-auto py-1"
-                                    disabled={
-                                        // biome-ignore lint/complexity/useOptionalChain: <explanation>
-                                        ((categories && categories?.length) || 0) >=
-                                        tempEmailsLimit[mailboxPlan?.plan as keyof typeof tempEmailsLimit]
-                                    }
-                                >
-                                    Create email
-                                </Button>
-                            </SmartDrawerTrigger>
-                            <SmartDrawerContent className="sm:max-w-[425px]">
-                                <CreateTempEmailForm mailboxId={mailboxId} />
-                            </SmartDrawerContent>
-                        </SmartDrawer>
-                    )}
-                    <div className="ms-auto flex h-6 shrink-0 items-center justify-center">
-                        <RefreshButton />
-                    </div>
+            {type === "trash" && (
+                <div className="text-center font-bold text-muted-foreground">
+                    Messages that have been in the Bin for more than 30 days will be deleted automatically
                 </div>
-                {type === "trash" && (
-                    <div className="text-center font-bold text-muted-foreground">
-                        Messages that have been in the Bin for more than 30 days will be deleted automatically
-                    </div>
-                )}
-                {type === "temp" && (
-                    <div className="text-center font-bold text-muted-foreground">
-                        {categoryId
-                            ? // @ts-expect-error types are boring
-                            `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
-                            : "Email addresses will be automatically deleted in 24 hours after creation."}
-                        {categoryId && (
-                            <p className="pt-1 font-normal">
-                                {/* @ts-expect-error types are boring */}
-                                {currentCategory?.alias}
-                            </p>
-                        )}
-                    </div>
-                )}
-                {emails.length === 0 && (
-                    <div className="text-center text-muted-foreground">
-                        {search
-                            ? `Couldn't find any emails matching "${search}"`
-                            : type === "drafts"
-                                ? "No drafts"
-                                : "No emails"}
-                    </div>
-                )}
-                {emails.map((email) => (
-                    <EmailItem
-                        key={email.id}
-                        email={email}
-                        categories={categories || undefined}
-                        mailboxId={mailboxId}
-                        type={type}
+            )}
+            {type === "temp" && (
+                <div className="text-center font-bold text-muted-foreground">
+                    {categoryId
+                        ? // @ts-expect-error types are boring
+                        `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
+                        : "Email addresses will be automatically deleted in 24 hours after creation."}
+                    {categoryId && (
+                        <p className="pt-1 font-normal">
+                            {/* @ts-expect-error types are boring */}
+                            {currentCategory?.alias}
+                        </p>
+                    )}
+                </div>
+            )}
+            {emails.length === 0 && (
+                <div className="text-center text-muted-foreground">
+                    {search
+                        ? `Couldn't find any emails matching "${search}"`
+                        : type === "drafts"
+                            ? "No drafts"
+                            : "No emails"}
+                </div>
+            )}
+            {emails.map((email) => (
+                <EmailItem
+                    key={email.id}
+                    email={email}
+                    categories={categories || undefined}
+                    mailboxId={mailboxId}
+                    type={type}
+                />
+            ))}
+        </>
+    );
+}
+
+
+function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
+    const params = useParams<"mailboxId">()
+    const searchParams = useSearchParams()[0]
+    const search = searchParams.get("q") as string | null
+    const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
+
+    const data = useLiveQuery(async () => {
+        const emails = await getEmailCategoriesList({
+            mailboxId,
+            type,
+        })
+        return emails
+    }, [mailboxId, type])
+
+    const isLoading = !data
+    const error = null
+
+    if (error) return <div>failed to load {type} ({error})</div>
+    if (isLoading || !data) return <EmailListCategoryLoadingSkeleton />
+
+    const { categories, mailboxPlan, allCount } = data
+
+    const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
+
+    return (
+        <>
+            <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
+            <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
+                <CategoryItem
+                    circleColor={null}
+                    name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
+                    count={allCount}
+                    link={baseUrl}
+                    category={null}
+                    main
+                />
+                {(type !== "drafts" && type !== "temp" && !search) && (categories || []).map((category) => (
+                    <CategoryItem
+                        key={category.id}
+                        circleColor={category.color || "grey"}
+                        name={category.name}
+                        count={category.count || 0}
+                        link={baseUrl}
+                        category={category.id}
                     />
                 ))}
+            </div>
+            {type === "temp" && (
+                <SmartDrawer>
+                    <SmartDrawerTrigger asChild>
+                        <Button
+                            size="sm"
+                            className="-my-1 h-auto py-1"
+                            disabled={
+                                // biome-ignore lint/complexity/useOptionalChain: <explanation>
+                                ((categories && categories?.length) || 0) >=
+                                tempEmailsLimit[mailboxPlan?.plan as keyof typeof tempEmailsLimit]
+                            }
+                        >
+                            Create email
+                        </Button>
+                    </SmartDrawerTrigger>
+                    <SmartDrawerContent className="sm:max-w-[425px]">
+                        <CreateTempEmailForm mailboxId={mailboxId} />
+                    </SmartDrawerContent>
+                </SmartDrawer>
+            )}
+            <div className="ms-auto flex h-6 shrink-0 items-center justify-center">
+                <RefreshButton />
             </div>
         </>
     );
@@ -173,15 +213,20 @@ export function CategoryItem({
     count,
     link,
     category,
-    isCurrent = false,
+    main = false,
 }: {
     circleColor: string | null;
     name: string;
     count: number;
     link: string;
     category: string | null;
-    isCurrent: boolean;
+    main?: boolean;
 }) {
+    const searchParams = useSearchParams()[0]
+    const categoryId = searchParams.get("category") as string | null
+
+    const isCurrent = main ? !categoryId : categoryId === category
+
     return (
         <Link
             href={link + (category ? `?category=${category}` : "")}

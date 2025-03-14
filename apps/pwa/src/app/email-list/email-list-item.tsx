@@ -40,7 +40,7 @@ export interface EmailItemProps {
     };
     mailboxId: string;
     type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
-    categories?: { id: string, name: string, color?: string }[] | null;
+    categories?: { id: string, name: string, color?: string | null }[] | null;
 }
 
 export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps) {
