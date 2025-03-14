@@ -36,7 +36,7 @@ export const DefaultDomain = sqliteTable(
 export const Stats = sqliteTable(
     "stats",
     {
-        time: text("time").notNull().$type<`${number}-${number}-${number}`>(), // 2024-12-31
+        time: text("time").notNull().$type<`${number}-${number}-${number}`>(), // 2025-12-31
         type: text("type", { enum: ["receive-email", "send-email"] }).notNull(),
         value: int("value").notNull(),
     },

@@ -32,7 +32,7 @@ Sending your emails to the front-end app. Mainly for custom domains and cloudfla
   "to": "RiskyMH@riskymh.dev",
   "from": "RiskyMH@emailthing.xyz",
   "email": 
-"Date: Mon, 1 Apr 2024 01:00:00 +0000
+"Date: Mon, 1 Apr 2025 01:00:00 +0000
 From: RiskyMH <RiskyMH@emailthing.xyz>
 Subject: Hello, World!
 To: <RiskyMH@riskymh.dev>

@@ -4,8 +4,8 @@ export const demoEmailRecipients: DBEmailRecipient[] = [
     {
         id: "rec1", 
         emailId: "1",
-        name: "EmailThing Team",
-        address: "team@emailthing.app",
+        name: "You",
+        address: "demo@emailthing.app",
         cc: false,
     },
     {

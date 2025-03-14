@@ -3,8 +3,8 @@ import { DBEmailSender } from "../types";
 export const demoEmailSenders: DBEmailSender[] = [
     {
         emailId: "1",
-        name: "EmailThing Team", 
-        address: "team@emailthing.app",
+        name: "EmailThing", 
+        address: "hello@emailthing.app",
     },
     {
         emailId: "2",

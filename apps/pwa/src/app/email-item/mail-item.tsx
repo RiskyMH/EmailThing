@@ -1,22 +1,23 @@
 "use client"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getCategories, getEmailWithDetails, updateEmailProperties } from "@/utils/data/queries/email-list"
+import { getEmailWithDetails, updateEmailProperties } from "@/utils/data/queries/email-list"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ChevronDown, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, Loader2, PaperclipIcon, VideoIcon } from "lucide-react"
-import { marked } from "marked"
-import { Suspense, useEffect } from "react"
+import { ChevronDown, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, Loader2, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
+import { parse as markedParse } from "marked"
+import { Suspense, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import Loading from "./loading"
 import Link from "@/components/link"
 import TopButtons from "./mail-item-top-buttons";
 import LocalTime from "@/components/localtime.client";
-import { ViewSelect } from "@/(email)/mail/[mailbox]/[email]/components.client";
 import { useEmailImage } from "@/utils/fetching";
 import { cn } from "@/utils/tw";
+import useSWR from "swr";
+import { parseHTML } from "./parse-html";
 
 
 export default function MailItemSuspense() {
@@ -30,50 +31,43 @@ function MailItem() {
     const mailboxId = params.mailboxId || "demo"
     const emailId = params.mailId || ""
 
-    const searchParams = useSearchParams()[0]
-    const view = (searchParams.get("view") || "markdown") as "text" | "markdown" | "html"
-
-    const data = useLiveQuery(async () => {
+    const email = useLiveQuery(async () => {
         if (!emailId) return
-        return Promise.all([getEmailWithDetails(mailboxId, emailId), getCategories(mailboxId)])
+        const d = await getEmailWithDetails(mailboxId, emailId)
+        return d
     }, [mailboxId, emailId])
 
+    const markedAsRead = useRef(false)
     useEffect(() => {
-        if (data && data[0] && !data[0].isRead) {
-            updateEmail({ isRead: true }, { auto: true})
+        if (email && !email.isRead && !markedAsRead.current) {
+            markedAsRead.current = true
+            updateEmail({ isRead: true }, { auto: true })
         }
-    }, [data])
+        else if (email && !email.isRead) {
+            markedAsRead.current = true
+        }
+    }, [email])
 
-    const gravatar = useEmailImage(data?.[0]?.sender?.address || "")
-    
-    if (!data || !params.mailId || !params.mailboxId) return <Loading />
-    const [email, categories] = data
-    
-    if (!email) return <Loading />
+    if (!email || !params.mailId || !params.mailboxId) return <Loading />
 
-    const updateEmail = async (updates: any, { auto }: { auto?: boolean } = {}) => {
+    const updateEmail = async (updates: Record<string, any>, { auto }: { auto?: boolean } = {}) => {
         console.log("updateEmail", updates, auto)
         const result = await updateEmailProperties(mailboxId, emailId, updates);
         if (!auto) toast(result.message, { description: result.description });
     };
 
-    const attachmentsPresigned = []
+    // const attachmentsPresigned = []
 
 
     return (
         <div className="flex size-full min-w-0 flex-col gap-3 overflow-auto p-5">
-            <TopButtons mailboxId={params.mailboxId} emailId={params.mailId} email={email} categories={categories} onUpdateEmail={updateEmail} />
+            <TopButtons mailboxId={params.mailboxId} emailId={params.mailId} email={email} onUpdateEmail={updateEmail} />
 
             <h1 className="mt-3 break-words font-bold text-2xl sm:text-3xl">{email.subject}</h1>
             <div className="flex flex-col gap-3 rounded-md bg-card p-3">
                 {/* from info and gravatar */}
                 <div className="flex gap-2">
-                    <Avatar className={cn("size-12 bg-tertiary transition-all", (!gravatar || gravatar.startsWith("https://www.gravatar.com/avatar/") )? "rounded-full" : "rounded-lg" )}>
-                        <AvatarImage src={gravatar} className={cn(gravatar?.startsWith("https://www.gravatar.com/avatar/") ? "" : "p-2 rounded-[20%]")} />
-                        <AvatarFallback className="bg-tertiary">
-                            {(email.sender?.name || email.sender?.address)?.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
+                    <EmailPicture email={email.sender?.address || ""} fallback={email.sender?.name?.slice(0, 2).toUpperCase()} />
 
                     <div className="flex flex-col overflow-hidden">
                         <div className="flex gap-2 text-ellipsis whitespace-nowrap">
@@ -199,7 +193,7 @@ function MailItem() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="min-w-[10rem] ">
-                            <ViewSelect selected={view} htmlValid={!!email.html} />
+                            <ViewSelect htmlValid={!!email.html} />
                             {email.raw !== "draft" && (
                                 <>
                                     <DropdownMenuSeparator />
@@ -243,12 +237,12 @@ function MailItem() {
                 </div>
 
                 {/* attachments */}
-                {attachmentsPresigned.length > 0 && (
+                {email.attachments.length > 0 && (
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                        {attachmentsPresigned.map((a) => (
+                        {email.attachments.map((a) => (
                             <a
                                 key={a.id}
-                                href={a.url}
+                                href={`/mail/${params.mailboxId}/${params.mailId}/attachment/${a.id}`}
                                 target="_blank"
                                 className="flex items-center gap-2 rounded-md bg-background p-2 hover:bg-background/80"
                                 rel="noreferrer"
@@ -262,7 +256,7 @@ function MailItem() {
                         ))}
                     </div>
                 )}
-                <EmailContent mailboxId={params.mailboxId} emailId={params.emailId} email={email} view={view} />
+                <EmailContent mailboxId={params.mailboxId} emailId={params.mailId} email={email} />
             </div>
 
             {/* // TODO: show references snippets for email */}
@@ -274,36 +268,83 @@ function EmailContent({
     mailboxId,
     emailId,
     email,
-    view,
-}: { mailboxId: string; emailId: string; email: any; view: "text" | "markdown" | "html" }) {
+}: { mailboxId: string; emailId: string; email: { body: string; html: string | null } }) {
 
-    // if (view === "text")
-    return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal">{email.body}</p>;
-    // if (view === "markdown")
-    //     return (
-    //         <ParseHTML
-    //             className="prose dark:prose-invert max-w-full overflow-auto break-words"
-    //             body={await marked.parse(email.body, { breaks: true })}
-    //         />
-    //     );
-    // if (view === "html")
-    //     return (
-    //         <iframe
-    //             className="h-screen w-full rounded-lg bg-card"
-    //             sandbox="allow-popups"
-    //             srcDoc={await parseHTML(email.html || email.body, true)}
-    //             title="The Email"
-    //         />
-    //     );
+    const searchParams = useSearchParams()[0]
+    const view = (searchParams.get("view") || "markdown") as "text" | "markdown" | "html"
+
+    const { data } = useSWR(`/mail/${mailboxId}/${emailId}/email.html&view=${view}`, async () => {
+        if (view === "text") return email.body
+        if (view === "markdown") {
+            return parseHTML(await markedParse(email.body, { breaks: true }), false)
+        }
+        if (view === "html") return parseHTML(email.html || email.body, true)
+    }, {
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+        revalidateIfStale: false,
+        // revalidateOnMount: false,
+    })
+
+
+    if (view === "text") {
+        return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal">{email.body}</p>;
+    }
+
+    else if (view === "markdown") {
+        // if (!data) return <EmailContentSpinner />;
+        if (!data) return <p className="prose dark:prose-invert max-w-full overflow-auto break-words">{email.body}</p>;
+        return (
+            <div
+                className="prose dark:prose-invert max-w-full overflow-auto break-words"
+                dangerouslySetInnerHTML={{ __html: data }}
+            />
+        );
+    }
+
+    else if (view === "html") {
+        if (!data) return <EmailContentSpinner />
+        return (
+            <iframe
+                className="h-screen w-full rounded-lg bg-card"
+                sandbox="allow-popups"
+                srcDoc={data}
+                title="The Email"
+            />
+        );
+    }
+
+    return null;
 }
 
 function EmailContentSpinner() {
     return (
-        <div className="flex h-screen w-full flex-col items-center justify-center">
+        <div className="flex h-screen w-full flex-col items-center justify-center fade-in">
             <Loader2 className="size-12 animate-spin text-muted-foreground" />
         </div>
     );
 }
+
+function ViewSelect({
+    htmlValid = false,
+}: { htmlValid?: boolean }) {
+    const navigate = useNavigate()
+    const searchParams = useSearchParams()[0]
+    const view = (searchParams.get("view") || "markdown")
+
+    function onValueChange(v: string) {
+        navigate(`?view=${v}`, { replace: true });
+    }
+
+    return (
+        <DropdownMenuRadioGroup value={view} onValueChange={onValueChange}>
+            <DropdownMenuRadioItem value="text">Text</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="markdown" defaultChecked>Markdown</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="html" disabled={!htmlValid}>HTML</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+    );
+}
+
 
 function size(bytes: number) {
     const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -339,3 +380,19 @@ function GetAttachmentIcon(extension: string) {
     const ReturnIcon = attachmentExtensionMap[extension] || PaperclipIcon;
     return <ReturnIcon className="size-5 text-muted-foreground" />;
 }
+
+
+function EmailPicture({ email, fallback }: { email: string, fallback?: string }) {
+    const img = useEmailImage(email)
+    const isGravatar = !img || img.startsWith("https://www.gravatar.com/avatar/")
+
+    return (
+        <Avatar className={cn("size-12 bg-tertiary transition-all", isGravatar ? "rounded-full" : "rounded-lg")}>
+            <AvatarImage src={img} className={(isGravatar ? "" : "p-2 rounded-[20%]")} />
+            <AvatarFallback className="bg-tertiary">
+                {fallback}
+            </AvatarFallback>
+        </Avatar>
+    )
+}
+

@@ -223,6 +223,11 @@ export async function getEmailList({
     };
 }
 
+
+export const getEmail = (mailboxId: string, emailId: string) => {
+    return db.emails.where('id').equals(emailId).and(item => item.mailboxId === mailboxId).first();
+}
+
 // Helper function to get a single email with related data
 export async function getEmailWithDetails(mailboxId: string, emailId: string) {
     return db.transaction('r',
