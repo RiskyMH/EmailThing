@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MailboxLink } from "@/(email)/mail/[mailbox]/components.client";
 import { SidebarLink } from "@/(email)/mail/[mailbox]/sidebar.client";
-import { gravatar } from "@/utils/tools";
 import { cn } from "@/utils/tw";
 
 import {
@@ -30,6 +29,7 @@ import Link from "@/components/link";
 import { Suspense, use } from "react";
 import { getEmailCount } from "@/utils/data/queries/email-list";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useGravatar } from "@/utils/fetching";
 
 export const Sidebar = ({ mailbox: mailboxId, className }: { mailbox: string; className?: string }) => {
     const items = [
@@ -219,7 +219,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     }
 
     // const gravatarImg = use(gravatar(defaultAlias?.alias ?? "ab@c.com"))
-    const gravatarImg = "https://riskymh.dev/fire.svg"
+    const gravatarImg = useGravatar(defaultAlias?.alias ?? "ab@c.com")
 
     return (
         <DropdownMenu>

@@ -95,13 +95,9 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                             "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56",
                             !email.isRead ? "font-bold" : "text-foreground/80",
                         )}
-                        title={type === 'drafts' ? 
-                          email.to?.[0]?.address ?? 'No recipient' : 
-                          email.from?.address ?? 'No sender'}
+                        title={email.from?.address ?? "uh?"}
                     >
-                        {type === 'drafts' ? 
-                          (email.to?.[0]?.name || email.to?.[0]?.address || 'No recipient') :
-                          (email.from?.name || email.from?.address || 'No sender')}
+                        {email.from?.name || email.from?.address}
                     </span>
                     {/* </TooltipText> */}
 

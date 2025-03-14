@@ -14,7 +14,7 @@ export const demoEmailSenders: DBEmailSender[] = [
     {
         emailId: "3",
         name: "EmailThing Updates",
-        address: "updates@emailthing.com",
+        address: "updates@emailthing.app",
     },
     {
         emailId: "4",
@@ -33,8 +33,8 @@ export const demoEmailSenders: DBEmailSender[] = [
     },
     {
         emailId: "7",
-        name: "EmailThing Pro",
-        address: "pro@emailthing.com",
+        name: "EmailThing",
+        address: "system@emailthing.app",
     },
     {
         emailId: "8",
@@ -44,11 +44,11 @@ export const demoEmailSenders: DBEmailSender[] = [
     {
         emailId: "16",
         name: "Me",
-        address: "me@emailthing.com",
+        address: "me@emailthing.xyz",
     },
     {
         emailId: "17", 
         name: "Security Alert",
-        address: "security@emailthing.com",
+        address: "system@emailthing.app",
     },
 ];

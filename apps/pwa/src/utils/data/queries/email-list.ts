@@ -131,7 +131,7 @@ export async function getEmailList({
 
 
     // Get categories with counts based on current query
-    const categories = await db.transaction('r',
+    const categories = db.transaction('r',
         [db.emails, db.mailboxCategories],
         async () => {
             const cats = await db.mailboxCategories
@@ -182,10 +182,11 @@ export async function getEmailList({
                 return {
                     ...email,
                     from: {
-                        name: "Me",
-                        address: email.from || "me@emailthing.com"
+                        name: "demo@emailthing.app",
+                        address: "demo@emailthing.app"
                     },
-                    to: email.to || []
+                    to: email.to || [],
+                    isRead: true,
                 };
             } else {
                 // For regular emails, get the sender and recipients
@@ -212,9 +213,11 @@ export async function getEmailList({
         })
     );
 
+    await Promise.all([emailsWithDetails, categories])
+
     return {
-        emails: emailsWithDetails,
-        categories,
+        emails: await emailsWithDetails,
+        categories: await categories,
         allCount,
         mailboxPlan: mailboxId === 'demo' ? { plan: 'DEMO' } : undefined
     };

@@ -8,14 +8,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ChevronDown, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, Loader2, PaperclipIcon, VideoIcon } from "lucide-react"
 import { marked } from "marked"
-import { useState, Suspense, useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { toast } from "sonner"
 import Loading from "./loading"
 import Link from "@/components/link"
 import TopButtons from "./mail-item-top-buttons";
-import { gravatar } from "@/utils/tools";
 import LocalTime from "@/components/localtime.client";
 import { ViewSelect } from "@/(email)/mail/[mailbox]/[email]/components.client";
+import { useEmailImage } from "@/utils/fetching";
 
 
 export default function MailItemSuspense() {
@@ -43,9 +43,11 @@ function MailItem() {
         }
     }, [data])
 
+    const gravatar = useEmailImage(data?.[0]?.sender?.address || "")
+    
     if (!data || !params.mailId || !params.mailboxId) return <Loading />
     const [email, categories] = data
-
+    
     if (!email) return <Loading />
 
     const updateEmail = async (updates: any, { auto }: { auto?: boolean } = {}) => {
@@ -55,6 +57,7 @@ function MailItem() {
     };
 
     const attachmentsPresigned = []
+
 
     return (
         <div className="flex size-full min-w-0 flex-col gap-3 overflow-auto p-5">
@@ -66,7 +69,7 @@ function MailItem() {
                 <div className="flex gap-2">
                     <Avatar className="size-12">
                         {/* <AvatarImage className="rounded-full bg-tertiary" src={gravatar(email.sender?.address)} /> */}
-                        <AvatarImage className="rounded-full bg-tertiary" src={"https://emailthing.app/logo.svg"} />
+                        <AvatarImage className="rounded-full bg-tertiary" src={gravatar} />
                         <AvatarFallback className="rounded-full bg-tertiary">
                             {(email.sender?.name || email.sender?.address)?.slice(0, 2).toUpperCase()}
                         </AvatarFallback>

@@ -1,11 +1,9 @@
 "use client"
 import { useParams, useSearchParams } from "react-router-dom"
-import useSWR from "swr"
-import { Suspense, useRef } from "react"
+import { Suspense } from "react"
 import Loading from "./email-list-loading"
-import { demoEmails, demoEmailsDraft, sentEmails, demoCategories, tempEmails } from "../demo-data"
 import { Button } from "@/components/ui/button"
-import { RefreshButton } from "@/(email)/mail/[mailbox]/components.client"
+import RefreshButton from "./refresh-button"
 import { SmartDrawer, SmartDrawerTrigger, SmartDrawerContent } from "@/components/ui/smart-drawer"
 import { tempEmailsLimit } from "@/utils/limits";
 import { CreateTempEmailForm } from "./email-list-temp-modal"
@@ -13,8 +11,6 @@ import { EmailItem } from "./email-list-item"
 import Link from "@/components/link"
 import { cn } from "@/utils/tw"
 import { formatTimeAgo } from "@/utils/tools"
-import { RotateCcwIcon } from "lucide-react"
-import { toast } from "sonner"
 import { getEmailList } from "@/utils/data/queries/email-list"
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -58,7 +54,7 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
     const categoryId = searchParams.get("category") as string | null
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
-    
+
     const data = useLiveQuery(async () => {
         const emails = await getEmailList({
             mailboxId,
@@ -93,7 +89,7 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
                             category={null}
                             isCurrent={!categoryId}
                         />
-                        { (type !== "drafts" && type !== "temp" && !search) && (categories || []).map((category) => (
+                        {(type !== "drafts" && type !== "temp" && !search) && (categories || []).map((category) => (
                             <CategoryItem
                                 isCurrent={category.id === categoryId}
                                 key={category.id}
@@ -126,16 +122,7 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
                         </SmartDrawer>
                     )}
                     <div className="ms-auto flex h-6 shrink-0 items-center justify-center">
-                        {/* <RefreshButton className="shrink-0" /> */}
-                        <Button
-                            variant="ghost"
-                            size="auto"
-                            className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground "
-                            onClick={() => toast.success("Refreshed")}
-                        >
-                            <RotateCcwIcon className="size-5 text-muted-foreground" />
-                        </Button>
-
+                        <RefreshButton />
                     </div>
                 </div>
                 {type === "trash" && (
