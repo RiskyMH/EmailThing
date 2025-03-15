@@ -30,13 +30,19 @@ import { Suspense, use } from "react";
 import { getEmailCount } from "@/utils/data/queries/email-list";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useGravatar } from "@/utils/fetching";
+import { useParams } from "react-router-dom";
 
-export const Sidebar = ({ mailbox: mailboxId, className }: { mailbox: string; className?: string }) => {
+export const Sidebar = ({ className }: { className?: string }) => {
+    const params = useParams<"mailboxId" | "mailId">()
+    const mailboxId = params.mailboxId || "demo"
+
+
     const items = [
         {
             name: "Inbox",
             icon: InboxIcon,
             href: `/mail/${mailboxId}`,
+            alaisMatch: `/mail`
         },
         {
             name: "Draft",
@@ -124,12 +130,14 @@ function LinkElement({
     icon: Icon,
     disabled,
     className,
+    alaisMatch,
 }: {
     href: string;
     name: string;
     icon: any;
     disabled?: boolean;
     className?: string;
+    alaisMatch?: string;
 }) {
     return (
         <Button
@@ -140,7 +148,7 @@ function LinkElement({
                 className,
             )}
         >
-            <SidebarLink href={href} className="" disabled={disabled}>
+            <SidebarLink href={href} className="" disabled={disabled} alaisMatch={alaisMatch}>
                 <Icon className="size-6 self-center sm:max-lg:mx-auto" />
                 <span className="self-center sm:max-lg:hidden">{name}</span>
                 {name === "Inbox" ? (

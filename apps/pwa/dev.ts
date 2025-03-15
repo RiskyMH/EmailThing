@@ -12,6 +12,7 @@ const server = serve({
     "/register": home,
 
     "/mail/*": app,
+    "/mail": app,
 
     "/docs": docs,
     "/docs/*": docs,

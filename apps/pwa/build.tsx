@@ -119,7 +119,7 @@ const start2 = performance.now();
 import { renderToStaticMarkup } from "react-dom/server";
 import type _routes from "./src/routes.js";
 import { createStaticHandler, createStaticRouter, StaticRouterProvider } from "react-router-dom";
-
+import type { RouteObject } from "react-router-dom";
 const routes = (await import("./src/routes.js")).default as typeof _routes;
 
 
@@ -135,13 +135,14 @@ const templates = {
   "app.html": appHtml,
   "docs.html": docsHtml,
   "home.html": homeHtml,
-}
+} as Record<string, string>
 
 
 const { query, dataRoutes } = createStaticHandler(routes);
 
-for (const route of routes) {
-  if (route.path === "*") continue;
+
+async function processRoute(route: RouteObject & { preferTemplate?: string }) {
+  if (!route.path || route.path === "*") return;
 
   const path = route.path
     .replaceAll(/:(\w*)/g, '[$1]')
@@ -149,7 +150,7 @@ for (const route of routes) {
   const context = await query(new Request(`http://localhost${path}`));
 
   if (context instanceof Response) {
-    continue;
+    return;
   }
 
 
@@ -170,8 +171,21 @@ for (const route of routes) {
 
   await Bun.write(`./dist/${path === "/" ? "index" : path}.html`, _html)
   // await Bun.write(`./dist/${path}/index.html`, _html)
-
 }
+
+
+const promises = []
+for (const route of routes) {
+  if (route.children) {
+    for (const child of route.children) {
+      promises.push(processRoute(child))
+    }
+  } else {
+    promises.push(processRoute(route))
+  }
+}
+
+await Promise.all(promises)
 
 const buildTime2 = (performance.now() - start2).toFixed(2);
 

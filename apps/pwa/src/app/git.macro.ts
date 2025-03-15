@@ -1,5 +1,5 @@
 export async function getSha(): Promise<string | null> {
-    if (typeof window === "undefined" && process.platform === "win32") return null
+    if (typeof window === "undefined" && process?.platform === "win32") return null
 
     const fn = async () => (await Bun.$`git rev-parse HEAD`.text()).trim()
 

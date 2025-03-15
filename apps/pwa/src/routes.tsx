@@ -11,7 +11,7 @@ export const routes = ([
     ...DocsRoutes.map(e => ({ preferTemplate: "docs.html", ...e })),
     ...HomeRoutes.map(e => ({ preferTemplate: "home.html", ...e })),
 
-] satisfies RouteObject[] & { preferTemplate?: string }[])
+] as RouteObject[] & { preferTemplate?: string }[])
     .map(e => ({ errorElement: <ErrorPage />, ...e, }))
 
 

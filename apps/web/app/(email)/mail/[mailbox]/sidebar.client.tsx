@@ -13,7 +13,8 @@ export function SidebarLink({
     className,
     children,
     disabled,
-}: PropsWithChildren<{ href: string; className: string; disabled?: boolean }>) {
+    alaisMatch,
+}: PropsWithChildren<{ href: string; className: string; disabled?: boolean, alaisMatch?: string }>) {
     const pathName = usePathname();
 
     if (disabled) {
@@ -32,7 +33,7 @@ export function SidebarLink({
     return (
         <Link href={href} className={cn(className, pathName === href && "text-blue dark:text-foreground")}>
             {/* make a vertical line on very left of screen */}
-            {pathName === href && (
+            {pathName === href || (alaisMatch && pathName === alaisMatch) && (
                 <span className="sm:-ms-6 absolute start-0 me-1 h-10 w-1 self-center rounded-e bg-blue sm:relative sm:start-auto dark:bg-foreground" />
             )}
 

@@ -1,4 +1,4 @@
-import type { RouteObject } from "react-router-dom";
+import { type RouteObject, Outlet } from "react-router-dom";
 import Docs from "./1-introduction";
 import CustomDomainDocs from "./2-custom-domain";
 import DocsLayout from "@/(docs)/layout"
@@ -9,17 +9,18 @@ import CustomDomainPage from "@/(docs)/docs/custom-domain/page"
 export const routes = [
     {
         path: "/docs",
-        element: <DocsLayout><DocsLayout2>  <AboutPage />  </DocsLayout2></DocsLayout>,
+        element: <DocsLayout><DocsLayout2><Outlet /></DocsLayout2></DocsLayout>,
+        children: [
+            {
+                path: "/docs",
+                element: <AboutPage />,
+            },
+            {
+                path: "/docs/custom-domain",
+                element: <CustomDomainPage />,
+            },
+        ],
     },
-    {
-        path: "/docs/custom-domain",
-        element: <DocsLayout><DocsLayout2>  <CustomDomainPage />  </DocsLayout2></DocsLayout>,
-    },
-
-    // {
-    //   path: "/docs",
-    //   element: <AboutPage />,
-    // },
 ] satisfies RouteObject[]
 
 

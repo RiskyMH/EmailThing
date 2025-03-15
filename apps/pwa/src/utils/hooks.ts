@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useState } from "react";
+import { useParams,  } from "react-router-dom";
 
 export function useOnline() {
     const [online, setOnline] = useState<boolean | null>(navigator?.onLine ?? null);
@@ -15,4 +16,10 @@ export function useOnline() {
     }, []);
 
     return online;
+}
+
+
+export function useMailbox() {
+    const params = useParams<"mailboxId">()
+    return useMemo(() => params.mailboxId, [params.mailboxId])
 }

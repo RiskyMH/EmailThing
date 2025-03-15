@@ -5,8 +5,12 @@ import Link from "next/link";
 import { Search } from "@/(email)/mail/[mailbox]/nav.search";
 import Sidebar from "./root-layout-sidebar";
 import { MobileNav } from "@/(email)/mail/[mailbox]/sidebar.client";
+import { useParams } from "react-router-dom";
 
-export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
+export default function Header() {
+    const params = useParams<"mailboxId" | "mailId">()
+    const mailboxId = params.mailboxId || "demo"
+
     return (
         <div className="sticky top-0 z-40 flex items-center justify-between border-b-2 bg-secondary px-7 dark:bg-tertiary">
             <header className="flex h-16 w-full items-center">
@@ -15,7 +19,7 @@ export default function Header({ mailbox: mailboxId }: { mailbox: string }) {
                         <Logo className="size-7" />
                         <h2 className="inline-block whitespace-nowrap font-bold text-xl">EmailThing</h2>
                     </div>
-                    <Sidebar mailbox={mailboxId} className="min-h-[calc(100%-2rem)]" />
+                    <Sidebar className="min-h-[calc(100%-2rem)]" />
                 </MobileNav>
 
                 <nav className="mx-auto me-auto w-auto sm:mx-0 sm:ms-0 lg:w-[calc(15rem-1.75rem)]">

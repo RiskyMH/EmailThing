@@ -35,7 +35,7 @@ Best regards,
 [contact page]: https://emailthing.app/settings/emailthing-me
 [GitHub]: https://github.com/RiskyMH/EmailThing`;
 
-    const html = (typeof window === "undefined" && process.platform === "win32")
+    const html = (typeof window === "undefined" && process?.platform === "win32")
         ? undefined
         : await marked.parse(msg)
 

@@ -31,7 +31,7 @@ function parseSponsors(html: string) {
 
 
 async function getActiveSponsors(): Promise<{ username: string; avatar: string; name?: string }[]> {
-    if (!process.env.GITHUB_PAT) {
+    if (!process?.env?.GITHUB_PAT) {
         return fetch("https://github.com/sponsors/riskymh/sponsors_partial?filter=active")
             .then((e) => e.text())
             .then(parseSponsors);
@@ -85,7 +85,7 @@ export const getSponsors = async () => {
         ];
     }
 
-    if (typeof window === "undefined" && process.platform === "win32") return [] as Awaited<ReturnType<typeof fn>>
+    if (typeof window === "undefined" && process?.platform === "win32") return [] as Awaited<ReturnType<typeof fn>>
 
     if (import.meta.hot) {
         return (import.meta.hot.data.sponsors ??= await fn()) as Awaited<ReturnType<typeof fn>>

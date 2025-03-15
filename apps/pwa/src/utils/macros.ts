@@ -4,7 +4,7 @@ const defaultSvgl = {
 }
 
 export async function getSvgl(): Promise<Record<string, string>> {
-    if (typeof window === "undefined" && process.platform === "win32") return defaultSvgl
+    if (typeof window === "undefined" && process?.platform === "win32") return defaultSvgl
 
     const fn = async () => {
         try {
