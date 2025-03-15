@@ -16,6 +16,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
+    if (typeof window === "undefined") return <Loading />
     return <Suspense fallback={<Loading />}>
         <EmailList filter={filter} />
     </Suspense>
@@ -83,7 +84,7 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
     const error = null
 
     if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !data) return <EmailListLoadingSkeleton />
+    if (isLoading || !data) return <EmailListLoadingSkeleton className="fade-in" />
 
     const { emails, categories } = data
 
@@ -151,7 +152,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
     const error = null
 
     if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !data) return <EmailListCategoryLoadingSkeleton />
+    if (isLoading || !data) return <EmailListCategoryLoadingSkeleton className="fade-in" />
 
     const { categories, mailboxPlan, allCount } = data
 
