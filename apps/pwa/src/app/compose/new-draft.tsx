@@ -1,4 +1,3 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { createDraftEmail } from "@/utils/data/queries/email-list";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
@@ -8,7 +7,6 @@ import { useRef } from "react";
 
 export default function NewDraft() {
     const params = useParams<{ mailboxId: string }>()
-    const navigate = useNavigate()
 
     const i = useRef(new Date().toISOString())
 
@@ -16,7 +14,7 @@ export default function NewDraft() {
         return createDraftEmail(params.mailboxId!)
     })
 
-    if (!draftId) return <><Loading /></>
+    if (!draftId) return <Loading />
 
     return <><Navigate to={`/mail/${params.mailboxId}/draft/${draftId}`} replace /><Loading /></>
 }

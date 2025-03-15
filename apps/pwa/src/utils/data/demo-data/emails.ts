@@ -251,16 +251,33 @@ export const demoTempEmails: DBEmail[] = [
 // drafts
 export const demoDrafts: DBEmailDraft[] = [
     {
-        id: "18",
+        id: "1",
+        mailboxId: demoMailboxId,
+        subject: "Welcome to EmailThing!",
+        body: welcome.html || welcome.body,
+        createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
+        updatedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
+        to: [],
+        from: "welcome@emailthing.app",
+        headers: [
+            {
+                key: "X-Easter-Egg",
+                value: "🥚"
+            },
+        ],
+    },
+    {
+        id: "2",
         mailboxId: demoMailboxId,
         subject: "Draft email",
-        body: "This is a draft email",
-        createdAt: new Date("2025-01-18T08:30:00"),
-        updatedAt: new Date("2025-01-18T08:30:00"),
+        body: "This is a draft email\n<br>\nEnjoy the markdowning!",
+        createdAt: new Date(),
+        updatedAt: new Date(),
         to: [
             {
                 name: "Test",
                 address: "test@test.com",
+                cc: null
             },
             {
                 name: "Test2",
@@ -268,7 +285,7 @@ export const demoDrafts: DBEmailDraft[] = [
                 cc: "cc"
             }
         ],
-        from: "me@emailthing.com",
+        from: "your@customdomain.com",
         headers: [],
     }
 ];

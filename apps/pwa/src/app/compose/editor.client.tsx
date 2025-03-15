@@ -379,7 +379,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                                 {{ to: "To", cc: "CC", bcc: "BCC" }[type]}
                             </span>
                             {to
-                                .filter((r) => r.cc === (type === "to" ? null : type))
+                                .filter((r) => r.cc == (type === "to" ? null : type))
                                 .map(({ name, address }) => (
                                     <RecipientPill
                                         key={address}
