@@ -48,6 +48,15 @@ export interface Category {
     color?: string
 }
 
+declare global {
+    interface Window {
+        _tempData?: {
+            emailList?: Record<string, any>
+            emailCategoriesList?: Record<string, any>
+        }
+    }
+}
+
 
 function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
 
@@ -63,12 +72,16 @@ function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "st
         </>
     );
 }
+
 function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     const params = useParams<"mailboxId">()
     const searchParams = useSearchParams()[0]
     const categoryId = searchParams.get("category") as string | null
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
+
+    const key = JSON.stringify({mailboxId, type, categoryId, search})
+    const _data = window?._tempData?.emailList?.[key]
 
     const data = useLiveQuery(async () => {
         const emails = await getEmailList({
@@ -78,13 +91,20 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
             search: search ?? undefined,
         })
         return emails
-    }, [mailboxId, type, categoryId, search])
+    }, [mailboxId, type, categoryId, search]) || _data
 
     const isLoading = !data
     const error = null
 
     if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !data) return <EmailListLoadingSkeleton className="fade-in" />
+    if (isLoading || !data) return <EmailListLoadingSkeleton />
+
+    if (data) {
+        window ||= {}
+        window._tempData ||= {}
+        window._tempData.emailList ||= {}
+        window._tempData.emailList[key] = data
+    }
 
     const { emails, categories } = data
 
@@ -140,19 +160,30 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
 
+    const key = JSON.stringify({mailboxId, type, search})
+    const _data = window?._tempData?.emailCategoriesList?.[key]
+
     const data = useLiveQuery(async () => {
         const emails = await getEmailCategoriesList({
             mailboxId,
             type,
         })
         return emails
-    }, [mailboxId, type])
-
+    }, [mailboxId, type]) || _data
+    
+    
     const isLoading = !data
     const error = null
 
     if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !data) return <EmailListCategoryLoadingSkeleton className="fade-in" />
+    if (isLoading || !data) return <EmailListCategoryLoadingSkeleton />
+
+    if (data) {
+        window ||= {}
+        window._tempData ||= {}
+        window._tempData.emailCategoriesList ||= {}
+        window._tempData.emailCategoriesList[key] = data
+    }
 
     const { categories, mailboxPlan, allCount } = data
 

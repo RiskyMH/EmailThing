@@ -1,9 +1,8 @@
-import { cn } from "@/utils/tw";
 import { StarIcon } from "lucide-react";
 
-export default function Loading({ className }: { className?: string }) {
+export default function Loading() {
     return (
-        <div className={cn("flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0", className)}>
+        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
             <div className="sticky top-0 z-10 flex h-12 w-full min-w-0 animate-pulse flex-row items-center justify-center gap-3 border-b-2 bg-background px-2">
                 <EmailListCategoryLoadingSkeleton />
             </div>
@@ -13,12 +12,12 @@ export default function Loading({ className }: { className?: string }) {
     );
 }
 
-export function EmailListLoadingSkeleton({ className }: { className?: string }) {
+export function EmailListLoadingSkeleton() {
     return (
         Array.from({ length: 25 }).map((_, i) => (
             <div
                 key={i}
-                className={cn("bg-card flex h-12 w-full animate-pulse gap-3 rounded-md px-4 py-1.5", className)}
+                className="//bg-card flex h-12 w-full animate-pulse gap-3 rounded-md px-4 py-1.5"
             >
                 <span
                     className="m-2 mx-auto inline-block size-4 shrink-0 self-center rounded-full"
@@ -38,15 +37,15 @@ export function EmailListLoadingSkeleton({ className }: { className?: string }) 
 }
 
 
-export function EmailListCategoryLoadingSkeleton({ className }: { className?: string }) {
+export function EmailListCategoryLoadingSkeleton() {
     return (
         <>
-            <input type="checkbox" disabled id="select" className={cn("my-auto mr-2 size-4 self-start", className)} />
-            <div className={cn("inline-flex h-6 w-auto max-w-fit items-center justify-center gap-1 border-transparent border-b-3 px-1 font-bold", className)}>
+            <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 self-start" />
+            <div className="inline-flex h-6 w-auto max-w-fit items-center justify-center gap-1 border-transparent border-b-3 px-1 font-bold">
                 <span className="h-5 w-36 self-center rounded bg-muted-foreground/25" />
             </div>
 
-            <div className={cn("ms-auto me-2 flex h-6 shrink-0 items-center justify-center", className)}>
+            <div className="ms-auto me-2 flex h-6 shrink-0 items-center justify-center">
                 <span className="-m-2 size-5 rounded-full bg-muted-foreground/25 p-2" />
             </div>
         </>

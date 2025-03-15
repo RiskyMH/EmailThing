@@ -49,7 +49,7 @@ function MailItem() {
         }
     }, [email])
 
-    if (!email || !params.mailId || !params.mailboxId) return <Loading className="fade-in" />
+    if (!email || !params.mailId || !params.mailboxId) return <Loading />
 
     const updateEmail = async (updates: Record<string, any>, { auto }: { auto?: boolean } = {}) => {
         console.log("updateEmail", updates, auto)
