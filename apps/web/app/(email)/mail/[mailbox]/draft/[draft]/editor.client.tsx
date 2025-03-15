@@ -621,31 +621,34 @@ interface FromInputProps {
 export function FromInput({ savedAlias, aliases }: FromInputProps) {
     const [value, setValue] = useState(savedAlias);
     return (
-        <Select value={value} onValueChange={setValue} name="from">
-            <SelectTrigger className="shrink-0 border-none bg-card focus:z-10">
-                <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-sm">From</span>
-                    <SelectValue className="font-semibold text-sm">{value}</SelectValue>
-                </div>
-            </SelectTrigger>
-            <SelectContent>
-                <SelectGroup>
-                    {/* <SelectLabel>From:</SelectLabel> */}
-                    {aliases.map(({ name, alias }) => (
-                        <SelectItem
-                            key={alias}
-                            value={alias}
-                            onSelect={(e) => (e.currentTarget as any).form?.requestSubmit()}
-                        >
-                            <div className="flex items-center gap-2">
-                                <span className="font-semibold text-sm">{name || alias}</span>
-                                {name && <span className="text-muted-foreground text-sm">{alias}</span>}
-                            </div>
-                        </SelectItem>
-                    ))}
-                </SelectGroup>
-            </SelectContent>
-        </Select>
+        <>
+            <input name="from" value={value} hidden readOnly />
+            <Select value={value} onValueChange={setValue}>
+                <SelectTrigger className="shrink-0 border-none bg-card focus:z-10">
+                    <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-sm">From</span>
+                        <SelectValue className="font-semibold text-sm">{value}</SelectValue>
+                    </div>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        {/* <SelectLabel>From:</SelectLabel> */}
+                        {aliases.map(({ name, alias }) => (
+                            <SelectItem
+                                key={alias}
+                                value={alias}
+                                onSelect={(e) => (e.currentTarget as any).form?.requestSubmit()}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-sm">{name || alias}</span>
+                                    {name && <span className="text-muted-foreground text-sm">{alias}</span>}
+                                </div>
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+        </>
     );
 }
 
@@ -821,7 +824,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                             )}
                         >
                             <span className="flex w-8 shrink-0 self-center text-muted-foreground text-sm">
-                                {type.toUpperCase()}:
+                                {{ to: "To", cc: "CC", bcc: "BCC" }[type]}:
                             </span>
                             {to
                                 .filter((r) => r.cc === (type === "to" ? null : type))
