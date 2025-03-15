@@ -18,6 +18,7 @@ import { useEmailImage } from "@/utils/fetching";
 import { cn } from "@/utils/tw";
 import useSWR from "swr";
 import { parseHTML } from "./parse-html";
+import { getMailboxName } from "@/utils/data/queries/mailbox";
 
 
 export default function MailItemSuspense() {
@@ -49,7 +50,8 @@ function MailItem() {
         }
     }, [email])
 
-    if (!email || !params.mailId || !params.mailboxId) return <Loading />
+    if (!params.mailboxId) return <Loading />
+    if (!email || !params.mailId) return <><Loading /><Title mailboxId={params.mailboxId} /></>
 
     const updateEmail = async (updates: Record<string, any>, { auto }: { auto?: boolean } = {}) => {
         console.log("updateEmail", updates, auto)
@@ -63,6 +65,7 @@ function MailItem() {
     return (
         <div className="flex size-full min-w-0 flex-col gap-3 overflow-auto p-5">
             <TopButtons mailboxId={params.mailboxId} emailId={params.mailId} email={email} onUpdateEmail={updateEmail} />
+            <Title email={email} mailboxId={params.mailboxId} />
 
             <h1 className="mt-3 break-words font-bold text-2xl sm:text-3xl">{email.subject}</h1>
             <div className="flex flex-col gap-3 rounded-md bg-card p-3">
@@ -263,6 +266,18 @@ function MailItem() {
             {/* // TODO: show references snippets for email */}
         </div>
     );
+}
+
+function Title({ email, mailboxId }: { email?: { subject?: string | null }, mailboxId: string }) {
+    const mailboxName = useLiveQuery(async () => getMailboxName(mailboxId), [mailboxId])
+
+    useEffect(() => {
+        if (!email?.subject) document.title = "EmailThing"
+        else document.title = `${email.subject}${mailboxName ? ` - ${mailboxName}` : ""} - EmailThing`
+        return () => { document.title = "EmailThing" }
+    }, [email, mailboxName])
+
+    return null
 }
 
 function EmailContent({

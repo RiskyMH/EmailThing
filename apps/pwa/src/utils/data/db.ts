@@ -40,7 +40,7 @@ export class EmailDB extends Dexie {
       
       // Mailbox related tables
       mailboxes: 'id, createdAt',
-      mailboxAliases: 'id, mailboxId, alias',
+      mailboxAliases: 'id, mailboxId, alias, default',
       mailboxCategories: 'id, mailboxId, name',
       tempAliases: 'id, mailboxId, alias, expiresAt',
       

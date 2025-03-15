@@ -1,6 +1,6 @@
 "use client"
 import { useParams, useSearchParams } from "react-router-dom"
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import Loading, { EmailListLoadingSkeleton, EmailListCategoryLoadingSkeleton } from "./email-list-loading"
 import { Button } from "@/components/ui/button"
 import RefreshButton from "./refresh-button"
@@ -11,9 +11,9 @@ import { EmailItem } from "./email-list-item"
 import Link from "@/components/link"
 import { cn } from "@/utils/tw"
 import { formatTimeAgo } from "@/utils/tools"
-import { getEmailList, getEmailCategoriesList } from "@/utils/data/queries/email-list"
+import { getEmailList, getEmailCategoriesList, getEmailCount } from "@/utils/data/queries/email-list"
 import { useLiveQuery } from 'dexie-react-hooks';
-
+import { getMailboxName } from "@/utils/data/queries/mailbox";
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     if (typeof window === "undefined") return <Loading />
@@ -59,18 +59,74 @@ declare global {
 
 
 function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
-
     return (
-        <>
-            <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
-                <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2">
-                    <Categories filter={type} />
-                </div>
-
-                <Emails filter={type} />
+        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
+            <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2">
+                <Categories filter={type} />
             </div>
-        </>
+
+            <Emails filter={type} />
+            <Title type={type} />
+        </div>
     );
+}
+
+function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
+    const params = useParams<"mailboxId">()
+    const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
+    const searchParams = useSearchParams()[0]
+    const search = searchParams.get("q") as string | null
+
+    const key = JSON.stringify({ mailboxId, type })
+    const _data = window?._tempData?.emailList?.[key]
+
+    const data = useLiveQuery(async () => {
+        const types = {
+            inbox: "unread",
+            drafts: "drafts",
+            sent: "",
+            starred: "",
+            trash: "binned",
+            temp: "temp",
+        } as const
+        return Promise.all([
+            getEmailCount(mailboxId, types[type]),
+            getMailboxName(mailboxId)
+        ]);
+    }, [mailboxId, type])
+
+    if (data && typeof window !== "undefined") {
+        window._tempData ||= {}
+        window._tempData.emailList ||= {}
+        window._tempData.emailList[key] = data
+    }
+
+    const [count, name] = (data || _data || [0, undefined]) as [number, string | undefined]
+
+    const names = {
+        inbox: "Inbox",
+        drafts: "Drafts",
+        sent: "Sent",
+        starred: "Starred",
+        trash: "Trash",
+        temp: "Temporary Email",
+    } as Record<string, string>
+
+    useEffect(() => {
+
+
+        if (search) {
+            document.title = "Search results | EmailThing"
+        } else if (count || name) {
+            document.title = `${names[type] || "Inbox"}${count ? ` (${count})` : ""}${name ? ` | ${name}` : ""} | EmailThing`
+        } else {
+            document.title = `${names[type] || "Inbox"} | EmailThing`
+        }
+
+        return () => { document.title = "EmailThing" }
+    }, [count, name, search, type])
+
+    return null
 }
 
 function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
@@ -80,7 +136,7 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
 
-    const key = JSON.stringify({mailboxId, type, categoryId, search})
+    const key = JSON.stringify({ mailboxId, type, categoryId, search })
     const _data = window?._tempData?.emailList?.[key]
 
     const data = useLiveQuery(async () => {
@@ -91,22 +147,18 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
             search: search ?? undefined,
         })
         return emails
-    }, [mailboxId, type, categoryId, search]) || _data
+    }, [mailboxId, type, categoryId, search])
 
-    const isLoading = !data
-    const error = null
+    const isLoading = !data && !_data
+    if (isLoading) return <EmailListLoadingSkeleton />
 
-    if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !data) return <EmailListLoadingSkeleton />
-
-    if (data) {
-        window ||= {}
+    if (data && typeof window !== "undefined") {
         window._tempData ||= {}
         window._tempData.emailList ||= {}
         window._tempData.emailList[key] = data
     }
 
-    const { emails, categories } = data
+    const { emails, categories } = (data || _data) as Awaited<ReturnType<typeof getEmailList>>
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 
@@ -160,7 +212,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
 
-    const key = JSON.stringify({mailboxId, type, search})
+    const key = JSON.stringify({ mailboxId, type, search })
     const _data = window?._tempData?.emailCategoriesList?.[key]
 
     const data = useLiveQuery(async () => {
@@ -169,23 +221,18 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
             type,
         })
         return emails
-    }, [mailboxId, type]) || _data
-    
-    
-    const isLoading = !data
-    const error = null
+    }, [mailboxId, type])
 
-    if (error) return <div>failed to load {type} ({error})</div>
-    if (isLoading || !data) return <EmailListCategoryLoadingSkeleton />
+    const isLoading = !data && !_data
+    if (isLoading) return <EmailListCategoryLoadingSkeleton />
 
-    if (data) {
-        window ||= {}
+    if (data && typeof window !== "undefined") {
         window._tempData ||= {}
         window._tempData.emailCategoriesList ||= {}
         window._tempData.emailCategoriesList[key] = data
     }
 
-    const { categories, mailboxPlan, allCount } = data
+    const { categories, mailboxPlan, allCount } = (data || _data) as Awaited<ReturnType<typeof getEmailCategoriesList>>
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 

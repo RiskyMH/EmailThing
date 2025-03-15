@@ -31,6 +31,7 @@ import { getEmailCount } from "@/utils/data/queries/email-list";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useGravatar } from "@/utils/fetching";
 import { useParams } from "react-router-dom";
+import { getMailboxDefaultAlias, getUserMailboxes } from "@/utils/data/queries/mailbox";
 
 export const Sidebar = ({ className }: { className?: string }) => {
     const params = useParams<"mailboxId" | "mailId">()
@@ -207,27 +208,30 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     // const { default: defaultAlias } = await mailboxAliases(mailboxId);
     const userId = "a"
 
-    type _mailboxes = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["userMailboxes"]>>
-    const mailboxes = [
-        {
-            id: mailboxId,
-            name: "demo@emailthing.xyz",
-            alias: "demo@emailthing.xyz",
-            role: "DEMO",
-            isDefault: true,
-        },
-    ]
+    // type _mailboxes = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["userMailboxes"]>>
+    // const mailboxes = [
+    //     {
+    //         id: mailboxId,
+    //         name: "demo@emailthing.xyz",
+    //         alias: "demo@emailthing.xyz",
+    //         role: "DEMO",
+    //     },
+    // ]
+    const mailboxes = useLiveQuery(async () => getUserMailboxes(), [])
 
-    type _defaultAlias = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["mailboxAliases"]>>
-    const { default: defaultAlias } = {
-        default: {
-            alias: "demo@emailthing.xyz",
-            name: "Demo"
-        }
-    }
-
+    // type _defaultAlias = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["mailboxAliases"]>>
+    // const { default: defaultAlias } = {
+    //     default: {
+    //         alias: "demo@emailthing.xyz",
+    //         name: "Demo"
+    //     }
+    // }
+    const defaultAlias = useLiveQuery(async () => getMailboxDefaultAlias(mailboxId), [mailboxId])
+    
     // const gravatarImg = use(gravatar(defaultAlias?.alias ?? "ab@c.com"))
     const gravatarImg = useGravatar(defaultAlias?.alias ?? "ab@c.com")
+
+    if (!defaultAlias) return <MailboxesFallback />
 
     return (
         <DropdownMenu>
@@ -245,7 +249,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
                 <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                {mailboxes.map((m) => (
+                {mailboxes?.map((m) => (
                     <DropdownMenuItem key={m.id} asChild className="flex cursor-pointer gap-2">
                         <MailboxLink mailboxId={m.id}>
                             {m.id === mailboxId ? (

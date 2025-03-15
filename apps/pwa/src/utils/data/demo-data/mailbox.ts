@@ -1,4 +1,4 @@
-import { DBMailbox, DBMailboxCategory } from "../types";
+import type { DBMailbox, DBMailboxCategory, DBMailboxAlias } from "../types";
 
 export const demoMailboxId = "demo";
 
@@ -9,6 +9,18 @@ export const demoMailbox: DBMailbox = {
     storageUsed: 1024 * 1024, // 1MB
     plan: "FREE",
 };
+
+export const demoMailboxAliases: DBMailboxAlias[] = [
+    {
+        id: "1",
+        mailboxId: demoMailboxId,
+        alias: "demo@emailthing.app",
+        default: true,
+        name: "Demo",
+        createdAt: new Date("2025-01-01"),
+        updatedAt: new Date("2025-01-01"),
+    },
+];
 
 export const demoCategories: DBMailboxCategory[] = [
     {

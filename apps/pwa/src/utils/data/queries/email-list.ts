@@ -414,7 +414,7 @@ export async function deleteEmailLocally(mailboxId: string, emailId: string, typ
 }
 
 
-export async function getEmailCount(mailboxId: string, type: "unread" | "binned" | "drafts" | "temp") {
+export async function getEmailCount(mailboxId: string, type: "unread" | "binned" | "drafts" | "temp" | "") {
 
     try {
         let query = db.emails.where("mailboxId").equals(mailboxId);
@@ -432,6 +432,8 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
             case "temp":
                 query = query.filter(email => !!email.tempId && !email.isSender && !email.binnedAt);
                 break;
+            default:
+                return 0;
         }
 
         const count = await query.count();

@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { demoEmails, demoSentEmails, demoTempEmails, demoDrafts } from "./emails";
-import { demoMailbox, demoCategories } from "./mailbox";
+import { demoMailbox, demoCategories, demoMailboxAliases } from "./mailbox";
 import { demoEmailRecipients } from "./recipients";
 import { demoEmailSenders } from "./senders";
 import { DEMO_DATA_VERSION, DEMO_VERSION_KEY, DemoDataVersion } from "./version";
@@ -40,7 +40,8 @@ export async function loadDemoData(force = false) {
                 db.mailboxes,
                 db.mailboxCategories,
                 db.syncInfo,
-                db.draftEmails
+                db.draftEmails,
+                db.mailboxAliases,
             ], 
             async () => {
                 // Clear existing demo data
@@ -69,6 +70,10 @@ export async function loadDemoData(force = false) {
                         .where('mailboxId')
                         .equals(demoMailbox.id)
                         .delete(),
+                    db.mailboxAliases
+                        .where('mailboxId')
+                        .equals(demoMailbox.id)
+                        .delete(),
                 ]);
 
                 // Load new demo data
@@ -79,6 +84,7 @@ export async function loadDemoData(force = false) {
                     db.emailSenders.bulkAdd(demoEmailSenders),
                     db.emailRecipients.bulkAdd(demoEmailRecipients),
                     db.draftEmails.bulkAdd(demoDrafts),
+                    db.mailboxAliases.bulkAdd(demoMailboxAliases),
                 ]);
 
                 // Update version
