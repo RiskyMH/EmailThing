@@ -687,8 +687,8 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
 
     function validate(element: HTMLInputElement, type: (typeof types)[number], toastOnError = true) {
         const value = `${element.value}`;
-        if (to.find((r) => r.cc === (type === "to" ? null : type) && r.address === value)) {
-            setTo((r) => r.filter((r) => !(r.cc === (type === "to" ? null : type) && r.address === value)));
+        if (to.find((r) => r.cc == (type === "to" ? null : type) && r.address === value)) {
+            setTo((r) => r.filter((r) => !(r.cc == (type === "to" ? null : type) && r.address === value)));
             toast.info("Removed duplicate email");
             element.value = "";
             return;
@@ -766,7 +766,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                 )}
                 type="button"
             >
-                <span className="flex w-full gap-2 overflow-y-hidden text-ellipsis">
+                <span className="flex w-full gap-2 overflow-y-hidden text-ellipsis self-center">
                     {types.map((type) => (
                         <Fragment key={type}>
                             <span className="shrink-0 self-center text-muted-foreground text-sm">
@@ -774,7 +774,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                             </span>
                             <span className="shrink-0 self-center">
                                 {to
-                                    .filter((r) => r.cc === (type === "to" ? null : type))
+                                    .filter((r) => r.cc == (type === "to" ? null : type))
                                     .map(({ name, address }) => name || address)
                                     .join(", ")}
                             </span>
@@ -827,7 +827,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                                 {{ to: "To", cc: "CC", bcc: "BCC" }[type]}
                             </span>
                             {to
-                                .filter((r) => r.cc === (type === "to" ? null : type))
+                                .filter((r) => r.cc == (type === "to" ? null : type))
                                 .map(({ name, address }) => (
                                     <RecipientPill
                                         key={address}
@@ -839,7 +839,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                                                     (r) =>
                                                         !(
                                                             r.address === address &&
-                                                            r.cc === (type === "to" ? null : type)
+                                                            r.cc == (type === "to" ? null : type)
                                                         ),
                                                 ),
                                             )
@@ -864,13 +864,13 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
                                         validate(e.currentTarget, type);
                                     } else if (e.key === "Backspace" && e.currentTarget.value === "") {
                                         setTo((to) => {
-                                            const last = to.findLast((r) => r.cc === (type === "to" ? null : type));
+                                            const last = to.findLast((r) => r.cc == (type === "to" ? null : type));
                                             if (!last) return to;
                                             return to.filter(
                                                 (r) =>
                                                     !(
                                                         r.address === last.address &&
-                                                        r.cc === (type === "to" ? null : (type as any))
+                                                        r.cc == (type === "to" ? null : (type as any))
                                                     ),
                                             );
                                         });

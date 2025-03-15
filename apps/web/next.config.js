@@ -43,6 +43,7 @@ const nextConfig = {
     images: {
         unoptimized: true
     },
+    productionBrowserSourceMaps: process.env.GITHUB_ACTIONS === "true",
     async headers() {
         return [
             {
