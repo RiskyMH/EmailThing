@@ -30,7 +30,7 @@ import {
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 import { lazy } from "react"
 
-import { BodyHeader } from "./tiptap.client"
+import { BodyHeader } from "./tiptap-header"
 
 const catchRedirectError = () => {
     // console.log("catchRedirectError")
