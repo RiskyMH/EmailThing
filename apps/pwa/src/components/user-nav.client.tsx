@@ -120,7 +120,7 @@ export function UserDropDown({ user }: UserProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
-                        <Link to="/" className="cursor-pointer">
+                        <Link to="/mail" className="cursor-pointer">
                             Dashboard
                         </Link>
                     </DropdownMenuItem>
