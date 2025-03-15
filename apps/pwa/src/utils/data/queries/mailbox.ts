@@ -17,7 +17,6 @@ export async function getMailboxAliases(mailboxId: string) {
 
 export async function getMailboxDefaultAlias(mailboxId: string) {
     const mailboxAliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).and(mailboxAlias => mailboxAlias.default).first()
-    console.log(await db.mailboxAliases.toArray())
     return mailboxAliases
 }
 

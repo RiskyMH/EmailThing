@@ -444,3 +444,39 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
         return 0;
     }
 }
+
+
+// drafts
+export async function getDraftEmail(mailboxId: string, draftId: string) {
+    return db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).first();
+}
+
+export async function updateDraftEmail(mailboxId: string, draftId: string, updates: Partial<DBEmailDraft>) {
+    return db.transaction('rw', [db.draftEmails], async () => {
+        await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).modify(updates);
+    });
+}
+
+export async function deleteDraftEmail(mailboxId: string, draftId: string) {
+    return db.transaction('rw', [db.draftEmails], async () => {
+        await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
+    });
+}
+
+export async function createDraftEmail(mailboxId: string) {
+    return db.transaction('rw', [db.draftEmails], async () => {
+        const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        await db.draftEmails.add({
+            id: randomId,
+            mailboxId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            subject: null,
+            body: null,
+            from: null,
+            to: null,
+            headers: null
+        });
+        return randomId;
+    });
+}

@@ -3,6 +3,8 @@ import EmailList from "./email-list/email-list";
 import MailItem from "./email-item/mail-item";
 import MailLayout from "./mail/root-layout";
 import EmailListLoading from "./email-list/email-list-loading";
+import DraftPage from "./compose/draft";
+import NewDraft from "./compose/new-draft";
 
 export const routes = [
     {
@@ -47,11 +49,11 @@ export const routes = [
             },
             {
                 path: "/mail/:mailboxId/draft/:draftId",
-                element: <h1>TODO: Mail draft</h1>,
+                element: <DraftPage />,
             },
             {
                 path: "/mail/:mailboxId/draft/new",
-                element: <h1>TODO: Mail draft (new)</h1>,
+                element: <NewDraft />,
             },
             {
                 path: "/mail/:mailboxId/config",

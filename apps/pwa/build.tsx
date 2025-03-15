@@ -230,9 +230,11 @@ const generateServiceWorkerAssets = async () => {
   );
 
   await Bun.write(serviceWorkerPath, serviceWorkerContent);
+  await Bun.write("./dist/health.txt", gitsha.trim())
 
   console.log('\n📦 Generated service worker asset list with', staticAssets.size, 'files');
 };
 
 // Add to build process
 await generateServiceWorkerAssets();
+
