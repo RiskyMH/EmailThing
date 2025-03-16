@@ -36,8 +36,11 @@ export const useEmailImage = (email: string) => {
         if (await imgExists(g)) return g
 
         const domain = email.split("@")[1]
-        const match = svgl[domain]
+        let match = svgl[domain]
         if (match) {
+            if (match.startsWith(":")) {
+                match = `https://svgl.app/library/${match.slice(1)}.svg`
+            }
             if (await imgExists(match)) return match
         }
 
