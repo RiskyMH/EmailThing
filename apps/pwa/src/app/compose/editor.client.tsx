@@ -29,8 +29,13 @@ import {
 } from "@/components/ui/smart-drawer";
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 import { lazy } from "react"
-
 import { BodyHeader } from "./tiptap-header"
+import { useParams, useSearchParams } from "react-router-dom";
+import { Textarea } from "@/components/ui/textarea";
+import { parseHTML } from "../email-item/parse-html";
+import useSWR from "swr";
+import { makeHtml } from "./tools";
+import Turndown from "turndown";
 
 const catchRedirectError = () => {
     // console.log("catchRedirectError")
@@ -40,26 +45,125 @@ const EditorContent2 = lazy(() => import("./tiptap.client"))
 
 
 export function BodyEditor({ savedBody }: { savedBody?: string }) {
+    const searchParams = useSearchParams()[0]
+    const mode = (searchParams.get("editor") || "normal") as "normal" | "html" | "text" | "html-preview"
+
     return (
-        <Suspense fallback={
-            // SUSPENCE FALLBACK BELOW
-            // see ./tiptap.tsx for the real component
-            <div className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none bg-secondary text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                style={{ fontFamily: "Arial, sans-serif" }}
-            >
-                <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
-                    <BodyHeader />
-                    <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
+        mode === "normal" ? (
+            <Suspense fallback={
+                // SUSPENCE FALLBACK BELOW
+                // see ./tiptap.tsx for the real component
+                <div className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none bg-secondary text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{ fontFamily: "Arial, sans-serif" }}
+                >
+                    <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
+                        <BodyHeader />
+                        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
+                    </div>
+                    <div className="flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto fade-in">
+                        <Loader2 className="size-12 animate-spin text-muted-foreground" />
+                    </div>
                 </div>
-                <div className="flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto fade-in">
-                    <Loader2 className="size-12 animate-spin text-muted-foreground" />
-                </div>
-            </div>
-        }>
-            <EditorContent2 savedBody={savedBody} />
-        </Suspense >
+            }>
+                <EditorContent2 savedBody={savedBody} />
+            </Suspense >
+        ) : (
+            mode === "html" ? (
+                <HTMLEditor savedHTML={savedBody} />
+            ) : mode === "html-preview" ? (
+                <HTMLPreviewEditor savedHTML={savedBody} />
+            ) : (
+                <TextEditor savedText={savedBody} />
+            )
+        )
     );
 }
+
+function formatHtml(html: string) {
+    var tab = '\t';
+    var result = '';
+    var indent = '';
+
+    html.split(/>\s*</).forEach(function (element) {
+        if (element.match(/^\/\w/)) {
+            indent = indent.substring(tab.length);
+        }
+
+        result += indent + '<' + element + '>\r\n';
+
+        if (element.match(/^<?\w[^>]*[^\/]$/) && !element.startsWith("input")) {
+            indent += tab;
+        }
+    });
+
+    return result.substring(1, result.length - 3);
+}
+
+export function HTMLEditor({ savedHTML }: { savedHTML?: string }) {
+    const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+
+    if (savedHTML?.endsWith("<!--tiptap-->")) {
+        savedHTML = formatHtml(makeHtml(savedHTML))
+    }
+
+    return (
+        <>
+            <Textarea
+                className="w-full h-[calc(100%-2.75rem)] shrink border-none font-mono overflow-x-auto h-full rounded-lg bg-tertiary p-3 whitespace-pre border overflow-auto border-primary border-2 resize-none"
+                id="html-editor"
+                name="html"
+                defaultValue={savedHTML}
+                onChange={debounced}
+                onBlur={(e) => (e.currentTarget as any)?.form?.requestSubmit()}
+            />
+        </>
+    );
+}
+
+export function TextEditor({ savedText }: { savedText?: string }) {
+    const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+
+    if (savedText && (savedText.startsWith("<") && savedText.endsWith(">"))) {
+        savedText = new Turndown().turndown(savedText
+            .replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, "$1")
+            .replaceAll(/<style(.*?)>([\s\S]*?)<\/style>/g, "")
+        );
+    }
+
+    return (
+        <Textarea
+            className="w-full shrink border-none font-mono h-full w-full max-w-full grow rounded-lg bg-secondary p-3 whitespace-pre-wrap resize-none"
+            id="text-editor"
+            name="body"
+            defaultValue={savedText}
+            onChange={debounced}
+            onBlur={(e) => (e.currentTarget as any)?.form?.requestSubmit()}
+        />
+    );
+}
+
+export function HTMLPreviewEditor({ savedHTML }: { savedHTML?: string }) {
+
+    if (savedHTML?.includes("<!--tiptap-->")) {
+        savedHTML = makeHtml(savedHTML)
+    }
+    savedHTML = parseHTML(savedHTML || "", true)
+
+    return (
+        <>
+            <input hidden readOnly value={savedHTML} name="html" />
+            <input hidden readOnly value={savedHTML} name="body" />
+            <iframe
+                className="h-full w-full rounded-lg bg-card"
+                sandbox="allow-popups"
+                srcDoc={savedHTML}
+                title="The Email"
+            />
+        </>
+    );
+}
+
+
 
 export function Subject({ savedSubject }: { savedSubject?: string }) {
     const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);

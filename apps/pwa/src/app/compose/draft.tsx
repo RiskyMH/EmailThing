@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuPortal,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuSeparator,
+    DropdownMenuSubContent,
+    DropdownMenuSub,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisIcon } from "lucide-react";
+import { ChevronRight, EllipsisIcon } from "lucide-react";
 import { Fragment, cache } from "react";
 import {
     BodyEditor,
@@ -20,7 +23,7 @@ import {
     Subject,
     UploadAttachment,
 } from "./editor.client";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { deleteDraftEmail, getDraftEmail, updateDraftEmail } from "@/utils/data/queries/email-list";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getData } from "./tools";
@@ -28,10 +31,13 @@ import { toast } from "sonner";
 import Loading from "./loading";
 import { getMailboxAliases, getMailboxDefaultAlias } from "@/utils/data/queries/mailbox";
 import DisableFormReset from "@/components/disable-reset.client";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 
 export default function DraftPage() {
     const params = useParams<{ mailboxId: string, draftId: string }>()
     const navigate = useNavigate()
+    const searchParams = useSearchParams()[0]
+    const editor = (searchParams.get("editor") || "normal") as "normal" | "html" | "text" | "html-preview"
 
     const data = useLiveQuery(async () => {
         if (!params.mailboxId || !params.draftId) return
@@ -91,10 +97,15 @@ export default function DraftPage() {
         toast("Updates aren't available in demo", { description: "This would sync with the server in the real app (headers)" })
     }
 
+    function setEditor(v: string) {
+        navigate(`?editor=${v}`, { replace: true });
+    }
+
     if (!data || data[0] === undefined || !data[1]) return <Loading />
     if (data[0] === null) return <>404 - Draft not found</>
 
     const [mail, aliases] = data
+    
 
     return (
         <form
@@ -127,11 +138,25 @@ export default function DraftPage() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuRadioGroup value="normal" /*value={position} onValueChange={setPosition}*/>
+                            <DropdownMenuRadioGroup value={editor === "html-preview" ? "html-raw" : editor} onValueChange={setEditor}>
                                 <DropdownMenuRadioItem value="normal">Normal</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="text" disabled>
-                                    Plain Text
-                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="text">Plain Text</DropdownMenuRadioItem>
+                                <DropdownMenuSub>
+                                    <DropdownMenuPrimitive.SubTrigger asChild>
+                                        <DropdownMenuRadioItem value="html">
+                                            HTML
+                                            <ChevronRight className="ms-auto size-4" />
+                                        </DropdownMenuRadioItem>
+                                    </DropdownMenuPrimitive.SubTrigger>
+                                    <DropdownMenuPortal>
+                                        <DropdownMenuSubContent>
+                                            <DropdownMenuRadioGroup value={editor} onValueChange={setEditor}>
+                                                <DropdownMenuRadioItem value="html">HTML code</DropdownMenuRadioItem>
+                                                <DropdownMenuRadioItem value="html-preview">HTML (preview)</DropdownMenuRadioItem>
+                                            </DropdownMenuRadioGroup>
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuPortal>
+                                </DropdownMenuSub>
                             </DropdownMenuRadioGroup>
                             <DropdownMenuSeparator />
 

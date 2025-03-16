@@ -4,9 +4,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getEmailWithDetails, updateEmailProperties } from "@/utils/data/queries/email-list"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ChevronDown, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, Loader2, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
+import { ChevronDown, ChevronRight, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, Loader2, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
 import { parse as markedParse } from "marked"
 import { Suspense, useEffect, useRef } from "react"
 import { toast } from "sonner"
@@ -19,6 +19,7 @@ import { cn } from "@/utils/tw";
 import useSWR from "swr";
 import { parseHTML } from "./parse-html";
 import { getMailboxName } from "@/utils/data/queries/mailbox";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 
 
 export default function MailItemSuspense() {
@@ -287,10 +288,10 @@ function EmailContent({
 }: { mailboxId: string; emailId: string; email: { body: string; html: string | null } }) {
 
     const searchParams = useSearchParams()[0]
-    const view = (searchParams.get("view") || "markdown") as "text" | "markdown" | "html"
+    const view = (searchParams.get("view") || "markdown") as "text" | "markdown" | "html" | "html-raw"
 
     const { data } = useSWR(`/mail/${mailboxId}/${emailId}/email.html&view=${view}`, async () => {
-        if (view === "text") return email.body
+        if (view === "text" || view === "html-raw") return email.body
         if (view === "markdown") {
             return parseHTML(await markedParse(email.body, { breaks: true }), false)
         }
@@ -330,6 +331,10 @@ function EmailContent({
         );
     }
 
+    else if (view === "html-raw") {
+        return <p className="leading-normal font-mono overflow-x-auto h-full rounded-lg bg-tertiary p-3 whitespace-pre">{email.html || email.body}</p>;
+    }
+
     return null;
 }
 
@@ -353,10 +358,25 @@ function ViewSelect({
     }
 
     return (
-        <DropdownMenuRadioGroup value={view} onValueChange={onValueChange}>
+        <DropdownMenuRadioGroup value={view === "html-raw" ? "html" : view} onValueChange={onValueChange}>
             <DropdownMenuRadioItem value="text">Text</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="markdown" defaultChecked>Markdown</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="html" disabled={!htmlValid}>HTML</DropdownMenuRadioItem>
+            <DropdownMenuSub>
+                <DropdownMenuPrimitive.SubTrigger asChild disabled={!htmlValid}>
+                    <DropdownMenuRadioItem value="html" disabled={!htmlValid}>
+                        HTML
+                        <ChevronRight className="ms-auto size-4" />
+                    </DropdownMenuRadioItem>
+                </DropdownMenuPrimitive.SubTrigger>
+                <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                        <DropdownMenuRadioGroup value={view} onValueChange={onValueChange}>
+                            <DropdownMenuRadioItem value="html" disabled={!htmlValid}>HTML rendered</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="html-raw" disabled={!htmlValid}>HTML raw</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+            </DropdownMenuSub>
         </DropdownMenuRadioGroup>
     );
 }

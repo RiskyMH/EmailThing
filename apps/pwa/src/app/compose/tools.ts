@@ -51,7 +51,7 @@ export function getData(data: FormData): SaveActionProps {
         undefined;
 
     return {
-        body: body ?? undefined,
+        body: body ?? html ?? undefined,
         subject: subject ?? undefined,
         from: from ?? undefined,
         to,

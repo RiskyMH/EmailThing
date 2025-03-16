@@ -26,9 +26,15 @@ import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { Loader2 } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
 import { BodyHeader } from "./tiptap-header";
+import { parse as markedParse } from "marked"
+import { use } from "react";
 
 export default function EditorContent2({ savedBody }: { savedBody?: string }) {
     const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+    
+    if (savedBody && !(savedBody.startsWith("<") && savedBody.endsWith(">"))) {
+        savedBody = markedParse(savedBody, { breaks: true, async: false })
+    }
 
     const editor = useEditor({
         extensions: [
@@ -95,7 +101,7 @@ export default function EditorContent2({ savedBody }: { savedBody?: string }) {
 
             {/* //todo: maybe use json instead of html */}
             {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
-            <input hidden value={editor?.getHTML() || savedBody} name="body" readOnly />
+            <input hidden value={(editor?.getHTML() + "<!--tiptap-->") || savedBody} name="body" readOnly />
             <input
                 hidden
                 value={editor?.getHTML()?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")}
