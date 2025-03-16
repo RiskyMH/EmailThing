@@ -254,7 +254,7 @@ export const demoDrafts: DBEmailDraft[] = [
         id: "1",
         mailboxId: demoMailboxId,
         subject: "Welcome to EmailThing!",
-        body: welcome.html || welcome.body,
+        body: (welcome.html ? welcome.html + "<!--tiptap-->" : undefined) || welcome.body,
         createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
         updatedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
         to: [],
