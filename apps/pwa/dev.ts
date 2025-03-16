@@ -17,8 +17,8 @@ const server = serve({
     "/docs": docs,
     "/docs/*": docs,
   },
-    development: true,
-    fetch: () => new Response("404", {status: 404})
-  });
+  development: true,
+  fetch: () => new Response("404", { status: 404 })
+});
 
-  console.log(`🚀 Server running at ${server.url}`);
+console.log(`🚀 Server running at ${server.url}`);

@@ -18,6 +18,7 @@ export default function LocalTimeClient({
     const [timeZone, setTimeZone] = useState<string | undefined>(initialTimeZone);
 
     useEffect(() => setTimeZone(undefined), []);
+    time ||= new Date();
 
     return (
         <TooltipText

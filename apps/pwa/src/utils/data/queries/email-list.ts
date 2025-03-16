@@ -1,5 +1,6 @@
 import { db } from '../db';
 import type { DBEmail, DBMailboxCategory, DBEmailDraft } from '../types';
+import Dexie from 'dexie';
 
 export type EmailListType = "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
 
@@ -31,6 +32,8 @@ interface EmailListOptions {
     type: EmailListType;
     categoryId?: string;
     search?: string;
+    take?: number;
+    skip?: number;
 }
 
 interface EmailListResult {
@@ -60,8 +63,10 @@ export async function getEmailList({
     type,
     categoryId,
     search,
+    take = 100,
+    skip = 0,
 }: EmailListOptions): Promise<EmailListResult> {
-    // Start building the query
+    // Start with base query
     let emailQuery = (type === 'drafts'
         ? db.draftEmails.where('mailboxId').equals(mailboxId)
         : db.emails.where('mailboxId').equals(mailboxId)
@@ -71,48 +76,43 @@ export async function getEmailList({
     if (type !== 'drafts') {
         switch (type) {
             case 'sent':
-                emailQuery = emailQuery.and(item => item.isSender === true && !item.binnedAt);
+                emailQuery = emailQuery
+                    .and(item => item.isSender === true && !item.binnedAt);
                 break;
             case 'trash':
-                emailQuery = emailQuery.and(item => !!item.binnedAt);
+                emailQuery = emailQuery
+                    .and(item => item.binnedAt != null);
                 break;
             case 'starred':
-                emailQuery = emailQuery.and(item => item.isStarred === true && !item.binnedAt && !item.isSender);
+                emailQuery = emailQuery
+                    .and(item => item.isStarred === true && !item.binnedAt && !item.isSender);
                 break;
             case 'temp':
-                emailQuery = emailQuery.and(item => !!item.tempId && !item.binnedAt && !item.isSender);
+                emailQuery = emailQuery
+                    .and(item => item.tempId != null && !item.binnedAt && !item.isSender);
                 break;
             case 'inbox':
             default:
-                emailQuery = emailQuery.and(item =>
-                    !item.isSender &&
-                    !item.binnedAt &&
-                    !item.tempId
-                );
+                emailQuery = emailQuery
+                    .and(item => !item.isSender && !item.binnedAt && !item.tempId);
                 break;
         }
     }
 
     // Apply category filter if specified
-    if (categoryId) {
+    if (categoryId && type !== 'drafts') {
         emailQuery = emailQuery.and(item => item.categoryId === categoryId);
     }
 
     // Apply search filter if specified
-    if (search) {
+    if (search && type !== 'drafts') {
         const searchLower = search.toLowerCase();
-        emailQuery = emailQuery.and(item => {
+        emailQuery = emailQuery.filter(item => {
             const searchableFields = [
                 item.subject,
                 item.body,
-                item.snippet,
-                // For drafts, include recipient fields
-                ...(type === 'drafts' ? [
-                    item.to?.map(r => r.email).join(' '),
-                    item.cc?.map(r => r.email).join(' '),
-                    item.bcc?.map(r => r.email).join(' ')
-                ] : [])
-            ];
+                item.snippet
+            ].filter(Boolean);
 
             return searchableFields.some(field =>
                 field?.toLowerCase().includes(searchLower)
@@ -120,14 +120,26 @@ export async function getEmailList({
         });
     }
 
-    // Get all emails sorted by creation date
-    const emails = emailQuery
+    // Get total count before pagination
+    const allCount = await emailQuery.count();
+
+    // Apply pagination and sorting
+    const emails = await emailQuery
         .reverse() // Newest first
-        .sortBy('createdAt');
+        .offset(skip)
+        .limit(take)
+        .toArray();
+
+    // Get categories
+    const categories = type === 'drafts' ? [] :
+        await db.mailboxCategories
+            .where('mailboxId')
+            .equals(mailboxId)
+            .toArray();
 
     // Get sender/recipient info for each email
     const emailsWithDetails = await Promise.all(
-        (await emails).map(async (email) => {
+        emails.map(async (email) => {
             if (type === 'drafts') {
                 return {
                     ...email,
@@ -138,45 +150,80 @@ export async function getEmailList({
                     to: email.to || [],
                     isRead: true,
                 };
-            } else {
-                // For regular emails, get the sender and recipients
-                const [sender, recipients] = await Promise.all([
-                    db.emailSenders
-                        .where('emailId')
-                        .equals(email.id)
-                        .first(),
-                    db.emailRecipients
-                        .where('emailId')
-                        .equals(email.id)
-                        .toArray()
-                ]);
-
-                return {
-                    ...email,
-                    from: sender || {
-                        name: "Unknown",
-                        address: "unknown@emailthing.com"
-                    },
-                    recipients: recipients || []
-                };
             }
+
+            const [sender, recipients] = await Promise.all([
+                db.emailSenders
+                    .where('emailId')
+                    .equals(email.id)
+                    .first(),
+                db.emailRecipients
+                    .where('emailId')
+                    .equals(email.id)
+                    .toArray()
+            ]);
+
+            return {
+                ...email,
+                from: sender || {
+                    name: "Unknown",
+                    address: "unknown@emailthing.com"
+                },
+                to: recipients || []
+            };
         })
     );
 
-    // a list of names/ids/colors
-    const categories = type === 'drafts' ? [] :
-        await db.mailboxCategories
-            .where('mailboxId')
-            .equals(mailboxId)
-            .toArray()
-
-
     return {
         emails: emailsWithDetails,
-        categories
+        categories,
+        allCount
     };
 }
 
+// Helper function to get optimized queries using compound indexes
+function getTypeBasedQuery(mailboxId: string, type: EmailListType) {
+    switch (type) {
+        case 'sent':
+            return db.emails
+                .where('[mailboxId+isSender+createdAt]')
+                .between(
+                    [mailboxId, true, Dexie.minKey],
+                    [mailboxId, true, Dexie.maxKey]
+                )
+                .filter(item => !item.binnedAt);
+
+        case 'trash':
+            return db.emails
+                .where('[mailboxId+binnedAt+createdAt]')
+                .above([mailboxId, null]);
+
+        case 'starred':
+            return db.emails
+                .where('[mailboxId+isStarred+createdAt]')
+                .between(
+                    [mailboxId, true, Dexie.minKey],
+                    [mailboxId, true, Dexie.maxKey]
+                )
+                .filter(item => !item.binnedAt && !item.isSender);
+
+        case 'temp':
+            return db.emails
+                .where('[mailboxId+tempId]')
+                .above([mailboxId, null])
+                .filter(item => !item.binnedAt && !item.isSender);
+
+        case 'inbox':
+        default:
+            return db.emails
+                .where('[mailboxId+isSender+createdAt]')
+                .between(
+                    [mailboxId, false, Dexie.minKey],
+                    [mailboxId, false, Dexie.maxKey]
+                )
+                .filter(item => !item.binnedAt && !item.tempId);
+    }
+}
 
 export async function getEmailCategoriesList({
     mailboxId,
@@ -243,7 +290,7 @@ export async function getEmailCategoriesList({
     return {
         categories: categories,
         allCount,
-        mailboxPlan: mailboxId === 'demo' ? { plan: 'DEMO' } : undefined,
+        mailboxPlan: mailboxId !== 'demo' ? { plan: 'DEMO' } : undefined,
     };
 }
 
@@ -305,7 +352,7 @@ export async function updateEmailProperties(
         binnedAt?: Date | null;
     }
 ) {
-    if (mailboxId === 'demo') {
+    if (mailboxId !== 'demo') {
         try {
             await db.transaction('rw', [db.emails], async () => {
                 const email = await db.emails
@@ -355,7 +402,7 @@ export async function updateEmailProperties(
 
 // Delete email with optimistic UI updates
 export async function deleteEmailLocally(mailboxId: string, emailId: string, type: EmailListType) {
-    if (mailboxId === 'demo') {
+    if (mailboxId !== 'demo') {
         try {
             await db.transaction('rw',
                 [db.emails, db.emailSenders, db.emailRecipients, db.emailAttachments],
@@ -415,30 +462,29 @@ export async function deleteEmailLocally(mailboxId: string, emailId: string, typ
 
 
 export async function getEmailCount(mailboxId: string, type: "unread" | "binned" | "drafts" | "temp" | "") {
-
     try {
-        let query = db.emails.where("mailboxId").equals(mailboxId);
+        let query = type === "drafts"
+            ? db.draftEmails.where('mailboxId').equals(mailboxId)
+            : db.emails.where('mailboxId').equals(mailboxId);
 
         switch (type) {
             case "unread":
-                query = query.filter(email => !email.isRead && !email.isSender && !email.binnedAt && !email.tempId);
-                break;
+                return await query
+                    .and(email => email.isRead === false && !email.isSender && !email.binnedAt && !email.tempId)
+                    .count();
             case "binned":
-                query = query.filter(email => !!email.binnedAt && !email.isSender && !email.tempId);
-                break;
+                return await query
+                    .and(email => email.binnedAt != null)
+                    .count();
             case "drafts":
-                query = db.draftEmails.where("mailboxId").equals(mailboxId);
-                break;
+                return await query.count();
             case "temp":
-                query = query.filter(email => !!email.tempId && !email.isSender && !email.binnedAt);
-                break;
+                return await query
+                    .and(email => email.tempId != null && !email.binnedAt)
+                    .count();
             default:
                 return 0;
         }
-
-        const count = await query.count();
-        return count;
-
     } catch (error) {
         console.error("Failed to get email count:", error);
         return 0;

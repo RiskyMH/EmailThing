@@ -22,6 +22,9 @@ export const Mailbox = sqliteTable("mailboxes", {
     plan: text("plan", { enum: ["FREE", "UNLIMITED"] })
         .default("FREE")
         .notNull(),
+
+    // anonymous data - but here for syncing
+    isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
 });
 
 export const MailboxRelations = relations(Mailbox, ({ many, one }) => ({
@@ -54,6 +57,9 @@ export const MailboxAlias = sqliteTable(
             .$defaultFn(() => new Date())
             .$onUpdateFn(() => new Date()),
         default: int("default", { mode: "boolean" }).default(false).notNull(),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {
@@ -92,6 +98,9 @@ export const TempAlias = sqliteTable(
             .$defaultFn(() => new Date())
             .$onUpdateFn(() => new Date()),
         expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {
@@ -128,6 +137,9 @@ export const MailboxCustomDomain = sqliteTable(
             .$defaultFn(() => new Date())
             .$onUpdateFn(() => new Date()),
         domain: nocaseText("domain").notNull(),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {
@@ -162,6 +174,9 @@ export const MailboxTokens = sqliteTable("mailbox_token", {
         .$onUpdateFn(() => new Date()),
     expiresAt: integer("expires_at", { mode: "timestamp" }),
     name: text("name"),
+
+    // anonymous data - but here for syncing
+    isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
 });
 
 export const MailboxTokensRelations = relations(MailboxTokens, ({ many, one }) => ({
@@ -191,6 +206,9 @@ export const MailboxCategory = sqliteTable(
             // .notNull()
             .$defaultFn(() => new Date())
             .$onUpdateFn(() => new Date()),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {
@@ -225,6 +243,9 @@ export const MailboxForUser = sqliteTable(
             // .notNull()
             .$defaultFn(() => new Date())
             .$onUpdateFn(() => new Date()),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {

@@ -8,6 +8,7 @@ export const demoMailbox: DBMailbox = {
     updatedAt: new Date("2025-01-01"),
     storageUsed: 1024 * 1024, // 1MB
     plan: "FREE",
+    isDeleted: false,    
 };
 
 export const demoMailboxAliases: DBMailboxAlias[] = [
@@ -19,6 +20,7 @@ export const demoMailboxAliases: DBMailboxAlias[] = [
         name: "Demo",
         createdAt: new Date("2025-01-01"),
         updatedAt: new Date("2025-01-01"),
+        isDeleted: false,
     },
 ];
 
@@ -30,6 +32,7 @@ export const demoCategories: DBMailboxCategory[] = [
         color: "#FFA500", // orange
         createdAt: new Date("2025-01-01"),
         updatedAt: new Date("2025-01-01"),
+        isDeleted: false,
     },
     {
         id: "2",
@@ -38,5 +41,6 @@ export const demoCategories: DBMailboxCategory[] = [
         color: "#008000", // green
         createdAt: new Date("2025-01-01"),
         updatedAt: new Date("2025-01-01"),
+        isDeleted: false,
     },
 ]; 

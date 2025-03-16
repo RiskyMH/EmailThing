@@ -1,15 +1,22 @@
 import Dexie, { Table } from 'dexie';
-import type { 
-  DBEmail, 
-  DBEmailSender, 
-  DBEmailRecipient, 
+import type {
+  DBEmail,
+  DBEmailSender,
+  DBEmailRecipient,
   DBEmailAttachment,
   DBMailbox,
   DBMailboxAlias,
   DBMailboxCategory,
   DBTempAlias,
   SyncInfo,
-  DBEmailDraft
+  DBEmailDraft,
+  DBMailboxCustomDomain,
+  DBMailboxTokens,
+  DBDefaultDomain,
+  DBPasskeyCredentials,
+  DBUser,
+  DBUserNotification,
+  DBMailboxForUser
 } from './types';
 
 export class EmailDB extends Dexie {
@@ -23,29 +30,54 @@ export class EmailDB extends Dexie {
   mailboxAliases!: Table<DBMailboxAlias, string>;
   mailboxCategories!: Table<DBMailboxCategory, string>;
   tempAliases!: Table<DBTempAlias, string>;
+  mailboxTokens!: Table<DBMailboxTokens, string>;
+  mailboxCustomDomains!: Table<DBMailboxCustomDomain, string>;
+  user!: Table<DBUser, string>;
+  passkeyCredentials!: Table<DBPasskeyCredentials, string>;
+  userNotifications!: Table<DBUserNotification, string>;
+  defaultDomains!: Table<DBDefaultDomain, string>;
+  mailboxForUser!: Table<DBMailboxForUser, string>;
   syncInfo!: Table<SyncInfo, string>;
 
   constructor() {
     super('EmailDB');
-    
-    this.version(1).stores({
-      // Main email table with indexes
-      emails: 'id, mailboxId, *categoryId, *tempId, createdAt, *isRead, *isStarred, *binnedAt',
-      draftEmails: 'id, mailboxId, createdAt',
 
-      // Related email data
-      emailSenders: 'emailId, address',
-      emailRecipients: 'id, emailId, address',
-      emailAttachments: 'id, emailId',
-      
-      // Mailbox related tables
-      mailboxes: 'id, createdAt',
-      mailboxAliases: 'id, mailboxId, alias, default',
-      mailboxCategories: 'id, mailboxId, name',
-      tempAliases: 'id, mailboxId, alias, expiresAt',
-      
-      // Sync metadata
-      syncInfo: 'id, mailboxId, lastSynced'
+    this.version(1).stores({
+      // Optimize email indexes for common query patterns
+      emails: [
+        'id',
+        'mailboxId',
+        '*categoryId',
+        // Primary compound indexes for list views
+        '[mailboxId+isSender+createdAt]',
+        '[mailboxId+binnedAt+createdAt]',
+        '[mailboxId+isStarred+createdAt]',
+        // Category filtering with other conditions
+        '[mailboxId+categoryId+createdAt]',
+        '[mailboxId+categoryId+isRead]',
+        // Status indexes
+        '[mailboxId+isRead]',
+        '[mailboxId+tempId]'
+      ].join(','),
+
+      draftEmails: 'id,mailboxId,[mailboxId+createdAt],*updatedAt',
+
+      // Keep other tables as they were
+      emailSenders: '[emailId+address],emailId,*address',
+      emailRecipients: '[emailId+address],emailId,*address',
+      emailAttachments: '[emailId+id],emailId',
+      mailboxes: 'id,*createdAt',
+      mailboxAliases: '[mailboxId+alias],mailboxId,*alias,*default',
+      mailboxCategories: '[mailboxId+name],mailboxId,*name',
+      tempAliases: '[mailboxId+alias],mailboxId,*alias,*expiresAt',
+      syncInfo: 'id,*lastSynced',
+      user: 'id',
+      passkeyCredentials: '[userId+id],userId,id',
+      userNotifications: '[userId+id],userId,id',
+      defaultDomains: 'id',
+      mailboxForUser: '[userId+mailboxId],userId,mailboxId',
+      mailboxTokens: '[mailboxId+id],mailboxId,id',
+      mailboxCustomDomains: '[mailboxId+id],mailboxId,id'
     });
   }
 
@@ -58,7 +90,6 @@ export class EmailDB extends Dexie {
   async updateLastSync(mailboxId: string): Promise<void> {
     await this.syncInfo.put({
       id: mailboxId,
-      mailboxId,
       lastSynced: new Date()
     });
   }

@@ -865,7 +865,7 @@ export default async function EmailConfig(props: {
     );
 }
 
-function hideToken(token: string) {
+export function hideToken(token: string) {
     const newToken = "et_";
     if (!token.startsWith(newToken)) return `${token.slice(0, 4)}......${token.slice(-4)}`;
     // show first 4 and last 4 characters

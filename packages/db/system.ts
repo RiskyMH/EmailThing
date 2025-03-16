@@ -23,6 +23,9 @@ export const DefaultDomain = sqliteTable(
             .$defaultFn(() => createId()),
         available: int("available", { mode: "boolean" }).default(false),
         tempDomain: int("temp_domain", { mode: "boolean" }).default(false),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {

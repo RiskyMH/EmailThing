@@ -42,6 +42,9 @@ export const Email = sqliteTable(
         isStarred: int("is_starred", { mode: "boolean" }).default(false).notNull(),
 
         binnedAt: int("binned_at", { mode: "timestamp" }),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {
@@ -197,6 +200,9 @@ export const DraftEmail = sqliteTable(
         from: text("from", { length: 255 }),
         to: text("to", { mode: "json" }).$type<{ address: string; name: string | null; cc?: "cc" | "bcc" | null }[]>(),
         headers: text("headers", { mode: "json" }).$type<{ key: string; value: string }[]>(),
+
+        // anonymous data - but here for syncing
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {

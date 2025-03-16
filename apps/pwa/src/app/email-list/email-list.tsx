@@ -145,6 +145,8 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
             type,
             categoryId: categoryId ?? undefined,
             search: search ?? undefined,
+            take: 10000,
+            skip: 0,
         })
         return emails
     }, [mailboxId, type, categoryId, search])
@@ -158,7 +160,8 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
         window._tempData.emailList[key] = data
     }
 
-    const { emails, categories } = (data || _data) as Awaited<ReturnType<typeof getEmailList>>
+    const { emails: _emails, categories } = (data || _data) as Awaited<ReturnType<typeof getEmailList>>
+    const emails = _emails.slice(0, 50)
 
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 

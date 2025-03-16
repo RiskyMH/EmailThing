@@ -1,6 +1,8 @@
 import { db } from "../db";
 import { demoEmails, demoSentEmails, demoTempEmails, demoDrafts } from "./emails";
 import { demoMailbox, demoCategories, demoMailboxAliases } from "./mailbox";
+import { demoDefaultDomains, demoMailboxCustomDomains, demoMailboxForUser, demoMailboxTokens, demoPasskeyCredentials, demoUserNotifications } from "./other";
+import { demoUser } from "./other";
 import { demoEmailRecipients } from "./recipients";
 import { demoEmailSenders } from "./senders";
 import { DEMO_DATA_VERSION, DEMO_VERSION_KEY, DemoDataVersion } from "./version";
@@ -18,7 +20,6 @@ async function getCurrentVersion(): Promise<number> {
 async function updateVersion() {
     await db.syncInfo.put({
         id: DEMO_VERSION_KEY,
-        mailboxId: 'demo',
         lastSynced: new Date()
     });
 }
@@ -26,23 +27,29 @@ async function updateVersion() {
 export async function loadDemoData(force = false) {
     try {
         const currentVersion = await getCurrentVersion();
-        
+
         // Skip if already at latest version unless forced
         if (currentVersion === DEMO_DATA_VERSION && !force) {
             return;
         }
 
-        await db.transaction('rw', 
+        await db.transaction('rw',
             [
-                db.emails, 
-                db.emailSenders, 
-                db.emailRecipients, 
+                db.emails,
+                db.emailSenders,
+                db.emailRecipients,
                 db.mailboxes,
                 db.mailboxCategories,
                 db.syncInfo,
                 db.draftEmails,
                 db.mailboxAliases,
-            ], 
+                // db.mailboxTokens,
+                // db.mailboxCustomDomains,
+                // db.user,
+                // db.passkeyCredentials,
+                // db.userNotifications,
+                // db.defaultDomains,
+            ],
             async () => {
                 // Clear existing demo data
                 await Promise.all([
@@ -85,6 +92,13 @@ export async function loadDemoData(force = false) {
                     db.emailRecipients.bulkAdd(demoEmailRecipients),
                     db.draftEmails.bulkAdd(demoDrafts),
                     db.mailboxAliases.bulkAdd(demoMailboxAliases),
+                    // db.mailboxTokens.bulkAdd(demoMailboxTokens),
+                    // db.mailboxCustomDomains.bulkAdd(demoMailboxCustomDomains),
+                    // db.mailboxForUser.bulkAdd(demoMailboxForUser),
+                    // db.user.add(demoUser),
+                    // db.passkeyCredentials.bulkAdd(demoPasskeyCredentials),
+                    // db.userNotifications.bulkAdd(demoUserNotifications),
+                    // db.defaultDomains.bulkAdd(demoDefaultDomains),
                 ]);
 
                 // Update version
@@ -101,8 +115,3 @@ export async function loadDemoData(force = false) {
 export async function isDemoMailbox(mailboxId: string): Promise<boolean> {
     return mailboxId === demoMailbox.id;
 }
-
-export * from "./emails";
-export * from "./mailbox";
-export * from "./senders";
-export * from "./recipients"; 
