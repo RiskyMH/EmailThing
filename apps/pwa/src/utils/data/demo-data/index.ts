@@ -24,7 +24,7 @@ async function updateVersion() {
     });
 }
 
-export async function loadDemoData(force = false) {
+export async function loadDemoData(force = 0) {
     try {
         const currentVersion = await getCurrentVersion();
 

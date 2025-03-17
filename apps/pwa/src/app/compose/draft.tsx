@@ -105,7 +105,7 @@ export default function DraftPage() {
     if (data[0] === null) return <>404 - Draft not found</>
 
     const [mail, aliases] = data
-    
+
 
     return (
         <form
@@ -167,7 +167,7 @@ export default function DraftPage() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     {/* just easier access */}
-                    {mail.headers?.map(({ key, value }, i) => (
+                    {(mail.headers || []).map(({ key, value }, i) => (
                         <Fragment key={i}>
                             <input hidden name="header" value={i} readOnly />
                             <input hidden name={`header:${i}:name`} value={key} readOnly />

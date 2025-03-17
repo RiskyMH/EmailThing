@@ -3,6 +3,9 @@ import { Suspense, use } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserDropDown } from "./user-nav.client";
 import { useGravatar } from "@/utils/fetching";
+import { useLiveQuery } from "dexie-react-hooks";
+import { getMe } from "@/utils/data/queries/user";
+
 export default function UserNav({ fallbackLogin }: { fallbackLogin?: boolean }) {
     const Fallback = fallbackLogin ? UserNavLogin : UserNavFallback;
     return (
@@ -32,7 +35,7 @@ function UserNavLogin() {
 }
 
 export function UserNavv() {
-    const user = document.cookie.includes('test') ? { username: "Demo", email: "demo@emailthing.xyz" } : false
+    const user = useLiveQuery(async () => getMe(), [])
     if (!user) return <UserNavLogin />;
     // if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
 

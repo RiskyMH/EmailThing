@@ -104,7 +104,7 @@ async function getMinimalChanges(currentUser: InferSelectModel<typeof User>, mai
 
     const emails = await db.select().from(Email)
         .where(inArray(Email.mailboxId, mailboxIds))
-        .orderBy(desc(Email.createdAt)).limit(100);
+        .orderBy(desc(Email.createdAt)).limit(50);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
     const b = await db.batch([
@@ -117,7 +117,7 @@ async function getMinimalChanges(currentUser: InferSelectModel<typeof User>, mai
         db.select().from(MailboxCategory).where(inArray(MailboxCategory.mailboxId, mailboxIds)),
         db.select().from(MailboxAlias).where(inArray(MailboxAlias.mailboxId, mailboxIds)),
         db.select().from(DraftEmail).where(inArray(DraftEmail.mailboxId, mailboxIds))
-            .orderBy(desc(DraftEmail.createdAt)).limit(100),
+            .orderBy(desc(DraftEmail.createdAt)).limit(50),
     ] as const)
 
     const [emailSenders, emailRecipients, emailAttachments, mailboxes, mailboxCategories, mailboxAliases, draftEmails] = b;

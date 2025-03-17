@@ -675,7 +675,7 @@ export function HeaderModal({
                     onSubmit={formSubmit}
                 >
                     <div className="flex flex-col gap-2">
-                        {headers.map(({ key, value }, i) => (
+                        {(headers || []).map(({ key, value }, i) => (
                             <div key={i} className="flex gap-2">
                                 <input hidden name="header" value={i} readOnly />
                                 <div className="flex">

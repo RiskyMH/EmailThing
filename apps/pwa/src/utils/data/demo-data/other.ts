@@ -6,11 +6,11 @@ export const demoUser = {
     updatedAt: new Date(),
     username: "demo",
     email: "demo@emailthing.app",
-    admin: false,
+    admin: 0,
     backupEmail: "demo@emailthing.app",
     onboardingStatus: { initial: true },
     publicEmail: "demo@emailthing.app",
-    publicContactPage: false,
+    publicContactPage: 0,
 } satisfies DBUser
 
 export const demoPasskeyCredentials: DBPasskeyCredentials[] = []
@@ -22,18 +22,18 @@ export const demoDefaultDomains = [
         id: "1",
         createdAt: new Date(),
         updatedAt: new Date(),
-        isDeleted: false,
+        isDeleted: 0,
         domain: "emailthing.xyz",
-        available: true,
-        tempDomain: null,
+        available: 1,
+        tempDomain: 0,
     }, {
         id: "1",
         createdAt: new Date(),
         updatedAt: new Date(),
-        isDeleted: false,
+        isDeleted: 0,
         domain: "temp.emailthing.xyz",
-        available: true,
-        tempDomain: true,
+        available: 1,
+        tempDomain: 1,
     }
 ] satisfies DBDefaultDomain[]
 
@@ -49,7 +49,7 @@ export const demoMailboxForUser = [{
     joinedAt: new Date(),
     role: "OWNER",
     updatedAt: new Date(),
-    isDeleted: false,
+    isDeleted: 0,
 }] satisfies DBMailboxForUser[]
 
 

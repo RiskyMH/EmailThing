@@ -14,6 +14,9 @@ import { formatTimeAgo } from "@/utils/tools"
 import { getEmailList, getEmailCategoriesList, getEmailCount } from "@/utils/data/queries/email-list"
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getMailboxName } from "@/utils/data/queries/mailbox";
+import { useInView } from "react-intersection-observer";
+import { Loader2 } from "lucide-react"
+
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     if (typeof window === "undefined") return <Loading />
@@ -129,14 +132,23 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
     return null
 }
 
-function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
+function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp", skip?: number }) {
     const params = useParams<"mailboxId">()
     const searchParams = useSearchParams()[0]
     const categoryId = searchParams.get("category") as string | null
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
 
-    const key = JSON.stringify({ mailboxId, type, categoryId, search })
+
+    const [loadMore, inView] = useInView({
+        threshold: 0,
+        rootMargin: '500px',
+        triggerOnce: true,
+        initialInView: false,
+    })
+
+
+    const key = JSON.stringify({ mailboxId, type, categoryId, search, skip })
     const _data = window?._tempData?.emailList?.[key]
 
     const data = useLiveQuery(async () => {
@@ -145,55 +157,82 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
             type,
             categoryId: categoryId ?? undefined,
             search: search ?? undefined,
-            take: 10000,
-            skip: 0,
+            take: 50 + 1,
+            skip: skip,
         })
-        return emails
-    }, [mailboxId, type, categoryId, search])
+        return [emails, localStorage.getItem("lastSync") ? "loading..." : key]
+    }, [mailboxId, type, categoryId, search, key])
+
+    const loading = skip > 0 ?
+        <Button
+            variant="outline"
+            className="flex gap-2"
+            size="lg"
+            disabled
+        >
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        </Button>
+        : <EmailListLoadingSkeleton />
 
     const isLoading = !data && !_data
-    if (isLoading) return <EmailListLoadingSkeleton />
+    if (isLoading) return loading
 
-    if (data && typeof window !== "undefined") {
+    if (data?.[1] !== key && _data?.[1] !== key) {
+        return loading
+    }
+
+    const __data = data?.[1] === key ? data : _data
+
+    if (data && typeof window !== "undefined" && data?.[1] === key) {
         window._tempData ||= {}
         window._tempData.emailList ||= {}
         window._tempData.emailList[key] = data
     }
 
-    const { emails: _emails, categories } = (data || _data) as Awaited<ReturnType<typeof getEmailList>>
-    const emails = _emails.slice(0, 50)
 
-    const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
+    const { emails: emails_, categories } = (__data?.[0]) as Awaited<ReturnType<typeof getEmailList>>
+
+    const emails = emails_.slice(0, 50)
+
+    const hasMore = emails_.length > 50
 
     return (
         <>
-            {type === "trash" && (
-                <div className="text-center font-bold text-muted-foreground">
-                    Messages that have been in the Bin for more than 30 days will be deleted automatically
-                </div>
-            )}
-            {type === "temp" && (
-                <div className="text-center font-bold text-muted-foreground">
-                    {categoryId
-                        ? // @ts-expect-error types are boring
-                        `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
-                        : "Email addresses will be automatically deleted in 24 hours after creation."}
-                    {categoryId && (
-                        <p className="pt-1 font-normal">
-                            {/* @ts-expect-error types are boring */}
-                            {currentCategory?.alias}
-                        </p>
+            {skip > 0 ? (
+                // "loading"
+                <></>
+            ) : (
+                <>
+
+                    {type === "trash" && (
+                        <div className="text-center font-bold text-muted-foreground">
+                            Messages that have been in the Bin for more than 30 days will be deleted automatically
+                        </div>
                     )}
-                </div>
-            )}
-            {emails.length === 0 && (
-                <div className="text-center text-muted-foreground">
-                    {search
-                        ? `Couldn't find any emails matching "${search}"`
-                        : type === "drafts"
-                            ? "No drafts"
-                            : "No emails"}
-                </div>
+                    {type === "temp" && (
+                        <div className="text-center font-bold text-muted-foreground">
+                            {categoryId
+                                ? // @ts-expect-error types are boring
+                                `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
+                                : "Email addresses will be automatically deleted in 24 hours after creation."}
+                            {categoryId && (
+                                <p className="pt-1 font-normal">
+                                    {/* @ts-expect-error types are boring */}
+                                    {currentCategory?.alias}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    {emails.length === 0 && (
+                        <div className="text-center text-muted-foreground">
+                            {search
+                                ? `Couldn't find any emails matching "${search}"`
+                                : type === "drafts"
+                                    ? "No drafts"
+                                    : "No emails"}
+                        </div>
+                    )}
+                </>
             )}
             {emails.map((email) => (
                 <EmailItem
@@ -204,6 +243,22 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
                     type={type}
                 />
             ))}
+            {hasMore && (
+                inView
+                    ? <Emails filter={type} skip={emails.length + skip} />
+                    : <div ref={loadMore} className="w-full">{loading}</div>
+            )}
+
+            {!hasMore && skip > 0 && (
+                <Button
+                    variant="outline"
+                    className="flex gap-2"
+                    size="lg"
+                    disabled
+                >
+                    You have reached the bottom
+                </Button>
+            )}
         </>
     );
 }
@@ -222,9 +277,10 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
         const emails = await getEmailCategoriesList({
             mailboxId,
             type,
+            search: search ?? undefined,
         })
         return emails
-    }, [mailboxId, type])
+    }, [mailboxId, type, search])
 
     const isLoading = !data && !_data
     if (isLoading) return <EmailListCategoryLoadingSkeleton />

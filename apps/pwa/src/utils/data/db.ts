@@ -37,40 +37,85 @@ export class EmailDB extends Dexie {
   userNotifications!: Table<DBUserNotification, string>;
   defaultDomains!: Table<DBDefaultDomain, string>;
   mailboxForUser!: Table<DBMailboxForUser, string>;
-  syncInfo!: Table<SyncInfo, string>;
 
   constructor() {
     super('EmailDB');
 
     this.version(1).stores({
-      // Optimize email indexes for common query patterns
+      // Add comprehensive indexes for emails
       emails: [
+        // Primary key
         'id',
+        // Basic indexes
         'mailboxId',
-        '*categoryId',
-        // Primary compound indexes for list views
+        'categoryId',
+        'isRead',
+        'isStarred',
+        'isSender',
+        'binnedAt',
+        'tempId',
+        'createdAt',
+
+        // TODO: clean up some of thse (ie see whats actually in use and could be used)
+        // Two-field compound indexes
+        '[mailboxId+createdAt]',
+        '[mailboxId+categoryId]',
+        '[mailboxId+isRead]',
+        '[mailboxId+isStarred]',
+        '[mailboxId+isSender]',
+        '[mailboxId+binnedAt]',
+        '[mailboxId+tempId]',
+        // Three-field compound indexes for common queries
+        '[mailboxId+categoryId+createdAt]',
+        '[mailboxId+isRead+createdAt]',
+        '[mailboxId+isStarred+createdAt]',
         '[mailboxId+isSender+createdAt]',
         '[mailboxId+binnedAt+createdAt]',
-        '[mailboxId+isStarred+createdAt]',
-        // Category filtering with other conditions
-        '[mailboxId+categoryId+createdAt]',
+        '[mailboxId+tempId+createdAt]',
+
         '[mailboxId+categoryId+isRead]',
-        // Status indexes
-        '[mailboxId+isRead]',
-        '[mailboxId+tempId]'
+        '[mailboxId+categoryId+isStarred]',
+        '[mailboxId+categoryId+isSender]',
+        '[mailboxId+categoryId+binnedAt]',
+        '[mailboxId+categoryId+tempId]',
+
+        // 4 field compound indexes
+        '[mailboxId+categoryId+isRead+createdAt]',
+        '[mailboxId+categoryId+isStarred+createdAt]',
+        '[mailboxId+categoryId+isSender+createdAt]',
+        '[mailboxId+categoryId+binnedAt+createdAt]',
+        '[mailboxId+categoryId+tempId+createdAt]', 
+        
+        // these are used for the actual filtering of emails on homepage
+        '[mailboxId+isSender+binnedAt+tempId]',
+        '[mailboxId+categoryId+isSender+binnedAt+tempId]',
+        '[mailboxId+isRead+isSender+binnedAt]',
+        '[mailboxId+isRead+isSender+binnedAt+tempId]',
+        '[mailboxId+categoryId+isRead+isSender+binnedAt]',
+        '[mailboxId+isStarred+isSender+binnedAt]',
+        '[mailboxId+categoryId+isStarred+isSender+binnedAt]',
+        '[mailboxId+tempId+isSender+binnedAt]',
+        '[mailboxId+categoryId+tempId+isSender+binnedAt]',
+
+        '[mailboxId+isSender+binnedAt+tempId+createdAt]',
+        '[mailboxId+categoryId+isSender+binnedAt+tempId+createdAt]',
+        '[mailboxId+isRead+isSender+binnedAt+createdAt]',
+        '[mailboxId+categoryId+isRead+isSender+binnedAt+createdAt]',
+        '[mailboxId+isStarred+isSender+binnedAt+createdAt]',
+        '[mailboxId+categoryId+isStarred+isSender+binnedAt+createdAt]',
+        '[mailboxId+tempId+isSender+binnedAt+createdAt]',
+        '[mailboxId+categoryId+tempId+isSender+binnedAt+createdAt]',
       ].join(','),
 
-      draftEmails: 'id,mailboxId,[mailboxId+createdAt],*updatedAt',
-
       // Keep other tables as they were
-      emailSenders: '[emailId+address],emailId,*address',
-      emailRecipients: '[emailId+address],emailId,*address',
+      draftEmails: 'id,mailboxId,[mailboxId+createdAt],updatedAt',
+      emailSenders: '[emailId+address],emailId,address',
+      emailRecipients: '[emailId+address],emailId,address',
       emailAttachments: '[emailId+id],emailId',
-      mailboxes: 'id,*createdAt',
-      mailboxAliases: '[mailboxId+alias],mailboxId,*alias,*default',
-      mailboxCategories: '[mailboxId+name],mailboxId,*name',
-      tempAliases: '[mailboxId+alias],mailboxId,*alias,*expiresAt',
-      syncInfo: 'id,*lastSynced',
+      mailboxes: 'id,createdAt',
+      mailboxAliases: '[mailboxId+alias],mailboxId,alias,default',
+      mailboxCategories: '[mailboxId+name],mailboxId,name',
+      tempAliases: '[mailboxId+alias],mailboxId,alias,expiresAt',
       user: 'id',
       passkeyCredentials: '[userId+id],userId,id',
       userNotifications: '[userId+id],userId,id',
@@ -79,36 +124,6 @@ export class EmailDB extends Dexie {
       mailboxTokens: '[mailboxId+id],mailboxId,id',
       mailboxCustomDomains: '[mailboxId+id],mailboxId,id'
     });
-  }
-
-  // Helper methods for sync
-  async getLastSync(mailboxId: string): Promise<Date | null> {
-    const info = await this.syncInfo.get(mailboxId);
-    return info?.lastSynced ?? null;
-  }
-
-  async updateLastSync(mailboxId: string): Promise<void> {
-    await this.syncInfo.put({
-      id: mailboxId,
-      lastSynced: new Date()
-    });
-  }
-
-  // Bulk upsert helpers
-  async bulkUpsertEmails(emails: DBEmail[]): Promise<void> {
-    await this.emails.bulkPut(emails);
-  }
-
-  async bulkUpsertSenders(senders: DBEmailSender[]): Promise<void> {
-    await this.emailSenders.bulkPut(senders);
-  }
-
-  async bulkUpsertRecipients(recipients: DBEmailRecipient[]): Promise<void> {
-    await this.emailRecipients.bulkPut(recipients);
-  }
-
-  async bulkUpsertAttachments(attachments: DBEmailAttachment[]): Promise<void> {
-    await this.emailAttachments.bulkPut(attachments);
   }
 }
 

@@ -72,7 +72,7 @@ function MailItem() {
             <div className="flex flex-col gap-3 rounded-md bg-card p-3">
                 {/* from info and gravatar */}
                 <div className="flex gap-2">
-                    <EmailPicture email={email.sender?.address || ""} fallback={email.sender?.name?.slice(0, 2).toUpperCase()} />
+                    <EmailPicture email={email.sender?.address || ""} fallback={(email.sender?.name || email.sender?.address || '')?.slice(0, 2).toUpperCase()} />
 
                     <div className="flex flex-col overflow-hidden">
                         <div className="flex gap-2 text-ellipsis whitespace-nowrap">
@@ -170,7 +170,7 @@ function MailItem() {
                                         </div>
 
                                         {/* reply to */}
-                                        {email.replyTo && (
+                                        {!!email.replyTo && (
                                             <div className="grid grid-cols-5 items-center gap-4">
                                                 <p className="text-end text-muted-foreground">reply to:</p>
                                                 <p className="col-span-4 overflow-y-auto">{email.replyTo}</p>

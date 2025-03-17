@@ -6,7 +6,7 @@ export async function getMailbox(mailboxId: string) {
 }
 
 export async function getMailboxName(mailboxId: string) {
-    const mailboxAliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).and(mailboxAlias => mailboxAlias.default).first()
+    const mailboxAliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).and(mailboxAlias => mailboxAlias.default == 1).first()
     return mailboxAliases?.alias
 }
 
@@ -16,7 +16,7 @@ export async function getMailboxAliases(mailboxId: string) {
 }
 
 export async function getMailboxDefaultAlias(mailboxId: string) {
-    const mailboxAliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).and(mailboxAlias => mailboxAlias.default).first()
+    const mailboxAliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).and(mailboxAlias => mailboxAlias.default == 1).first()
     return mailboxAliases
 }
 
@@ -26,7 +26,7 @@ export async function getUserMailboxes() {
     const mailboxAliases = await db.mailboxAliases.toArray()
     return mailboxes.map(mailbox => ({
         id: mailbox.id,
-        name: mailboxAliases.find(alias => alias.mailboxId === mailbox.id)?.alias,
+        name: mailboxAliases.find(alias => alias.mailboxId === mailbox.id && alias.default == 1)?.alias,
         // role: "ADMIN",
     }))
 }

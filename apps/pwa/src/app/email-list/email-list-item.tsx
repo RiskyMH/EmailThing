@@ -11,11 +11,13 @@ import {
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { cn } from "@/utils/tw";
-import { ExternalLink, ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon } from "lucide-react";
+import { ArchiveRestoreIcon, ExternalLink, ForwardIcon, MailOpenIcon, ReplyAllIcon, ReplyIcon, TagIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { ClientStar, ContextMenuAction } from "@/(email)/mail/[mailbox]/components.client";
 import { toast } from "sonner";
 import { updateEmailProperties, deleteEmailLocally } from "@/utils/data/queries/email-list";
+import { useEffect, useState } from "react";
+import MailUnreadIcon from "@/components/icons/mail-unread";
 
 export interface EmailItemProps {
     email: {
@@ -25,10 +27,10 @@ export interface EmailItemProps {
         body?: string;
         html?: string;
         createdAt: Date;
-        isRead?: boolean;
-        isStarred?: boolean;
-        binnedAt?: Date | null;
-        categoryId?: string | null;
+        isRead?: boolean | 0 | 1;
+        isStarred?: boolean | 0 | 1;
+        binnedAt?: Date | 0;
+        categoryId?: string | 0;
         from?: {
             name?: string;
             address: string;
@@ -40,12 +42,40 @@ export interface EmailItemProps {
     };
     mailboxId: string;
     type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
-    categories?: { id: string, name: string, color?: string | null }[] | null;
+    categories?: { id: string, name: string, color?: string | 0 }[] | 0;
+}
+
+function useInView() {
+    const [ref, setRef] = useState<HTMLElement | null>(null);
+    const [isInView, setIsInView] = useState(false);
+
+    useEffect(() => {
+        if (!ref) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsInView(entry.isIntersecting);
+            },
+            {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            }
+        );
+
+        observer.observe(ref);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [ref]);
+
+    return [setRef, isInView] as const;
 }
 
 export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps) {
     const emailId = email.id;
-    
+
     const updateEmail = async (updates: any) => {
         const result = await updateEmailProperties(mailboxId, emailId, updates);
         toast(result.message, { description: result.description });
@@ -56,65 +86,75 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
         toast(result.message, { description: result.description });
     };
 
-    const category = categories?.find((c) => c.id === email.categoryId);
+    const category = (categories || [])?.find((c) => c.id === email.categoryId);
     const link = `/mail/${mailboxId}/${type === "drafts" ? "draft/" : ""}${email.id}`;
 
-    return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>
-                <Link
-                    href={link}
-                    className={cn(
-                        "group inline-flex h-12 gap-3 rounded-md px-4 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                        email.isRead ? "hover:bg-card/60" : "bg-card text-card-foreground shadow-sm hover:bg-card/60",
-                    )}
-                >
-                    {/* Category indicator */}
-                    <TooltipText text={category?.name ?? "No category"}>
-                        <span
-                            className="inline-block size-4 shrink-0 self-center rounded-full"
-                            style={{
-                                backgroundColor: category?.color ?? "grey",
-                            }}
-                        />
-                    </TooltipText>
+    const [ref, isInView] = useInView()
 
-                    {/* Star button */}
-                    <ClientStar
-                        enabled={!!email.isStarred}
-                        action={type !== "drafts" ? () => updateEmail({ isStarred: !email.isStarred }) : async () => {}}
-                        className="hidden shrink-0 self-center text-muted-foreground hover:text-foreground sm:inline-block"
+    const main = (
+        <Link
+            ref={ref}
+            href={link}
+            className={cn(
+                "group inline-flex h-12 gap-3 rounded-md px-4 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                email.isRead ? "hover:bg-card/60" : "bg-card text-card-foreground shadow-sm hover:bg-card/60",
+            )}
+        >
+            {/* Category indicator */}
+            {isInView ? (
+                <TooltipText text={category?.name ?? "No category"}>
+                    <span
+                        className="inline-block size-4 shrink-0 self-center rounded-full"
+                        style={{
+                            backgroundColor: category?.color || "grey",
+                        }}
                     />
+                </TooltipText>
+            ) : (
+                <span
+                    className="inline-block size-4 shrink-0 self-center rounded-full"
+                    style={{
+                        backgroundColor: category?.color || "grey",
+                    }}
+                />
+            )}
 
-                    {/* <TooltipText
+            {/* Star button */}
+            <ClientStar
+                enabled={!!email.isStarred}
+                action={type !== "drafts" ? () => updateEmail({ isStarred: !email.isStarred }) : async () => { }}
+                className="hidden shrink-0 self-center text-muted-foreground hover:text-foreground sm:inline-block"
+            />
+
+            {/* <TooltipText
                         text={email.from?.name || email.from?.address || "There should be an email here"}
                         subtext={email.from?.name && email.from?.address ? `(${email.from?.address})` : ""}
                     > */}
-                    <span
-                        className={cn(
-                            "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56",
-                            !email.isRead ? "font-bold" : "text-foreground/80",
-                        )}
-                        title={email.from?.address ?? "uh?"}
-                    >
-                        {email.from?.name || email.from?.address}
-                    </span>
-                    {/* </TooltipText> */}
+            <span
+                className={cn(
+                    "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56",
+                    !email.isRead ? "font-bold" : "text-foreground/80",
+                )}
+                title={email.from?.address ?? "uh?"}
+            >
+                {email.from?.name || email.from?.address}
+            </span>
+            {/* </TooltipText> */}
 
-                    {/* <TooltipText text={email.subject || "No subject was provided"}> */}
-                    <span
-                        className={cn(
-                            "self-center truncate text-sm",
-                            !email.subject && "italic",
-                            !email.isRead ? "font-bold" : "text-foreground/80",
-                        )}
-                        title={email.subject || "No subject was provided"}
-                    >
-                        {email.subject || "(no subject)"}
-                    </span>
-                    {/* </TooltipText> */}
+            {/* <TooltipText text={email.subject || "No subject was provided"}> */}
+            <span
+                className={cn(
+                    "self-center truncate text-sm",
+                    !email.subject && "italic",
+                    !email.isRead ? "font-bold" : "text-foreground/80",
+                )}
+                title={email.subject || "No subject was provided"}
+            >
+                {email.subject || "(no subject)"}
+            </span>
+            {/* </TooltipText> */}
 
-                    {/* <span className="hidden w-full shrink-[2] gap-4 self-center sm:inline-flex">
+            {/* <span className="hidden w-full shrink-[2] gap-4 self-center sm:inline-flex">
                         {!email.isRead && (
                             <span className="inline h-6 select-none self-center rounded bg-red px-3 py-1 font-bold text-white text-xs">
                                 NEW
@@ -122,12 +162,15 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         )}
                         <span className="line-clamp-2 break-all text-muted-foreground text-sm">{email.snippet}</span>
                     </span> */}
-                    <LocalTime
-                        type="smart"
-                        time={email.createdAt}
-                        className="float-right ms-auto w-auto shrink-0 self-center text-right text-muted-foreground text-xs group-hover:sm:hidden"
-                    />
-                    <div className="float-right ms-auto me-1.5 hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
+            <LocalTime
+                type="smart"
+                time={email.createdAt}
+                tooltip={false}
+                className="float-right ms-auto w-auto shrink-0 self-center text-right text-muted-foreground text-xs group-hover:sm:hidden"
+            />
+            <div className="float-right ms-auto me-1.5 hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
+                {isInView ? (
+                    <>
                         {type !== "drafts" && <ContextMenuAction
                             icon={email.isRead ? "MailUnreadIcon" : "MailOpenIcon"}
                             action={() => updateEmail({ isRead: !email.isRead })}
@@ -155,8 +198,21 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                                 size="small"
                             />
                         )}
-                    </div>
-                </Link>
+                    </>)
+                    : <>
+                        {type !== "drafts" && (email.isRead ? <MailUnreadIcon className="size-4 text-muted-foreground" /> : <MailOpenIcon className="size-4 text-muted-foreground" />)}
+                        {!email.binnedAt ? <Trash2Icon className="size-4 text-muted-foreground" /> : <ArchiveRestoreIcon className="size-4 text-muted-foreground" />}
+                    </>
+                }
+            </div>
+        </Link>
+    )
+
+    if (!isInView) return main
+    return (
+        <ContextMenu>
+            <ContextMenuTrigger asChild>
+                {main}
             </ContextMenuTrigger>
             <ContextMenuContent>
                 {!["drafts", "temp"].includes(type) ? (
@@ -184,7 +240,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                         <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
                             <ContextMenuAction
                                 icon="StarIcon"
-                                fillIcon={email.isStarred}
+                                fillIcon={!!email.isStarred}
                                 action={() => updateEmail({ isStarred: !email.isStarred })}
                             >
                                 {email.isStarred ? "Unstar" : "Star"}
@@ -198,7 +254,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                                 {!email.binnedAt ? "Delete" : "Restore to inbox"}
                             </ContextMenuAction>
                         </ContextMenuItem>
-                        {email.binnedAt && (
+                        {!!email.binnedAt && (
                             <ContextMenuItem className="flex w-full cursor-pointer gap-2" asChild>
                                 <ContextMenuAction
                                     icon="Trash2Icon"
@@ -234,7 +290,7 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
                                         </ContextMenuAction>
                                     </ContextMenuItem>
 
-                                    {categories?.map((category) => (
+                                    {(categories || [])?.map((category) => (
                                         <ContextMenuItem
                                             key={category.id}
                                             asChild

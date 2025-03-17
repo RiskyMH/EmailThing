@@ -217,7 +217,8 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     //         role: "DEMO",
     //     },
     // ]
-    const mailboxes = useLiveQuery(async () => getUserMailboxes(), [])
+    const _mailboxes = useLiveQuery(async () => getUserMailboxes(), [])
+    const mailboxes = _mailboxes?.filter(m => mailboxId === "demo" ? m.id === "demo" : m.id !== "demo")
 
     // type _defaultAlias = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["mailboxAliases"]>>
     // const { default: defaultAlias } = {
@@ -227,7 +228,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     //     }
     // }
     const defaultAlias = useLiveQuery(async () => getMailboxDefaultAlias(mailboxId), [mailboxId])
-    
+
     // const gravatarImg = use(gravatar(defaultAlias?.alias ?? "ab@c.com"))
     const gravatarImg = useGravatar(defaultAlias?.alias ?? "ab@c.com")
 
