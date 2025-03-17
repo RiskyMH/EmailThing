@@ -160,8 +160,7 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
             take: 50 + 1,
             skip: skip,
         })
-        const _key = localStorage.getItem("lastSync") && mailboxId !== "demo" ? "loading..." : key
-        return [emails, _key]
+        return [emails, key]
     }, [mailboxId, type, categoryId, search, key])
 
     const loading = skip > 0 ?
@@ -196,6 +195,11 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
     const emails = emails_.slice(0, 50)
 
     const hasMore = emails_.length > 50
+
+    const hasSynced = "window" in globalThis && globalThis.window?.localStorage?.getItem("lastSync")
+    if (!hasSynced && emails.length === 0 && mailboxId !== "demo") {
+        return <EmailListLoadingSkeleton />
+    }
 
     return (
         <>

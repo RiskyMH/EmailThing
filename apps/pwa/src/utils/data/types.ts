@@ -30,12 +30,3 @@ export type DBDefaultDomain = Omit<T<InferSelectModel<typeof DefaultDomain>>, "a
 export type DBUser = T<Omit<InferSelectModel<typeof User>, "password">>;
 export type DBPasskeyCredentials = T<Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">>;
 export type DBUserNotification = T<Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">>;
-
-
-
-// Sync metadata
-export interface SyncInfo {
-  id: string;
-  lastSynced: Date;
-  // mailboxId: string;
-}

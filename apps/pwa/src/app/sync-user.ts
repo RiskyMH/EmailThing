@@ -52,7 +52,7 @@ export async function syncUser(minimal = false, lastSync?: Date) {
         return arr?.filter(item => !item.isDeleted).map(parseValues) as T;
     };
 
-    db.transaction('rw', [
+    await db.transaction('rw', [
         db.emails,
         db.emailSenders,
         db.emailRecipients,
@@ -65,28 +65,30 @@ export async function syncUser(minimal = false, lastSync?: Date) {
         db.mailboxCustomDomains,
         db.defaultDomains,
         db.passkeyCredentials,
-        db.userNotifications
+        db.userNotifications,
+        db.mailboxForUser,
+        db.user,
     ], async () => {
         // Handle deletions first
+        const emailIds = data.emails?.filter((e: any) => e.isDeleted)?.map((e: any) => e.id) ?? [];
         await Promise.all([
             // Delete emails and related data
-            ...(data.emails?.filter((e: any) => e.isDeleted)?.map((e: any) => e.id) ?? []).length > 0 ? [
-                async () => {
-                    const emailIds = data.emails?.filter((e: any) => e.isDeleted)?.map((e: any) => e.id) ?? [];
-                    await Promise.all([
-                        db.emails.bulkDelete(emailIds),
-                        db.emailSenders.where('emailId').anyOf(emailIds).delete(),
-                        db.emailRecipients.where('emailId').anyOf(emailIds).delete(),
-                        db.emailAttachments.where('emailId').anyOf(emailIds).delete()
-                    ]);
-                }
-            ] : [],
+            db.emails.bulkDelete(emailIds),
+            db.emailSenders.where('emailId').anyOf(emailIds).delete(),
+            db.emailRecipients.where('emailId').anyOf(emailIds).delete(),
+            db.emailAttachments.where('emailId').anyOf(emailIds).delete(),
 
             // Delete other entities
             db.mailboxes.bulkDelete(data.mailboxes?.filter((m: any) => m.isDeleted)?.map((m: any) => m.id) ?? []),
             db.mailboxCategories.bulkDelete(data.mailboxCategories?.filter((c: any) => c.isDeleted)?.map((c: any) => c.id) ?? []),
             db.mailboxAliases.bulkDelete(data.mailboxAliases?.filter((a: any) => a.isDeleted)?.map((a: any) => a.id) ?? []),
-            db.draftEmails.bulkDelete(data.draftEmails?.filter((d: any) => d.isDeleted)?.map((d: any) => d.id) ?? [])
+            db.draftEmails.bulkDelete(data.draftEmails?.filter((d: any) => d.isDeleted)?.map((d: any) => d.id) ?? []),
+            db.mailboxTokens.bulkDelete(data.mailboxTokens?.filter((t: any) => t.isDeleted)?.map((t: any) => t.id) ?? []),
+            db.mailboxCustomDomains.bulkDelete(data.mailboxCustomDomains?.filter((d: any) => d.isDeleted)?.map((d: any) => d.id) ?? []),
+            db.defaultDomains.bulkDelete(data.defaultDomains?.filter((d: any) => d.isDeleted)?.map((d: any) => d.id) ?? []),
+            db.passkeyCredentials.bulkDelete(data.passkeyCredentials?.filter((c: any) => c.isDeleted)?.map((c: any) => c.id) ?? []),
+            db.userNotifications.bulkDelete(data.userNotifications?.filter((n: any) => n.isDeleted)?.map((n: any) => n.id) ?? []),
+            db.mailboxForUser.bulkDelete(data.mailboxesForUser?.filter((m: any) => m.isDeleted)?.map((m: any) => m.id) ?? []),
         ]);
 
         // Then handle updates/inserts
@@ -113,7 +115,7 @@ export async function syncUser(minimal = false, lastSync?: Date) {
                 db.mailboxCustomDomains.bulkPut(parseValuesInArray(data.mailboxCustomDomains)),
                 db.defaultDomains.bulkPut(parseValuesInArray(data.defaultDomains)),
                 db.passkeyCredentials.bulkPut(parseValuesInArray(data.passkeyCredentials)),
-                db.userNotifications.bulkPut(parseValuesInArray(data.userNotifications))
+                db.userNotifications.bulkPut(parseValuesInArray(data.userNotifications)),
             ] : [])
         ]);
     });

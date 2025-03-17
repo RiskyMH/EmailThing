@@ -1,38 +1,12 @@
 import { db } from "../db";
 import { demoEmails, demoSentEmails, demoTempEmails, demoDrafts } from "./emails";
 import { demoMailbox, demoCategories, demoMailboxAliases } from "./mailbox";
-import { demoDefaultDomains, demoMailboxCustomDomains, demoMailboxForUser, demoMailboxTokens, demoPasskeyCredentials, demoUserNotifications } from "./other";
-import { demoUser } from "./other";
 import { demoEmailRecipients } from "./recipients";
 import { demoEmailSenders } from "./senders";
-import { DEMO_DATA_VERSION, DEMO_VERSION_KEY, DemoDataVersion } from "./version";
 
-async function getCurrentVersion(): Promise<number> {
-    try {
-        const version = await db.syncInfo.get(DEMO_VERSION_KEY);
-        return version?.lastSynced.getTime() || 0;
-    } catch (error) {
-        console.error('Failed to get demo version:', error);
-        return 0;
-    }
-}
-
-async function updateVersion() {
-    await db.syncInfo.put({
-        id: DEMO_VERSION_KEY,
-        lastSynced: new Date()
-    });
-}
 
 export async function loadDemoData(force = 0) {
     try {
-        const currentVersion = await getCurrentVersion();
-
-        // Skip if already at latest version unless forced
-        if (currentVersion === DEMO_DATA_VERSION && !force) {
-            return;
-        }
-
         await db.transaction('rw',
             [
                 db.emails,
@@ -40,7 +14,6 @@ export async function loadDemoData(force = 0) {
                 db.emailRecipients,
                 db.mailboxes,
                 db.mailboxCategories,
-                db.syncInfo,
                 db.draftEmails,
                 db.mailboxAliases,
                 // db.mailboxTokens,
@@ -100,9 +73,6 @@ export async function loadDemoData(force = 0) {
                     // db.userNotifications.bulkAdd(demoUserNotifications),
                     // db.defaultDomains.bulkAdd(demoDefaultDomains),
                 ]);
-
-                // Update version
-                await updateVersion();
             }
         );
     } catch (error) {
