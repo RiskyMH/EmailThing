@@ -304,7 +304,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
         return (
             <>
                 <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
-                <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
+                <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden text-nowrap">
                     <CategoryItem
                         circleColor={null}
                         name={search ? "Search results" : name || "All"}

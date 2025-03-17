@@ -28,7 +28,7 @@ export async function syncUser(minimal = false, lastSync?: Date) {
 }
 
 export async function proposeSync(changes: ChangesRequest, lastSync?: Date) {
-    if (!localStorage.getItem('token')) return 
+    if (!localStorage.getItem('token')) return
 
     // Build query params
     const params = new URLSearchParams();
@@ -52,8 +52,12 @@ export async function proposeSync(changes: ChangesRequest, lastSync?: Date) {
         }
         return { data: null, errors: ["Unknown error. Can you connect to the internet?"] }
     }
-
-    return { data: await parseSyncResponse(response), errors: null};
+    try {
+        return { data: await parseSyncResponse(response), errors: null };
+    } catch (e) {
+        console.error('Failed to parse sync response', e);
+        return { data: null, errors: e instanceof Error ? e.message : "Unknown error. Can you connect to the internet?" }
+    }
 }
 
 

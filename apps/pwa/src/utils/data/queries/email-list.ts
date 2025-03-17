@@ -337,7 +337,7 @@ export async function getEmailCategoriesList({
                         case 'trash':
                             categoryQuery = db.emails
                                 .where('[mailboxId+categoryId+binnedAt]')
-                                .equals([mailboxId, cat.id, 0]);
+                                .between([mailboxId, cat.id, 1], [mailboxId, cat.id, Dexie.maxKey]);
                             break;
                         case 'starred':
                             categoryQuery = db.emails
@@ -491,8 +491,8 @@ export async function updateEmailProperties(
             id: emailId,
             mailboxId,
             ...updates
-        }]
-    })
+        }],
+    }, new Date(localStorage.getItem('lastSync') || 0))
     if (!res) {
         return {
             success: false,
