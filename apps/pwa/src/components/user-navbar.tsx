@@ -1,17 +1,25 @@
 import { Link } from "react-router-dom";
-import { Suspense, use } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { UserDropDown } from "./user-nav.client";
-import { useGravatar } from "@/utils/fetching";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getMe } from "@/utils/data/queries/user";
 
 export default function UserNav({ fallbackLogin }: { fallbackLogin?: boolean }) {
     const Fallback = fallbackLogin ? UserNavLogin : UserNavFallback;
+
+    const user = useLiveQuery(async () => await getMe() || null, [])
+    if (user === undefined) return <Fallback />;
+    else if (user === null) return <UserNavLogin />;
+
+
     return (
-        <Suspense fallback={<Fallback />}>
-            <UserNavv />
-        </Suspense>
+        <UserDropDown
+            user={{
+                name: user.username,
+                secondary: user.email,
+                email: user.email,
+            }}
+        />
     );
 }
 
@@ -31,25 +39,5 @@ function UserNavLogin() {
         >
             Login
         </Link>
-    );
-}
-
-export function UserNavv() {
-    const user = useLiveQuery(async () => getMe(), [])
-    if (!user) return <UserNavLogin />;
-    // if (!user.onboardingStatus?.initial) return redirect("/onboarding/welcome");
-
-    // const img = use<string | undefined>(user.email ? gravatar(user.email) : Promise.resolve(undefined))
-    // const img = useGravatar(user.email)
-
-    return (
-        <UserDropDown
-            user={{
-                name: user.username,
-                secondary: user.email,
-                email: user.email,
-                // image: img,
-            }}
-        />
     );
 }

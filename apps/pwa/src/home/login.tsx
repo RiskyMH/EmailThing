@@ -91,7 +91,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             // router.refresh();
             // setLoading(false);
 
-            const res = await fetch("http://localhost:3000/api/internal/login", {
+            const res = await fetch("https://emailthing.app/api/internal/login", {
                 method: "POST",
                 body: JSON.stringify({
                     username: (event.target as HTMLFormElement).username.value,
