@@ -4,7 +4,7 @@ import Pricing from "./pricing";
 import { lazy, Suspense } from 'react';
 import AuthPage from "./auth";
 import HomeLayout from "./layout";
-
+import LoginPage from "./login";
 export const routes = [
     {
         path: "/",
@@ -26,7 +26,7 @@ export const routes = [
     },
     {
         path: "/login",
-        element: <AuthPage />,
+        element: <LoginPage />,
     },
     {
         path: "/register",
