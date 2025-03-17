@@ -311,7 +311,7 @@ export async function getEmailCategoriesList({
             const cats = await db.mailboxCategories
                 .where('mailboxId')
                 .equals(mailboxId)
-                .toArray();
+                .sortBy('createdAt');
 
             // Can't count categories for drafts
             if (type === 'drafts') {

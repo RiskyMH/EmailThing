@@ -108,20 +108,20 @@ export class EmailDB extends Dexie {
 
       // Keep other tables as they were
       draftEmails: 'id,mailboxId,[mailboxId+createdAt],updatedAt',
-      emailSenders: '[emailId+address],emailId,address',
-      emailRecipients: '[emailId+address],emailId,address',
-      emailAttachments: '[emailId+id],emailId',
+      emailSenders: 'id,[emailId+address],emailId,address',
+      emailRecipients: 'id,[emailId+address],emailId,address',
+      emailAttachments: 'id,[emailId+id],emailId',
       mailboxes: 'id,createdAt',
-      mailboxAliases: '[mailboxId+alias],mailboxId,alias,default',
-      mailboxCategories: '[mailboxId+name],mailboxId,name',
-      tempAliases: '[mailboxId+alias],mailboxId,alias,expiresAt',
+      mailboxAliases: 'id,[mailboxId+alias],mailboxId,alias,default',
+      mailboxCategories: 'id,[mailboxId+name],mailboxId,name',
+      tempAliases: 'id,[mailboxId+alias],mailboxId,alias,expiresAt',
       user: 'id',
-      passkeyCredentials: '[userId+id],userId,id',
-      userNotifications: '[userId+id],userId,id',
+      passkeyCredentials: 'id,[userId+id],userId,id',
+      userNotifications: 'id,[userId+id],userId,id',
       defaultDomains: 'id',
       mailboxForUser: '[userId+mailboxId],userId,mailboxId',
-      mailboxTokens: '[mailboxId+id],mailboxId,id',
-      mailboxCustomDomains: '[mailboxId+id],mailboxId,id'
+      mailboxTokens: 'id,[mailboxId+id],mailboxId,id',
+      mailboxCustomDomains: 'id,[mailboxId+id],mailboxId,id'
     });
   }
 }

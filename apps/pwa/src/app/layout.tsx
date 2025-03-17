@@ -12,10 +12,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             // Initialize DB and load demo data
             try {
                 const v = localStorage.getItem("indexdb-test-version")
-                if (v !== "v1") {
+                if (v !== "v1.1") {
                     // delete the indexdb
                     await asyncDeleteIndexDB("EmailDB");
-                    localStorage.setItem("indexdb-test-version", "v1");
+                    localStorage.setItem("indexdb-test-version", "v1.1");
                 }
 
                 await initializeDB();

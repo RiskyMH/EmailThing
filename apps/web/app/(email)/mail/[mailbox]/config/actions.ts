@@ -21,6 +21,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { userMailboxAccess } from "../tools";
+import { createId } from "@paralleldrive/cuid2";
 
 export async function verifyDomain(mailboxId: string, customDomain: string) {
     const userId = await getCurrentUser();
@@ -287,7 +288,7 @@ export async function deleteAlias(mailboxId: string, aliasId: string) {
     await db.update(MailboxAlias).set({
         isDeleted: true,
         // if alias is emailthing.xyz, we don't want to delete it, so people can't use it again
-        alias: alias.alias.endsWith("@emailthing.xyz") ? alias.alias : "<deleted>",
+        alias: alias.alias.endsWith("@emailthing.xyz") ? alias.alias : `<deleted>@${createId()}_`,
         default: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -338,7 +339,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
             .update(MailboxAlias)
             .set({
                 isDeleted: true,
-                alias: "<deleted>@<deleted>",
+                alias: `<deleted>@${createId()}_`,
                 default: false,
                 createdAt: new Date(),
                 updatedAt: new Date(),
