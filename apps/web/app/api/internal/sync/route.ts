@@ -1,6 +1,6 @@
 import { getUserByToken } from "@/utils/jwt";
 import db, { DefaultDomain, DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens, PasskeyCredentials, User, UserNotification } from "@/db";
-import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull } from "drizzle-orm";
+import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTableColumns, sql } from "drizzle-orm";
 import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import { cookies, headers } from "next/headers";
 
@@ -30,8 +30,6 @@ export async function GET(request: Request) {
     const minimal = searchParams.get("minimal");
 
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date(0);
-
-    console.log({ lastSyncDate, minimal, lastSync });
 
     const currentUserid = await getCurrentUser();
     if (!currentUserid) return new Response("Unauthorized", { status: 401 });
@@ -102,7 +100,10 @@ async function getMinimalChanges(currentUser: InferSelectModel<typeof User>, mai
     const mailboxIds = mailboxesForUser.map((m) => m.mailboxId);
     const currentUserid = currentUser.id;
 
-    const emails = await db.select().from(Email)
+    const emails = await db.select({
+        ...getTableColumns(Email),
+        html: sql`NULL`,
+    }).from(Email)
         .where(inArray(Email.mailboxId, mailboxIds))
         .orderBy(desc(Email.createdAt)).limit(50);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
@@ -143,7 +144,7 @@ export type MinimalChangesResponse = Awaited<ReturnType<typeof getMinimalChanges
 export type ChangesResponse = Awaited<ReturnType<typeof getChanges>>
 
 async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<typeof User>, mailboxesForUser: InferSelectModel<typeof MailboxForUser>[]) {
-    const mailboxIds = [mailboxesForUser.map((m) => m.mailboxId)[0]];
+    const mailboxIds = mailboxesForUser.map((m) => m.mailboxId);
     const currentUserid = currentUser.id;
 
     const emails = await db.select().from(Email).where(and(inArray(Email.mailboxId, mailboxIds), gte(Email.updatedAt, lastSyncDate))).limit(500)

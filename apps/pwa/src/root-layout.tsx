@@ -10,6 +10,7 @@ import "@fontsource/inter/900.css";
 // import "";
 
 import "./index.css";
+import "./app/compose/tiptap.css";
 import React, { type PropsWithChildren } from "react";
 
 import { Toaster as Sonner } from "@/components/ui/sonner";

@@ -20,27 +20,7 @@
     ],
     "paths": {
       "@/db": ["./app/utils/db.ts"],
-      
-      "next/link": [
-        "../pwa/src/components/next-link.tsx"
-      ],
-      "next/navigation": [
-        "../pwa/src/components/next-pathname.tsx"
-      ],
-      "next/form": [
-        "../pwa/src/components/next-form.tsx"
-      ],
-      "@/(home)/components.client": [
-       "../pwa/src/home/layout.tsx"
-      ],
-      "@/components/user-navbar": [
-        "../pwa/src/components/user-navbar"
-      ],
-      "@/*": [
-        "../pwa/src/*",
-        "./app/*"
-      ],
-
+      "@/*": ["./app/*"],
       "@emailthing/dbb": ["../../packages/db/index.ts"],
     }
   },

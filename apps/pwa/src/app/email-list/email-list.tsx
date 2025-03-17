@@ -274,6 +274,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
     const searchParams = useSearchParams()[0]
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
+    const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 
     const key = JSON.stringify({ mailboxId, type, search })
     const _data = window?._tempData?.emailCategoriesList?.[key]
@@ -284,21 +285,39 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
             type,
             search: search ?? undefined,
         })
-        return emails
-    }, [mailboxId, type, search])
+        return [emails, key]
+    }, [mailboxId, type, search, key])
 
     const isLoading = !data && !_data
     if (isLoading) return <EmailListCategoryLoadingSkeleton />
 
-    if (data && typeof window !== "undefined") {
+    if (data?.[1] !== key && _data?.[1] !== key) {
+        return (
+            <>
+                <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
+                <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
+                    <CategoryItem
+                        circleColor={null}
+                        name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
+                        count={null}
+                        link={baseUrl}
+                        category={null}
+                        main
+                    />
+                </div>
+            </>)
+    }
+
+    const __data = data?.[1] === key ? data : _data
+
+    if (data && typeof window !== "undefined" && data?.[1] === key) {
         window._tempData ||= {}
         window._tempData.emailCategoriesList ||= {}
         window._tempData.emailCategoriesList[key] = data
     }
 
-    const { categories, mailboxPlan, allCount } = (data || _data) as Awaited<ReturnType<typeof getEmailCategoriesList>>
+    const { categories, mailboxPlan, allCount } = (__data?.[0]) as Awaited<ReturnType<typeof getEmailCategoriesList>>
 
-    const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
 
     return (
         <>
@@ -360,7 +379,7 @@ export function CategoryItem({
 }: {
     circleColor: string | null;
     name: string;
-    count: number;
+    count: number | null;
     link: string;
     category: string | null;
     main?: boolean;
@@ -380,7 +399,7 @@ export function CategoryItem({
         >
             {circleColor && <div className="mr-1 size-2.5 rounded-full" style={{ backgroundColor: circleColor }} />}
             <span className="font-medium text-base group-hover:text-muted-foreground">{name}</span>
-            <span className="text-muted-foreground text-sm group-hover:text-muted-foreground/50">({count})</span>
+            {count !== null && <span className="text-muted-foreground text-sm group-hover:text-muted-foreground/50">({count})</span>}
         </Link>
     );
 }

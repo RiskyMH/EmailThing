@@ -16,7 +16,7 @@ import {
 import { type FormEvent, Fragment, type MouseEvent, Suspense, useEffect, useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
-import "./tiptap.css";
+// import "./tiptap.css";
 import {
     SmartDrawer,
     SmartDrawerClose,

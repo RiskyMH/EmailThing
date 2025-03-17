@@ -67,7 +67,10 @@ export async function getEmailList({
 }: EmailListOptions): Promise<EmailListResult> {
     // Start with base query using mailboxId+createdAt index
     let emailQuery = (type === 'drafts'
-        ? db.draftEmails.where('mailboxId').equals(mailboxId)
+        ? db.draftEmails.where('[mailboxId+createdAt]').between(
+            [mailboxId, Dexie.minKey],
+            [mailboxId, Dexie.maxKey]
+        )
         : db.emails.where('[mailboxId+createdAt]').between(
             [mailboxId, Dexie.minKey],
             [mailboxId, Dexie.maxKey]
@@ -183,7 +186,7 @@ export async function getEmailList({
         .offset(skip)
         .limit(take)
         // .sortBy('createdAt')
-    .toArray();
+        .toArray();
 
     // Get categories
     const categories = type === 'drafts' ? [] :
@@ -243,10 +246,7 @@ export async function getEmailCategoriesList({
     // Start with base query using mailboxId index
     let emailQuery = (type === 'drafts'
         ? db.draftEmails.where('mailboxId').equals(mailboxId)
-        : db.emails.where('[mailboxId+createdAt]').between(
-            [mailboxId, Dexie.minKey],
-            [mailboxId, Dexie.maxKey]
-        )
+        : db.emails.where('mailboxId').equals(mailboxId)
     ) as ReturnType<typeof db.emails.where>
 
     // Apply filters based on type
@@ -283,17 +283,26 @@ export async function getEmailCategoriesList({
     }
 
     // Get total count
-    const allCount = await emailQuery.count();
+    let allCount = 0
 
     // if search, then we need to get the count of emails that match the search
     if (search) {
         const searchLower = search.toLowerCase();
-        const searchCount = await emailQuery.filter(item => {
+        const allCount = await emailQuery.filter(item => {
             const searchableFields = [item.subject, item.body, item.snippet].filter(Boolean);
             return searchableFields.some(field =>
                 (field || "")?.toLowerCase().includes(searchLower)
             );
         }).count();
+
+        return {
+            categories: [],
+            allCount,
+            mailboxPlan: mailboxId === 'demo' ? { plan: 'DEMO' } : undefined,
+        };
+
+    } else {
+        allCount = await emailQuery.count();
     }
 
     // Get categories with counts

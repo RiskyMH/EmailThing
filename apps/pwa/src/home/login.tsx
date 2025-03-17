@@ -100,7 +100,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             });
 
             const data = await res.json();
-            console.log(data);
             if (data.error) {
                 setHadAnError((event.target as HTMLFormElement).username.value ?? "unknown");
                 setLoading(false);
