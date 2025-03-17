@@ -108,7 +108,7 @@ export class EmailDB extends Dexie {
 
       // Keep other tables as they were
       draftEmails: 'id,mailboxId,[mailboxId+createdAt],updatedAt',
-      emailSenders: 'id,[emailId+address],emailId,address',
+      emailSenders: 'emailId,[emailId+address],emailId,address',
       emailRecipients: 'id,[emailId+address],emailId,address',
       emailAttachments: 'id,[emailId+id],emailId',
       mailboxes: 'id,createdAt',

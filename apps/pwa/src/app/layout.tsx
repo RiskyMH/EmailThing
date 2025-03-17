@@ -16,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     // delete the indexdb
                     await asyncDeleteIndexDB("EmailDB");
                     localStorage.setItem("indexdb-test-version", "v1.1");
+                    localStorage.removeItem("lastSync");
                 }
 
                 await initializeDB();
