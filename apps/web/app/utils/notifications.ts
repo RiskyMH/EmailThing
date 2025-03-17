@@ -1,5 +1,5 @@
 import db, { UserNotification, MailboxForUser } from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { sendNotification } from "./web-push";
 
 export async function notifyMailbox(
