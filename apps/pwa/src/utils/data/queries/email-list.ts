@@ -1,4 +1,5 @@
 import { db } from '../db';
+import { proposeSync } from '../sync-user';
 import type { DBEmail, DBMailboxCategory, DBEmailDraft } from '../types';
 import Dexie from 'dexie';
 
@@ -434,6 +435,7 @@ export async function updateEmailProperties(
         isRead?: boolean;
         categoryId?: string | null;
         binnedAt?: Date | null;
+        hardDelete?: boolean;
     }
 ) {
     if (mailboxId === 'demo') {
@@ -449,14 +451,22 @@ export async function updateEmailProperties(
                     throw new Error('Email not found');
                 }
 
-                // Update using modify instead of delete/add
-                await db.emails
-                    .where('id')
-                    .equals(emailId)
-                    .modify({
-                        ...updates,
-                        updatedAt: new Date()
-                    });
+                if (updates.hardDelete) {
+                    await deleteEmailLocally(mailboxId, emailId, "inbox");
+                } else {
+                    // Update using modify instead of delete/add
+                    // Update using modify instead of delete/add
+                    await db.emails
+                        .where('id')
+                        .equals(emailId)
+                        .modify({
+                            updatedAt: new Date(),
+                            isStarred: updates.isStarred === undefined ? undefined : updates.isStarred === true ? 1 : 0,
+                            isRead: updates.isRead === undefined ? undefined : updates.isRead === true ? 1 : 0,
+                            categoryId: updates.categoryId,
+                            binnedAt: updates.binnedAt || 0,
+                        });
+                }
             });
 
             return {
@@ -476,12 +486,34 @@ export async function updateEmailProperties(
         }
     }
 
-    return {
-        success: false,
-        demo: true,
-        message: "Updates aren't available in demo",
-        description: "This would sync with the server in the real app"
-    };
+    const res = await proposeSync({
+        emails: [{
+            id: emailId,
+            mailboxId,
+            ...updates
+        }]
+    })
+    if (!res) {
+        return {
+            success: false,
+            error: true,
+            message: "Failed to update email",
+        };
+    }
+    if (res.errors) {
+        return {
+            success: false,
+            error: true,
+            message: "Failed to update email",
+            description: res.errors?.[0]
+        };
+    }
+
+    if (res.data) {
+        return {
+            success: true,
+        }
+    }
 }
 
 // Delete email with optimistic UI updates

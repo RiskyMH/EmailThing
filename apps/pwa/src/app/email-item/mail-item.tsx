@@ -57,7 +57,13 @@ function MailItem() {
     const updateEmail = async (updates: Record<string, any>, { auto }: { auto?: boolean } = {}) => {
         console.log("updateEmail", updates, auto)
         const result = await updateEmailProperties(mailboxId, emailId, updates);
-        if (!auto) toast(result.message, { description: result.description });
+        if (result?.message) {
+            if (result.error) {
+                toast.error(result.message, { description: result.description });
+            } else {
+                toast(result.message, { description: result.description });
+            }
+        } 
     };
 
     // const attachmentsPresigned = []

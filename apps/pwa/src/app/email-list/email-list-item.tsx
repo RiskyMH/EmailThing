@@ -15,7 +15,7 @@ import { ArchiveRestoreIcon, ExternalLink, ForwardIcon, MailOpenIcon, ReplyAllIc
 import Link from "next/link";
 import { ClientStar, ContextMenuAction } from "@/(email)/mail/[mailbox]/components.client";
 import { toast } from "sonner";
-import { updateEmailProperties, deleteEmailLocally } from "@/utils/data/queries/email-list";
+import { updateEmailProperties, deleteEmailLocally, deleteDraftEmail } from "@/utils/data/queries/email-list";
 import { useEffect, useState } from "react";
 import MailUnreadIcon from "@/components/icons/mail-unread";
 
@@ -78,12 +78,26 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
 
     const updateEmail = async (updates: any) => {
         const result = await updateEmailProperties(mailboxId, emailId, updates);
-        toast(result.message, { description: result.description });
+        if (result?.message) {
+            if (result.error) {
+                toast.error(result.message, { description: result.description });
+            } else {
+                toast(result.message, { description: result.description });
+            }
+        }
     };
 
     const deleteEmail = async () => {
-        const result = await deleteEmailLocally(mailboxId, emailId, type);
-        toast(result.message, { description: result.description });
+        if (type === "drafts") {
+            const result = await deleteDraftEmail(mailboxId, emailId);
+            if (mailboxId === "demo") {
+                toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+            } else {
+                toast.error("todo lol")
+            }
+        } else {
+            updateEmail({ hardDelete: true });
+        }
     };
 
     const category = (categories || [])?.find((c) => c.id === email.categoryId);

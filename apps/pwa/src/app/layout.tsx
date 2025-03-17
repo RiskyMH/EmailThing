@@ -4,7 +4,7 @@ import { loadDemoData } from "@/utils/data/demo-data";
 import { initializeDB } from "@/utils/data/db";
 import { registerServiceWorker } from "@/utils/service-worker";
 import { getSha } from "./git.macro" with { type: "macro" };
-import { syncUser } from "./sync-user";
+import { syncUser } from "../utils/data/sync-user";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     useEffect(() => {

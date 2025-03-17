@@ -54,6 +54,12 @@ export async function GET(request: Request) {
 
 
 export async function POST(request: Request) {
+
+    const { searchParams } = new URL(request.url);
+    const lastSync = parseInt(searchParams.get("last_sync") || "0");
+    const lastSyncDate = lastSync ? new Date(lastSync) : new Date();
+
+
     const currentUserid = await getCurrentUser();
     if (!currentUserid) return new Response("Unauthorized", { status: 401 });
 
@@ -67,31 +73,276 @@ export async function POST(request: Request) {
     });
 
     // body is partial of ChangesResponse
-    const body = await request.json() as Partial<ChangesRequest>;
+    const body = await request.json() as ChangesRequest;
     // use the provided id (or null for create)
     // do some validations to ensure its safe
     // after that, update the database and return lastsynced object
 
-    // TODO
-    return Response.json({
-        TODO: "TODO",
-    }, { status: 200 })
+    const changes = [] // to bulk update at end
+
+    for (const key in body) {
+        if (key === "emails") {
+            // update the emails
+            // 1. verify user has access to the emails
+            // 2. can update every field except for mailboxId and its own id
+            // 2.1. if id is null, create it
+
+            for (const email of body.emails || []) {
+
+                if (!email) continue;
+                if (!email.mailboxId || !mailboxesForUser.some((m) => m.mailboxId === email.mailboxId)) {
+                    return Response.json({
+                        error: "User does not have access to the mailbox",
+                        moreInfo: `Mailbox id: ${email.mailboxId}; User id: ${currentUser.id} (access to ${mailboxesForUser.map((m) => m.mailboxId).join(", ")})`,
+                    }, { status: 403 })
+                }
+                if (email.id == null) {
+                    // normally create, but rn only update
+                    return Response.json({
+                        error: "Cannot create email yet",
+                    }, { status: 400 })
+                } else {
+                    // check that the emailid exists and is owned by the user
+                    const e = await db.select({ id: Email.id }).from(Email).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)))
+                    if (!e) {
+                        return Response.json({
+                            error: "Email not found",
+                            moreInfo: `Email id: ${email.id}; Mailbox id: ${email.mailboxId}; User id: ${currentUser.id}`,
+                        }, { status: 404 })
+                    }
+                }
+
+                if (email.hardDelete) {
+                    // still not actually delete, but anonimise it
+                    changes.push(db.update(Email).set({
+                        isDeleted: true,
+                        updatedAt: new Date(),
+                        body: "<deleted>",
+                        subject: "<deleted>",
+                        binnedAt: null,
+                        categoryId: null,
+                        givenId: null,
+                        givenReferences: null,
+                        html: null,
+                        isRead: true,
+                        isSender: false,
+                        replyTo: null,
+                        snippet: null,
+                        size: 0,
+                        isStarred: false,
+                        // tempId: null,
+                        createdAt: new Date(),
+                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId))))
+                } else {
+                    // update the email
+                    changes.push(db.update(Email).set({
+                        isStarred: email.isStarred,
+                        isRead: email.isRead,
+                        categoryId: email.categoryId,
+                        binnedAt: email.binnedAt ? new Date() : email.binnedAt === null ? null : undefined,
+                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId))))
+                }
+
+
+            }
+
+
+
+        } else if (key === "draftEmails") {
+            // update the draft emails
+            // 1. verify user has access to the draft emails
+            // 2. can update every field except for mailboxId and its own id
+            // 2.1. if id is null, create it
+
+            for (const draftEmail of body.draftEmails || []) {
+                if (!draftEmail) continue;
+                if (!draftEmail.mailboxId || !mailboxesForUser.some((m) => m.mailboxId === draftEmail.mailboxId)) {
+                    return Response.json({
+                        error: "User does not have access to the mailbox",
+                    }, { status: 403 })
+                }
+
+                if (draftEmail.id == null) {
+                    if (draftEmail.hardDelete) {
+                        return Response.json({
+                            error: "Cannot delete a non created draft email",
+                        }, { status: 400 })
+                    }
+                } else {
+                    // check that the draftemailid exists and is owned by the user
+                    const e = await db.select({ id: DraftEmail.id }).from(DraftEmail).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId)))
+                    if (!e) {
+                        return Response.json({
+                            error: "Draft email not found",
+                        }, { status: 404 })
+                    }
+                }
+
+                if (draftEmail.hardDelete) {
+                    // still not actually delete, but anonimise it
+                    changes.push(db.update(DraftEmail).set({
+                        isDeleted: true,
+                        updatedAt: new Date(),
+                        body: "<deleted>",
+                        subject: "<deleted>",
+                        from: null,
+                        to: null,
+                        headers: null,
+                        createdAt: new Date(),
+                    }).where(and(eq(DraftEmail.id, draftEmail.id!), eq(DraftEmail.mailboxId, draftEmail.mailboxId))))
+                } else {
+
+                    if (draftEmail.id == null) {
+                        changes.push(db.insert(DraftEmail).values({
+                            // id: draftEmail.id,
+                            mailboxId: draftEmail.mailboxId,
+                            body: draftEmail.body,
+                            subject: draftEmail.subject,
+                            from: draftEmail.from,
+                            to: draftEmail.to,
+                            headers: draftEmail.headers,
+                        }))
+                    } else {
+                        // update the draft email
+                        changes.push(db.update(DraftEmail).set({
+                            body: draftEmail.body,
+                            subject: draftEmail.subject,
+                            from: draftEmail.from,
+                            to: draftEmail.to,
+                            headers: draftEmail.headers,
+                        }).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId))))
+                    }
+                }
+
+
+
+            }
+
+
+        } else if (key === "mailboxCategories") {
+            // update the mailbox categories
+            // 1. verify user has access to the mailbox categories
+            // 2. can update name/color
+            // 2.1. if id is null, create it
+
+            for (const mailboxCategory of body.mailboxCategories || []) {
+                if (!mailboxCategory) continue;
+                if (!mailboxCategory.mailboxId || !mailboxesForUser.some((m) => m.mailboxId === mailboxCategory.mailboxId)) {
+                    return Response.json({
+                        error: "User does not have access to the mailbox",
+                    }, { status: 403 })
+                }
+                const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
+                if (mailboxCategory.color && !categoryColorRegex.test(mailboxCategory.color)) {
+                    return Response.json({
+                        error: "Invalid color for category",
+                    }, { status: 400 })
+                }
+
+                if (mailboxCategory.hardDelete) {
+                    if (!mailboxCategory.id) {
+                        return Response.json({
+                            error: "Cannot delete a non created mailbox category",
+                        }, { status: 400 })
+                    }
+                    changes.push(db.update(MailboxCategory).set({
+                        isDeleted: true,
+                        name: "<deleted>",
+                        color: "<deleted>",
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    }).where(eq(MailboxCategory.id, mailboxCategory.id)))
+                } else {
+                    if (mailboxCategory.id == null) {
+                        changes.push(db.insert(MailboxCategory).values({
+                            mailboxId: mailboxCategory.mailboxId,
+                            name: mailboxCategory.name,
+                            color: mailboxCategory.color,
+                        }))
+                    } else {
+                        changes.push(db.update(MailboxCategory).set({
+                            name: mailboxCategory.name,
+                            color: mailboxCategory.color,
+                        }).where(eq(MailboxCategory.id, mailboxCategory.id)))
+                    }
+
+                }
+            }
+        }
+
+        else {
+            return Response.json({
+                error: "Invalid key: " + key,
+            }, { status: 400 })
+        }
+    }
+
+    await db.batch(changes);
+
+    return Response.json(await getChanges(lastSyncDate, currentUser, mailboxesForUser));
 
 }
 
-export type ChangesRequest = Pick<Awaited<ReturnType<typeof getChanges>>,
-    "emails" | // only actions like if starred, trashed, etc
-    "draftEmails" | // can create, update, delete
-    "mailboxCategories" | // can create, update, delete
-    "mailboxAliases" | // only delete or change name (not the actual alias)
-    "mailboxTokens" | // only delete
-    "mailboxCustomDomains" | // only delete
-    "passkeyCredentials" | // only delete or create
-    "userNotifications" | // only delete or create
-    "mailboxesForUser"  // only delete (ie leave a mailbox)
 
-// the rest of items will have to be done in seperate api calls that are more targeted
->
+
+export type ChangesRequest = {
+    emails?: {
+        id: string;
+        mailboxId: string;
+        isStarred?: boolean;
+        isRead?: boolean;
+        categoryId?: string | null;
+        binnedAt?: Date | null;
+        hardDelete?: boolean;
+    }[];
+    draftEmails?: {
+        /** null for create */
+        id: string | null;
+        mailboxId: string;
+        body?: string | null;
+        subject?: string | null;
+        from?: string | null;
+        to?: {
+            name: string | null;
+            address: string;
+            cc?: "cc" | "bcc" | null;
+        }[] | null;
+        headers?: { key: string; value: string }[];
+        hardDelete?: boolean;
+    }[];
+    mailboxCategories?: {
+        /** null for create */
+        id: string | null;
+        mailboxId: string;
+        name: string;
+        color?: string | null;
+        hardDelete?: boolean;
+    }[];
+    /** //todo: */
+    mailboxAliases?: {}
+    /** //todo: */
+    mailboxTokens?: {}
+    /** //todo: */
+    mailboxCustomDomains?: {}
+    /** //todo: */
+    passkeyCredentials?: {}
+    userNotifications?: {
+        /** null for create */
+        id: null;
+        userId: string;
+        expiresAt?: Date;
+        endpoint?: string | null;
+        p256dh?: string | null;
+    }[];
+    /** //todo: */
+    mailboxesForUser?: {}
+}
+
+export type ChangesResponseError = {
+    error: string;
+    moreInfo?: string;
+}
 
 
 

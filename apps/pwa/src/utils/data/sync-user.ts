@@ -1,5 +1,5 @@
 import { db } from "@/utils/data/db";
-import type { MinimalChangesResponse, ChangesResponse } from "@/../../web/app/api/internal/sync/route";
+import type { MinimalChangesResponse, ChangesResponse, ChangesRequest, ChangesResponseError } from "@/../../web/app/api/internal/sync/route";
 
 export async function syncUser(minimal = false, lastSync?: Date) {
     if (!localStorage.getItem('token')) return false
@@ -24,6 +24,40 @@ export async function syncUser(minimal = false, lastSync?: Date) {
         throw new Error('Failed to sync user data');
     }
 
+    return parseSyncResponse(response, minimal);
+}
+
+export async function proposeSync(changes: ChangesRequest, lastSync?: Date) {
+    if (!localStorage.getItem('token')) return 
+
+    // Build query params
+    const params = new URLSearchParams();
+    if (lastSync) {
+        params.append('last_sync', lastSync.getTime().toString());
+    }
+
+    // Call sync API
+    const response = await fetch(`https://emailthing.app/api/internal/sync?${params.toString()}`, {
+        method: 'POST',
+        headers: {
+            "x-auth": `${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(changes)
+    });
+    if (!response.ok) {
+        console.error('Failed to sync user data', response);
+        if (response.body) {
+            const e = await response.json() as ChangesResponseError
+            return { data: null, errors: [e.error] }
+        }
+        return { data: null, errors: ["Unknown error. Can you connect to the internet?"] }
+    }
+
+    return { data: await parseSyncResponse(response), errors: null};
+}
+
+
+async function parseSyncResponse(response: Response, minimal = false) {
     // Parse response
     const data = await response.json() as (typeof minimal extends true ? MinimalChangesResponse : ChangesResponse);
 
@@ -88,7 +122,8 @@ export async function syncUser(minimal = false, lastSync?: Date) {
             db.defaultDomains.bulkDelete(data.defaultDomains?.filter((d: any) => d.isDeleted)?.map((d: any) => d.id) ?? []),
             db.passkeyCredentials.bulkDelete(data.passkeyCredentials?.filter((c: any) => c.isDeleted)?.map((c: any) => c.id) ?? []),
             db.userNotifications.bulkDelete(data.userNotifications?.filter((n: any) => n.isDeleted)?.map((n: any) => n.id) ?? []),
-            db.mailboxForUser.bulkDelete(data.mailboxesForUser?.filter((m: any) => m.isDeleted)?.map((m: any) => m.id) ?? []),
+            // @ts-expect-error - this *should* work
+            db.mailboxForUser.bulkDelete(data.mailboxesForUser?.filter((m: any) => m.isDeleted)?.map((m: any) => ([m.userId, m.mailboxId])) ?? []),
         ]);
 
         // Then handle updates/inserts
