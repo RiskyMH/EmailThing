@@ -3,6 +3,7 @@ import db, { DefaultDomain, DraftEmail, Email, EmailAttachments, EmailRecipient,
 import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTableColumns, sql } from "drizzle-orm";
 import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import { cookies, headers } from "next/headers";
+import type { BatchItem } from "drizzle-orm/batch";
 
 
 const getCurrentUser = async () => {
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
     // do some validations to ensure its safe
     // after that, update the database and return lastsynced object
 
-    const changes = [] // to bulk update at end
+    const changes = [] as BatchItem<"sqlite">[] // to bulk update at end
 
     for (const key in body) {
         if (key === "emails") {
@@ -278,7 +279,7 @@ export async function POST(request: Request) {
         }
     }
 
-    await db.batch(changes);
+    await db.batch(changes as any);
 
     return Response.json(await getChanges(lastSyncDate, currentUser, mailboxesForUser));
 
