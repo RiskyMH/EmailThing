@@ -160,7 +160,8 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
             take: 50 + 1,
             skip: skip,
         })
-        return [emails, localStorage.getItem("lastSync") ? "loading..." : key]
+        const _key = localStorage.getItem("lastSync") && mailboxId !== "demo" ? "loading..." : key
+        return [emails, _key]
     }, [mailboxId, type, categoryId, search, key])
 
     const loading = skip > 0 ?

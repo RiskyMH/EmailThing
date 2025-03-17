@@ -41,7 +41,7 @@ export class EmailDB extends Dexie {
   constructor() {
     super('EmailDB');
 
-    this.version(1).stores({
+    this.version(1.1).stores({
       // Add comprehensive indexes for emails
       emails: [
         // Primary key
