@@ -19,7 +19,7 @@ import { type ReactNode, Suspense } from "react";
 export default function Home() {
     // const currentMailbox = (await cookies()).get("mailboxId")?.value;
 
-    const currentMailbox = globalThis.window ? document.cookie.includes('test') ? "demo" : undefined : undefined
+    const currentMailbox = globalThis.window ? document.cookie.includes('mailboxId=') ? document.cookie.split('mailboxId=')[1].split(';')[0] : undefined : undefined
 
     return (
         <>

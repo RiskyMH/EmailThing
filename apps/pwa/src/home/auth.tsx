@@ -3,7 +3,7 @@ export default function AuthPage() {
     <div>
       <h1>Login/Register :)</h1>
       <button onClick={() => {
-        document.cookie = "test=true"
+        document.cookie = "mailboxId=demo"
         window.location.href = '/'
       }}>
         [login as test]
