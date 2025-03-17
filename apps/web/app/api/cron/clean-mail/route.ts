@@ -30,9 +30,9 @@ export async function GET(request: NextRequest) {
             // or if its part of a expired temp alias
             tempAliases.length
                 ? inArray(
-                      Email.tempId,
-                      tempAliases.map((temp) => temp.id),
-                  )
+                    Email.tempId,
+                    tempAliases.map((temp) => temp.id),
+                )
                 : undefined,
         ),
         columns: {
@@ -65,22 +65,47 @@ export async function GET(request: NextRequest) {
     await db.batch([
         // delete from db
         db
-            .delete(Email)
-            .where(
+            .update(Email)
+            .set({
+                isDeleted: true,
+                updatedAt: new Date(),
+                body: "<deleted>",
+                subject: "<deleted>",
+                binnedAt: null,
+                categoryId: null,
+                givenId: null,
+                givenReferences: null,
+                html: null,
+                isRead: true,
+                isSender: false,
+                replyTo: null,
+                snippet: null,
+                size: 0,
+                isStarred: false,
+                // tempId: null,
+                createdAt: new Date(),
+            }).where(
                 emails.length
                     ? inArray(
-                          Email.id,
-                          emails.map((email) => email.id),
-                      )
+                        Email.id,
+                        emails.map((email) => email.id),
+                    )
                     : sql`1 = 0`,
+
             ),
 
-        db.delete(TempAlias).where(
+        db.update(TempAlias).set({ 
+            isDeleted: true,
+            createdAt: new Date(),
+            name: "<deleted>",
+            updatedAt: new Date(),
+            // alias: "<deleted>",
+         }).where(
             tempAliases.length
                 ? inArray(
-                      TempAlias.id,
-                      tempAliases.map((temp) => temp.id),
-                  )
+                    TempAlias.id,
+                    tempAliases.map((temp) => temp.id),
+                )
                 : sql`1 = 0`,
         ),
 

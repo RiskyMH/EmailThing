@@ -23,7 +23,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens, db } from "@/db";
 import { aliasLimit, customDomainLimit, storageLimit } from "@/utils/limits";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import {
     CheckIcon,
     ClipboardIcon,
@@ -72,7 +72,7 @@ export default async function EmailConfig(props: {
     if (!userId) return notFound();
 
     const mailbox = await db.query.Mailbox.findFirst({
-        where: eq(Mailbox.id, params.mailbox),
+        where: and(eq(Mailbox.id, params.mailbox), eq(Mailbox.isDeleted, false)),
         columns: {
             storageUsed: true,
             plan: true,
@@ -86,6 +86,7 @@ export default async function EmailConfig(props: {
                     id: true,
                 },
                 orderBy: asc(MailboxAlias.createdAt),
+                where: eq(MailboxAlias.isDeleted, false),
             },
             customDomains: {
                 columns: {
@@ -94,6 +95,7 @@ export default async function EmailConfig(props: {
                     addedAt: true,
                 },
                 orderBy: asc(MailboxCustomDomain.addedAt),
+                where: eq(MailboxCustomDomain.isDeleted, false),
             },
             tokens: {
                 columns: {
@@ -104,6 +106,7 @@ export default async function EmailConfig(props: {
                     id: true,
                 },
                 orderBy: asc(MailboxTokens.createdAt),
+                where: eq(MailboxTokens.isDeleted, false),
             },
             categories: {
                 columns: {
@@ -112,6 +115,7 @@ export default async function EmailConfig(props: {
                     color: true,
                 },
                 orderBy: asc(MailboxCategory.createdAt),
+                where: eq(MailboxCategory.isDeleted, false),
             },
             users: {
                 columns: {
@@ -120,6 +124,7 @@ export default async function EmailConfig(props: {
                     joinedAt: true,
                 },
                 orderBy: asc(MailboxForUser.joinedAt),
+                where: eq(MailboxForUser.isDeleted, false),
                 with: {
                     user: {
                         columns: {

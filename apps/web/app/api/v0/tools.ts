@@ -17,6 +17,7 @@ export async function getTokenMailbox(): Promise<string | null> {
         where: and(
             eq(MailboxTokens.token, auth),
             or(isNull(MailboxTokens.expiresAt), gt(MailboxTokens.expiresAt, new Date())),
+            eq(MailboxTokens.isDeleted, false),
         ),
         columns: {
             id: true,

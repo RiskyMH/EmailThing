@@ -50,6 +50,7 @@ export async function getJustEmailsList(mailboxId: string, options: EmailListFin
                     ? sql`(${Email.createdAt}, ${Email.id}) <= (${bindIfParam(curser.createdAt, Email.createdAt)}, ${curser.emailId})`
                     : undefined,
                 options.search ? like(Email.subject, `%${options.search}%`) : undefined,
+                eq(Email.isDeleted, false),
             ),
         )
         .orderBy(options.isBinned ? desc(Email.binnedAt) : desc(Email.createdAt))
@@ -83,6 +84,7 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
                           options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
                           options.search ? like(Email.subject, `%${options.search}%`) : undefined,
                           options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId),
+                          eq(Email.isDeleted, false),
                       ),
                   )
                   .groupBy(options.isTemp ? Email.tempId : Email.categoryId)
@@ -100,6 +102,7 @@ export function getEmailList(mailboxId: string, options: EmailListFindOptions = 
                     options.isStarred !== undefined ? eq(Email.isStarred, options.isStarred) : undefined,
                     options.search ? like(Email.subject, `%${options.search}%`) : undefined,
                     options.isTemp ? isNotNull(Email.tempId) : isNull(Email.tempId),
+                    eq(Email.isDeleted, false),
                 ),
             ),
     ]);
@@ -113,10 +116,12 @@ export async function getDraftJustEmailsList(
     const emails = await db.query.DraftEmail.findMany({
         where: and(
             eq(DraftEmail.mailboxId, mailboxId),
+            eq(DraftEmail.isDeleted, false),
             curser && "emailId" in curser
                 ? sql`(${DraftEmail.updatedAt}, ${DraftEmail.id}) < (${bindIfParam(curser.createdAt, DraftEmail.updatedAt)}, ${curser.emailId})`
                 : undefined,
             options?.search ? like(DraftEmail.subject, `%${options.search}%`) : undefined,
+            eq(DraftEmail.isDeleted, false),
         ),
         columns: {
             id: true,
@@ -157,7 +162,9 @@ export async function getDraftEmailList(mailboxId: string, options?: { take?: nu
         .where(
             and(
                 eq(DraftEmail.mailboxId, mailboxId),
+                eq(DraftEmail.isDeleted, false),
                 options?.search ? like(DraftEmail.subject, `%${options.search}%`) : undefined,
+                eq(DraftEmail.isDeleted, false),
             ),
         )
         .execute();
@@ -167,7 +174,7 @@ export async function getDraftEmailList(mailboxId: string, options?: { take?: nu
 
 export async function getTempAliases(mailboxId: string) {
     const temps = await db.query.TempAlias.findMany({
-        where: and(eq(TempAlias.mailboxId, mailboxId), gt(TempAlias.expiresAt, new Date())),
+        where: and(eq(TempAlias.mailboxId, mailboxId), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
         columns: {
             id: true,
             alias: true,

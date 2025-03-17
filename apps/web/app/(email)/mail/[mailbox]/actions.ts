@@ -1,5 +1,5 @@
 "use server";
-import { DraftEmail, Email, EmailAttachments, Mailbox, db } from "@/db";
+import { DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, db } from "@/db";
 import { getCurrentUser } from "@/utils/jwt";
 import { deleteFile } from "@/utils/s3";
 import { and, eq, sql } from "drizzle-orm";
@@ -35,7 +35,7 @@ export async function updateEmail(mailboxId: string, emailId: string, type: Emai
             binnedAt: state.binned ? new Date() : state.binned === false ? null : undefined,
             categoryId: state.category,
         })
-        .where(and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId)))
+        .where(and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId), eq(Email.isDeleted, false)))
         .execute();
 
     revalidatePath(baseUrl);
@@ -50,13 +50,23 @@ export async function deleteEmail(mailboxId: string, emailId: string, type: Emai
     const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : type === "mail-page" ? `/${emailId}` : `/${type}`}`;
 
     if (type === "drafts") {
-        await db.delete(DraftEmail).where(and(eq(DraftEmail.id, emailId), eq(DraftEmail.mailboxId, mailboxId)));
+        // await db.delete(DraftEmail).where(and(eq(DraftEmail.id, emailId), eq(DraftEmail.mailboxId, mailboxId)));
+        await db.update(DraftEmail).set({
+            isDeleted: true,
+            updatedAt: new Date(),
+            body: "<deleted>",
+            subject: "<deleted>",
+            from: null,
+            to: null,
+            headers: null,
+            createdAt: new Date(),
+        }).where(and(eq(DraftEmail.id, emailId), eq(DraftEmail.mailboxId, mailboxId)));
 
         return revalidatePath(baseUrl);
     }
 
     const email = await db.query.Email.findFirst({
-        where: and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId)),
+        where: and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId), eq(Email.isDeleted, false)),
         columns: {
             size: true,
         },
@@ -84,7 +94,30 @@ export async function deleteEmail(mailboxId: string, emailId: string, type: Emai
     ]);
 
     await db.batch([
-        db.delete(Email).where(and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId))),
+        // db.delete(Email).where(and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId))),
+        db.update(Email).set({
+            isDeleted: true,
+            updatedAt: new Date(),
+            body: "<deleted>",
+            subject: "<deleted>",
+            binnedAt: null,
+            categoryId: null,
+            givenId: null,  
+            givenReferences: null,
+            html: null,
+            isRead: true,
+            isSender: false,
+            replyTo: null,
+            snippet: null,
+            size: 0,
+            isStarred: false,
+            // tempId: null,
+            createdAt: new Date(),
+        }).where(and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId))),
+
+        db.delete(EmailSender).where(eq(EmailSender.emailId, emailId)),
+        db.delete(EmailRecipient).where(eq(EmailRecipient.emailId, emailId)),
+        db.delete(EmailAttachments).where(eq(EmailAttachments.emailId, emailId)),
 
         db
             .update(Mailbox)

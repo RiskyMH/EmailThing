@@ -11,7 +11,7 @@ export const userMailboxAccess = cache((mailboxId: string, userId: string | null
     return unstable_cache(
         async () => {
             const mailbox = await db.query.MailboxForUser.findFirst({
-                where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, userId)),
+                where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)),
             });
 
             return !!mailbox;
@@ -33,7 +33,7 @@ export const mailboxCategories = cache((mailboxId: string) => {
     return unstable_cache(
         async () => {
             const categories = await db.query.MailboxCategory.findMany({
-                where: eq(MailboxCategory.mailboxId, mailboxId),
+                where: and(eq(MailboxCategory.mailboxId, mailboxId), eq(MailboxCategory.isDeleted, false)),
                 columns: {
                     id: true,
                     name: true,
@@ -57,7 +57,7 @@ export const mailboxAliases = cache((mailboxId: string) => {
     return unstable_cache(
         async () => {
             const aliases = await db.query.MailboxAlias.findMany({
-                where: eq(MailboxAlias.mailboxId, mailboxId),
+                where: and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.isDeleted, false)),
                 columns: {
                     id: true,
                     name: true,
@@ -99,7 +99,7 @@ export const userMailboxes = cache((userId: string) => {
     return unstable_cache(
         async () => {
             const mailboxes = await db.query.MailboxForUser.findMany({
-                where: eq(MailboxForUser.userId, userId),
+                where: and(eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)),
                 columns: {
                     mailboxId: true,
                     role: true,
@@ -114,6 +114,7 @@ export const userMailboxes = cache((userId: string) => {
                         mailboxes.map((m) => m.mailboxId),
                     ),
                     eq(MailboxAlias.default, true),
+                    eq(MailboxAlias.isDeleted, false),
                 ),
                 columns: {
                     mailboxId: true,

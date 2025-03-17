@@ -51,7 +51,7 @@ export const useEmailImage = (email: string) => {
         let match = svgl[domain] as string | null | undefined
         if (!match) {
             // maybe try to match if ending with (like abc.emailthing.xyz should match emailthing.xyz)
-            const m = Object.keys(svgl).find(k => email.endsWith(k))
+            const m = Object.keys(svgl).find(k => domain.endsWith("." + k))
             if (m) match = svgl[m]
         }
         if (match) {

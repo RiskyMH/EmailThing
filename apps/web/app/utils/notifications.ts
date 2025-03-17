@@ -15,7 +15,7 @@ export async function notifyMailbox(
         })
         .from(UserNotification)
         .leftJoin(MailboxForUser, eq(UserNotification.userId, MailboxForUser.userId))
-        .where(eq(MailboxForUser.mailboxId, mailboxId))
+        .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(UserNotification.isDeleted, false)))
         .execute();
 
     await Promise.all(
@@ -37,7 +37,14 @@ export async function notifyMailbox(
             if (!res.ok) {
                 // delete the notification if it's no longer valid
                 if (res.status === 410) {
-                    await db.delete(UserNotification).where(eq(UserNotification.endpoint, n.endpoint)).execute();
+                    await db.update(UserNotification).set({ 
+                        isDeleted: true,
+                        createdAt: new Date(),
+                        auth: "<deleted>",
+                        p256dh: "<deleted>",
+                        endpoint: "<deleted>",
+                        expiresAt: new Date(0),
+                    }).where(eq(UserNotification.endpoint, n.endpoint)).execute();
                 }
                 console.error(await res.text());
             }

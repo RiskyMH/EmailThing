@@ -21,6 +21,7 @@ export async function makeTempEmail(mailboxId: string, aliasDomain: string, name
             eq(DefaultDomain.domain, aliasDomain),
             eq(DefaultDomain.available, true),
             eq(DefaultDomain.tempDomain, true),
+            eq(DefaultDomain.isDeleted, false),
         ),
     });
     if (!defaultDomain) {

@@ -100,8 +100,8 @@ export async function getEmailList({
                 if (categoryId) {
                     emailQuery = db.emails.where('[mailboxId+categoryId+binnedAt+createdAt]')
                         .between(
-                            [mailboxId, categoryId, 0, Dexie.minKey],
-                            [mailboxId, categoryId, 0, Dexie.maxKey]
+                            [mailboxId, categoryId, 1, Dexie.minKey],
+                            [mailboxId, categoryId, Dexie.maxKey, Dexie.maxKey]
                         );
                 } else {
                     emailQuery = db.emails
@@ -260,8 +260,7 @@ export async function getEmailCategoriesList({
             case 'trash':
                 emailQuery = db.emails
                     .where('[mailboxId+binnedAt]')
-                    .above([mailboxId, 0])
-                    .and(item => item.mailboxId === mailboxId);
+                    .between([mailboxId, 1], [mailboxId, Dexie.maxKey])
                 break;
             case 'starred':
                 emailQuery = db.emails
@@ -557,7 +556,7 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
             case "binned":
                 return await db.emails
                     .where('[mailboxId+binnedAt]')
-                    .above([mailboxId, 0])
+                    .between([mailboxId, 1], [mailboxId, Dexie.maxKey])
                     .count();
             case "drafts":
                 return await db.draftEmails

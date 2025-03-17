@@ -37,10 +37,10 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
             },
         }),
 
-        db.select({ count: count() }).from(MailboxCustomDomain).where(eq(MailboxCustomDomain.mailboxId, mailboxId)),
+        db.select({ count: count() }).from(MailboxCustomDomain).where(and(eq(MailboxCustomDomain.mailboxId, mailboxId), eq(MailboxCustomDomain.isDeleted, false))),
 
         db.query.MailboxCustomDomain.findFirst({
-            where: and(eq(MailboxCustomDomain.domain, customDomain), eq(MailboxCustomDomain.mailboxId, mailboxId)),
+            where: and(eq(MailboxCustomDomain.domain, customDomain), eq(MailboxCustomDomain.mailboxId, mailboxId), eq(MailboxCustomDomain.isDeleted, false)),
             columns: {
                 id: true,
             },
@@ -120,6 +120,7 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
 
     // check if alias exists
     const existingAlias = await db.query.MailboxAlias.findFirst({
+        // intentionally not checking if it's deleted, as we don't want people to get already used aliases
         where: eq(MailboxAlias.alias, alias),
         columns: {
             id: true,
@@ -133,17 +134,18 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
     // check if domain is a custom domain (and they have access to it) or just a default domain
     const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batch([
         db.query.DefaultDomain.findFirst({
-            where: and(eq(DefaultDomain.domain, alias.split("@")[1]), not(eq(DefaultDomain.tempDomain, true))),
+            where: and(eq(DefaultDomain.domain, alias.split("@")[1]), not(eq(DefaultDomain.tempDomain, true)), eq(DefaultDomain.isDeleted, false)),
         }),
 
         db.query.MailboxCustomDomain.findFirst({
             where: and(
                 eq(MailboxCustomDomain.mailboxId, mailboxId),
                 eq(MailboxCustomDomain.domain, alias.split("@")[1]),
+                eq(MailboxCustomDomain.isDeleted, false),
             ),
         }),
 
-        db.select({ count: count() }).from(MailboxAlias).where(eq(MailboxAlias.mailboxId, mailboxId)),
+        db.select({ count: count() }).from(MailboxAlias).where(and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.isDeleted, false))),
 
         db.query.Mailbox.findFirst({
             where: eq(Mailbox.id, mailboxId),
@@ -197,7 +199,7 @@ export async function editAlias(mailboxId: string, aliasId: string, name: string
 
     // check if alias exists
     const existingAlias = await db.query.MailboxAlias.findFirst({
-        where: eq(MailboxAlias.id, aliasId),
+        where: and(eq(MailboxAlias.id, aliasId), eq(MailboxAlias.isDeleted, false)),
         columns: {
             id: true,
         },
@@ -213,7 +215,7 @@ export async function editAlias(mailboxId: string, aliasId: string, name: string
         .set({
             name,
         })
-        .where(eq(MailboxAlias.id, aliasId))
+        .where(and(eq(MailboxAlias.id, aliasId), eq(MailboxAlias.isDeleted, false)))
         .execute();
 
     revalidateTag(`mailbox-aliases-${mailboxId}`);
@@ -229,7 +231,7 @@ export async function changeDefaultAlias(mailboxId: string, defaultAliasId: stri
 
     // check if alias exists
     const existingAlias = await db.query.MailboxAlias.findFirst({
-        where: eq(MailboxAlias.id, defaultAliasId),
+        where: and(eq(MailboxAlias.id, defaultAliasId), eq(MailboxAlias.isDeleted, false)),
         columns: {
             id: true,
         },
@@ -246,14 +248,14 @@ export async function changeDefaultAlias(mailboxId: string, defaultAliasId: stri
             .set({
                 default: false,
             })
-            .where(and(eq(MailboxAlias.mailboxId, mailboxId), not(eq(MailboxAlias.id, defaultAliasId)))),
+            .where(and(eq(MailboxAlias.mailboxId, mailboxId), not(eq(MailboxAlias.id, defaultAliasId)), eq(MailboxAlias.isDeleted, false))),
 
         db
             .update(MailboxAlias)
             .set({
                 default: true,
             })
-            .where(and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.id, defaultAliasId))),
+            .where(and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.id, defaultAliasId), eq(MailboxAlias.isDeleted, false))),
     ]);
 
     revalidateTag(`mailbox-aliases-${mailboxId}`);
@@ -268,9 +270,10 @@ export async function deleteAlias(mailboxId: string, aliasId: string) {
     }
 
     const alias = await db.query.MailboxAlias.findFirst({
-        where: and(eq(MailboxAlias.id, aliasId), eq(MailboxAlias.mailboxId, mailboxId)),
+        where: and(eq(MailboxAlias.id, aliasId), eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.isDeleted, false)),
         columns: {
             default: true,
+            alias: true,
         },
     });
 
@@ -281,7 +284,15 @@ export async function deleteAlias(mailboxId: string, aliasId: string) {
         return { error: "Cannot delete default alias" };
     }
 
-    await db.delete(MailboxAlias).where(eq(MailboxAlias.id, aliasId)).execute();
+    await db.update(MailboxAlias).set({
+        isDeleted: true,
+        // if alias is emailthing.xyz, we don't want to delete it, so people can't use it again
+        alias: alias.alias.endsWith("@emailthing.xyz") ? alias.alias : "<deleted>",
+        default: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        name: "<deleted>"
+    }).where(eq(MailboxAlias.id, aliasId)).execute();
 
     revalidateTag(`mailbox-aliases-${mailboxId}`);
 
@@ -295,7 +306,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
     }
 
     const domain = await db.query.MailboxCustomDomain.findFirst({
-        where: and(eq(MailboxCustomDomain.id, customDomainId), eq(MailboxCustomDomain.mailboxId, mailboxId)),
+        where: and(eq(MailboxCustomDomain.id, customDomainId), eq(MailboxCustomDomain.mailboxId, mailboxId), eq(MailboxCustomDomain.isDeleted, false)),
     });
 
     const defaultAliasFromThis = await db.query.MailboxAlias.findFirst({
@@ -303,6 +314,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
             eq(MailboxAlias.mailboxId, mailboxId),
             eq(MailboxAlias.default, true),
             like(MailboxAlias.alias, `%@${domain?.domain}`),
+            eq(MailboxAlias.isDeleted, false),
         ),
     });
 
@@ -315,11 +327,23 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
 
     // also delete all aliases with that domain
     await db.batch([
-        db.delete(MailboxCustomDomain).where(eq(MailboxCustomDomain.id, customDomainId)),
+        db.update(MailboxCustomDomain).set({
+            isDeleted: true,
+            domain: "<deleted>",
+            addedAt: new Date(),
+            updatedAt: new Date(),
+        }).where(eq(MailboxCustomDomain.id, customDomainId)),
 
         db
-            .delete(MailboxAlias)
-            .where(
+            .update(MailboxAlias)
+            .set({
+                isDeleted: true,
+                alias: "<deleted>@<deleted>",
+                default: false,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                name: "<deleted>"
+            }).where(
                 and(
                     eq(MailboxAlias.mailboxId, mailboxId),
                     like(MailboxAlias.alias, `%@${domain.domain}`),
@@ -350,6 +374,7 @@ export async function makeToken(mailboxId: string, name: string | null) {
             .execute();
 
         revalidatePath(`/mail/${mailboxId}/config`);
+        // only ever time the token is shown in full to user
         return { token };
     } catch (e) {
         return { error: "Failed to create token" };
@@ -363,8 +388,13 @@ export async function deleteToken(mailboxId: string, token: string) {
     }
 
     await db
-        .delete(MailboxTokens)
-        .where(and(eq(MailboxTokens.token, token), eq(MailboxTokens.mailboxId, mailboxId)))
+        .update(MailboxTokens).set({
+            isDeleted: true,
+            token: "<deleted>",
+            name: "<deleted>",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }).where(and(eq(MailboxTokens.token, token), eq(MailboxTokens.mailboxId, mailboxId)))
         .execute();
 
     revalidatePath(`/mail/${mailboxId}/config`);
@@ -411,7 +441,7 @@ export async function editCategory(mailboxId: string, categoryId: string, name: 
             name,
             color,
         })
-        .where(and(eq(MailboxCategory.id, categoryId), eq(MailboxCategory.mailboxId, mailboxId)))
+        .where(and(eq(MailboxCategory.id, categoryId), eq(MailboxCategory.mailboxId, mailboxId), eq(MailboxCategory.isDeleted, false)))
         .execute();
 
     revalidateTag(`mailbox-categories-${mailboxId}`);
@@ -425,8 +455,13 @@ export async function deleteCategory(mailboxId: string, categoryId: string) {
     }
 
     await db
-        .delete(MailboxCategory)
-        .where(and(eq(MailboxCategory.id, categoryId), eq(MailboxCategory.mailboxId, mailboxId)))
+        .update(MailboxCategory).set({
+            isDeleted: true,
+            name: "<deleted>",
+            color: "<deleted>",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }).where(and(eq(MailboxCategory.id, categoryId), eq(MailboxCategory.mailboxId, mailboxId), eq(MailboxCategory.isDeleted, false)))
         .execute();
 
     revalidateTag(`mailbox-categories-${mailboxId}`);
@@ -441,7 +476,7 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
 
     // check if the current user is an admin
     const userRole = await db.query.MailboxForUser.findFirst({
-        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, userId)),
+        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)),
         columns: {
             role: true,
         },
@@ -453,9 +488,9 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
 
     // check how many users are in the mailbox
     const [mailboxUsers, mailbox] = await db.batch([
-        db.select({ count: count() }).from(MailboxForUser).where(eq(MailboxForUser.mailboxId, mailboxId)),
+        db.select({ count: count() }).from(MailboxForUser).where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.isDeleted, false))),
         db.query.Mailbox.findFirst({
-            where: eq(Mailbox.id, mailboxId),
+            where: and(eq(Mailbox.id, mailboxId), eq(Mailbox.isDeleted, false)),
             columns: {
                 plan: true,
             },
@@ -487,7 +522,7 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
     const userMailboxes = await db
         .select({ count: count() })
         .from(MailboxForUser)
-        .where(eq(MailboxForUser.userId, proposedUser.id))
+        .where(and(eq(MailboxForUser.userId, proposedUser.id), eq(MailboxForUser.isDeleted, false)))
         .execute();
 
     // TODO: either make it 5 free mailboxes or somehow make a plan for this
@@ -500,6 +535,10 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
     if (!validRoles.includes(role)) {
         return { error: "Invalid role" };
     }
+
+    // if the user used to be in the mailbox, we need to delete the old entry (to be able to add them again)
+    // technically this could be abused to lower someone's role, but thats why only OWNER can do this (and only one owner per mailbox)
+    await db.delete(MailboxForUser).where(and(eq(MailboxForUser.userId, proposedUser.id), eq(MailboxForUser.mailboxId, mailboxId))).execute();
 
     // add user to mailbox
     await db
@@ -524,7 +563,7 @@ export async function removeUserFromMailbox(mailboxId: string, userId: string) {
 
     // check if the current user is an admin
     const userRole = await db.query.MailboxForUser.findFirst({
-        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId)),
+        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),
         columns: {
             role: true,
         },
@@ -548,8 +587,12 @@ export async function removeUserFromMailbox(mailboxId: string, userId: string) {
 
     // remove user from mailbox
     await db
-        .delete(MailboxForUser)
-        .where(
+        .update(MailboxForUser).set({
+            isDeleted: true,
+            joinedAt: new Date(),
+            updatedAt: new Date(),
+            role: "NONE",
+        }).where(
             and(
                 eq(MailboxForUser.mailboxId, mailboxId),
                 eq(MailboxForUser.userId, userId),
@@ -583,7 +626,7 @@ export async function leaveMailbox(mailboxId: string) {
 
     // check if they are owner
     const userRole = await db.query.MailboxForUser.findFirst({
-        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId)),
+        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),
         columns: {
             role: true,
         },
@@ -595,8 +638,12 @@ export async function leaveMailbox(mailboxId: string) {
 
     // remove user from mailbox
     await db
-        .delete(MailboxForUser)
-        .where(
+        .update(MailboxForUser).set({
+            isDeleted: true,
+            joinedAt: new Date(),
+            updatedAt: new Date(),
+            role: "NONE",
+        }).where(
             and(
                 eq(MailboxForUser.mailboxId, mailboxId),
                 eq(MailboxForUser.userId, currentUserId),

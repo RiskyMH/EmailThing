@@ -236,7 +236,7 @@ export const MailboxForUser = sqliteTable(
         joinedAt: integer("joined_at", { mode: "timestamp" })
             .notNull()
             .$defaultFn(() => new Date()),
-        role: text("role", { enum: ["OWNER", "ADMIN"] })
+        role: text("role", { enum: ["OWNER", "ADMIN", "NONE"] })
             .default("ADMIN")
             .notNull(),
         updatedAt: integer("updated_at", { mode: "timestamp" })

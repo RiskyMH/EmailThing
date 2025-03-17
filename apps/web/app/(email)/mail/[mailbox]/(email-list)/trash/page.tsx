@@ -25,8 +25,8 @@ export default async function Mailbox(props: {
             mailboxId={params.mailbox}
             initialTake={searchParams?.take}
             type="trash"
-            categoryId={searchParams?.category}
             search={searchParams?.q}
+            categoryId={searchParams?.category}
         />
     );
 }

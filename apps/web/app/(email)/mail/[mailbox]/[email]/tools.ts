@@ -4,7 +4,7 @@ import { cache } from "react";
 
 export const getEmail = cache(async (mailboxId: string, emailId: string) => {
     return db.query.Email.findFirst({
-        where: and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId)),
+        where: and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId), eq(Email.isDeleted, false)),
         columns: {
             id: true,
             subject: true,

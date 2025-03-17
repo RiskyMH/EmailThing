@@ -21,7 +21,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     if (!data) return { error: "No data???" };
 
     const mail = await db.query.DraftEmail.findFirst({
-        where: and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId)),
+        where: and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId), eq(DraftEmail.isDeleted, false)),
         columns: {
             // body: true,
             // subject: true,
@@ -58,7 +58,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
 
     // verify alias is valid (and user has access to it)
     const alias = await db.query.MailboxAlias.findFirst({
-        where: and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.alias, from!)),
+        where: and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.alias, from!), eq(MailboxAlias.isDeleted, false)),
         columns: {
             name: true,
             alias: true,
@@ -188,8 +188,22 @@ export async function deleteDraftAction(mailboxId: string, draftId: string) {
         throw new Error("Mailbox not found");
     }
 
+    // await db
+    //     .delete(DraftEmail)
+    //     .where(and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId)))
+    //     .execute();
     await db
-        .delete(DraftEmail)
+        .update(DraftEmail)
+        .set({
+            isDeleted: true,
+            body: "<deleted>",
+            subject: "<deleted>",
+            from: null,
+            to: null,
+            updatedAt: new Date(),
+            headers: [],
+            createdAt: new Date(),
+        })
         .where(and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId)))
         .execute();
 
@@ -227,7 +241,7 @@ export async function saveDraftHeadersAction(mailboxId: string, draftId: string,
         .update(DraftEmail)
         // .set({ headers })
         .set({ headers: uniqueHeaders })
-        .where(and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId)))
+        .where(and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId), eq(DraftEmail.isDeleted, false)))
         .execute();
 
     revalidatePath(`/mail/${mailboxId}/draft/${draftId}`);

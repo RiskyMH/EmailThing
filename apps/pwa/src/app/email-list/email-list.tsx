@@ -291,6 +291,15 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
     const isLoading = !data && !_data
     if (isLoading) return <EmailListCategoryLoadingSkeleton />
 
+    const name = {
+        inbox: "Inbox",
+        drafts: "Drafts",
+        sent: "Sent",
+        starred: "Starred",
+        trash: "Trash",
+        temp: "Temporary Email",
+    }[type]
+
     if (data?.[1] !== key && _data?.[1] !== key) {
         return (
             <>
@@ -298,7 +307,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
                 <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
                     <CategoryItem
                         circleColor={null}
-                        name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
+                        name={search ? "Search results" : name || "All"}
                         count={null}
                         link={baseUrl}
                         category={null}
@@ -325,7 +334,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
             <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden">
                 <CategoryItem
                     circleColor={null}
-                    name={type === "drafts" ? "Drafts" : search ? "Search results" : "All"}
+                    name={search ? "Search results" : name || "All"}
                     count={allCount}
                     link={baseUrl}
                     category={null}

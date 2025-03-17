@@ -63,6 +63,7 @@ export const PasskeyCredentials = sqliteTable("passkey_credentials", {
         .$onUpdateFn(() => new Date()),
     name: text("name"),
     publicKey: text("public_key").notNull(),
+    isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
 });
 
 export const PasskeyCredentialsSchemaRelations = relations(PasskeyCredentials, ({ many, one }) => ({
@@ -90,6 +91,7 @@ export const UserNotification = sqliteTable(
             .notNull()
             .$defaultFn(() => new Date()),
         expiresAt: integer("expires_at", { mode: "timestamp" }),
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
     },
     (table) => {
         return {

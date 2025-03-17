@@ -21,7 +21,7 @@ export async function GET(
     if (!(userId && (await userMailboxAccess(params.mailbox, userId)))) return notFound();
 
     const mail = await db.query.DraftEmail.findFirst({
-        where: and(eq(DraftEmail.id, params.draft), eq(DraftEmail.mailboxId, params.mailbox)),
+        where: and(eq(DraftEmail.id, params.draft), eq(DraftEmail.mailboxId, params.mailbox), eq(DraftEmail.isDeleted, false)),
         columns: {
             body: true,
         },

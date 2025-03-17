@@ -39,7 +39,7 @@ export async function generateMetadata(props: {
 
 const fetchDraft = cache(async (mailboxId: string, draftId: string) => {
     return await db.query.DraftEmail.findFirst({
-        where: and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId)),
+        where: and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId), eq(DraftEmail.isDeleted, false)),
         columns: {
             body: true,
             subject: true,
@@ -66,7 +66,7 @@ export default async function DraftPage(props: {
     if (!mail) {
         // check if mail sent before 404ing
         const mail = await db.query.Email.findFirst({
-            where: and(eq(Email.id, params.draft), eq(Email.mailboxId, params.mailbox)),
+            where: and(eq(Email.id, params.draft), eq(Email.mailboxId, params.mailbox), eq(Email.isDeleted, false)),
             columns: {
                 id: true,
             },
