@@ -51,6 +51,23 @@ export async function POST(request: Request) {
         return new Response("Mailbox not found", { status: 400 });
     }
 
+    // work out if the email is already in the database (using Message-ID)
+    const existingEmail = await db.query.Email.findFirst({
+        where: and(eq(Email.mailboxId, mailboxId), eq(Email.givenId, email.messageId), eq(Email.isDeleted, false)),
+        columns: {
+            id: true,
+        },
+    });
+    if (existingEmail) {
+        console.log("Email already exists, no need to add!");
+        return Response.json({
+            success: true,
+            id: existingEmail.id,
+            alreadyExists: true,
+        });
+    }
+
+
     // get storage used and see if over limit
     const mailbox = await db.query.Mailbox.findFirst({
         where: and(eq(Mailbox.id, mailboxId), eq(Mailbox.isDeleted, false)),
