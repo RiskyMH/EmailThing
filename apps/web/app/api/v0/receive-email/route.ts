@@ -51,20 +51,22 @@ export async function POST(request: Request) {
         return new Response("Mailbox not found", { status: 400 });
     }
 
-    // work out if the email is already in the database (using Message-ID)
-    const existingEmail = await db.query.Email.findFirst({
-        where: and(eq(Email.mailboxId, mailboxId), eq(Email.givenId, email.messageId), eq(Email.isDeleted, false)),
-        columns: {
-            id: true,
-        },
-    });
-    if (existingEmail) {
-        console.log("Email already exists, no need to add!");
-        return Response.json({
-            success: true,
-            id: existingEmail.id,
-            alreadyExists: true,
+    if (email.messageId) {
+        // work out if the email is already in the database (using Message-ID)
+        const existingEmail = await db.query.Email.findFirst({
+            where: and(eq(Email.mailboxId, mailboxId), eq(Email.givenId, email.messageId), eq(Email.isDeleted, false)),
+            columns: {
+                id: true,
+            },
         });
+        if (existingEmail) {
+            console.log("Email already exists, no need to add!");
+            return Response.json({
+                success: true,
+                id: existingEmail.id,
+                alreadyExists: true,
+            });
+        }
     }
 
 
@@ -222,19 +224,19 @@ async function getMailbox({ internal, zone, auth, to }: { internal: boolean; zon
 
     const alias = defaultDomain.tempDomain
         ? await db.query.TempAlias.findFirst({
-              where: and(eq(TempAlias.alias, to), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
-              columns: {
-                  mailboxId: true,
-                  id: true,
-              },
-          })
+            where: and(eq(TempAlias.alias, to), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
+            columns: {
+                mailboxId: true,
+                id: true,
+            },
+        })
         : await db.query.MailboxAlias.findFirst({
-              where: and(eq(MailboxAlias.alias, to), eq(MailboxAlias.isDeleted, false)),
-              columns: {
-                  mailboxId: true,
-                  id: true,
-              },
-          });
+            where: and(eq(MailboxAlias.alias, to), eq(MailboxAlias.isDeleted, false)),
+            columns: {
+                mailboxId: true,
+                id: true,
+            },
+        });
 
     if (defaultDomain.tempDomain) {
         return { mailboxId: alias?.mailboxId, tempId: alias?.id };
