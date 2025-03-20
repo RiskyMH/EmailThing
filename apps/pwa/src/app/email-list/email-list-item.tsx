@@ -13,9 +13,9 @@ import {
 import { cn } from "@/utils/tw";
 import { ArchiveRestoreIcon, ExternalLink, ForwardIcon, MailOpenIcon, ReplyAllIcon, ReplyIcon, TagIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
-import { ClientStar, ContextMenuAction } from "@/(email)/mail/[mailbox]/components.client";
+import { ClientStar, ContextMenuAction } from "../components";
 import { toast } from "sonner";
-import { updateEmailProperties, deleteEmailLocally, deleteDraftEmail } from "@/utils/data/queries/email-list";
+import { updateEmailProperties, deleteDraftEmail } from "@/utils/data/queries/email-list";
 import { useEffect, useState } from "react";
 import MailUnreadIcon from "@/components/icons/mail-unread";
 
@@ -77,6 +77,9 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
     const emailId = email.id;
 
     const updateEmail = async (updates: any) => {
+        if (mailboxId !== 'demo' && !navigator.onLine) {
+            toast.info("You are offline - changes will be synced when you come back online")
+        }
         const result = await updateEmailProperties(mailboxId, emailId, updates);
         if (result?.message) {
             if (result.error) {

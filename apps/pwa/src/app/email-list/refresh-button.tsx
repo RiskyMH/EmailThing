@@ -3,20 +3,29 @@ import { useOnline } from "@/utils/hooks";
 import { RotateCcwIcon, CloudOff } from "lucide-react";
 import { useTransition, useEffect } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { cn } from "@/utils/tw";
+import { useParams } from "react-router-dom";
+import { syncUser } from "@/utils/data/sync-user";
 
-
-export default function RefreshButton() {
+export default function RefreshButton({ className }: { className?: string }) {
     const online = useOnline();
     const [isPending, startTransition] = useTransition();
-    const router = useRouter();
-
+    const params = useParams<{ mailboxId: string }>();
 
     const reload = () => {
-        // TODO: do something more useful here
-        toast.success("Would refresh!")
-        return router.refresh() as Promise<any>
+        if (params.mailboxId === 'demo') {
+            // TODO: do something more useful here
+            toast.success("Would refresh!")
+        } else {
+            if (!navigator.onLine) {
+                toast.info("You are offline")
+                return
+            }
+            if (isPending) return
+            startTransition(async () => {
+                await syncUser(false, new Date(localStorage.getItem('lastSync') || 0))
+            })
+        }
     }
 
 
@@ -46,12 +55,12 @@ export default function RefreshButton() {
         <Button
             variant="ghost"
             size="auto"
-            className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground shrink-0"
+            className={cn("-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground shrink-0", className)}
             onClick={() => {
                 !isPending &&
-                startTransition(() =>
-                    online ? reload() : void toast.warning("Offline")
-                )
+                    startTransition(() =>
+                        online ? reload() : void toast.warning("Offline")
+                    )
             }}
             disabled={!online}
         >

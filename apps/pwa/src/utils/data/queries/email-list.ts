@@ -438,82 +438,113 @@ export async function updateEmailProperties(
         hardDelete?: boolean;
     }
 ) {
-    if (mailboxId === 'demo') {
-        try {
-            await db.transaction('rw', [db.emails], async () => {
-                const email = await db.emails
+    // if (mailboxId === 'demo') {
+    try {
+        await db.transaction('rw', [db.emails], async () => {
+            const email = await db.emails
+                .where('id')
+                .equals(emailId)
+                .and(item => item.mailboxId === mailboxId)
+                .first();
+
+            if (!email) {
+                throw new Error('Email not found');
+            }
+
+            if (updates.hardDelete) {
+                await deleteEmailLocally(mailboxId, emailId, "inbox");
+            } else {
+                // Update using modify instead of delete/add
+                // Update using modify instead of delete/add
+
+                const modify: Partial<DBEmail> = {}
+                if (updates.isStarred !== undefined) modify.isStarred = updates.isStarred === true ? 1 : 0
+                if (updates.isRead !== undefined) modify.isRead = updates.isRead === true ? 1 : 0
+                if (updates.categoryId !== undefined) modify.categoryId = updates.categoryId || 0
+                if (updates.binnedAt !== undefined) modify.binnedAt = updates.binnedAt || 0
+                await db.emails
                     .where('id')
                     .equals(emailId)
-                    .and(item => item.mailboxId === mailboxId)
-                    .first();
-
-                if (!email) {
-                    throw new Error('Email not found');
-                }
-
-                if (updates.hardDelete) {
-                    await deleteEmailLocally(mailboxId, emailId, "inbox");
-                } else {
-                    // Update using modify instead of delete/add
-                    // Update using modify instead of delete/add
-                    await db.emails
-                        .where('id')
-                        .equals(emailId)
-                        .modify({
-                            updatedAt: new Date(),
-                            isStarred: updates.isStarred === undefined ? undefined : updates.isStarred === true ? 1 : 0,
-                            isRead: updates.isRead === undefined ? undefined : updates.isRead === true ? 1 : 0,
-                            categoryId: updates.categoryId,
-                            binnedAt: updates.binnedAt || 0,
-                        });
-                }
-            });
-
+                    .modify(modify);
+            }
+        });
+        if (mailboxId === 'demo') {
             return {
                 success: true,
                 demo: true,
                 message: "This is a demo - changes won't actually do anything",
                 description: "But you can see how it would work in the real app!"
             };
-        } catch (error) {
-            console.error('Failed to update email:', error);
-            return {
-                success: false,
-                demo: true,
-                message: "Failed to update email",
-                description: "There was an error updating the email"
-            };
-        }
-    }
+        } else {
+            const res = await proposeSync({
+                emails: [{
+                    id: emailId,
+                    mailboxId,
+                    lastUpdated: new Date(),
+                    ...updates
+                }],
+            }, new Date(localStorage.getItem('lastSync') || 0))
+            if (!res) {
+                return {
+                    success: false,
+                    error: true,
+                    message: "Failed to update email",
+                };
+            }
+            if (res.errors) {
+                return {
+                    success: false,
+                    error: true,
+                    message: "Failed to update email",
+                    description: res.errors?.[0]
+                };
+            }
 
-    const res = await proposeSync({
-        emails: [{
-            id: emailId,
-            mailboxId,
-            ...updates
-        }],
-    }, new Date(localStorage.getItem('lastSync') || 0))
-    if (!res) {
+            if (res.data) {
+                return {
+                    success: true,
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to update email:', error);
         return {
             success: false,
-            error: true,
+            demo: true,
             message: "Failed to update email",
+            description: "There was an error updating the email"
         };
     }
-    if (res.errors) {
-        return {
-            success: false,
-            error: true,
-            message: "Failed to update email",
-            description: res.errors?.[0]
-        };
-    }
+    // }
 
-    if (res.data) {
-        return {
-            success: true,
-        }
-    }
+    // const res = await proposeSync({
+    //     emails: [{
+    //         id: emailId,
+    //         mailboxId,
+    //         ...updates
+    //     }],
+    // }, new Date(localStorage.getItem('lastSync') || 0))
+    // if (!res) {
+    //     return {
+    //         success: false,
+    //         error: true,
+    //         message: "Failed to update email",
+    //     };
+    // }
+    // if (res.errors) {
+    //     return {
+    //         success: false,
+    //         error: true,
+    //         message: "Failed to update email",
+    //         description: res.errors?.[0]
+    //     };
+    // }
+
+    // if (res.data) {
+    //     return {
+    //         success: true,
+    //     }
+    // }
 }
 
 // Delete email with optimistic UI updates

@@ -1,4 +1,4 @@
-import { ContextMenuAction } from "@/(email)/mail/[mailbox]/components.client";
+import { ContextMenuAction } from "../components";
 import TooltipText from "@/components/tooltip-text";
 import { Button } from "@/components/ui/button";
 import {

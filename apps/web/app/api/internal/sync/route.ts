@@ -133,7 +133,7 @@ export async function POST(request: Request) {
                         isStarred: false,
                         // tempId: null,
                         createdAt: new Date(),
-                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId))))
+                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId), email.lastUpdated ? gte(Email.updatedAt, email.lastUpdated) : undefined)))
                 } else {
                     // update the email
                     changes.push(db.update(Email).set({
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
                         isRead: email.isRead,
                         categoryId: email.categoryId,
                         binnedAt: email.binnedAt ? new Date() : email.binnedAt === null ? null : undefined,
-                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId))))
+                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId), email.lastUpdated ? gte(Email.updatedAt, email.lastUpdated) : undefined)))
                 }
 
 
@@ -190,7 +190,7 @@ export async function POST(request: Request) {
                         to: null,
                         headers: null,
                         createdAt: new Date(),
-                    }).where(and(eq(DraftEmail.id, draftEmail.id!), eq(DraftEmail.mailboxId, draftEmail.mailboxId))))
+                    }).where(and(eq(DraftEmail.id, draftEmail.id!), eq(DraftEmail.mailboxId, draftEmail.mailboxId), draftEmail.lastUpdated ? gte(DraftEmail.updatedAt, draftEmail.lastUpdated) : undefined)))
                 } else {
 
                     if (draftEmail.id == null) {
@@ -211,7 +211,7 @@ export async function POST(request: Request) {
                             from: draftEmail.from,
                             to: draftEmail.to,
                             headers: draftEmail.headers,
-                        }).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId))))
+                        }).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId), draftEmail.lastUpdated ? gte(DraftEmail.updatedAt, draftEmail.lastUpdated) : undefined)))
                     }
                 }
 
@@ -296,6 +296,7 @@ export type ChangesRequest = {
         categoryId?: string | null;
         binnedAt?: Date | null;
         hardDelete?: boolean;
+        lastUpdated?: Date;
     }[];
     draftEmails?: {
         /** null for create */
@@ -311,6 +312,7 @@ export type ChangesRequest = {
         }[] | null;
         headers?: { key: string; value: string }[];
         hardDelete?: boolean;
+        lastUpdated?: Date;
     }[];
     mailboxCategories?: {
         /** null for create */
@@ -319,6 +321,7 @@ export type ChangesRequest = {
         name: string;
         color?: string | null;
         hardDelete?: boolean;
+        lastUpdated?: Date;
     }[];
     /** //todo: */
     mailboxAliases?: {}

@@ -1,6 +1,7 @@
 import { db } from "@/utils/data/db";
 import type { MinimalChangesResponse, ChangesResponse, ChangesRequest, ChangesResponseError } from "@/../../web/app/api/internal/sync/route";
 
+
 export async function syncUser(minimal = false, lastSync?: Date) {
     if (!localStorage.getItem('token')) return false
 
@@ -27,35 +28,77 @@ export async function syncUser(minimal = false, lastSync?: Date) {
     return parseSyncResponse(response, minimal);
 }
 
-export async function proposeSync(changes: ChangesRequest, lastSync?: Date) {
-    if (!localStorage.getItem('token')) return
+type NeedsToSyncStore = ChangesRequest
 
-    // Build query params
-    const params = new URLSearchParams();
-    if (lastSync) {
-        params.append('last_sync', lastSync.getTime().toString());
-    }
-
-    // Call sync API
-    const response = await fetch(`https://emailthing.app/api/internal/sync?${params.toString()}`, {
-        method: 'POST',
-        headers: {
-            "x-auth": `${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(changes)
-    });
-    if (!response.ok) {
-        console.error('Failed to sync user data', response);
-        if (response.body) {
-            const e = await response.json() as ChangesResponseError
-            return { data: null, errors: [e.error] }
-        }
-        return { data: null, errors: ["Unknown error. Can you connect to the internet?"] }
-    }
+export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
     try {
-        return { data: await parseSyncResponse(response), errors: null };
+
+        const store: NeedsToSyncStore = JSON.parse(localStorage?.getItem('sync-user') ?? '{}')
+        // update the _store with current changes
+        for (const key of Object.keys(changes)) {
+            store[key] = store[key] ?? []
+            store[key].push(...changes[key])
+        }
+        // save the _store
+        localStorage.setItem('sync-user', JSON.stringify(store))
+
+        if (JSON.stringify(store) === "{}") return { data: null, errors: ["No changes to sync"] }
+
+        const isSyncing = localStorage.getItem('is-syncing')
+        // if syncing, wait 100ms and try again
+        if (isSyncing && new Date(isSyncing).getTime() > Date.now() - 100) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+            return proposeSync({}, lastSync)
+        }
+        localStorage.setItem('is-syncing', new Date().toISOString())
+
+
+        if (!localStorage.getItem('token')) return { data: null, errors: ["You are not logged in"] }
+
+        // Build query params
+        const params = new URLSearchParams();
+        if (lastSync) {
+            params.append('last_sync', lastSync.getTime().toString());
+        }
+
+        // Call sync API
+        const response = await fetch(`https://emailthing.app/api/internal/sync?${params.toString()}`, {
+            method: 'POST',
+            headers: {
+                "x-auth": `${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(changes)
+        });
+        if (!response.ok) {
+            console.error('Failed to sync user data', response);
+            if (response.body) {
+                const e = await response.json() as ChangesResponseError
+                return { data: null, errors: [e.error] }
+            }
+            return { data: null, errors: ["Unknown error. Can you connect to the internet?"] }
+        }
+
+        try {
+            const d = { data: await parseSyncResponse(response), errors: null };
+
+            const _store = JSON.parse(JSON.stringify(store))
+            // save the _store minus the changes done here
+            for (const key of Object.keys(store)) {
+                _store[key] = _store[key].filter((item: any) => !changes[key].some((change: any) => change.id === item.id))
+            }
+            localStorage.setItem('sync-user', JSON.stringify(_store))
+            localStorage.removeItem('is-syncing')
+
+            return d
+
+        } catch (e) {
+            console.error('Failed to parse sync response', e);
+            return { data: null, errors: e instanceof Error ? e.message : "Unknown error. Can you connect to the internet?" }
+        } finally {
+        }
+
     } catch (e) {
-        console.error('Failed to parse sync response', e);
+        console.error('Failed to propose sync', e);
         return { data: null, errors: e instanceof Error ? e.message : "Unknown error. Can you connect to the internet?" }
     }
 }

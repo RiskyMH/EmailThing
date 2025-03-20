@@ -160,7 +160,7 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
             take: 50 + 1,
             skip: skip,
         })
-        return [emails, key]
+        return [emails, key] as const
     }, [mailboxId, type, categoryId, search, key])
 
     const loading = skip > 0 ?
@@ -182,6 +182,7 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
     }
 
     const __data = data?.[1] === key ? data : _data
+    if (!__data) return loading
 
     if (data && typeof window !== "undefined" && data?.[1] === key) {
         window._tempData ||= {}

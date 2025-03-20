@@ -55,7 +55,9 @@ function MailItem() {
     if (!email || !params.mailId) return <><Loading /><Title mailboxId={params.mailboxId} /></>
 
     const updateEmail = async (updates: Record<string, any>, { auto }: { auto?: boolean } = {}) => {
-        console.log("updateEmail", updates, auto)
+        if (mailboxId !== 'demo' && !navigator.onLine) {
+            toast.info("You are offline - changes will be synced when you come back online")
+        }
         const result = await updateEmailProperties(mailboxId, emailId, updates);
         if (result?.message) {
             if (result.error) {
@@ -63,7 +65,7 @@ function MailItem() {
             } else {
                 toast(result.message, { description: result.description });
             }
-        } 
+        }
     };
 
     // const attachmentsPresigned = []
@@ -267,7 +269,7 @@ function MailItem() {
                         ))}
                     </div>
                 )}
-                <EmailContent mailboxId={params.mailboxId} emailId={params.mailId} email={email} />
+                <EmailContent email={email} />
             </div>
 
             {/* // TODO: show references snippets for email */}
@@ -288,57 +290,40 @@ function Title({ email, mailboxId }: { email?: { subject?: string | null }, mail
 }
 
 function EmailContent({
-    mailboxId,
-    emailId,
     email,
-}: { mailboxId: string; emailId: string; email: { body: string; html: string | null } }) {
-
+}: { email: { body: string; html?: string | null } }) {
     const searchParams = useSearchParams()[0]
     const view = (searchParams.get("view") || "markdown") as "text" | "markdown" | "html" | "html-raw"
-
-    const { data } = useSWR(`/mail/${mailboxId}/${emailId}/email.html&view=${view}`, async () => {
-        if (view === "text" || view === "html-raw") return email.body
-        if (view === "markdown") {
-            return parseHTML(await markedParse(email.body, { breaks: true }), false)
-        }
-        if (view === "html") return parseHTML(email.html || email.body, true)
-    }, {
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-        revalidateIfStale: false,
-        // revalidateOnMount: false,
-    })
-
 
     if (view === "text") {
         return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal">{email.body}</p>;
     }
 
     else if (view === "markdown") {
-        // if (!data) return <EmailContentSpinner />;
-        if (!data) return <p className="prose dark:prose-invert max-w-full overflow-auto break-words">{email.body}</p>;
         return (
             <div
                 className="prose dark:prose-invert max-w-full overflow-auto break-words"
-                dangerouslySetInnerHTML={{ __html: data }}
+                dangerouslySetInnerHTML={{
+                    __html:
+                        parseHTML(markedParse(email.body, { breaks: true, async: false }), false)
+                }}
             />
         );
     }
 
     else if (view === "html") {
-        if (!data) return <EmailContentSpinner />
         return (
             <iframe
                 className="h-screen w-full rounded-lg bg-card"
                 sandbox="allow-popups"
-                srcDoc={data}
+                srcDoc={parseHTML(email.html || email.body, true)}
                 title="The Email"
             />
         );
     }
 
     else if (view === "html-raw") {
-        return <p className="leading-normal font-mono overflow-x-auto h-full rounded-lg bg-tertiary p-3 whitespace-pre">{email.html || email.body}</p>;
+        return <p className="leading-normal font-mono overflow-x-auto h-full rounded-lg bg-tertiary p-3 whitespace-pre text-sm">{email.html || email.body}</p>;
     }
 
     return null;
