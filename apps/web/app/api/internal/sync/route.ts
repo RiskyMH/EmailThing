@@ -185,6 +185,21 @@ export async function POST(request: Request) {
                         });
                         continue;
                     }
+                } else if (draftEmail.id?.startsWith("new:")) {
+                    // verify that there is no draft with this id
+                    const e = await db.select({ id: DraftEmail.id, mailboxId: DraftEmail.mailboxId }).from(DraftEmail).where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")))
+                    if (e) {
+                        if (e.length > 0 && !e.some((e) => e.mailboxId === draftEmail.mailboxId)) {
+                            errors.push({
+                                key: "draftEmails",
+                                id: draftEmail.id,
+                                error: "Draft email already exists",
+                            });
+                            draftEmail.id = null;
+                        } else {
+                            draftEmail.id = draftEmail.id.replace("new:", "");
+                        }
+                    }
                 } else {
                     // check that the draftemailid exists and is owned by the user
                     const e = await db.select({ id: DraftEmail.id }).from(DraftEmail).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId)))
@@ -226,37 +241,15 @@ export async function POST(request: Request) {
                             headers: draftEmail.headers,
                         }))
                     } else if (draftEmail.id.startsWith("new:")) {
-                        // verify that there is no draft with this id
-                        const e = await db.select({ id: DraftEmail.id }).from(DraftEmail).where(eq(DraftEmail.id, draftEmail.id))
-                        if (e) {
-                            errors.push({
-                                key: "draftEmails",
-                                id: draftEmail.id,
-                                error: "Draft email already exists",
-                            });
-
-                            // create one with random id then
-                            changes.push(db.insert(DraftEmail).values({
-                                // id: draftEmail.id,
-                                mailboxId: draftEmail.mailboxId,
-                                body: draftEmail.body,
-                                subject: draftEmail.subject,
-                                from: draftEmail.from,
-                                to: draftEmail.to,
-                                headers: draftEmail.headers,
-                            }))
-                            continue;
-                        } else {
-                            changes.push(db.insert(DraftEmail).values({
-                                id: draftEmail.id.replace("new:", ""),
-                                mailboxId: draftEmail.mailboxId,
-                                body: draftEmail.body,
-                                subject: draftEmail.subject,
-                                from: draftEmail.from,
-                                to: draftEmail.to,
-                                headers: draftEmail.headers,
-                            }))
-                        }
+                        changes.push(db.insert(DraftEmail).values({
+                            id: draftEmail.id.replace("new:", ""),
+                            mailboxId: draftEmail.mailboxId,
+                            body: draftEmail.body,
+                            subject: draftEmail.subject,
+                            from: draftEmail.from,
+                            to: draftEmail.to,
+                            headers: draftEmail.headers,
+                        }))
                     } else {
                         // update the draft email
                         changes.push(db.update(DraftEmail).set({
@@ -360,10 +353,23 @@ export async function POST(request: Request) {
         }
     }
 
+    const changesRes = await getChanges(lastSyncDate, currentUser, mailboxesForUser, failedIds)
+
+    // if its a new and failed, add it to the changes as deleted
+    for (const error of errors) {
+        if (error.id?.startsWith("new:")) {
+            // @ts-ignore
+            changesRes[error.key].push({
+                id: error.id,
+                isDeleted: true,
+            } as any);
+        }
+    }
+
     // Return both errors and latest changes
     return Response.json({
         errors: errors.length > 0 ? errors : undefined,
-        ...await getChanges(lastSyncDate, currentUser, mailboxesForUser, failedIds)
+        ...changesRes
     });
 }
 

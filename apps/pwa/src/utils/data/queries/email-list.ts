@@ -782,14 +782,23 @@ export async function createDraftEmail(mailboxId: string, options?: {
                     ...draftData,
                     id: `new:${draftId}`,
                     mailboxId,
+                    from: draftData?.from || '',
+                    // createdAt: new Date(),
+                    // updatedAt: new Date(),
+                    subject: draftData?.subject || '',
+                    body: draftData?.body || '',
+                    to: draftData?.to || [],
+                    headers: draftData?.headers || [],
+                    isDeleted: false,
+
                 }]
             }, new Date(localStorage.getItem('lastSync') || 0))
 
-            // if the id chosen isn't the one we created, delete the one we created
-            // its cuid, so it's unlikely to be the same
-            if (!res.data?.draftEmails?.find(d => d.id === draftId)) {
-                await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
-            }
+            // // if the id chosen isn't the one we created, delete the one we created
+            // // its cuid, so it's unlikely to be the same
+            // if (res.data && !res.data?.draftEmails?.find((d: DBEmailDraft) => d.id === draftId)) {
+            //     await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
+            // }
         })()
     }
 
