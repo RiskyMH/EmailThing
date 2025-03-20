@@ -97,32 +97,32 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
           'www.gravatar.com',
           'riskymh.dev'
         ];
-        if (domains.includes(u.hostname)) {
-          if (navigator.onLine) {
-            return event.respondWith((async () => {
-              try {
-                const response = await fetch(Object.assign(event.request, { mode: 'no-cors' }));
-                if (response.ok) {
-                  const cache = await caches.open(THIRD_PARTY_CACHE_NAME);
-                  await cache.put(event.request, response);
-                }
-                return response.clone();
-              } catch (error) {
-                try {
-                  return await fetch(event.request);
-                } catch (error) {
-                  const m = await caches.match(event.request);
-                  if (m) return m;
-                  return fetch(event.request);
-                }
-              }
-            })());
-          } else {
-            return event.respondWith((async () =>
-              (await caches.match(event.request) || fetch(Object.assign(event.request, { mode: 'cors' })))
-            )());
-          }
-        }
+        // if (domains.includes(u.hostname) && !u.hostname.includes('api')) {
+        //   if (navigator.onLine) {
+        //     return event.respondWith((async () => {
+        //       try {
+        //         const response = await fetch(event.request);
+        //         if (response.ok) {
+        //           const cache = await caches.open(THIRD_PARTY_CACHE_NAME);
+        //           await cache.put(event.request, response);
+        //         }
+        //         return response.clone();
+        //       } catch (error) {
+        //         try {
+        //           return await fetch(event.request);
+        //         } catch (error) {
+        //           const m = await caches.match(event.request);
+        //           if (m) return m;
+        //           return fetch(event.request);
+        //         }
+        //       }
+        //     })());
+        //   } else {
+        //     return event.respondWith((async () =>
+        //       (await caches.match(event.request) || fetch(event.request))
+        //     )());
+        //   }
+        // }
       }
     }
   });
