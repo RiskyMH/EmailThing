@@ -4,10 +4,26 @@ import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTab
 import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import { cookies, headers } from "next/headers";
 import type { BatchItem } from "drizzle-orm/batch";
+import { isValidOrigin } from "../tools";
 
+
+export function OPTIONS(request: Request) {
+    const origin = request.headers.get("origin")
+    if (!origin || !isValidOrigin(origin)) {
+        return new Response("Not allowed", { status: 403 });
+    }
+    return new Response("OK", {
+        headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "authorization",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    });
+}
 
 const getCurrentUser = async () => {
-    const token = (await cookies()).get("token")?.value || (await headers()).get("x-auth");
+    const token = (await cookies()).get("token")?.value || (await headers()).get("authorization");
     if (!token) return null;
     try {
         return await getUserByToken(token);
@@ -18,6 +34,11 @@ const getCurrentUser = async () => {
 
 
 export async function GET(request: Request) {
+    const origin = request.headers.get("origin")
+    if (!origin || !isValidOrigin(origin)) {
+        return new Response("Not allowed", { status: 403 });
+    }
+
     // a user can request a sync of their data to be storred in apps\pwa\src\utils\data\types.ts
     // this should give a list of objects that have been changed since the last sync
     // or if first time, give a reduced dataset - ie less emails and only a few tables
@@ -46,15 +67,39 @@ export async function GET(request: Request) {
     });
 
     if (minimal) {
-        return Response.json(await getMinimalChanges(currentUser, mailboxesForUser));
+        return Response.json(
+            await getMinimalChanges(currentUser, mailboxesForUser),
+            {
+                headers: {
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Allow-Headers": "authorization",
+                    "Access-Control-Allow-Credentials": "true",
+                }
+            }
+        );
     }
 
-    return Response.json(await getChanges(lastSyncDate, currentUser, mailboxesForUser));
+    return Response.json(
+        await getChanges(lastSyncDate, currentUser, mailboxesForUser),
+        {
+            headers: {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "authorization",
+                "Access-Control-Allow-Credentials": "true",
+            }
+        }
+    );
 }
 
 
 
 export async function POST(request: Request) {
+    const origin = request.headers.get("origin")
+    if (!origin || !isValidOrigin(origin)) {
+        return new Response("Not allowed", { status: 403 });
+    }
 
     const { searchParams } = new URL(request.url);
     const lastSync = parseInt(searchParams.get("last_sync") || "0");
@@ -390,6 +435,13 @@ export async function POST(request: Request) {
     return Response.json({
         errors: errors.length > 0 ? errors : undefined,
         ...changesRes
+    }, {
+        headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "authorization",
+            "Access-Control-Allow-Credentials": "true",
+        }
     });
 }
 

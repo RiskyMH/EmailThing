@@ -17,7 +17,7 @@ export async function syncUser(minimal = false, lastSync?: Date) {
     // Call sync API
     const response = await fetch(`https://emailthing.app/api/internal/sync?${params.toString()}`, {
         headers: {
-            "x-auth": `${localStorage.getItem('token')}`
+            "authorization": `${localStorage.getItem('token')}`
         }
     });
     if (!response.ok) {
@@ -74,7 +74,7 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
         const response = await fetch(`https://emailthing.app/api/internal/sync?${params.toString()}`, {
             method: 'POST',
             headers: {
-                "x-auth": `${localStorage.getItem('token')}`
+                "authorization": `${localStorage.getItem('token')}`
             },
             body: JSON.stringify(store)
         });
@@ -98,6 +98,9 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
                 const _changes = changes?.[key]
                 if (Array.isArray(_key) && Array.isArray(_changes)) {
                     _store[key] = _key.filter((item: any) => !_changes?.some(change => change.id === item.id))
+                    if ('length' in _store[key] && _store[key].length === 0) {
+                        delete _store[key]
+                    }
                 } else {
                     if (store[key]) {
                         delete _store[key]
