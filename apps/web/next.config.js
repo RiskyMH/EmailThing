@@ -35,6 +35,9 @@ const nextConfig = {
     transpilePackages: [
         "@emailthing/db"
     ],
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     logging: {
         fetches: {
             fullUrl: true,

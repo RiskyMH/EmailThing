@@ -1,6 +1,6 @@
 import { getUserByToken } from "@/utils/jwt";
 import db, { DefaultDomain, DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens, PasskeyCredentials, User, UserNotification } from "@/db";
-import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTableColumns, sql } from "drizzle-orm";
+import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTableColumns, sql, lte } from "drizzle-orm";
 import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import { cookies, headers } from "next/headers";
 import type { BatchItem } from "drizzle-orm/batch";
@@ -133,7 +133,11 @@ export async function POST(request: Request) {
                         isStarred: false,
                         // tempId: null,
                         createdAt: new Date(),
-                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId), email.lastUpdated ? gte(Email.updatedAt, email.lastUpdated) : undefined)))
+                    }).where(and(
+                        eq(Email.id, email.id),
+                        eq(Email.mailboxId, email.mailboxId),
+                        email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined)
+                    ))
                 } else {
                     // update the email
                     changes.push(db.update(Email).set({
@@ -141,7 +145,11 @@ export async function POST(request: Request) {
                         isRead: email.isRead,
                         categoryId: email.categoryId,
                         binnedAt: email.binnedAt ? new Date() : email.binnedAt === null ? null : undefined,
-                    }).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId), email.lastUpdated ? gte(Email.updatedAt, email.lastUpdated) : undefined)))
+                    }).where(and(
+                        eq(Email.id, email.id),
+                        eq(Email.mailboxId, email.mailboxId),
+                        email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined)
+                    ))
                 }
 
 
@@ -190,7 +198,11 @@ export async function POST(request: Request) {
                         to: null,
                         headers: null,
                         createdAt: new Date(),
-                    }).where(and(eq(DraftEmail.id, draftEmail.id!), eq(DraftEmail.mailboxId, draftEmail.mailboxId), draftEmail.lastUpdated ? gte(DraftEmail.updatedAt, draftEmail.lastUpdated) : undefined)))
+                    }).where(and(
+                        eq(DraftEmail.id, draftEmail.id!),
+                        eq(DraftEmail.mailboxId, draftEmail.mailboxId),
+                        draftEmail.lastUpdated ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated)) : undefined)
+                    ))
                 } else {
 
                     if (draftEmail.id == null) {
@@ -211,7 +223,11 @@ export async function POST(request: Request) {
                             from: draftEmail.from,
                             to: draftEmail.to,
                             headers: draftEmail.headers,
-                        }).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId), draftEmail.lastUpdated ? gte(DraftEmail.updatedAt, draftEmail.lastUpdated) : undefined)))
+                        }).where(and(
+                            eq(DraftEmail.id, draftEmail.id),
+                            eq(DraftEmail.mailboxId, draftEmail.mailboxId),
+                            draftEmail.lastUpdated ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated)) : undefined)
+                        ))
                     }
                 }
 
@@ -253,7 +269,10 @@ export async function POST(request: Request) {
                         color: "<deleted>",
                         createdAt: new Date(),
                         updatedAt: new Date(),
-                    }).where(eq(MailboxCategory.id, mailboxCategory.id)))
+                    }).where(and(
+                        eq(MailboxCategory.id, mailboxCategory.id),
+                        mailboxCategory.lastUpdated ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated)) : undefined
+                    )))
                 } else {
                     if (mailboxCategory.id == null) {
                         changes.push(db.insert(MailboxCategory).values({
@@ -265,7 +284,10 @@ export async function POST(request: Request) {
                         changes.push(db.update(MailboxCategory).set({
                             name: mailboxCategory.name,
                             color: mailboxCategory.color,
-                        }).where(eq(MailboxCategory.id, mailboxCategory.id)))
+                        }).where(and(
+                            eq(MailboxCategory.id, mailboxCategory.id),
+                            mailboxCategory.lastUpdated ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated)) : undefined
+                        )))
                     }
 
                 }
@@ -286,7 +308,7 @@ export async function POST(request: Request) {
 }
 
 
-
+type DateString = `${number}-${number}-${number}T${number}:${number}:${number}.${number}Z`
 export type ChangesRequest = {
     emails?: {
         id: string;
@@ -296,7 +318,7 @@ export type ChangesRequest = {
         categoryId?: string | null;
         binnedAt?: Date | null;
         hardDelete?: boolean;
-        lastUpdated?: Date;
+        lastUpdated?: DateString;
     }[];
     draftEmails?: {
         /** null for create */
@@ -312,7 +334,7 @@ export type ChangesRequest = {
         }[] | null;
         headers?: { key: string; value: string }[];
         hardDelete?: boolean;
-        lastUpdated?: Date;
+        lastUpdated?: DateString;
     }[];
     mailboxCategories?: {
         /** null for create */
@@ -321,7 +343,7 @@ export type ChangesRequest = {
         name: string;
         color?: string | null;
         hardDelete?: boolean;
-        lastUpdated?: Date;
+        lastUpdated?: DateString;
     }[];
     /** //todo: */
     mailboxAliases?: {}

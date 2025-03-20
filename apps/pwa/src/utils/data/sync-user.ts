@@ -35,9 +35,9 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
 
         const store: NeedsToSyncStore = JSON.parse(localStorage?.getItem('sync-user') ?? '{}')
         // update the _store with current changes
-        for (const key of Object.keys(changes)) {
+        for (const key of Object.keys(changes ?? {})) {
             store[key] = store[key] ?? []
-            store[key].push(...changes[key])
+            store[key].push(...(changes?.[key] ?? []))
         }
         // save the _store
         localStorage.setItem('sync-user', JSON.stringify(store))
