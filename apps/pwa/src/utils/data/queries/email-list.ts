@@ -2,6 +2,7 @@ import { db } from '../db';
 import { proposeSync } from '../sync-user';
 import type { DBEmail, DBMailboxCategory, DBEmailDraft } from '../types';
 import Dexie from 'dexie';
+import { createId } from '@paralleldrive/cuid2';
 
 export type EmailListType = "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
 
@@ -643,13 +644,13 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
 
 // drafts
 export async function getDraftEmail(mailboxId: string, draftId: string) {
-    if (!mailboxId) return null // todo
+    if (mailboxId !== 'demo') return null // todo
 
     return db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).first();
 }
 
 export async function updateDraftEmail(mailboxId: string, draftId: string, updates: Partial<DBEmailDraft>) {
-    if (!mailboxId) return null // todo
+    if (mailboxId !== 'demo') return null // todo
 
     return db.transaction('rw', [db.draftEmails], async () => {
         await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).modify(updates);
@@ -657,30 +658,103 @@ export async function updateDraftEmail(mailboxId: string, draftId: string, updat
 }
 
 export async function deleteDraftEmail(mailboxId: string, draftId: string) {
-    if (!mailboxId) return null // todo
+    if (mailboxId !== 'demo') return null // todo
 
     return db.transaction('rw', [db.draftEmails], async () => {
         await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
     });
 }
 
-export async function createDraftEmail(mailboxId: string) {
-    if (!mailboxId) return null // todo
+export async function createDraftEmail(mailboxId: string, options?: {
+    reply?: string;
+    replyAll?: string;
+    forward?: string;
+    from?: string;
+}) {
+    if (mailboxId !== 'demo') return null // todo
 
-    return db.transaction('rw', [db.draftEmails], async () => {
-        const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        await db.draftEmails.add({
-            id: randomId,
-            mailboxId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            subject: 0,
-            body: 0,
-            from: 0,
-            to: 0,
-            headers: [],
-            isDeleted: 0,
-        });
-        return randomId;
+    return db.transaction('rw', [db.draftEmails, db.emails], async () => {
+        const draftId = createId();
+
+        const maybeEmailId = options?.reply || options?.replyAll || options?.forward
+        if (maybeEmailId) {
+            const email = await db.emails.where('[mailboxId+id]')
+                .equals([mailboxId, maybeEmailId])
+                .first();
+
+            if (!email) return null;
+
+            let subject = email.subject || '';
+            let to: { name: string | 0; address: string; cc?: 'cc' | 'bcc' | 0 }[] = [];
+
+            const [recipients, sender] = await Promise.all([
+                db.emailRecipients.where('emailId').equals(email.id).toArray(),
+                db.emailSenders.where('emailId').equals(email.id).first()
+            ])
+
+            const replyTo = email.replyTo ? { address: email.replyTo, name: 0 as const } : sender;
+
+            if (options.reply) {
+                if (!subject?.startsWith("Re: ")) {
+                    subject = `Re: ${subject}`;
+                }
+                if (replyTo?.address) {
+                    to = [{ name: replyTo?.name ?? 0, address: replyTo?.address, cc: 0 }];
+                }
+            } else if (options.replyAll) {
+                if (!subject?.startsWith("Re: ")) {
+                    subject = `Re: ${subject}`;
+                }
+                to = [
+                    { name: replyTo?.name ?? 0 as const, address: replyTo?.address ?? '', cc: 0 as const },
+                    ...recipients.map(r => ({
+                        name: r.name ?? 0 as const,
+                        address: r.address ?? '',
+                        cc: r.cc ? "cc" as const : 0 as const
+                    }))
+                ].filter(r => r.address !== options.from);
+            } else if (options.forward) {
+                if (!subject?.startsWith("Fwd: ")) {
+                    subject = `Fwd: ${subject}`;
+                }
+            }
+
+            const emailBody = `\n\nOn ${email.createdAt.toLocaleString()}, ${sender?.name ? `${sender.name} <${sender.address}>` : sender?.address} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`;
+
+            await db.draftEmails.add({
+                id: draftId,
+                mailboxId,
+                from: options.from ?? 0,
+                body: emailBody,
+                subject,
+                to: to ?? 0,
+                headers: email.givenId ? [
+                    { key: "In-Reply-To", value: email.givenId },
+                    {
+                        key: "References",
+                        value: [email.givenId, ...(email.givenReferences || [])].join(" ")
+                    }
+                ] : [],
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                isDeleted: 0
+            });
+
+        } else {
+            await db.draftEmails.add({
+                id: draftId,
+                mailboxId,
+                from: options?.from || 0,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                subject: '',
+                body: '',
+                to: [],
+                headers: [],
+                isDeleted: 0
+            });
+        }
+
+        return draftId;
     });
 }
