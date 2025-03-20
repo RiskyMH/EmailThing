@@ -219,8 +219,8 @@ const generateServiceWorkerAssets = async () => {
 
   const assetsArray = JSON.stringify([...staticAssets], null, 2);
   serviceWorkerContent = serviceWorkerContent.replace(
-    /const\s+STATIC_ASSETS\s*=\s*\[(\n|.)*?\]/m,
-    `const STATIC_ASSETS = ${assetsArray}`
+    /const\s+STATIC_ASSETS\s*=\s*\[(\n|\r|.)*?\];/m,
+    `const STATIC_ASSETS = ${assetsArray};`
   );
 
   const gitsha = await Bun.$`git rev-parse HEAD`.text()

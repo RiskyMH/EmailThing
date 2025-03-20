@@ -7,12 +7,15 @@ const OFFLINE_URL = '/offline';
 // Assets to cache
 const STATIC_ASSETS = [
   '/offline',
-  '/index.css',
+  // '/index.css',
   '/icon.svg',
   '/manifest.webmanifest',
   '/_bun/static/fonts/inter-latin-400-normal.woff2',
   '/_bun/static/fonts/inter-latin-400-normal.woff',
 ];
+
+// cache for up to month (so mm/yy)
+const THIRD_PARTY_CACHE_NAME = `3rd-party-cache-${new Date().getMonth()}${new Date().getFullYear()}`;
 
 // dont try to be smart for dev
 if (CACHE_NAME !== 'emailthing-offline-v1') {
@@ -42,14 +45,15 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
     event.waitUntil(
       caches.keys().then(cacheNames => {
         return Promise.all(
-          cacheNames.filter(e => e !== CACHE_NAME).map(cacheName => caches.delete(cacheName))
+          cacheNames.filter(e => e !== CACHE_NAME && e !== THIRD_PARTY_CACHE_NAME)
+            .map(cacheName => caches.delete(cacheName))
         );
       })
     );
   });
 
   // Fetch event - handle offline fallback
-  self.addEventListener('fetch', event => {
+  self.addEventListener('fetch', (/** @type {FetchEvent} */ event) => {
     // if (navigator.onLine) return
 
     if (event.request.mode === 'navigate') {
@@ -62,7 +66,8 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
       }
     } else {
       // For non-navigation requests, try network first then cache, except for _bun assets
-      if (event.request.url.includes('/_bun/') || STATIC_ASSETS.some(e => event.request.url.endsWith(e))) {
+      const u = new URL(event.request.url);
+      if (u.pathname.includes('/_bun/') || STATIC_ASSETS.some(e => u.pathname === e && self.location.origin === u.origin)) {
         return event.respondWith((async () => {
           const match = (await caches.match(event.request));
           if (match) return match;
@@ -75,17 +80,40 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
             }
             return response;
           } catch (error) {
-            return await caches.match(event.request);
+            const match = await caches.match(event.request);
+            if (match) return match;
+            return fetch(event.request);
           }
         })());
       } else {
-        // if (navigator.onLine) {
-        //   event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
-        // } else {
-        //   return event.respondWith((async () =>
-        //     (await caches.match(event.request)) || fetch(event.request)
-        //   )());
-        // }
+        // a few domains which can be cached (but only for fallback)
+        const domains = [
+          'cloudflare-dns.com',
+          'emailthing.app',
+          'svgl.app',
+          'www.gravatar.com',
+          'riskymh.dev'
+        ];
+        if (domains.includes(u.hostname)) {
+          if (navigator.onLine) {
+            return event.respondWith((async () => {
+              try {
+                const response = await fetch(Object.assign(event.request, { mode: 'cors' }));
+                if (response.ok) {
+                  const cache = await caches.open(THIRD_PARTY_CACHE_NAME);
+                  await cache.put(event.request, response.clone());
+                }
+                return response;
+              } catch (error) {
+                return fetch(event.request).catch(() => caches.match(event.request));
+              }
+            })());
+          } else {
+            return event.respondWith((async () =>
+              (await caches.match(event.request) || fetch(Object.assign(event.request, { mode: 'cors' })))
+            )());
+          }
+        }
       }
     }
   });

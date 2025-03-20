@@ -44,12 +44,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                 // Sync user
                 // use localstorage to store last sync date
-                const lastSync = localStorage.getItem('lastSync');
+                const lastSync = localStorage.getItem('last-sync');
                 const now = new Date();
                 if (lastSync) {
                     const a = await syncUser(false, new Date(lastSync));
                     if (a) {
-                        localStorage.setItem('lastSync', now.toISOString());
+                        localStorage.setItem('last-sync', now.toISOString());
                         await proposeSync();
                     }
                 } else {
@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     if (a) {
                         const b = await syncUser(false);
                         if (b) {
-                            localStorage.setItem('lastSync', now.toISOString());
+                            localStorage.setItem('last-sync', now.toISOString());
                             await proposeSync();
                         }
                     }

@@ -484,7 +484,7 @@ export async function updateEmailProperties(
                     lastUpdated: new Date().toISOString(),
                     ...updates
                 }],
-            }, new Date(localStorage.getItem('lastSync') || 0))
+            }, new Date(localStorage.getItem('last-sync') || 0))
             if (!res) {
                 return {
                     success: false,
@@ -524,7 +524,7 @@ export async function updateEmailProperties(
     //         mailboxId,
     //         ...updates
     //     }],
-    // }, new Date(localStorage.getItem('lastSync') || 0))
+    // }, new Date(localStorage.getItem('last-sync') || 0))
     // if (!res) {
     //     return {
     //         success: false,
@@ -660,7 +660,7 @@ export async function updateDraftEmail(mailboxId: string, draftId: string, updat
                 lastUpdated: new Date().toISOString(),
                 ...updates
             }]
-        }, new Date(localStorage.getItem('lastSync') || 0))
+        }, new Date(localStorage.getItem('last-sync') || 0))
     }
 
 }
@@ -678,7 +678,7 @@ export async function deleteDraftEmail(mailboxId: string, draftId: string) {
                 lastUpdated: new Date().toISOString(),
                 hardDelete: true
             }]
-        }, new Date(localStorage.getItem('lastSync') || 0))
+        }, new Date(localStorage.getItem('last-sync') || 0))
     }
 
 }
@@ -790,7 +790,7 @@ export async function createDraftEmail(mailboxId: string, options?: {
                 isDeleted: false,
 
             }]
-        }, new Date(localStorage.getItem('lastSync') || 0))
+        }, new Date(localStorage.getItem('last-sync') || 0))
     }
 
     return draftId;

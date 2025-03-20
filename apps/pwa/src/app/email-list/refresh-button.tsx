@@ -23,7 +23,7 @@ export default function RefreshButton({ className }: { className?: string }) {
             }
             if (isPending) return
             startTransition(async () => {
-                await syncUser(false, new Date(localStorage.getItem('lastSync') || 0))
+                await syncUser(false, new Date(localStorage.getItem('last-sync') || 0))
             })
         }
     }
