@@ -35,9 +35,16 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
 
         const store: NeedsToSyncStore = JSON.parse(localStorage?.getItem('sync-user') ?? '{}')
         // update the _store with current changes
-        for (const key of Object.keys(changes ?? {})) {
-            store[key] = store[key] ?? []
-            store[key].push(...(changes?.[key] ?? []))
+        for (const key of Object.keys(changes ?? {}) as (keyof ChangesRequest)[]) {
+            store[key] ??= []
+            if (Array.isArray(store[key])) {
+                store[key].push(...(changes?.[key] ?? []))
+            } else {
+                store[key] = {
+                    ...store[key],
+                    ...(changes?.[key] ?? {})
+                }
+            }
         }
         // save the _store
         localStorage.setItem('sync-user', JSON.stringify(store))
@@ -47,6 +54,7 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
         const isSyncing = localStorage.getItem('is-syncing')
         // if syncing, wait 100ms and try again
         if (isSyncing && new Date(isSyncing).getTime() > Date.now() - 100) {
+            console.log('waiting for another sync to finish')
             await new Promise(resolve => setTimeout(resolve, 100))
             return proposeSync({}, lastSync)
         }
@@ -67,7 +75,7 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
             headers: {
                 "x-auth": `${localStorage.getItem('token')}`
             },
-            body: JSON.stringify(changes)
+            body: JSON.stringify(store)
         });
         if (!response.ok) {
             console.error('Failed to sync user data', response);
@@ -81,10 +89,19 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
         try {
             const d = { data: await parseSyncResponse(response), errors: null };
 
-            const _store = JSON.parse(JSON.stringify(store))
+            const _store = JSON.parse(JSON.stringify(store || "{}")) as NeedsToSyncStore
+
             // save the _store minus the changes done here
-            for (const key of Object.keys(store)) {
-                _store[key] = _store[key].filter((item: any) => !changes[key].some((change: any) => change.id === item.id))
+            for (const key of Object.keys(store) as (keyof NeedsToSyncStore)[]) {
+                const _key = _store[key]
+                const _changes = changes?.[key]
+                if (Array.isArray(_key) && Array.isArray(_changes)) {
+                    _store[key] = _key.filter((item: any) => !_changes?.some(change => change.id === item.id))
+                } else {
+                    if (store[key]) {
+                        delete _store[key]
+                    }
+                }
             }
             localStorage.setItem('sync-user', JSON.stringify(_store))
             localStorage.removeItem('is-syncing')

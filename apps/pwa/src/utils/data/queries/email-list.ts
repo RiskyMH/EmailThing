@@ -648,9 +648,9 @@ export async function getDraftEmail(mailboxId: string, draftId: string) {
 }
 
 export async function updateDraftEmail(mailboxId: string, draftId: string, updates: Partial<DBEmailDraft>) {
-    await db.transaction('rw', [db.draftEmails], async () => {
-        await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).modify(updates);
-    });
+    await db.transaction('rw', [db.draftEmails], () =>
+        db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).modify(updates)
+    );
 
     if (mailboxId !== 'demo') {
         await proposeSync({
@@ -666,9 +666,9 @@ export async function updateDraftEmail(mailboxId: string, draftId: string, updat
 }
 
 export async function deleteDraftEmail(mailboxId: string, draftId: string) {
-    await db.transaction('rw', [db.draftEmails], async () => {
-        await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
-    });
+    await db.transaction('rw', [db.draftEmails], () =>
+        db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete()
+    );
 
     if (mailboxId !== 'demo') {
         await proposeSync({
@@ -689,8 +689,6 @@ export async function createDraftEmail(mailboxId: string, options?: {
     forward?: string;
     from?: string;
 }) {
-    if (mailboxId !== 'demo') return null // todo
-
     const draftId = createId();
     let draftData = {} as DBEmailDraft
 
@@ -775,31 +773,24 @@ export async function createDraftEmail(mailboxId: string, options?: {
         return draftId;
     });
     if (mailboxId !== 'demo') {
-        (async () => {
-            const res = await proposeSync({
-                draftEmails: [{
-                    lastUpdated: new Date().toISOString(),
-                    ...draftData,
-                    id: `new:${draftId}`,
-                    mailboxId,
-                    from: draftData?.from || '',
-                    // createdAt: new Date(),
-                    // updatedAt: new Date(),
-                    subject: draftData?.subject || '',
-                    body: draftData?.body || '',
-                    to: draftData?.to || [],
-                    headers: draftData?.headers || [],
-                    isDeleted: false,
+        // intentionally not awaited
+        proposeSync({
+            draftEmails: [{
+                lastUpdated: new Date().toISOString(),
+                ...draftData,
+                id: `new:${draftId}`,
+                mailboxId,
+                from: draftData?.from || '',
+                // createdAt: new Date(),
+                // updatedAt: new Date(),
+                subject: draftData?.subject || '',
+                body: draftData?.body || '',
+                to: draftData?.to || [],
+                headers: draftData?.headers || [],
+                isDeleted: false,
 
-                }]
-            }, new Date(localStorage.getItem('lastSync') || 0))
-
-            // // if the id chosen isn't the one we created, delete the one we created
-            // // its cuid, so it's unlikely to be the same
-            // if (res.data && !res.data?.draftEmails?.find((d: DBEmailDraft) => d.id === draftId)) {
-            //     await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
-            // }
-        })()
+            }]
+        }, new Date(localStorage.getItem('lastSync') || 0))
     }
 
     return draftId;
