@@ -68,6 +68,7 @@ interface ContextMenuActionProps {
     fillIcon?: boolean | null;
     tooltip?: string;
     size?: "small" | "normal";
+    onClick?: (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => void;
 }
 
 export function ContextMenuAction({
@@ -77,12 +78,14 @@ export function ContextMenuAction({
     fillIcon,
     tooltip,
     size,
+    onClick: _onClick,
     ...props
 }: PropsWithChildren<ContextMenuActionProps>) {
     const Icon: LucideIcon | null = iconMap[icon] ?? null;
 
     const onClick = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         if (tooltip) e.preventDefault();
+        _onClick?.(e)
         return action()
     };
 

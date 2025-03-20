@@ -61,12 +61,16 @@ export default function DraftPage() {
             to: draft.to,
             headers: draft.headers,
         })
-        toast("Updates aren't available in demo", { description: "This would sync with the server in the real app" })
+        if (params.mailboxId === "demo") {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" })
+        }
     }
 
     async function deleteDraftAction() {
         await deleteDraftEmail(params.mailboxId!, params.draftId!)
-        toast("Updates aren't available in demo", { description: "This would sync with the server in the real app (this is a demo though)" })
+        if (params.mailboxId === "demo") {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" })
+        }
         navigate(`/mail/${params.mailboxId}`)
     }
 
@@ -98,13 +102,16 @@ export default function DraftPage() {
         });
 
         await updateDraftEmail(params.mailboxId!, params.draftId!, { headers: uniqueHeaders })
-        toast("Updates aren't available in demo", { description: "This would sync with the server in the real app (headers)" })
+        if (params.mailboxId === "demo") {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" })
+        }
     }
 
-    const save = useDebouncedCallback((e: any) => {
+    const save = useDebouncedCallback((e?: any) => {
         e?.preventDefault()
-        saveDraftAction(new FormData(ref.current!))
+        return saveDraftAction(new FormData(ref.current!))
     }, 250)
+    const forceSave = () => saveDraftAction(new FormData(ref.current!))
 
     function setEditor(v: string) {
         navigate(`?editor=${v}`, { replace: true });
@@ -127,7 +134,7 @@ export default function DraftPage() {
             <div className="flex max-w-full grow flex-col break-words rounded-md border-input border-none bg-secondary text-base">
                 <FromInput savedAlias={mail.from || aliases.find(a => a.default)?.alias || undefined} aliases={aliases} onSave={save} />
                 <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
-                <RecipientInput savedTo={mail.to || undefined} onSave={save} />
+                <RecipientInput savedTo={mail.to || undefined} onSave={save} forceSave={forceSave} />
                 <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
                 <Subject savedSubject={mail.subject || undefined} onSave={save} />
             </div>

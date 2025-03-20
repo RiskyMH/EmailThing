@@ -211,7 +211,7 @@ function MailItem() {
                                 <>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
-                                        <Link
+                                        <a
                                             target="_blank"
                                             href={
                                                 email.raw === "s3"
@@ -225,11 +225,12 @@ function MailItem() {
                                         >
                                             <CodeIcon className="size-5 text-muted-foreground" />
                                             View original
-                                        </Link>
+                                        </a>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
-                                        <Link
+                                        <a
                                             download
+                                            target="_blank" // its meant to download, but as so much redirecting is happening we give up
                                             href={
                                                 email.raw === "s3"
                                                     // ? await getSignedUrl({
@@ -241,7 +242,7 @@ function MailItem() {
                                         >
                                             <DownloadIcon className="size-5 text-muted-foreground" />
                                             Download message
-                                        </Link>
+                                        </a>
                                     </DropdownMenuItem>
                                 </>
                             )}

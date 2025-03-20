@@ -334,7 +334,7 @@ function ToFormData(data: Recipient) {
     );
 }
 
-export function RecipientInput({ savedTo, onSave }: RecipientInputProps & { onSave: (e?: any) => void }) {
+export function RecipientInput({ savedTo, onSave, forceSave }: RecipientInputProps & { onSave: (e?: any) => any, forceSave: () => Promise<any> }) {
     const [to, setTo] = useState<Recipient[]>(savedTo ?? []);
     const [showCC, setShowCC] = useState(savedTo?.some((r) => r.cc === "cc") ?? false);
     const [showBCC, setShowBCC] = useState(savedTo?.some((r) => r.cc === "bcc") ?? false);
@@ -389,8 +389,18 @@ export function RecipientInput({ savedTo, onSave }: RecipientInputProps & { onSa
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                toast.info("Saving...", { duration: 500 });
-                onSave?.(e);
+                if (!onSave) return void toast.error("No save action provided");
+                const p = onSave(e)
+                if (p instanceof Promise) {
+                    toast.promise(p, {
+                        loading: "Saving...",
+                        success: "Saved!",
+                        error: "Error saving",
+                        // duration: 250
+                    });
+                } else {
+                    toast.info("Saving...", { duration: 500 });
+                }
                 // (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit();
             } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();

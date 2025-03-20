@@ -3,6 +3,8 @@ import { proposeSync } from '../sync-user';
 import type { DBEmail, DBMailboxCategory, DBEmailDraft } from '../types';
 import Dexie from 'dexie';
 import { createId } from '@paralleldrive/cuid2';
+import { parseHTML } from '@/app/email-item/parse-html';
+import { parse as markedParse } from 'marked';
 
 export type EmailListType = "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
 
@@ -692,53 +694,72 @@ export async function createDraftEmail(mailboxId: string, options?: {
     const draftId = createId();
     let draftData = {} as DBEmailDraft
 
-    await db.transaction('rw', [db.draftEmails, db.emails, db.emailRecipients, db.emailSenders], async () => {
+    await db.transaction('rw', [db.draftEmails, db.emails, db.emailRecipients, db.emailSenders, db.mailboxAliases], async () => {
         const maybeEmailId = options?.reply || options?.replyAll || options?.forward
         const email = maybeEmailId ? await db.emails.where('id').equals(maybeEmailId).and(item => item.mailboxId === mailboxId).first() : null;
 
         if (email && maybeEmailId) {
             let subject = email.subject || '';
-            let to: { name: string | 0; address: string; cc?: 'cc' | 'bcc' | 0 }[] = [];
+            let to: { name: string | null; address: string; cc?: 'cc' | 'bcc' | null }[] = [];
 
-            const [recipients, sender] = await Promise.all([
+            const [recipients, sender, aliases] = await Promise.all([
                 db.emailRecipients.where('emailId').equals(email.id).toArray(),
-                db.emailSenders.where('emailId').equals(email.id).first()
+                db.emailSenders.where('emailId').equals(email.id).first(),
+                db.mailboxAliases.where('mailboxId').equals(mailboxId).toArray(),
             ])
 
-            const replyTo = email.replyTo ? { address: email.replyTo, name: 0 as const } : sender;
+            const aliasesList = aliases.map((a) => a.alias);
+            const defaultAlias = aliases.find((a) => a.alias === options.from)?.alias;
+            const yourAlias = recipients.find((r) => aliasesList.includes(r.address))?.address || defaultAlias;
+
+            const replyTo = email.replyTo ? { address: email.replyTo, name: null } : sender;
 
             if (options.reply) {
                 if (!subject?.startsWith("Re: ")) {
                     subject = `Re: ${subject}`;
                 }
                 if (replyTo?.address) {
-                    to = [{ name: replyTo?.name ?? 0, address: replyTo?.address, cc: 0 }];
+                    to = [{ name: replyTo?.name || null, address: replyTo?.address, cc: null }];
                 }
             } else if (options.replyAll) {
                 if (!subject?.startsWith("Re: ")) {
                     subject = `Re: ${subject}`;
                 }
                 to = [
-                    { name: replyTo?.name ?? 0 as const, address: replyTo?.address ?? '', cc: 0 as const },
+                    { name: replyTo?.name || null, address: replyTo?.address || '', cc: null },
                     ...recipients.map(r => ({
-                        name: r.name ?? 0 as const,
-                        address: r.address ?? '',
-                        cc: r.cc ? "cc" as const : 0 as const
+                        name: r.name || null,
+                        address: r.address || '',
+                        cc: r.cc ? "cc" as const : null
                     }))
-                ].filter(r => r.address !== options.from);
+                ].filter(r => r.address !== yourAlias);
             } else if (options.forward) {
                 if (!subject?.startsWith("Fwd: ")) {
                     subject = `Fwd: ${subject}`;
                 }
             }
 
-            const emailBody = `\n\nOn ${email.createdAt.toLocaleString()}, ${sender?.name ? `${sender.name} <${sender.address}>` : sender?.address} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`;
+            if (email.isSender == 1 && (options.reply || options.replyAll || options.forward)) {
+                to = recipients.map(r => ({
+                    name: r.name || null,
+                    address: r.address || '',
+                    cc: r.cc ? "cc" as const : null
+                })).filter(r => r.address !== yourAlias);
+            }
+
+            let emailBody = `<p></p>\n<p></p>\n<p>\nOn ${email.createdAt.toLocaleString()}, ${sender?.name ? `${sender.name} &lt;${sender.address}&gt;` : `${sender?.address ?? "*someone@idk.com*"}`} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`;
+            if (options.forward) {
+                const to = recipients.filter(t => !t.cc).map(t => t.name ? `${t.name} &lt;${t.address}&gt;` : t.address);
+                const cc = recipients.filter(t => t.cc).map(t => t.name ? `${t.name} &lt;${t.address}&gt;` : t.address);
+                const from = sender?.name ? `<b>${sender.name}</b> &lt;${sender.address}&gt;` : `${sender?.address ?? "*someone@idk.com*"}`;
+                emailBody = `<p></p>\n<p></p>\n<p>\n---------- Forwarded message ---------<br>\nFrom: ${from}<br>\nDate: ${email.createdAt.toLocaleString()}<br>\nSubject: ${email.subject}<br>\nTo: ${to.join(", ")}${cc.length > 0 ? `<br>\nCc: ${cc.join(", ")}` : ""}<br>\n</p>\n\n${email.body}`;
+            }
 
             draftData = {
                 id: draftId,
                 mailboxId,
-                from: options.from ?? 0,
-                body: emailBody,
+                from: yourAlias ?? 0,
+                body: parseHTML(markedParse(emailBody, { breaks: true, async: false })),
                 subject,
                 to: to ?? 0,
                 headers: email.givenId ? [

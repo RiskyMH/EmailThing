@@ -95,8 +95,6 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
             const result = await deleteDraftEmail(mailboxId, emailId);
             if (mailboxId === "demo") {
                 toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
-            } else {
-                toast.error("todo lol")
             }
         } else {
             updateEmail({ hardDelete: true });
