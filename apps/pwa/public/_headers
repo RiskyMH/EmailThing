@@ -5,6 +5,11 @@
     X-XSS-Protection: 1; mode=block
     X-Frame-Options: DENY
     # Content-Security-Policy: TODO
+    Link: </service.js>; rel="serviceworker";
+    Link: </manifest.webmanifest>; rel="manifest";
+    Link: </icon.svg>; rel="icon";
+
+    Link: </_bun/static/fonts/inter-latin-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-latin-500-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-latin-700-normal.woff2>; rel="preload"; as="font" type="font/woff2"
 
 # /_bun/static/*
 #     Cache-Control: public, max-age=31536000, immutable
@@ -13,3 +18,4 @@
     Content-Type: application/javascript; charset=utf-8
     Cache-Control: no-cache, no-store, must-revalidate
     Content-Security-Policy: default-src 'self'; script-src 'self'
+    

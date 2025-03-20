@@ -56,9 +56,6 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
   self.addEventListener('fetch', (/** @type {FetchEvent} */ event) => {
     // if (navigator.onLine) return
 
-    // dont cache non-GET requests
-    if (event.request.method !== 'GET') return;
-
     if (event.request.mode === 'navigate') {
       if (navigator.onLine) {
         event.respondWith(
@@ -68,6 +65,9 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
         event.respondWith(caches.match(OFFLINE_URL));
       }
     } else {
+      // dont cache non-GET requests
+      if (event.request.method !== 'GET') return;
+
       // For non-navigation requests, try network first then cache, except for _bun assets
       const u = new URL(event.request.url);
       if (u.pathname.includes('/_bun/') || STATIC_ASSETS.some(e => u.pathname === e && self.location.origin === u.origin)) {
@@ -104,9 +104,9 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
                 const response = await fetch(Object.assign(event.request, { mode: 'cors' }));
                 if (response.ok) {
                   const cache = await caches.open(THIRD_PARTY_CACHE_NAME);
-                  await cache.put(event.request, response.clone());
+                  await cache.put(event.request, response);
                 }
-                return response;
+                return response.clone();
               } catch (error) {
                 try {
                   return await fetch(event.request);
