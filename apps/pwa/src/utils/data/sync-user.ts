@@ -32,6 +32,7 @@ type NeedsToSyncStore = ChangesRequest
 
 export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
     try {
+        const now = new Date()
 
         const store: NeedsToSyncStore = JSON.parse(localStorage?.getItem('sync-user') ?? '{}')
         // update the _store with current changes
@@ -105,6 +106,10 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
             }
             localStorage.setItem('sync-user', JSON.stringify(_store))
             localStorage.removeItem('is-syncing')
+
+            if (lastSync) {
+                localStorage.setItem('last-sync', now.toISOString())
+            }
 
             return d
 

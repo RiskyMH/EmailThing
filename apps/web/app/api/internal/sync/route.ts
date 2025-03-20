@@ -110,7 +110,7 @@ export async function POST(request: Request) {
                 }
                 // check that the emailid exists and is owned by the user
                 const e = await db.select({ id: Email.id }).from(Email).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)))
-                if (!e) {
+                if (!e.length) {
                     errors.push({
                         key: "emails",
                         id: email.id,
@@ -186,9 +186,18 @@ export async function POST(request: Request) {
                         continue;
                     }
                 } else if (draftEmail.id?.startsWith("new:")) {
+                    if (draftEmail.hardDelete) {
+                        errors.push({
+                            key: "draftEmails",
+                            id: null,
+                            error: "Cannot delete a non created draft email",
+                        });
+                        continue;
+                    }
                     // verify that there is no draft with this id
-                    const e = await db.select({ id: DraftEmail.id, mailboxId: DraftEmail.mailboxId }).from(DraftEmail).where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")))
-                    if (e) {
+                    const e = await db.select({ id: DraftEmail.id, mailboxId: DraftEmail.mailboxId }).from(DraftEmail)
+                        .where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")))
+                    if (e.length) {
                         if (e.length > 0 && !e.some((e) => e.mailboxId === draftEmail.mailboxId)) {
                             errors.push({
                                 key: "draftEmails",
@@ -203,7 +212,7 @@ export async function POST(request: Request) {
                 } else {
                     // check that the draftemailid exists and is owned by the user
                     const e = await db.select({ id: DraftEmail.id }).from(DraftEmail).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId)))
-                    if (!e) {
+                    if (!e.length) {
                         errors.push({
                             key: "draftEmails",
                             id: draftEmail.id,
@@ -282,6 +291,18 @@ export async function POST(request: Request) {
                     });
                     continue;
                 }
+
+                if (mailboxCategory.id !== null) {
+                    const e = await db.select({ id: MailboxCategory.id }).from(MailboxCategory).where(and(eq(MailboxCategory.id, mailboxCategory.id), eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)))
+                    if (!e.length) {
+                        errors.push({
+                            key: "mailboxCategories",
+                            id: mailboxCategory.id,
+                            error: "Mailbox category not found",
+                        });
+                        continue;
+                    }
+                }
                 const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
                 if (mailboxCategory.color && !categoryColorRegex.test(mailboxCategory.color)) {
@@ -309,6 +330,7 @@ export async function POST(request: Request) {
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     }).where(and(
+                        eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
                         eq(MailboxCategory.id, mailboxCategory.id),
                         mailboxCategory.lastUpdated ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated)) : undefined
                     )))
@@ -324,6 +346,7 @@ export async function POST(request: Request) {
                             name: mailboxCategory.name,
                             color: mailboxCategory.color,
                         }).where(and(
+                            eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
                             eq(MailboxCategory.id, mailboxCategory.id),
                             mailboxCategory.lastUpdated ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated)) : undefined
                         )))
@@ -340,10 +363,7 @@ export async function POST(request: Request) {
         }
     }
 
-    // Only process changes if there were no errors
-    if (errors.length === 0) {
-        await db.batch(changes as any);
-    }
+    await db.batch(changes as any);
 
     const failedIds: Record<string, string[]> = {};
     for (const error of errors) {
