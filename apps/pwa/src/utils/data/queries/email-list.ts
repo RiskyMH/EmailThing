@@ -481,7 +481,7 @@ export async function updateEmailProperties(
                 emails: [{
                     id: emailId,
                     mailboxId,
-                    lastUpdated: new Date(),
+                    lastUpdated: new Date().toISOString(),
                     ...updates
                 }],
             }, new Date(localStorage.getItem('lastSync') || 0))
@@ -644,25 +644,43 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
 
 // drafts
 export async function getDraftEmail(mailboxId: string, draftId: string) {
-    if (mailboxId !== 'demo') return null // todo
-
     return db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).first();
 }
 
 export async function updateDraftEmail(mailboxId: string, draftId: string, updates: Partial<DBEmailDraft>) {
-    if (mailboxId !== 'demo') return null // todo
-
-    return db.transaction('rw', [db.draftEmails], async () => {
+    await db.transaction('rw', [db.draftEmails], async () => {
         await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).modify(updates);
     });
+
+    if (mailboxId !== 'demo') {
+        await proposeSync({
+            draftEmails: [{
+                id: draftId,
+                mailboxId,
+                lastUpdated: new Date().toISOString(),
+                ...updates
+            }]
+        }, new Date(localStorage.getItem('lastSync') || 0))
+    }
+
 }
 
 export async function deleteDraftEmail(mailboxId: string, draftId: string) {
-    if (mailboxId !== 'demo') return null // todo
-
-    return db.transaction('rw', [db.draftEmails], async () => {
+    await db.transaction('rw', [db.draftEmails], async () => {
         await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
     });
+
+    if (mailboxId !== 'demo') {
+        await proposeSync({
+            draftEmails: [{
+                id: draftId,
+                mailboxId,
+                lastUpdated: new Date().toISOString(),
+                hardDelete: true
+            }]
+        }, new Date(localStorage.getItem('lastSync') || 0))
+    }
+
 }
 
 export async function createDraftEmail(mailboxId: string, options?: {
@@ -673,17 +691,14 @@ export async function createDraftEmail(mailboxId: string, options?: {
 }) {
     if (mailboxId !== 'demo') return null // todo
 
-    return db.transaction('rw', [db.draftEmails, db.emails], async () => {
-        const draftId = createId();
+    const draftId = createId();
+    let draftData = {} as DBEmailDraft
 
+    await db.transaction('rw', [db.draftEmails, db.emails, db.emailRecipients, db.emailSenders], async () => {
         const maybeEmailId = options?.reply || options?.replyAll || options?.forward
-        if (maybeEmailId) {
-            const email = await db.emails.where('[mailboxId+id]')
-                .equals([mailboxId, maybeEmailId])
-                .first();
+        const email = maybeEmailId ? await db.emails.where('id').equals(maybeEmailId).and(item => item.mailboxId === mailboxId).first() : null;
 
-            if (!email) return null;
-
+        if (email && maybeEmailId) {
             let subject = email.subject || '';
             let to: { name: string | 0; address: string; cc?: 'cc' | 'bcc' | 0 }[] = [];
 
@@ -721,7 +736,7 @@ export async function createDraftEmail(mailboxId: string, options?: {
 
             const emailBody = `\n\nOn ${email.createdAt.toLocaleString()}, ${sender?.name ? `${sender.name} <${sender.address}>` : sender?.address} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`;
 
-            await db.draftEmails.add({
+            draftData = {
                 id: draftId,
                 mailboxId,
                 from: options.from ?? 0,
@@ -738,10 +753,10 @@ export async function createDraftEmail(mailboxId: string, options?: {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 isDeleted: 0
-            });
+            }
 
         } else {
-            await db.draftEmails.add({
+            draftData = {
                 id: draftId,
                 mailboxId,
                 from: options?.from || 0,
@@ -752,9 +767,31 @@ export async function createDraftEmail(mailboxId: string, options?: {
                 to: [],
                 headers: [],
                 isDeleted: 0
-            });
+            }
         }
+
+        await db.draftEmails.add(draftData);
 
         return draftId;
     });
+    if (mailboxId !== 'demo') {
+        (async () => {
+            const res = await proposeSync({
+                draftEmails: [{
+                    lastUpdated: new Date().toISOString(),
+                    ...draftData,
+                    id: `new:${draftId}`,
+                    mailboxId,
+                }]
+            }, new Date(localStorage.getItem('lastSync') || 0))
+
+            // if the id chosen isn't the one we created, delete the one we created
+            // its cuid, so it's unlikely to be the same
+            if (!res.data?.draftEmails?.find(d => d.id === draftId)) {
+                await db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete();
+            }
+        })()
+    }
+
+    return draftId;
 }

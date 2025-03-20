@@ -225,6 +225,38 @@ export async function POST(request: Request) {
                             to: draftEmail.to,
                             headers: draftEmail.headers,
                         }))
+                    } else if (draftEmail.id.startsWith("new:")) {
+                        // verify that there is no draft with this id
+                        const e = await db.select({ id: DraftEmail.id }).from(DraftEmail).where(eq(DraftEmail.id, draftEmail.id))
+                        if (e) {
+                            errors.push({
+                                key: "draftEmails",
+                                id: draftEmail.id,
+                                error: "Draft email already exists",
+                            });
+
+                            // create one with random id then
+                            changes.push(db.insert(DraftEmail).values({
+                                // id: draftEmail.id,
+                                mailboxId: draftEmail.mailboxId,
+                                body: draftEmail.body,
+                                subject: draftEmail.subject,
+                                from: draftEmail.from,
+                                to: draftEmail.to,
+                                headers: draftEmail.headers,
+                            }))
+                            continue;
+                        } else {
+                            changes.push(db.insert(DraftEmail).values({
+                                id: draftEmail.id.replace("new:", ""),
+                                mailboxId: draftEmail.mailboxId,
+                                body: draftEmail.body,
+                                subject: draftEmail.subject,
+                                from: draftEmail.from,
+                                to: draftEmail.to,
+                                headers: draftEmail.headers,
+                            }))
+                        }
                     } else {
                         // update the draft email
                         changes.push(db.update(DraftEmail).set({
