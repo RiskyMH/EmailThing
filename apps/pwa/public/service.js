@@ -56,6 +56,9 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
   self.addEventListener('fetch', (/** @type {FetchEvent} */ event) => {
     // if (navigator.onLine) return
 
+    // dont cache non-GET requests
+    if (event.request.method !== 'GET') return;
+
     if (event.request.mode === 'navigate') {
       if (navigator.onLine) {
         event.respondWith(
@@ -105,7 +108,13 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
                 }
                 return response;
               } catch (error) {
-                return fetch(event.request).catch(() => caches.match(event.request));
+                try {
+                  return await fetch(event.request);
+                } catch (error) {
+                  const m = await caches.match(event.request);
+                  if (m) return m;
+                  return fetch(event.request);
+                }
               }
             })());
           } else {
