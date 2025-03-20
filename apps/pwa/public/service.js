@@ -101,7 +101,7 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
           if (navigator.onLine) {
             return event.respondWith((async () => {
               try {
-                const response = await fetch(Object.assign(event.request, { mode: 'cors' }));
+                const response = await fetch(Object.assign(event.request, { mode: 'no-cors' }));
                 if (response.ok) {
                   const cache = await caches.open(THIRD_PARTY_CACHE_NAME);
                   await cache.put(event.request, response);
