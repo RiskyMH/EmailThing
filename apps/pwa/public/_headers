@@ -4,12 +4,11 @@
     Referrer-Policy: strict-origin-when-cross-origin
     X-XSS-Protection: 1; mode=block
     X-Frame-Options: DENY
-    # Content-Security-Policy: TODO
-    Link: </service.js>; rel="serviceworker";
-    Link: </manifest.webmanifest>; rel="manifest";
-    Link: </icon.svg>; rel="icon";
 
+    Link: </service.js>; rel="serviceworker", </manifest.webmanifest>; rel="manifest", </icon.svg>; rel="icon"
     Link: </_bun/static/fonts/inter-latin-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-latin-500-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-latin-700-normal.woff2>; rel="preload"; as="font" type="font/woff2"
+
+    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://www.gravatar.com https://avatars.githubusercontent.com https://svgl.app; font-src 'self' ; object-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; connect-src 'self' https://cloudflare-dns.com https://emailthing.app https://pwa.emailthing.app http://localhost:3000; upgrade-insecure-requests;
 
 # /_bun/static/*
 #     Cache-Control: public, max-age=31536000, immutable

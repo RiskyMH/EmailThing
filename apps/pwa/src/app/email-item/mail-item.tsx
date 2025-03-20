@@ -293,7 +293,12 @@ function EmailContent({
     email,
 }: { email: { body: string; html?: string | null } }) {
     const searchParams = useSearchParams()[0]
-    const view = (searchParams.get("view") || (localStorage || {}).getItem('last-view') || "markdown") as "text" | "markdown" | "html" | "html-raw"
+    const lastView = (localStorage || {}).getItem('last-view')
+    const view = (
+        searchParams.get("view")
+        || (lastView?.startsWith("html") && !email?.html ? "markdown" : lastView)
+        || "markdown"
+    ) as "text" | "markdown" | "html" | "html-raw"
 
     if (view === "text") {
         return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal">{email.body}</p>;
