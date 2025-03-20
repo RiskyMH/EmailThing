@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronRight, EllipsisIcon } from "lucide-react";
-import { Fragment, cache } from "react";
+import { Fragment, useRef } from "react";
 import {
     BodyEditor,
     DeleteButton,
@@ -32,12 +32,16 @@ import Loading from "./loading";
 import { getMailboxAliases, getMailboxDefaultAlias } from "@/utils/data/queries/mailbox";
 import DisableFormReset from "@/components/disable-reset.client";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { useDebouncedCallback } from "use-debounce";
+
 
 export default function DraftPage() {
     const params = useParams<{ mailboxId: string, draftId: string }>()
     const navigate = useNavigate()
     const searchParams = useSearchParams()[0]
     const editor = (searchParams.get("editor") || "normal") as "normal" | "html" | "text" | "html-preview"
+
+    const ref = useRef<HTMLFormElement>(null)
 
     const data = useLiveQuery(async () => {
         if (!params.mailboxId || !params.draftId) return
@@ -97,33 +101,38 @@ export default function DraftPage() {
         toast("Updates aren't available in demo", { description: "This would sync with the server in the real app (headers)" })
     }
 
+    const save = useDebouncedCallback((e: any) => {
+        e?.preventDefault()
+        saveDraftAction(new FormData(ref.current!))
+    }, 250)
+
     function setEditor(v: string) {
         navigate(`?editor=${v}`, { replace: true });
     }
 
     if (!data || data[0] === undefined || !data[1]) return <Loading />
-    if (data[0] === null) return <>404 - Draft not found</>
+    if (data[0] === null) return <div className="flex size-full items-center justify-center">404 - Draft not found</div>
 
     const [mail, aliases] = data
-
 
     return (
         <form
             action={saveDraftAction}
+            ref={ref}
             id="draft-form"
             className="flex size-full flex-col gap-4 overflow-auto p-4 md:p-6"
             suppressHydrationWarning
         >
             <DisableFormReset formId="draft-form" />
             <div className="flex max-w-full grow flex-col break-words rounded-md border-input border-none bg-secondary text-base">
-                <FromInput savedAlias={mail.from || aliases.find(a => a.default)?.alias || undefined} aliases={aliases} />
+                <FromInput savedAlias={mail.from || aliases.find(a => a.default)?.alias || undefined} aliases={aliases} onSave={save} />
                 <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
-                <RecipientInput savedTo={mail.to || undefined} />
+                <RecipientInput savedTo={mail.to || undefined} onSave={save} />
                 <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
-                <Subject savedSubject={mail.subject || undefined} />
+                <Subject savedSubject={mail.subject || undefined} onSave={save} />
             </div>
 
-            <BodyEditor savedBody={mail.body || undefined} />
+            <BodyEditor savedBody={mail.body || undefined} onSave={save} />
 
             <div className="flex gap-4">
                 <button type="submit" hidden />

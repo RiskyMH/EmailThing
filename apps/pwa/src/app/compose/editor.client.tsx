@@ -44,7 +44,7 @@ const catchRedirectError = () => {
 const EditorContent2 = lazy(() => import("./tiptap.client"))
 
 
-export function BodyEditor({ savedBody }: { savedBody?: string }) {
+export function BodyEditor({ savedBody, onSave }: { savedBody?: string, onSave: (e?: any) => void }) {
     const searchParams = useSearchParams()[0]
     const mode = (searchParams.get("editor") || "normal") as "normal" | "html" | "text" | "html-preview"
 
@@ -65,15 +65,15 @@ export function BodyEditor({ savedBody }: { savedBody?: string }) {
                     </div>
                 </div>
             }>
-                <EditorContent2 savedBody={savedBody} />
+                <EditorContent2 savedBody={savedBody} onSave={onSave} />
             </Suspense >
         ) : (
             mode === "html" ? (
-                <HTMLEditor savedHTML={savedBody} />
+                <HTMLEditor savedHTML={savedBody} onSave={onSave} />
             ) : mode === "html-preview" ? (
                 <HTMLPreviewEditor savedHTML={savedBody} />
             ) : (
-                <TextEditor savedText={savedBody} />
+                <TextEditor savedText={savedBody} onSave={onSave} />
             )
         )
     );
@@ -99,8 +99,9 @@ function formatHtml(html: string) {
     return result.substring(1, result.length - 3);
 }
 
-export function HTMLEditor({ savedHTML }: { savedHTML?: string }) {
-    const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+export function HTMLEditor({ savedHTML, onSave }: { savedHTML?: string, onSave: (e: any) => void }) {
+    // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit(), 1000);
+    const debounced = onSave
 
     if (savedHTML?.endsWith("<!--tiptap-->")) {
         savedHTML = formatHtml(makeHtml(savedHTML))
@@ -120,8 +121,9 @@ export function HTMLEditor({ savedHTML }: { savedHTML?: string }) {
     );
 }
 
-export function TextEditor({ savedText }: { savedText?: string }) {
-    const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+export function TextEditor({ savedText, onSave }: { savedText?: string, onSave: (e?: any) => void }) {
+    // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit(), 1000);
+    const debounced = onSave
 
     if (savedText && (savedText.startsWith("<") && savedText.endsWith(">"))) {
         savedText = new Turndown().turndown(savedText
@@ -165,8 +167,9 @@ export function HTMLPreviewEditor({ savedHTML }: { savedHTML?: string }) {
 
 
 
-export function Subject({ savedSubject }: { savedSubject?: string }) {
-    const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+export function Subject({ savedSubject, onSave }: { savedSubject?: string, onSave: (e: any) => void }) {
+    // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit(), 1000);
+    const debounced = onSave
 
     return (
         <Input
@@ -271,10 +274,10 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
 interface FromInputProps {
     // saveAction: ({ from }: { from: string }) => Promise<any>,
     savedAlias?: string;
-    aliases: { name: string | null; alias: string }[];
+    aliases: { name: string | 0; alias: string }[];
 }
 
-export function FromInput({ savedAlias, aliases }: FromInputProps) {
+export function FromInput({ savedAlias, aliases, onSave }: FromInputProps & { onSave: (e?: any) => void }) {
     const [value, setValue] = useState(savedAlias);
     return (
         <>
@@ -293,11 +296,12 @@ export function FromInput({ savedAlias, aliases }: FromInputProps) {
                             <SelectItem
                                 key={alias}
                                 value={alias}
-                                onSelect={(e) => (e.currentTarget as any).form?.requestSubmit()}
+                                // onSelect={(e) => (e.currentTarget as any).form?.requestSubmit()}
+                                onSelect={onSave}
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-sm">{name || alias}</span>
-                                    {name && <span className="text-muted-foreground text-sm">{alias}</span>}
+                                    {!!name && <span className="text-muted-foreground text-sm">{alias}</span>}
                                 </div>
                             </SelectItem>
                         ))}
@@ -330,7 +334,7 @@ function ToFormData(data: Recipient) {
     );
 }
 
-export function RecipientInput({ savedTo }: RecipientInputProps) {
+export function RecipientInput({ savedTo, onSave }: RecipientInputProps & { onSave: (e?: any) => void }) {
     const [to, setTo] = useState<Recipient[]>(savedTo ?? []);
     const [showCC, setShowCC] = useState(savedTo?.some((r) => r.cc === "cc") ?? false);
     const [showBCC, setShowBCC] = useState(savedTo?.some((r) => r.cc === "bcc") ?? false);
@@ -339,7 +343,8 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
     const types = ["to", ...(showCC ? ["cc"] : []), ...(showBCC ? ["bcc"] : [])] as const;
     const allTypes = ["to", "cc", "bcc"] as const;
 
-    const update = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 150);
+    // const update = useDebouncedCallback(() => (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit(), 150);
+    const update = onSave
 
     function validate(element: HTMLInputElement, type: (typeof types)[number], toastOnError = true) {
         const value = `${element.value}`;
@@ -366,7 +371,7 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
             toast.error("Invalid email address");
         }
         element.value = element.value.replaceAll(" ", "");
-        (document.getElementById("draft-form") as any)?.requestSubmit();
+        // (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit();
     }
 
     useEffect(() => {
@@ -385,7 +390,8 @@ export function RecipientInput({ savedTo }: RecipientInputProps) {
             if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
                 toast.info("Saving...", { duration: 500 });
-                (document.getElementById("draft-form") as any)?.requestSubmit();
+                onSave?.(e);
+                // (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit();
             } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
                 (document.getElementById("send-button") as any)?.click();

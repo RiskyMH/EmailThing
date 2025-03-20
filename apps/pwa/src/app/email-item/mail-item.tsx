@@ -293,7 +293,7 @@ function EmailContent({
     email,
 }: { email: { body: string; html?: string | null } }) {
     const searchParams = useSearchParams()[0]
-    const view = (searchParams.get("view") || "markdown") as "text" | "markdown" | "html" | "html-raw"
+    const view = (searchParams.get("view") || (localStorage || {}).getItem('last-view') || "markdown") as "text" | "markdown" | "html" | "html-raw"
 
     if (view === "text") {
         return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal">{email.body}</p>;
@@ -342,9 +342,10 @@ function ViewSelect({
 }: { htmlValid?: boolean }) {
     const navigate = useNavigate()
     const searchParams = useSearchParams()[0]
-    const view = (searchParams.get("view") || "markdown")
+    const view = (searchParams.get("view") || (localStorage || {}).getItem('last-view') || "markdown")
 
     function onValueChange(v: string) {
+        localStorage.setItem('last-view', v)
         navigate(`?view=${v}`, { replace: true });
     }
 

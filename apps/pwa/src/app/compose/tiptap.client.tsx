@@ -29,8 +29,9 @@ import { BodyHeader } from "./tiptap-header";
 import { parse as markedParse } from "marked"
 import { use } from "react";
 
-export default function EditorContent2({ savedBody }: { savedBody?: string }) {
-    const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+export default function EditorContent2({ savedBody, onSave }: { savedBody?: string, onSave: (e?: any) => void }) {
+    // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+    const debounced = onSave
     
     if (savedBody && !(savedBody.startsWith("<") && savedBody.endsWith(">"))) {
         savedBody = markedParse(savedBody, { breaks: true, async: false })
