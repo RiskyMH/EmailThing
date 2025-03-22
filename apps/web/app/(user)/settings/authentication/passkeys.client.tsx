@@ -48,7 +48,7 @@ export default function PasskeysSetup({ userId, username }: { userId: string; us
                     return void toast.error("Failed to create Passkey");
                 }
                 const ua = new UAParser(navigator.userAgent).getResult();
-                const res = await addPasskey(cred, `${ua.browser.name} on ${ua.os.name}`);
+                const res = await addPasskey(cred.toJSON(), `${ua.browser.name} on ${ua.os.name}`);
                 if (res?.error) {
                     return void toast.error(res.error);
                 }

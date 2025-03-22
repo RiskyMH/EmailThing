@@ -51,8 +51,7 @@ export default function PasskeysLogin({
                     setLoading(false);
                     return void toast.error("No passkey");
                 }
-
-                const signInResult = await signInPasskey(credential).catch(catchRedirectError);
+                const signInResult = await signInPasskey(credential.toJSON()).catch(catchRedirectError);
 
                 if (signInResult?.error) {
                     setLoading(false);

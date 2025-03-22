@@ -293,8 +293,8 @@ export async function getEmailCategoriesList({
                 break;
             case 'temp':
                 emailQuery = db.emails
-                    .where('[mailboxId+tempId+isSender+binnedAt+tempId+isDeleted]')
-                    .between([mailboxId, 1, 0, 0, 1, 0], [mailboxId, 1, 0, 0, Dexie.maxKey, 0]);
+                    .where('[mailboxId+isSender+binnedAt+tempId+isDeleted]')
+                    .between([mailboxId, 0, 0, 1, 0], [mailboxId, 0, 0, Dexie.maxKey, 0]);
                 break;
             case 'inbox':
             default:
@@ -305,8 +305,6 @@ export async function getEmailCategoriesList({
         }
     }
 
-    // Get total count
-    let allCount = 0
 
     // if search, then we need to get the count of emails that match the search
     if (search) {
@@ -324,12 +322,11 @@ export async function getEmailCategoriesList({
             mailboxPlan: mailboxId === 'demo' ? { plan: 'DEMO' } : undefined,
         };
 
-    } else {
-        allCount = await emailQuery.count();
     }
+    const allCount = emailQuery.count();
 
     // Get categories with counts
-    const categories = await db.transaction('r',
+    const categories = db.transaction('r',
         [db.emails, db.mailboxCategories],
         async () => {
             const cats = await db.mailboxCategories
@@ -396,8 +393,8 @@ export async function getEmailCategoriesList({
     );
 
     return {
-        categories,
-        allCount,
+        categories: await categories,
+        allCount: await allCount,
         mailboxPlan: mailboxId === 'demo' ? { plan: 'DEMO' } : undefined,
     };
 }
@@ -534,8 +531,8 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
                 .count();
         case "temp":
             return await db.emails
-                .where('[mailboxId+tempId+isSender+binnedAt+tempId+isDeleted]')
-                .between([mailboxId, 1, 0, 1, 0], [mailboxId, 1, 0, Dexie.maxKey, 0])
+                .where('[mailboxId+isSender+binnedAt+tempId+isDeleted]')
+                .between([mailboxId, 0, 0, 1, 0], [mailboxId, 0, 0, Dexie.maxKey, 0])
                 .count();
         default:
             return 0;

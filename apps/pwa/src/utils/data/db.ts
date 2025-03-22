@@ -72,7 +72,6 @@ export class EmailDB extends Dexie {
         '[mailboxId+isSender+binnedAt+tempId+isDeleted]',
         '[mailboxId+binnedAt+tempId+isDeleted]',
         '[mailboxId+isStarred+isSender+binnedAt+tempId+isDeleted]',
-        '[mailboxId+tempId+isSender+binnedAt+tempId+isDeleted]',
         '[mailboxId+categoryId+isSender+binnedAt+tempId+isDeleted]',
         '[mailboxId+categoryId+binnedAt+isDeleted]',
         '[mailboxId+categoryId+isStarred+isSender+binnedAt+isDeleted]',
