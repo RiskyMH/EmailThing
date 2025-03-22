@@ -9,7 +9,7 @@ export async function getMailbox(mailboxId: string) {
 }
 
 export async function getMailboxName(mailboxId: string) {
-    const mailboxAliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).and(mailboxAlias => mailboxAlias.default == 1).first()
+    const mailboxAliases = await db.mailboxAliases.where("[mailboxId+default]").equals([mailboxId, 1]).first()
     return mailboxAliases?.alias
 }
 
@@ -19,7 +19,7 @@ export async function getMailboxAliases(mailboxId: string) {
 }
 
 export async function getMailboxDefaultAlias(mailboxId: string) {
-    const mailboxAliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).and(mailboxAlias => mailboxAlias.default == 1).first()
+    const mailboxAliases = await db.mailboxAliases.where("[mailboxId+default]").equals([mailboxId, 1]).first()
     return mailboxAliases
 }
 

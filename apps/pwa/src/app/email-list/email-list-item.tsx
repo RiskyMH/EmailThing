@@ -77,27 +77,24 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
     const emailId = email.id;
 
     const updateEmail = async (updates: any) => {
-        if (mailboxId !== 'demo' && !navigator.onLine) {
+        if (mailboxId === 'demo') {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+        } else if (!navigator.onLine) {
             toast.info("You are offline - changes will be synced when you come back online")
         }
-        const result = await updateEmailProperties(mailboxId, emailId, updates);
-        if (result?.message) {
-            if (result.error) {
-                toast.error(result.message, { description: result.description });
-            } else {
-                toast(result.message, { description: result.description });
-            }
-        }
+        await updateEmailProperties(mailboxId, emailId, updates);
     };
 
     const deleteEmail = async () => {
+        if (mailboxId === "demo") {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+        } else if (!navigator.onLine) {
+            toast.info("You are offline - changes will be synced when you come back online")
+        }
         if (type === "drafts") {
-            const result = await deleteDraftEmail(mailboxId, emailId);
-            if (mailboxId === "demo") {
-                toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
-            }
+            await deleteDraftEmail(mailboxId, emailId);
         } else {
-            updateEmail({ hardDelete: true });
+            await updateEmail({ hardDelete: true });
         }
     };
 

@@ -47,7 +47,9 @@ interface EmailListResult {
         name: string;
         color?: string | 0;
     }[];
+    hasAttachments?: boolean;
 }
+
 interface EmailCategoriesListResult {
     categories: {
         id: string;
@@ -71,13 +73,13 @@ export async function getEmailList({
 }: EmailListOptions): Promise<EmailListResult> {
     // Start with base query using mailboxId+createdAt index
     let emailQuery = (type === 'drafts'
-        ? db.draftEmails.where('[mailboxId+createdAt]').between(
-            [mailboxId, Dexie.minKey],
-            [mailboxId, Dexie.maxKey]
+        ? db.draftEmails.where('[mailboxId+createdAt+isDeleted]').between(
+            [mailboxId, Dexie.minKey, 0],
+            [mailboxId, Dexie.maxKey, 0]
         )
-        : db.emails.where('[mailboxId+createdAt]').between(
-            [mailboxId, Dexie.minKey],
-            [mailboxId, Dexie.maxKey]
+        : db.emails.where('[mailboxId+createdAt+deletedAt+isDeleted]').between(
+            [mailboxId, Dexie.minKey, 0, 0],
+            [mailboxId, Dexie.maxKey, 0, 0]
         )
     ) as ReturnType<typeof db.emails.where>
 
@@ -86,81 +88,81 @@ export async function getEmailList({
         switch (type) {
             case 'sent':
                 if (categoryId) {
-                    emailQuery = db.emails.where('[mailboxId+categoryId+isSender+binnedAt+tempId+createdAt]')
+                    emailQuery = db.emails.where('[mailboxId+categoryId+isSender+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, categoryId, 1, 0, 0, Dexie.minKey],
-                            [mailboxId, categoryId, 1, 0, 0, Dexie.maxKey]
+                            [mailboxId, categoryId, 1, 0, 0, 0, Dexie.minKey],
+                            [mailboxId, categoryId, 1, 0, 0, 0, Dexie.maxKey]
                         );
                 } else {
                     emailQuery = db.emails
-                        .where('[mailboxId+isSender+binnedAt+tempId+createdAt]')
+                        .where('[mailboxId+isSender+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, 1, 0, 0, Dexie.minKey],
-                            [mailboxId, 1, 0, 0, Dexie.maxKey]
+                            [mailboxId, 1, 0, 0, 0, Dexie.minKey],
+                            [mailboxId, 1, 0, 0, 0, Dexie.maxKey]
                         );
                 }
                 break;
             case 'trash':
                 if (categoryId) {
-                    emailQuery = db.emails.where('[mailboxId+categoryId+binnedAt+createdAt]')
+                    emailQuery = db.emails.where('[mailboxId+categoryId+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, categoryId, 1, Dexie.minKey],
-                            [mailboxId, categoryId, Dexie.maxKey, Dexie.maxKey]
+                            [mailboxId, categoryId, 1, 0, 0, Dexie.minKey],
+                            [mailboxId, categoryId, Dexie.maxKey, 0, 0, Dexie.maxKey]
                         );
                 } else {
                     emailQuery = db.emails
-                        .where('[mailboxId+binnedAt+createdAt]')
+                        .where('[mailboxId+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, 1, Dexie.minKey],
-                            [mailboxId, Dexie.maxKey, Dexie.maxKey]
+                            [mailboxId, 1, 0, 0, Dexie.minKey],
+                            [mailboxId, Dexie.maxKey, 0, 0, Dexie.maxKey]
                         )
                 }
                 break;
             case 'starred':
                 if (categoryId) {
-                    emailQuery = db.emails.where('[mailboxId+categoryId+isStarred+isSender+binnedAt+createdAt]')
+                    emailQuery = db.emails.where('[mailboxId+categoryId+isStarred+isSender+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, categoryId, 1, 0, 0, Dexie.minKey],
-                            [mailboxId, categoryId, 1, 0, 0, Dexie.maxKey]
+                            [mailboxId, categoryId, 1, 0, 0, 0, 0, Dexie.minKey],
+                            [mailboxId, categoryId, 1, 0, 0, 0, 0, Dexie.maxKey]
                         );
                 } else {
                     emailQuery = db.emails
-                        .where('[mailboxId+isStarred+isSender+binnedAt+createdAt]')
+                        .where('[mailboxId+isStarred+isSender+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, 1, 0, 0, Dexie.minKey],
-                            [mailboxId, 1, 0, 0, Dexie.maxKey]
+                            [mailboxId, 1, 0, 0, 0, 0, Dexie.minKey],
+                            [mailboxId, 1, 0, 0, 0, 0, Dexie.maxKey]
                         );
                 }
                 break;
             case 'temp':
                 if (categoryId) {
-                    emailQuery = db.emails.where('[mailboxId+categoryId+tempId+isSender+binnedAt+createdAt]')
+                    emailQuery = db.emails.where('[mailboxId+categoryId+tempId+isSender+binnedAt+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, categoryId, 1, 0, 0, Dexie.minKey],
-                            [mailboxId, categoryId, 1, 0, 0, Dexie.maxKey]
+                            [mailboxId, categoryId, 1, 0, 0, 0, Dexie.minKey],
+                            [mailboxId, categoryId, Dexie.maxKey, 0, 0, 0, Dexie.maxKey]
                         );
                 } else {
                     emailQuery = db.emails
-                        .where('[mailboxId+tempId+isSender+binnedAt+createdAt]')
+                        .where('[mailboxId+tempId+isSender+binnedAt+isDeleted+createdAt]')
                         .between(
                             [mailboxId, 1, 0, 0, Dexie.minKey],
-                            [mailboxId, 1, 0, 0, Dexie.maxKey]
+                            [mailboxId, Dexie.maxKey, 0, 0, Dexie.maxKey]
                         );
                 }
                 break;
             case 'inbox':
             default:
                 if (categoryId) {
-                    emailQuery = db.emails.where('[mailboxId+categoryId+isSender+binnedAt+tempId+createdAt]')
+                    emailQuery = db.emails.where('[mailboxId+categoryId+isSender+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, categoryId, 0, 0, 0, Dexie.minKey],
-                            [mailboxId, categoryId, 0, 0, 0, Dexie.maxKey]
+                            [mailboxId, categoryId, 0, 0, 0, 0, Dexie.minKey],
+                            [mailboxId, categoryId, 0, 0, 0, 0, Dexie.maxKey]
                         );
                 } else {
-                    emailQuery = db.emails.where('[mailboxId+isSender+binnedAt+tempId+createdAt]')
+                    emailQuery = db.emails.where('[mailboxId+isSender+binnedAt+tempId+isDeleted+createdAt]')
                         .between(
-                            [mailboxId, 0, 0, 0, Dexie.minKey],
-                            [mailboxId, 0, 0, 0, Dexie.maxKey]
+                            [mailboxId, 0, 0, 0, 0, Dexie.minKey],
+                            [mailboxId, 0, 0, 0, 0, Dexie.maxKey]
                         );
                 }
                 break;
@@ -169,19 +171,32 @@ export async function getEmailList({
 
 
     // Apply search filter if specified
-    if (search && type !== 'drafts') {
+    if (search) {
         const searchLower = search.toLowerCase();
-        emailQuery = emailQuery.filter(item => {
-            const searchableFields = [
-                item.subject,
-                item.body,
-                item.snippet
-            ].filter(Boolean);
+        if (type === 'drafts') {
+            emailQuery = (emailQuery as any as ReturnType<typeof db.draftEmails.where>).filter(item => {
+                const searchableFields = [
+                    item.subject,
+                    item.body,
+                ].filter(Boolean);
 
-            return searchableFields.some(field =>
-                (field || "")?.toLowerCase().includes(searchLower)
-            );
-        });
+                return searchableFields.some(field =>
+                    (field || "")?.toLowerCase().includes(searchLower)
+                );
+            }) as any as ReturnType<typeof db.emails.where>;
+        } else {
+            emailQuery = emailQuery.filter(item => {
+                const searchableFields = [
+                    item.subject,
+                    item.body,
+                    item.snippet,
+                ].filter(Boolean);
+
+                return searchableFields.some(field =>
+                    (field || "")?.toLowerCase().includes(searchLower)
+                );
+            });
+        }
     }
 
     // Apply pagination
@@ -189,7 +204,6 @@ export async function getEmailList({
         .reverse() // Newest first
         .offset(skip)
         .limit(take)
-        // .sortBy('createdAt')
         .toArray();
 
     // Get categories
@@ -215,7 +229,7 @@ export async function getEmailList({
                 };
             }
 
-            const [sender, recipients] = await Promise.all([
+            const [sender, recipients, attachments] = await Promise.all([
                 db.emailSenders
                     .where('emailId')
                     .equals(email.id)
@@ -223,7 +237,11 @@ export async function getEmailList({
                 db.emailRecipients
                     .where('emailId')
                     .equals(email.id)
-                    .toArray()
+                    .toArray(),
+                db.emailAttachments
+                    .where('emailId')
+                    .equals(email.id)
+                    .first()
             ]);
 
             return {
@@ -232,7 +250,8 @@ export async function getEmailList({
                     name: "Unknown",
                     address: "unknown@emailthing.com"
                 },
-                to: recipients || []
+                to: recipients || [],
+                hasAttachments: attachments ? true : false
             };
         })
     );
@@ -250,8 +269,8 @@ export async function getEmailCategoriesList({
 }: EmailListOptions): Promise<EmailCategoriesListResult> {
     // Start with base query using mailboxId index
     let emailQuery = (type === 'drafts'
-        ? db.draftEmails.where('mailboxId').equals(mailboxId)
-        : db.emails.where('mailboxId').equals(mailboxId)
+        ? db.draftEmails.where("[mailboxId+isDeleted]").equals([mailboxId, 0])
+        : db.emails.where("[mailboxId+isDeleted]").equals([mailboxId, 0])
     ) as ReturnType<typeof db.emails.where>
 
     // Apply filters based on type
@@ -259,29 +278,29 @@ export async function getEmailCategoriesList({
         switch (type) {
             case 'sent':
                 emailQuery = db.emails
-                    .where('[mailboxId+isSender+binnedAt+tempId]')
-                    .equals([mailboxId, 1, 0, 0]);
+                    .where('[mailboxId+isSender+binnedAt+tempId+isDeleted]')
+                    .equals([mailboxId, 1, 0, 0, 0]);
                 break;
             case 'trash':
                 emailQuery = db.emails
-                    .where('[mailboxId+binnedAt]')
-                    .between([mailboxId, 1], [mailboxId, Dexie.maxKey])
+                    .where('[mailboxId+binnedAt+tempId+isDeleted]')
+                    .between([mailboxId, 1, 0, 0], [mailboxId, Dexie.maxKey, 0, 0])
                 break;
             case 'starred':
                 emailQuery = db.emails
-                    .where('[mailboxId+isStarred+isSender+binnedAt]')
-                    .equals([mailboxId, 1, 0, 0]);
+                    .where('[mailboxId+isStarred+isSender+binnedAt+tempId+isDeleted]')
+                    .equals([mailboxId, 1, 0, 0, 0, 0]);
                 break;
             case 'temp':
                 emailQuery = db.emails
-                    .where('[mailboxId+tempId+isSender+binnedAt]')
-                    .equals([mailboxId, 1, 0, 0]);
+                    .where('[mailboxId+tempId+isSender+binnedAt+tempId+isDeleted]')
+                    .between([mailboxId, 1, 0, 0, 1, 0], [mailboxId, 1, 0, 0, Dexie.maxKey, 0]);
                 break;
             case 'inbox':
             default:
                 emailQuery = db.emails
-                    .where('[mailboxId+isSender+binnedAt+tempId]')
-                    .equals([mailboxId, 0, 0, 0]);
+                    .where('[mailboxId+isSender+binnedAt+tempId+isDeleted]')
+                    .equals([mailboxId, 0, 0, 0, 0]);
                 break;
         }
     }
@@ -314,9 +333,8 @@ export async function getEmailCategoriesList({
         [db.emails, db.mailboxCategories],
         async () => {
             const cats = await db.mailboxCategories
-                .where('mailboxId')
-                .equals(mailboxId)
-                .and(item => item.isDeleted !== 1)
+                .where("[mailboxId+isDeleted]")
+                .equals([mailboxId, 0])
                 .sortBy('createdAt');
 
             // Can't count categories for drafts
@@ -336,29 +354,29 @@ export async function getEmailCategoriesList({
                     switch (type) {
                         case 'sent':
                             categoryQuery = db.emails
-                                .where('[mailboxId+categoryId+isSender+binnedAt+tempId]')
-                                .equals([mailboxId, cat.id, 1, 0, 0]);
+                                .where('[mailboxId+categoryId+isSender+binnedAt+tempId+isDeleted]')
+                                .equals([mailboxId, cat.id, 1, 0, 0, 0]);
                             break;
                         case 'trash':
                             categoryQuery = db.emails
-                                .where('[mailboxId+categoryId+binnedAt]')
-                                .between([mailboxId, cat.id, 1], [mailboxId, cat.id, Dexie.maxKey]);
+                                .where('[mailboxId+categoryId+binnedAt+isDeleted]')
+                                .between([mailboxId, cat.id, 1, 0], [mailboxId, cat.id, Dexie.maxKey, 0]);
                             break;
                         case 'starred':
                             categoryQuery = db.emails
-                                .where('[mailboxId+categoryId+isStarred+isSender+binnedAt]')
-                                .equals([mailboxId, cat.id, 1, 0, 0]);
+                                .where('[mailboxId+categoryId+isStarred+isSender+binnedAt+isDeleted]')
+                                .equals([mailboxId, cat.id, 1, 0, 0, 0]);
                             break;
                         case 'temp':
                             categoryQuery = db.emails
-                                .where('[mailboxId+categoryId+tempId+isSender+binnedAt]')
-                                .equals([mailboxId, cat.id, 1, 0, 0]);
+                                .where('[mailboxId+categoryId+tempId+isSender+binnedAt+isDeleted]')
+                                .equals([mailboxId, cat.id, 1, 0, 0, 0]);
                             break;
                         case 'inbox':
                         default:
                             categoryQuery = db.emails
-                                .where('[mailboxId+categoryId+isSender+binnedAt+tempId]')
-                                .equals([mailboxId, cat.id, 0, 0, 0]);
+                                .where('[mailboxId+categoryId+isSender+binnedAt+tempId+isDeleted]')
+                                .equals([mailboxId, cat.id, 0, 0, 0, 0]);
                             break;
                     }
 
@@ -386,7 +404,7 @@ export async function getEmailCategoriesList({
 
 
 export const getEmail = (mailboxId: string, emailId: string) => {
-    return db.emails.where('id').equals(emailId).and(item => item.mailboxId === mailboxId).first();
+    return db.emails.where("[id+mailboxId]").equals([emailId, mailboxId]).first();
 }
 
 // Helper function to get a single email with related data
@@ -395,9 +413,8 @@ export async function getEmailWithDetails(mailboxId: string, emailId: string) {
         [db.emails, db.emailSenders, db.emailRecipients, db.emailAttachments],
         async () => {
             const email = await db.emails
-                .where('id')
-                .equals(emailId)
-                .and(item => item.mailboxId === mailboxId)
+                .where("[id+mailboxId]")
+                .equals([emailId, mailboxId])
                 .first();
 
             if (!email) return null;
@@ -439,133 +456,21 @@ export async function updateEmailProperties(
         hardDelete?: boolean;
     }
 ) {
-    // if (mailboxId === 'demo') {
-    try {
-        await db.transaction('rw', [db.emails], async () => {
-            const email = await db.emails
-                .where('id')
-                .equals(emailId)
-                .and(item => item.mailboxId === mailboxId)
-                .first();
+    await db.transaction('rw', [db.emails], async () => {
+        const email = await db.emails
+            .where("[id+mailboxId]")
+            .equals([emailId, mailboxId])
+            .first();
 
-            if (!email) {
-                throw new Error('Email not found');
-            }
-
-            if (updates.hardDelete) {
-                await deleteEmailLocally(mailboxId, emailId, "inbox");
-            } else {
-                // Update using modify instead of delete/add
-                // Update using modify instead of delete/add
-
-                const modify: Partial<DBEmail> = {}
-                if (updates.isStarred !== undefined) modify.isStarred = updates.isStarred === true ? 1 : 0
-                if (updates.isRead !== undefined) modify.isRead = updates.isRead === true ? 1 : 0
-                if (updates.categoryId !== undefined) modify.categoryId = updates.categoryId || 0
-                if (updates.binnedAt !== undefined) modify.binnedAt = updates.binnedAt || 0
-                await db.emails
-                    .where('id')
-                    .equals(emailId)
-                    .modify(modify);
-            }
-        });
-        if (mailboxId === 'demo') {
-            return {
-                success: true,
-                demo: true,
-                message: "This is a demo - changes won't actually do anything",
-                description: "But you can see how it would work in the real app!"
-            };
-        } else {
-            const res = await proposeSync({
-                emails: [{
-                    id: emailId,
-                    mailboxId,
-                    lastUpdated: new Date().toISOString(),
-                    ...updates
-                }],
-            }, new Date(localStorage.getItem('last-sync') || 0))
-            if (!res) {
-                return {
-                    success: false,
-                    error: true,
-                    message: "Failed to update email",
-                };
-            }
-            if (res.errors) {
-                return {
-                    success: false,
-                    error: true,
-                    message: "Failed to update email",
-                    description: res.errors?.[0]
-                };
-            }
-
-            if (res.data) {
-                return {
-                    success: true,
-                }
-            }
+        if (!email) {
+            throw new Error('Email not found');
         }
-    } catch (error) {
-        console.error('Failed to update email:', error);
-        return {
-            success: false,
-            demo: true,
-            message: "Failed to update email",
-            description: "There was an error updating the email"
-        };
-    }
-    // }
 
-    // const res = await proposeSync({
-    //     emails: [{
-    //         id: emailId,
-    //         mailboxId,
-    //         ...updates
-    //     }],
-    // }, new Date(localStorage.getItem('last-sync') || 0))
-    // if (!res) {
-    //     return {
-    //         success: false,
-    //         error: true,
-    //         message: "Failed to update email",
-    //     };
-    // }
-    // if (res.errors) {
-    //     return {
-    //         success: false,
-    //         error: true,
-    //         message: "Failed to update email",
-    //         description: res.errors?.[0]
-    //     };
-    // }
-
-    // if (res.data) {
-    //     return {
-    //         success: true,
-    //     }
-    // }
-}
-
-// Delete email with optimistic UI updates
-export async function deleteEmailLocally(mailboxId: string, emailId: string, type: EmailListType) {
-    if (mailboxId === 'demo') {
-        try {
+        if (updates.hardDelete) {
             await db.transaction('rw',
-                [db.emails, db.emailSenders, db.emailRecipients, db.emailAttachments],
+                [db.emails],
                 async () => {
-                    const email = await db.emails
-                        .where('id')
-                        .equals(emailId)
-                        .and(item => item.mailboxId === mailboxId)
-                        .first();
-
-                    if (!email) {
-                        throw new Error('Email not found');
-                    }
-
-                    if (type === 'trash') {
+                    if (mailboxId === 'demo') {
                         // Permanent delete from trash
                         await Promise.all([
                             db.emails.delete(emailId),
@@ -574,82 +479,78 @@ export async function deleteEmailLocally(mailboxId: string, emailId: string, typ
                             db.emailAttachments.where('emailId').equals(emailId).delete()
                         ]);
                     } else {
-                        // Move to trash
                         await db.emails
                             .where('id')
                             .equals(emailId)
-                            .modify({ binnedAt: new Date() });
+                            .modify({ isDeleted: 1 });
+                        // will properly delete the other tables on api response
                     }
                 }
             );
+        } else {
+            // Update using modify instead of delete/add
+            // Update using modify instead of delete/add
 
-            return {
-                success: true,
-                demo: true,
-                message: "This is a demo - changes won't actually do anything",
-                description: "But you can see how it would work in the real app!"
-            };
-        } catch (error) {
-            console.error('Failed to delete email:', error);
-            return {
-                success: false,
-                demo: true,
-                message: "Failed to delete email",
-                description: "There was an error deleting the email"
-            };
+            const modify: Partial<DBEmail> = {}
+            if (updates.isStarred !== undefined) modify.isStarred = updates.isStarred === true ? 1 : 0
+            if (updates.isRead !== undefined) modify.isRead = updates.isRead === true ? 1 : 0
+            if (updates.categoryId !== undefined) modify.categoryId = updates.categoryId || 0
+            if (updates.binnedAt !== undefined) modify.binnedAt = updates.binnedAt || 0
+            await db.emails
+                .where('id')
+                .equals(emailId)
+                .modify(modify);
         }
+    });
+    if (mailboxId !== 'demo') {
+        await proposeSync({
+            emails: [{
+                id: emailId,
+                mailboxId,
+                lastUpdated: new Date().toISOString(),
+                ...updates
+            }],
+        }, new Date(localStorage.getItem('last-sync') || 0))
     }
-
-    return {
-        success: false,
-        demo: true,
-        message: "Deletion isn't available in demo",
-        description: "This would sync with the server in the real app"
-    };
 }
 
 
 export async function getEmailCount(mailboxId: string, type: "unread" | "binned" | "drafts" | "temp" | "") {
-    try {
-        switch (type) {
-            case "unread":
-                return await db.emails
-                    .where('[mailboxId+isRead+isSender+binnedAt+tempId]')
-                    .equals([mailboxId, 0, 0, 0, 0])
-                    .count();
-            case "binned":
-                return await db.emails
-                    .where('[mailboxId+binnedAt]')
-                    .between([mailboxId, 1], [mailboxId, Dexie.maxKey])
-                    .count();
-            case "drafts":
-                return await db.draftEmails
-                    .where('mailboxId')
-                    .equals(mailboxId)
-                    .count();
-            case "temp":
-                return await db.emails
-                    .where('[mailboxId+tempId+isSender+binnedAt]')
-                    .equals([mailboxId, 1, 0, 0])
-                    .count();
-            default:
-                return 0;
-        }
-    } catch (error) {
-        console.error("Failed to get email count:", error);
-        return 0;
+    switch (type) {
+        case "unread":
+            return await db.emails
+                .where('[mailboxId+isRead+isSender+binnedAt+tempId+isDeleted]')
+                .equals([mailboxId, 0, 0, 0, 0, 0])
+                .count();
+        case "binned":
+            return await db.emails
+                .where('[mailboxId+binnedAt+tempId+isDeleted]')
+                .between([mailboxId, 1, 0, 0], [mailboxId, Dexie.maxKey, 0, 0])
+                .count();
+        case "drafts":
+            return await db.draftEmails
+                .where('[mailboxId+isDeleted]')
+                .equals([mailboxId, 0])
+                .count();
+        case "temp":
+            return await db.emails
+                .where('[mailboxId+tempId+isSender+binnedAt+tempId+isDeleted]')
+                .between([mailboxId, 1, 0, 1, 0], [mailboxId, 1, 0, Dexie.maxKey, 0])
+                .count();
+        default:
+            return 0;
     }
 }
 
 
 // drafts
 export async function getDraftEmail(mailboxId: string, draftId: string) {
-    return db.draftEmails.where("id").equals(draftId).and(item => item.mailboxId === mailboxId).first();
+    return db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).first();
 }
 
 export async function updateDraftEmail(mailboxId: string, draftId: string, updates: Partial<DBEmailDraft>) {
     await db.transaction('rw', [db.draftEmails], () =>
-        db.draftEmails.where("id").equals(draftId).and(item => item.mailboxId === mailboxId).modify(updates)
+        db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).modify(updates)
     );
 
     if (mailboxId !== 'demo') {
@@ -667,7 +568,9 @@ export async function updateDraftEmail(mailboxId: string, draftId: string, updat
 
 export async function deleteDraftEmail(mailboxId: string, draftId: string) {
     await db.transaction('rw', [db.draftEmails], () =>
-        db.draftEmails.where("id").equals(draftId).and(item => item.mailboxId === mailboxId).delete()
+        mailboxId === "demo"
+            ? db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).delete()
+            : db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).modify({ isDeleted: 1 })
     );
 
     if (mailboxId !== 'demo') {
@@ -694,7 +597,7 @@ export async function createDraftEmail(mailboxId: string, options?: {
 
     await db.transaction('rw', [db.draftEmails, db.emails, db.emailRecipients, db.emailSenders, db.mailboxAliases], async () => {
         const maybeEmailId = options?.reply || options?.replyAll || options?.forward
-        const email = maybeEmailId ? await db.emails.where('id').equals(maybeEmailId).and(item => item.mailboxId === mailboxId).first() : null;
+        const email = maybeEmailId ? await db.emails.where("[id+mailboxId]").equals([maybeEmailId, mailboxId]).first() : null;
 
         if (email && maybeEmailId) {
             let subject = email.subject || '';

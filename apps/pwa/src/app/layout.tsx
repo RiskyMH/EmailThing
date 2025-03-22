@@ -12,16 +12,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             // Initialize DB and load demo data
             try {
                 const v = localStorage.getItem("indexdb-test-version")
-                if (v !== "v1.1") {
+                if (v !== "v1.1a") {
                     // delete the indexdb
                     await asyncDeleteIndexDB("EmailDB");
-                    localStorage.setItem("indexdb-test-version", "v1.1");
-                    localStorage.removeItem("lastSync");
+                    localStorage.setItem("indexdb-test-version", "v1.1a");
+                    localStorage.removeItem("last-sync");
                 }
 
                 await initializeDB();
-                if (sessionStorage.getItem('demo') !== 'v1') await loadDemoData();
-                sessionStorage.setItem('demo', 'v1');
+                if (sessionStorage.getItem('demo') !== 'v1.1a') await loadDemoData();
+                sessionStorage.setItem('demo', 'v1.1a');
             } catch (error) {
                 console.error('Failed to initialize:', error);
             }

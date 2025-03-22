@@ -15,7 +15,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
                     description: "group-[.toast]:text-muted-foreground!",
                     actionButton: "group-[.toast]:bg-primary! group-[.toast]:text-primary-foreground!",
                     cancelButton: "group-[.toast]:bg-muted! group-[.toast]:text-muted-foreground!",
-                    error: "bg-destructive! text-destructive-foreground! border-red-500!",
+                    error: "bg-destructive! text-destructive-foreground! border-red-500! group-[.toast]:text-destructive-foreground!",
                 },
             }}
             {...props}

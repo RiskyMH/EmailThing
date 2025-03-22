@@ -23,13 +23,13 @@ import {
     Subject,
     UploadAttachment,
 } from "./editor.client";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { deleteDraftEmail, getDraftEmail, updateDraftEmail } from "@/utils/data/queries/email-list";
+import { useParams, useNavigate, useSearchParams, Navigate } from "react-router-dom";
+import { deleteDraftEmail, getDraftEmail, getEmail, updateDraftEmail } from "@/utils/data/queries/email-list";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getData } from "./tools";
 import { toast } from "sonner";
 import Loading from "./loading";
-import { getMailboxAliases, getMailboxDefaultAlias, getMailboxName } from "@/utils/data/queries/mailbox";
+import { getMailboxAliases, getMailboxName } from "@/utils/data/queries/mailbox";
 import DisableFormReset from "@/components/disable-reset.client";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useDebouncedCallback } from "use-debounce";
@@ -45,7 +45,12 @@ export default function DraftPage() {
 
     const data = useLiveQuery(async () => {
         if (!params.mailboxId || !params.draftId) return
-        const d = getDraftEmail(params.mailboxId, params.draftId).then(d => d || null)
+        const d = getDraftEmail(params.mailboxId, params.draftId).then(async d => {
+            if (d) return { draft: d }
+            const e = await getEmail(params.mailboxId!, params.draftId!)
+            if (e) return { email: e }
+            return null
+        })
         const aliases = getMailboxAliases(params.mailboxId)
         return Promise.all([d, aliases])
     }, [params.mailboxId, params.draftId])
@@ -55,6 +60,12 @@ export default function DraftPage() {
         const draft = getData(data)
         if (!draft) return
 
+        if (params.mailboxId === 'demo') {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+        } else if (!navigator.onLine) {
+            toast.info("You are offline - changes will be synced when you come back online")
+        }
+
         await updateDraftEmail(params.mailboxId!, params.draftId!, {
             body: draft.body,
             subject: draft.subject,
@@ -62,16 +73,15 @@ export default function DraftPage() {
             to: draft.to,
             headers: draft.headers,
         })
-        if (params.mailboxId === "demo") {
-            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" })
-        }
     }
 
     async function deleteDraftAction() {
-        await deleteDraftEmail(params.mailboxId!, params.draftId!)
-        if (params.mailboxId === "demo") {
-            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" })
+        if (params.mailboxId === 'demo') {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+        } else if (!navigator.onLine) {
+            toast.info("You are offline - changes will be synced when you come back online")
         }
+        await deleteDraftEmail(params.mailboxId!, params.draftId!)
         navigate(`/mail/${params.mailboxId}`)
     }
 
@@ -103,8 +113,10 @@ export default function DraftPage() {
         });
 
         await updateDraftEmail(params.mailboxId!, params.draftId!, { headers: uniqueHeaders })
-        if (params.mailboxId === "demo") {
-            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" })
+        if (params.mailboxId === 'demo') {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+        } else if (!navigator.onLine) {
+            toast.info("You are offline - changes will be synced when you come back online")
         }
     }
 
@@ -118,12 +130,16 @@ export default function DraftPage() {
         navigate(`?editor=${v}`, { replace: true });
     }
 
-    useTitle(params.mailboxId!, data?.[0]?.subject || undefined)
+    useTitle(params.mailboxId!, data?.[0]?.draft?.subject || undefined)
 
     if (!data || data[0] === undefined || !data[1]) return <Loading />
-    if (data[0] === null) return <div className="flex size-full items-center justify-center">404 - Draft not found</div>
+    if (data[0] === null) {
+        return <div className="flex size-full items-center justify-center">404 - Draft not found</div>
+    } else if (data[0]?.email) {
+        return <Navigate to={`/mail/${params.mailboxId}/${params.draftId!}`} />
+    }
 
-    const [mail, aliases] = data
+    const [{ draft: mail }, aliases] = data
 
     return (
         <form

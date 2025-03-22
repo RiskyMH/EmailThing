@@ -2,7 +2,7 @@
 import { useParams, useSearchParams } from "react-router-dom"
 import { Suspense, useEffect } from "react"
 import Loading, { EmailListLoadingSkeleton, EmailListCategoryLoadingSkeleton } from "./email-list-loading"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import RefreshButton from "./refresh-button"
 import { SmartDrawer, SmartDrawerTrigger, SmartDrawerContent } from "@/components/ui/smart-drawer"
 import { tempEmailsLimit } from "@/utils/limits";
@@ -116,8 +116,6 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
     } as Record<string, string>
 
     useEffect(() => {
-
-
         if (search) {
             document.title = "Search results | EmailThing"
         } else if (count || name) {
@@ -164,15 +162,11 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
     }, [mailboxId, type, categoryId, search, key])
 
     const loading = skip > 0 ?
-        <Button
-            variant="outline"
-            className="flex gap-2"
-            size="lg"
-            disabled
-        >
+        <div className={buttonVariants({ variant: "outline", size: "lg", className: "flex gap-2" })}>
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
-        </Button>
+        </div>
         : <EmailListLoadingSkeleton />
+
 
     const isLoading = !data && !_data
     if (isLoading) return loading
@@ -197,7 +191,7 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
 
     const hasMore = emails_.length > 50
 
-    const hasSynced = "window" in globalThis && globalThis.window?.localStorage?.getItem("lastSync")
+    const hasSynced = "window" in globalThis && globalThis.window?.localStorage?.getItem("last-sync")
     if (!hasSynced && emails.length === 0 && mailboxId !== "demo") {
         return <EmailListLoadingSkeleton />
     }
@@ -252,7 +246,9 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
             {hasMore && (
                 inView
                     ? <Emails filter={type} skip={emails.length + skip} />
-                    : <div ref={loadMore} className="w-full">{loading}</div>
+                    : <div ref={loadMore} className={buttonVariants({ variant: "outline", size: "lg", className: "flex gap-2" })}>
+                        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                    </div>
             )}
 
             {!hasMore && skip > 0 && (

@@ -201,13 +201,19 @@ export function CreateCategoryForm({
     const formSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        if (!/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)) {
+        if (color && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)) {
             toast.error("Invalid hex color", { description: "Please enter a valid hex color (i.e. #000000)" });
             return;
         }
 
         document.getElementById("smart-drawer:close")?.click();
         if (isPending) return;
+
+        if (mailboxId === 'demo') {
+            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+        } else if (!navigator.onLine) {
+            toast.info("You are offline - changes will be synced when you come back online")
+        }
 
         startTransition(async () => {
             const target = event.target as HTMLFormElement;
