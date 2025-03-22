@@ -7,7 +7,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getCategories, getEmail } from "@/utils/data/queries/email-list";
+import { getCategories } from "@/utils/data/queries/mailbox";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowLeftIcon, ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon } from "lucide-react";
 import Link from "next/link";

@@ -197,6 +197,7 @@ export async function getEmailList({
         await db.mailboxCategories
             .where('mailboxId')
             .equals(mailboxId)
+            .and(item => item.isDeleted !== 1)
             .toArray();
 
     // Get sender/recipient info for each email
@@ -315,6 +316,7 @@ export async function getEmailCategoriesList({
             const cats = await db.mailboxCategories
                 .where('mailboxId')
                 .equals(mailboxId)
+                .and(item => item.isDeleted !== 1)
                 .sortBy('createdAt');
 
             // Can't count categories for drafts
@@ -423,10 +425,6 @@ export async function getEmailWithDetails(mailboxId: string, emailId: string) {
             };
         }
     );
-}
-
-export async function getCategories(mailboxId: string) {
-    return db.mailboxCategories.where('mailboxId').equals(mailboxId).toArray();
 }
 
 // Update email properties with optimistic UI updates
@@ -646,12 +644,12 @@ export async function getEmailCount(mailboxId: string, type: "unread" | "binned"
 
 // drafts
 export async function getDraftEmail(mailboxId: string, draftId: string) {
-    return db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).first();
+    return db.draftEmails.where("id").equals(draftId).and(item => item.mailboxId === mailboxId).first();
 }
 
 export async function updateDraftEmail(mailboxId: string, draftId: string, updates: Partial<DBEmailDraft>) {
     await db.transaction('rw', [db.draftEmails], () =>
-        db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).modify(updates)
+        db.draftEmails.where("id").equals(draftId).and(item => item.mailboxId === mailboxId).modify(updates)
     );
 
     if (mailboxId !== 'demo') {
@@ -669,7 +667,7 @@ export async function updateDraftEmail(mailboxId: string, draftId: string, updat
 
 export async function deleteDraftEmail(mailboxId: string, draftId: string) {
     await db.transaction('rw', [db.draftEmails], () =>
-        db.draftEmails.where("mailboxId").equals(mailboxId).and(item => item.id === draftId).delete()
+        db.draftEmails.where("id").equals(draftId).and(item => item.mailboxId === mailboxId).delete()
     );
 
     if (mailboxId !== 'demo') {

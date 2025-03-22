@@ -7,11 +7,12 @@ import { toast } from "sonner";
 
 
 
-export function DeleteButton({ action, text = "Delete" }: { action: () => Promise<any>; text?: string }) {
+export function DeleteButton({ action, text = "Delete", instant = false }: { action: () => Promise<any> | void; text?: string, instant?: boolean }) {
     const [isPending, startTransition] = useTransition();
 
     const onClick = (event: any) => {
         event.preventDefault();
+        if (instant) document.getElementById("smart-drawer:close")?.click();
         if (isPending) return;
 
         startTransition(async () => {

@@ -6,8 +6,8 @@ import { PlusIcon, MoreHorizontalIcon, PencilIcon, Trash2Icon, ChevronDownIcon, 
 import { DeleteButton } from "./components.client";
 import { useParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getMailbox } from "@/utils/data/queries/mailbox";
-import { getCategories } from "@/utils/data/queries/email-list";
+import { deleteCategory, getMailbox, updateCategory, createCategory } from "@/utils/data/queries/mailbox";
+import { getCategories } from "@/utils/data/queries/mailbox";
 import { toast } from "sonner";
 import TooltipText from "@/components/tooltip-text";
 import { Input } from "@/components/ui/input";
@@ -15,14 +15,6 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { useTransition, useState, type FormEvent } from "react";
 
-
-const editCategory = async (mailboxId: string, categoryId: string, name: string, color: string | null) => {
-    toast.info("Not implemented");
-}
-
-const createCategory = async (mailboxId: string, name: string, color: string | null) => {
-    toast.info("Not implemented");
-}
 
 
 export default function Categories() {
@@ -34,11 +26,6 @@ export default function Categories() {
     );
 
     const [mailbox, categories] = data ?? [];
-
-    const deleteCategory = async (categoryId: string) => {
-        toast.info("Not implemented");
-    }
-
 
     return (
         <div className="mb-3 max-w-[40rem]">
@@ -152,10 +139,8 @@ export default function Categories() {
                                                                 Cancel
                                                             </SmartDrawerClose>
                                                             <DeleteButton
-                                                                delAction={deleteCategory.bind(
-                                                                    null,
-                                                                    row.id,
-                                                                )}
+                                                                action={() => deleteCategory(mailboxId!, row.id)}
+                                                                instant={true}
                                                             />
                                                         </SmartDrawerFooter>
                                                     </SmartDrawerContent>
@@ -168,7 +153,7 @@ export default function Categories() {
                         ) : (
                             <TableRow>
                                 <TableCell className={`h-24 text-center ${!data ? "fade-in" : ""}`} colSpan={2}>
-                                        {data ? "No categories yet." : <Loader2 className="size-8 animate-spin text-muted-foreground mx-auto" />}
+                                    {data ? "No categories yet." : <Loader2 className="size-8 animate-spin text-muted-foreground mx-auto" />}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -180,6 +165,26 @@ export default function Categories() {
     )
 }
 
+const defaultColors = [
+    { name: "Grey", hex: "#6b7280" },
+    { name: "Red", hex: "#ef4444" },
+    { name: "Orange", hex: "#f97316" },
+    { name: "Amber", hex: "#f59e0b" },
+    { name: "Yellow", hex: "#eab308" },
+    { name: "Lime", hex: "#84cc16" },
+    { name: "Green", hex: "#22c55e" },
+    { name: "Emerald", hex: "#10b981" },
+    { name: "Teal", hex: "#14b8a6" },
+    { name: "Cyan", hex: "#06b6d4" },
+    { name: "Sky", hex: "#0ea5e9" },
+    { name: "Blue", hex: "#3b82f6" },
+    { name: "Indigo", hex: "#6366f1" },
+    { name: "Violet", hex: "#8b5cf6" },
+    { name: "Purple", hex: "#a855f7" },
+    { name: "Fuchsia", hex: "#d946ef" },
+    { name: "Pink", hex: "#ec4899" },
+    { name: "Rose", hex: "#f43f5e" },
+];
 
 export function CreateCategoryForm({
     mailboxId,
@@ -189,11 +194,19 @@ export function CreateCategoryForm({
 }:
     | { mailboxId: string; id?: undefined; name?: undefined; color?: undefined }
     | { mailboxId: string; id: string; name: string; color: string | null }) {
+
     const [isPending, startTransition] = useTransition();
     const [color, setColor] = useState(c || "");
 
     const formSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        if (!/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color)) {
+            toast.error("Invalid hex color", { description: "Please enter a valid hex color (i.e. #000000)" });
+            return;
+        }
+
+        document.getElementById("smart-drawer:close")?.click();
         if (isPending) return;
 
         startTransition(async () => {
@@ -203,7 +216,7 @@ export function CreateCategoryForm({
             const color = target.elements.namedItem("color") as HTMLInputElement | null;
 
             const res = id
-                ? await editCategory(mailboxId, id, name?.value ?? "name", color?.value ?? null)
+                ? await updateCategory(mailboxId, id, name?.value ?? "name", color?.value ?? null)
                 : await createCategory(mailboxId, name?.value ?? "name", color?.value ?? null);
 
             if (res?.error) {
@@ -213,27 +226,6 @@ export function CreateCategoryForm({
             }
         });
     };
-
-    const defaultColors = [
-        { name: "Grey", hex: "#6b7280" },
-        { name: "Red", hex: "#ef4444" },
-        { name: "Orange", hex: "#f97316" },
-        { name: "Amber", hex: "#f59e0b" },
-        { name: "Yellow", hex: "#eab308" },
-        { name: "Lime", hex: "#84cc16" },
-        { name: "Green", hex: "#22c55e" },
-        { name: "Emerald", hex: "#10b981" },
-        { name: "Teal", hex: "#14b8a6" },
-        { name: "Cyan", hex: "#06b6d4" },
-        { name: "Sky", hex: "#0ea5e9" },
-        { name: "Blue", hex: "#3b82f6" },
-        { name: "Indigo", hex: "#6366f1" },
-        { name: "Violet", hex: "#8b5cf6" },
-        { name: "Purple", hex: "#a855f7" },
-        { name: "Fuchsia", hex: "#d946ef" },
-        { name: "Pink", hex: "#ec4899" },
-        { name: "Rose", hex: "#f43f5e" },
-    ];
 
     return (
         <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>

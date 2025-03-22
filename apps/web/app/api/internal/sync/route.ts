@@ -337,7 +337,18 @@ export async function POST(request: Request) {
                     continue;
                 }
 
-                if (mailboxCategory.id !== null) {
+                if (mailboxCategory.id?.startsWith("new:")) {
+                    const e = await db.select({ id: MailboxCategory.id }).from(MailboxCategory).where(and(eq(MailboxCategory.id, mailboxCategory.id.replace("new:", "")), eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)))
+                    if (e.length) {
+                        errors.push({
+                            key: "mailboxCategories",
+                            id: mailboxCategory.id,
+                            error: "Mailbox category already exists",
+                        });
+                        mailboxCategory.id = null;
+                    }
+                }
+                else if (mailboxCategory.id !== null) {
                     const e = await db.select({ id: MailboxCategory.id }).from(MailboxCategory).where(and(eq(MailboxCategory.id, mailboxCategory.id), eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)))
                     if (!e.length) {
                         errors.push({
@@ -348,6 +359,7 @@ export async function POST(request: Request) {
                         continue;
                     }
                 }
+
                 const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
                 if (mailboxCategory.color && !categoryColorRegex.test(mailboxCategory.color)) {
@@ -360,10 +372,10 @@ export async function POST(request: Request) {
                 }
 
                 if (mailboxCategory.hardDelete) {
-                    if (!mailboxCategory.id) {
+                    if (!mailboxCategory.id || mailboxCategory.id.startsWith("new:")) {
                         errors.push({
                             key: "mailboxCategories",
-                            id: null,
+                            id: mailboxCategory.id,
                             error: "Cannot delete a non created mailbox category",
                         });
                         continue;
@@ -382,6 +394,13 @@ export async function POST(request: Request) {
                 } else {
                     if (mailboxCategory.id == null) {
                         changes.push(db.insert(MailboxCategory).values({
+                            mailboxId: mailboxCategory.mailboxId,
+                            name: mailboxCategory.name,
+                            color: mailboxCategory.color,
+                        }))
+                    } else if (mailboxCategory.id.startsWith("new:")) {
+                        changes.push(db.insert(MailboxCategory).values({
+                            id: mailboxCategory.id.replace("new:", ""),
                             mailboxId: mailboxCategory.mailboxId,
                             name: mailboxCategory.name,
                             color: mailboxCategory.color,
@@ -425,7 +444,7 @@ export async function POST(request: Request) {
         if (error.id?.startsWith("new:")) {
             // @ts-ignore
             changesRes[error.key].push({
-                id: error.id,
+                id: error.id.replace("new:", ""),
                 isDeleted: true,
             } as any);
         }

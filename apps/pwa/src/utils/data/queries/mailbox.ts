@@ -1,5 +1,7 @@
 import { db } from "@/utils/data/db"
 import { getMe } from "./user"
+import { createId } from "@paralleldrive/cuid2"
+import { proposeSync } from "../sync-user"
 
 export async function getMailbox(mailboxId: string) {
     const mailbox = await db.mailboxes.get(mailboxId)
@@ -54,3 +56,91 @@ export async function getCurrentUserMailbox(mailboxId: string) {
     const mailboxForUser = await db.mailboxForUser.where("userId").equals(currentUser.id).and(mailboxForUser => mailboxForUser.mailboxId === mailboxId).first()
     return mailboxForUser
 }
+
+
+/////////////////////////////////////////////
+/////////////////////////////////////////////
+/////////////////////////////////////////////
+
+export async function getCategories(mailboxId: string) {
+    return db.mailboxCategories.where('mailboxId').equals(mailboxId).and(item => item.isDeleted !== 1).toArray();
+}
+
+
+export async function createCategory(mailboxId: string, name: string, color?: string | null) {
+    const categoryId = createId();
+    await db.mailboxCategories.add({
+        id: categoryId,
+        mailboxId,
+        name,
+        color: color ?? 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: 0
+    })
+
+    if (mailboxId !== 'demo') {
+        // intentionally not awaited
+        proposeSync({
+            mailboxCategories: [{
+                id: `new:${categoryId}`,
+                lastUpdated: new Date().toISOString() as any,
+                mailboxId,
+                name,
+                color: color ?? null,
+            }]
+        }, new Date(localStorage.getItem('last-sync') || 0))
+    }
+
+    return categoryId;
+}
+
+export async function deleteCategory(mailboxId: string, categoryId: string) {
+    await db.transaction('rw', [db.mailboxCategories], () =>
+        db.mailboxCategories.where("id").equals(categoryId).and(item => item.mailboxId === mailboxId).modify({
+            isDeleted: 1,
+            updatedAt: new Date(),
+            name: "<deleted>",
+            color: 0,
+        })
+    )
+
+    if (mailboxId !== 'demo') {
+        // intentionally not awaited
+        proposeSync({
+            mailboxCategories: [{
+                id: categoryId,
+                lastUpdated: new Date().toISOString() as any,
+                mailboxId,
+                name: "",
+                hardDelete: true,
+            }]
+        }, new Date(localStorage.getItem('last-sync') || 0))
+    } else {
+        // we dont care for demo
+        await db.mailboxCategories.where("id").equals(categoryId).and(item => item.mailboxId === mailboxId).delete()
+    }    
+}
+
+export async function updateCategory(mailboxId: string, categoryId: string, name: string, color?: string | null) {
+    await db.transaction('rw', [db.mailboxCategories], () =>
+        db.mailboxCategories.where("id").equals(categoryId).and(item => item.mailboxId === mailboxId).modify({
+            name,
+            color: color ?? 0,
+        })
+    )
+    if (mailboxId !== 'demo') {
+        // intentionally not awaited
+        proposeSync({
+            mailboxCategories: [{
+                id: categoryId,
+                lastUpdated: new Date().toISOString() as any,
+                mailboxId,
+                name,
+                color: color ?? null,
+            }]
+        }, new Date(localStorage.getItem('last-sync') || 0))
+    }
+
+}
+
