@@ -7,6 +7,9 @@ import APITokens from "./tokens";
 import CustomDomains from "./custom-domains";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { useEffect } from "react";
+import { getMailboxName } from "@/utils/data/queries/mailbox";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export default function ConfigPage() {
     return (
@@ -29,6 +32,22 @@ export default function ConfigPage() {
 
 function DemoWarning() {
     const { mailboxId } = useParams<{ mailboxId: string }>();
+
+    const mailbox = useLiveQuery(
+        () => getMailboxName(mailboxId!),
+        [mailboxId]
+    );
+
+    useEffect(() => {
+        if (mailbox) {
+            document.title = `Config | ${mailbox} | EmailThing`;
+        } else {
+            document.title = `Config | EmailThing`;
+        }
+        return () => { document.title = "EmailThing"; }
+    }, [mailbox])
+
+
     // if demo, warn in yellow that it's a demo
     if (mailboxId === "demo") return (
         <Alert variant="warning" className="max-w-[40rem]">

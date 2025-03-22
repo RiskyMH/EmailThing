@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronRight, EllipsisIcon } from "lucide-react";
-import { Fragment, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import {
     BodyEditor,
     DeleteButton,
@@ -29,7 +29,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getData } from "./tools";
 import { toast } from "sonner";
 import Loading from "./loading";
-import { getMailboxAliases, getMailboxDefaultAlias } from "@/utils/data/queries/mailbox";
+import { getMailboxAliases, getMailboxDefaultAlias, getMailboxName } from "@/utils/data/queries/mailbox";
 import DisableFormReset from "@/components/disable-reset.client";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useDebouncedCallback } from "use-debounce";
@@ -49,6 +49,7 @@ export default function DraftPage() {
         const aliases = getMailboxAliases(params.mailboxId)
         return Promise.all([d, aliases])
     }, [params.mailboxId, params.draftId])
+
 
     async function saveDraftAction(data: FormData) {
         const draft = getData(data)
@@ -116,6 +117,8 @@ export default function DraftPage() {
     function setEditor(v: string) {
         navigate(`?editor=${v}`, { replace: true });
     }
+
+    useTitle(params.mailboxId!, data?.[0]?.subject || undefined)
 
     if (!data || data[0] === undefined || !data[1]) return <Loading />
     if (data[0] === null) return <div className="flex size-full items-center justify-center">404 - Draft not found</div>
@@ -200,4 +203,24 @@ export default function DraftPage() {
             </div>
         </form>
     );
+}
+
+function useTitle(mailbox: string, draftSubject?: string) {
+    const mailboxName = useLiveQuery(
+        () => getMailboxName(mailbox),
+        [mailbox]
+    );
+
+    useEffect(() => {
+        if (mailboxName) {
+            if (draftSubject) {
+                document.title = `${draftSubject} (Draft) | ${mailboxName} | EmailThing`;
+            } else {
+                document.title = `New Draft | ${mailboxName} | EmailThing`;
+            }
+        } else {
+            document.title = `Compose | EmailThing`;
+        }
+        return () => { document.title = "EmailThing"; }
+    }, [mailboxName, draftSubject])
 }
