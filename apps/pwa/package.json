@@ -29,22 +29,22 @@
     "react-dom": "^19.0.0",
     "react-error-boundary": "^4.1.2",
     "react-intersection-observer": "^9.16.0",
-    "react-router-dom": "^7.3.0",
+    "react-router-dom": "^7.4.0",
     "sonner": "^1.7.4",
     "swr": "^2.3.3",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss": "^4.0.14",
+    "tailwindcss": "^4.0.15",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.22.0",
-    "@types/react": "^19.0.11",
+    "@eslint/js": "^9.23.0",
+    "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
-    "eslint": "^9.22.0",
+    "eslint": "^9.23.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
     "typescript": "~5.7.3",
-    "typescript-eslint": "^8.26.1"
+    "typescript-eslint": "^8.27.0"
   }
 }
