@@ -16,10 +16,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { MouseEvent, PropsWithChildren } from "react";
-import { useEffect, useTransition } from "react";
-import { toast } from "sonner";
+
 
 export function ClientStar({
     action,

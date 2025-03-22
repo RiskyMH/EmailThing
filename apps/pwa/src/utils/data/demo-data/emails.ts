@@ -24,7 +24,8 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: 0,
         categoryId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
     {
         id: "2",
@@ -45,7 +46,8 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: 0,
         categoryId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
     {
         id: "3",
@@ -67,6 +69,7 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: 0,
         categoryId: 0,
+        isDeleted: 0,
     },
     {
         id: "4",
@@ -87,7 +90,8 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: 0,
         categoryId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
     {
         id: "5",
@@ -108,7 +112,8 @@ export const demoEmails: DBEmail[] = [
         givenId: 0,
         givenReferences: [],
         tempId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
     {
         id: "6",
@@ -129,7 +134,8 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: 0,
         categoryId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
     {
         id: "7",
@@ -150,7 +156,8 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: 0,
         categoryId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
     {
         id: "8",
@@ -171,7 +178,8 @@ export const demoEmails: DBEmail[] = [
         givenId: 0,
         givenReferences: [],
         tempId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
     {
         id: "9",
@@ -192,7 +200,8 @@ export const demoEmails: DBEmail[] = [
         givenReferences: [],
         tempId: 0,
         categoryId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     },
 
 ];
@@ -218,7 +227,8 @@ export const demoSentEmails: DBEmail[] = [
         givenId: 0,
         givenReferences: [],
         tempId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     }
 ];
 
@@ -243,7 +253,8 @@ export const demoTempEmails: DBEmail[] = [
         givenId: 0,
         givenReferences: [],
         categoryId: 0,
-        binnedAt: 0
+        binnedAt: 0,
+        isDeleted: 0,
     }
 ];
 
@@ -265,6 +276,7 @@ export const demoDrafts: DBEmailDraft[] = [
                 value: "🥚"
             },
         ],
+        isDeleted: 0,
     },
     {
         id: "2",
@@ -277,7 +289,7 @@ export const demoDrafts: DBEmailDraft[] = [
             {
                 name: "Test",
                 address: "test@test.com",
-                cc: 0
+                cc: null
             },
             {
                 name: "Test2",
@@ -287,5 +299,6 @@ export const demoDrafts: DBEmailDraft[] = [
         ],
         from: "your@customdomain.com",
         headers: [],
+        isDeleted: 0,
     }
 ];

@@ -19,7 +19,7 @@ export const Mailbox = sqliteTable("mailboxes", {
         .$defaultFn(() => new Date())
         .$onUpdateFn(() => new Date()),
     storageUsed: int("storage_used").default(0).notNull(),
-    plan: text("plan", { enum: ["FREE", "UNLIMITED"] })
+    plan: text("plan", { enum: ["FREE", "UNLIMITED", "DEMO"] })
         .default("FREE")
         .notNull(),
 

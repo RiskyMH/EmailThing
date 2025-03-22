@@ -5,7 +5,7 @@ import MailLayout from "./mail/root-layout";
 import EmailListLoading from "./email-list/email-list-loading";
 import DraftPage from "./compose/draft";
 import NewDraft from "./compose/new-draft";
-
+import ConfigPage from "./config/config-page";
 export const routes = [
     {
         path: "/mail",
@@ -44,10 +44,6 @@ export const routes = [
                 element: <EmailList filter="trash" />,
             },
             {
-                path: "/mail/:mailboxId/config",
-                element: <h1>TODO: Mail config</h1>,
-            },
-            {
                 path: "/mail/:mailboxId/draft/:draftId",
                 element: <DraftPage />,
             },
@@ -57,7 +53,7 @@ export const routes = [
             },
             {
                 path: "/mail/:mailboxId/config",
-                element: <h1>TODO: Mail config</h1>,
+                element: <ConfigPage />,
             },
         ]
     },

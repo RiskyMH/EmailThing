@@ -5,8 +5,8 @@ export const enum PlanType {
 }
 
 export const storageLimit = {
-    [PlanType.DEMO]: 0,
-    [PlanType.FREE]: 100_000_000,
+    [PlanType.DEMO]: 100_000_000, // 100MB
+    [PlanType.FREE]: 100_000_000, // 100MB
     [PlanType.UNLIMITED]: Number.POSITIVE_INFINITY,
 };
 

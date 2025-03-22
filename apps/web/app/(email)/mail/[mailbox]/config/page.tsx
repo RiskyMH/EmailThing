@@ -521,7 +521,7 @@ export default async function EmailConfig(props: {
                                                                 <SmartDrawerTitle>Delete Domain</SmartDrawerTitle>
                                                                 <SmartDrawerDescription>
                                                                     Are you sure you want to delete{" "}
-                                                                    <strong>{row.domain}</strong>. This will also delete
+                                                                    <strong>{row.domain}</strong>. This will also delete{" "}
                                                                     <strong>
                                                                         {
                                                                             mailbox.aliases.filter((alias) =>
@@ -529,7 +529,7 @@ export default async function EmailConfig(props: {
                                                                             ).length
                                                                         }
                                                                     </strong>
-                                                                    aliases.
+                                                                    {" "}aliases.
                                                                 </SmartDrawerDescription>
                                                             </SmartDrawerHeader>
                                                             <SmartDrawerFooter className="flex pt-2">

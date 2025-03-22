@@ -613,10 +613,17 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
                 includeIds.draftEmails ? inArray(DraftEmail.id, includeIds.draftEmails) : undefined
             )
         )).limit(500),
-        db.select().from(MailboxForUser).where(and(
+
+        db.select({
+            ...getTableColumns(MailboxForUser),
+            username: User.username,
+        }).from(MailboxForUser).leftJoin(User, eq(MailboxForUser.userId, User.id)).where(and(
             inArray(MailboxForUser.mailboxId, mailboxIds),
             not(eq(MailboxForUser.userId, currentUserid)),
-            gte(MailboxForUser.updatedAt, lastSyncDate),
+            or(
+                gte(MailboxForUser.updatedAt, lastSyncDate),
+                gte(User.updatedAt, lastSyncDate),
+            )
         )),
 
         db.select().from(DefaultDomain).where(and(/*gte(DefaultDomain.updatedAt, lastSyncDate), */eq(DefaultDomain.available, true))),
@@ -677,7 +684,10 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             password: undefined as never,
         } as Omit<Partial<typeof currentUser>, "password">,
         mailboxesForUser: [
-            ...mailboxesForUser,
+            ...mailboxesForUser.map((m) => ({
+                ...m,
+                username: currentUser.username,
+            })),
             ...mailboxesForUser2,
         ],
         emails,

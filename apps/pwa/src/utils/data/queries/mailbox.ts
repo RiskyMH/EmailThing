@@ -1,4 +1,5 @@
 import { db } from "@/utils/data/db"
+import { getMe } from "./user"
 
 export async function getMailbox(mailboxId: string) {
     const mailbox = await db.mailboxes.get(mailboxId)
@@ -31,3 +32,25 @@ export async function getUserMailboxes() {
     }))
 }
 
+export async function getMailboxCustomDomains(mailboxId: string) {
+    const customDomains = await db.mailboxCustomDomains.where("mailboxId").equals(mailboxId).toArray()
+    return customDomains
+}
+
+export async function getMailboxTokens(mailboxId: string) {
+    const tokens = await db.mailboxTokens.where("mailboxId").equals(mailboxId).toArray()
+    return tokens
+}
+
+export async function getMailboxUsers(mailboxId: string) {
+    const users = await db.mailboxForUser.where("mailboxId").equals(mailboxId).toArray()
+    return users
+}
+
+
+export async function getCurrentUserMailbox(mailboxId: string) {
+    const currentUser = await getMe()
+    if (!currentUser) return null
+    const mailboxForUser = await db.mailboxForUser.where("userId").equals(currentUser.id).and(mailboxForUser => mailboxForUser.mailboxId === mailboxId).first()
+    return mailboxForUser
+}

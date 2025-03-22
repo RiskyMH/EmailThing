@@ -6,8 +6,8 @@ export const demoMailbox: DBMailbox = {
     id: demoMailboxId,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
-    storageUsed: 1024 * 1024, // 1MB
-    plan: "FREE",
+    storageUsed: 1000 * 1000 * 12.3, // 12.3MB (lazy using 1000 instead of 1024 because "storage used" isn't smart enough to use 1024)
+    plan: "DEMO",
     isDeleted: 0,    
 };
 
