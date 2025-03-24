@@ -1,7 +1,7 @@
 import { Table } from "@/components/ui/table";
 
 // import { changeDefaultAlias, deleteAlias } from "@/(email)/mail/[mailbox]/config/actions";
-import { DeleteButton } from "@/app/config/components.client";
+import { DeleteButton } from "@/app/mailbox-config/components.client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { SmartDrawer, SmartDrawerTrigger, SmartDrawerContent, SmartDrawerHeader, SmartDrawerTitle, SmartDrawerDescription, SmartDrawerFooter, SmartDrawerClose } from "@/components/ui/smart-drawer";

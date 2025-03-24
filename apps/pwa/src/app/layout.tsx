@@ -6,6 +6,8 @@ import { registerServiceWorker } from "@/utils/service-worker";
 import { getSha } from "./git.macro" with { type: "macro" };
 import { proposeSync, syncUser } from "../utils/data/sync-user";
 
+export const sha = await getSha();
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         async function init() {
@@ -29,7 +31,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             // Register service worker
             if (navigator.onLine) {
                 (async () => {
-                    const sha = await getSha();
                     await new Promise(resolve => setTimeout(resolve, 500))
 
                     if (sha) {

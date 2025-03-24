@@ -1,5 +1,5 @@
 import { db } from "../db"
-
+import { getMailboxAliases, getUserMailboxes } from "./mailbox"
 
 export async function getUser(userId: string) {
     const user = await db.user.get(userId)
@@ -12,4 +12,22 @@ export async function getMe() {
     return users
 }
 
+export async function getPasskeys() {
+    const passkeys = await db.passkeyCredentials.toArray()
+    return passkeys
+}
 
+
+
+export async function getAllAliases() {
+    const user = await getMe()
+    const mailboxes = await getUserMailboxes()
+    const aliases = await Promise.all(mailboxes.map(async (mailbox) => {
+        const aliases = await getMailboxAliases(mailbox.id)
+        return aliases.map(alias => ({
+            mailboxId: mailbox.id,
+            alias: alias.alias,
+        }))
+    }))
+    return aliases.flat()
+}

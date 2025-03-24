@@ -13,6 +13,17 @@ export const useGravatar = (email: string) => {
     return data
 }
 
+export const useGravatars = (emails: string[]) => {
+    const { data } = swr(`/api/gravatars?emails=${emails.join(",")}`, () => Promise.all(emails.map(gravatar)), {
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+        revalidateIfStale: false,
+        // revalidateOnMount: false,
+    })
+
+    return data
+}
+
 const svgl = await getSvgl()
 
 

@@ -5,7 +5,15 @@ import MailLayout from "./mail/root-layout";
 import EmailListLoading from "./email-list/email-list-loading";
 import DraftPage from "./compose/draft";
 import NewDraft from "./compose/new-draft";
-import ConfigPage from "./config/config-page";
+import ConfigPage from "./mailbox-config/config-page";
+import UserSettingsLayout from "./user-settings/layout";
+import UserSettingsGeneral from "./user-settings/general";
+import UserSettingsAuthentication from "./user-settings/authentication";
+import UserSettingsMailboxes from "./user-settings/mailboxes";
+import UserSettingsEmailthingMe from "./user-settings/emailthing-me";
+import UserSettingsNotifications from "./user-settings/notifications";
+import SettingsLayout from "./user-settings/layout2";
+
 export const routes = [
     {
         path: "/mail",
@@ -59,7 +67,29 @@ export const routes = [
     },
     {
         path: "/settings",
-        element: <h1>TODO: Settings</h1>,
+        element: <UserSettingsLayout><SettingsLayout><Outlet /></SettingsLayout></UserSettingsLayout>,
+        children: [
+            {
+                path: "/settings",
+                element: <UserSettingsGeneral />,
+            },
+            {
+                path: "/settings/authentication",
+                element: <UserSettingsAuthentication />,
+            },
+            {
+                path: "/settings/notifications",
+                element: <UserSettingsNotifications />,
+            },
+            {
+                path: "/settings/mailboxes",
+                element: <UserSettingsMailboxes />,
+            },
+            {
+                path: "/settings/emailthing-me",
+                element: <UserSettingsEmailthingMe />,
+            },
+        ]
     },
     {
         path: "/admin",

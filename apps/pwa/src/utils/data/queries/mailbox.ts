@@ -25,12 +25,15 @@ export async function getMailboxDefaultAlias(mailboxId: string) {
 
 export async function getUserMailboxes() {
     // return [{id: "demo", name: "demo@emailthing.app", role: "DEMO", isDefault: true}]
-    const mailboxes = await db.mailboxes.toArray()
-    const mailboxAliases = await db.mailboxAliases.toArray()
+    const [mailboxes, mailboxAliases, mailboxForUser] = await Promise.all([
+        db.mailboxes.toArray(),
+        db.mailboxAliases.toArray(),
+        db.mailboxForUser.toArray(),
+    ])
     return mailboxes.map(mailbox => ({
         id: mailbox.id,
         name: mailboxAliases.find(alias => alias.mailboxId === mailbox.id && alias.default == 1)?.alias,
-        // role: "ADMIN",
+        role: mailboxForUser.find(m => m.mailboxId === mailbox.id)?.role ?? "ADMIN",
     }))
 }
 

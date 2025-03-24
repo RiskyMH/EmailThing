@@ -1,10 +1,10 @@
 
 [serve.static]
 plugins = ["bun-plugin-tailwind"]
-env = "BUN_PUBLIC_*"
+env = "NEXT_PUBLIC_*"
 
 
 
 [build]
 plugins = ["bun-plugin-tailwind"]
-env = "BUN_PUBLIC_*"
+env = "NEXT_PUBLIC_*"

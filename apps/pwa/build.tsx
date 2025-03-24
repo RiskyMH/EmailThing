@@ -47,6 +47,7 @@ const result = await build({
   target: "browser",
   sourcemap: "linked",
   splitting: true,
+  env: "NEXT_PUBLIC_*",
   external: [
     "*.woff2",
     "*.woff",

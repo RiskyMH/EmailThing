@@ -43,7 +43,7 @@ export function MainNavItem({
     title: string;
     mobileShow?: boolean;
 }>) {
-    const match = useMatch(href)
+    const match = useMatch(href + "/*")
     // const segment = useSelectedLayoutSegment();
 
     return (
