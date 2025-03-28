@@ -51,6 +51,25 @@ export async function sendEmail(data: {
         data.data = data.data.asRaw();
     }
 
+    // todo: ...
+    if (!data.dkim) {
+        if (domain === "emailthing.app" && env.EMAIL_DKIM_PRIVATE_KEY) {
+            data.dkim = {
+                domain: "emailthing.app", // d=
+                selector: "rsa", // s=
+                privateKey: env.EMAIL_DKIM_PRIVATE_KEY,
+            }
+        } else if (domain === "emailthing.xyz" && env.EMAIL_DKIM_PRIVATE_KEY) {
+            data.dkim = {
+                domain: "emailthing.xyz", // d=
+                selector: "emailthing.rsa", // s=
+                privateKey: env.EMAIL_DKIM_PRIVATE_KEY,
+            }
+        } else {
+
+        }
+    }
+
     const signedData = await withDKIM(data.data, data.dkim);
     const e = await fetch("https://vps2.riskymh.dev/api/send-email", {
         method: "POST",
@@ -96,6 +115,9 @@ export async function withDKIM(
         return message;
     }
 
+    // todo: maybe be better and allow fallback, but i think its actually hurting the reputation
+    if (!dkim) return message;
+
     const _message = `${message.replace(/\r?\n/g, "\r\n").trim()}\r\n`;
 
     const signResult = await dkimSign(_message, {
@@ -106,7 +128,7 @@ export async function withDKIM(
         signatureData: [
             {
                 signingDomain: dkim?.domain || "emailthing.app", // d=
-                selector: dkim?.selector || "emailthing.rsa", // s=
+                selector: dkim?.selector || "emailthing", // s=
                 privateKey: dkim?.privateKey || env.EMAIL_DKIM_PRIVATE_KEY,
                 // algorithm: 'rsa-sha256',
                 canonicalization: "relaxed/relaxed", // c=
