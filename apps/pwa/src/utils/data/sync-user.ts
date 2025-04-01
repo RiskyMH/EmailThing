@@ -129,34 +129,36 @@ export async function proposeSync(changes?: ChangesRequest, lastSync?: Date) {
 }
 
 
+const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+
+// Parse values in the response data - convert nulls to 0
+export const parseValues = (obj: any) => {
+    if (!obj) return obj;
+    for (const key of Object.keys(obj)) {
+        // Handle date fields, excluding categoryId
+        if ((key.toLowerCase().endsWith('at') || key.toLowerCase().includes('date')) && dateRegex.test(obj[key])) {
+            obj[key] = new Date(obj[key]);
+        }
+        // Handle boolean fields
+        else if (typeof obj[key] === 'boolean') {
+            obj[key] = obj[key] ? 1 : 0;
+        }
+        // Handle all other fields
+        else {
+            obj[key] = obj[key] ?? 0;
+        }
+    }
+    return obj;
+};
+
+// Parse values in arrays and filter out deleted items
+export const parseValuesInArray = <T extends any[]>(arr: T) => {
+    return arr?.filter(item => !item.isDeleted).map(parseValues) as T;
+};
+
 async function parseSyncResponse(response: Response, minimal = false) {
     // Parse response
     const data = await response.json() as (typeof minimal extends true ? MinimalChangesResponse : ChangesResponse);
-
-    // Parse values in the response data - convert nulls to 0
-    const parseValues = (obj: any) => {
-        if (!obj) return obj;
-        for (const key of Object.keys(obj)) {
-            // Handle date fields, excluding categoryId
-            if ((key.toLowerCase().includes('at') || key.toLowerCase().includes('date')) && !key.endsWith('Id')) {
-                obj[key] = obj[key] ? new Date(obj[key]) : 0;
-            }
-            // Handle boolean fields
-            else if (typeof obj[key] === 'boolean') {
-                obj[key] = obj[key] ? 1 : 0;
-            }
-            // Handle all other fields
-            else {
-                obj[key] = obj[key] ?? 0;
-            }
-        }
-        return obj;
-    };
-
-    // Parse values in arrays and filter out deleted items
-    const parseValuesInArray = <T extends any[]>(arr: T) => {
-        return arr?.filter(item => !item.isDeleted).map(parseValues) as T;
-    };
 
     await db.transaction('rw', [
         db.emails,

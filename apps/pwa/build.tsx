@@ -179,7 +179,7 @@ const promises = []
 for (const route of routes) {
   if (route.children) {
     for (const child of route.children) {
-      promises.push(processRoute(child))
+      promises.push(processRoute({preferTemplate: route.preferTemplate, ...child}))
     }
   } else {
     promises.push(processRoute(route))
