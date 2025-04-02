@@ -62,5 +62,22 @@ export function getData(data: FormData): SaveActionProps {
 }
 
 export function makeHtml(html: string) {
-    return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><meta name="color-scheme" content="light dark"/><meta name="supported-color-schemes" content="light dark"/><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><style type="text/css" rel="stylesheet" media="all">:root{color-scheme: light dark !important;supported-color-schemes: light dark !important;font-family:Arial, sans-serif}</style><style>@media(prefers-color-scheme:dark){.main{background-color:rgb(51,51,51) !important;color:white !important;}}</style><style>blockquote{border-left: 3px solid #cccccc80;padding-left:10px;}</style><html><body style="font-family: Arial, sans-serif;"><div class="main" style="background-color:rgb(241,240,245);color:black;padding:20px;border-radius:0.5rem;height:100%;">${html}</div></body></html>`;
+    return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="color-scheme" content="light dark"/>
+<meta name="supported-color-schemes" content="light dark"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css" rel="stylesheet" media="all">
+  :root{color-scheme: light dark !important;supported-color-schemes: light dark !important;font-family:Arial, sans-serif}
+  @media(prefers-color-scheme:dark){.main{background-color:rgb(51,51,51) !important;color:white !important;}}
+  blockquote{border-left: 3px solid #cccccc80;padding-left:10px;}
+</style>
+</head>
+<body style="font-family: Arial, sans-serif;margin:0px;padding:0px;background-color:transparent">
+<div class="main" style="background-color:rgb(241,240,245);color:black;padding:20px;border-radius:0.5rem;height:100%;">
+${html}
+</div>
+</body>
+</html>`;
 }

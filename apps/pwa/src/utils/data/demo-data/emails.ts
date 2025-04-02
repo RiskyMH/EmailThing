@@ -1,9 +1,9 @@
 import { DBEmail, DBEmailDraft } from "../types";
 import { demoMailboxId } from "./mailbox";
 import { welcomeEmail } from "./email.macro" with { type: "macro" };
-import { makeHtml } from "@/(email)/mail/[mailbox]/draft/[draft]/tools";
+import { makeHtml } from "@/app/compose/tools";
 
-const welcome = await welcomeEmail({ mailboxId: "demo", username: "User" })
+const welcome = welcomeEmail({ mailboxId: "demo", username: "User" })
 export const demoEmails: DBEmail[] = [
     {
         id: "1",

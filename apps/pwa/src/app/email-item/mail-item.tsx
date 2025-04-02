@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ChevronDown, ChevronRight, CodeIcon, DownloadIcon, EllipsisVerticalIcon, FileArchiveIcon, FileTextIcon, ImageIcon, Loader2, PaperclipIcon, VideoIcon, type LucideIcon } from "lucide-react"
 import { parse as markedParse } from "marked"
-import { Suspense, useEffect, useRef } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import Loading from "./loading"
 import Link from "@/components/link"
@@ -67,14 +67,14 @@ function MailItem() {
 
 
     return (
-        <div className="flex size-full min-w-0 flex-col gap-3 overflow-auto p-5">
+        <div className="flex size-full min-w-0 flex-col gap-3 overflow-auto p-3 sm:p-5">
             <TopButtons mailboxId={params.mailboxId} emailId={params.mailId} email={email} onUpdateEmail={updateEmail} />
             <Title email={email} mailboxId={params.mailboxId} />
 
-            <h1 className="mt-3 break-words font-bold text-2xl sm:text-3xl">{email.subject}</h1>
-            <div className="flex flex-col gap-3 rounded-md bg-card p-3">
+            <h1 className="mt-3 px-3 break-words font-bold text-2xl sm:text-3xl">{email.subject}</h1>
+            <div className="flex flex-col gap-3 rounded-md bg-card">
                 {/* from info and gravatar */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 p-3 pb-0">
                     <EmailPicture email={email.sender?.address || ""} fallback={(email.sender?.name || email.sender?.address || '')?.slice(0, 2).toUpperCase()} />
 
                     <div className="flex flex-col overflow-hidden">
@@ -287,7 +287,7 @@ function Title({ email, mailboxId }: { email?: { subject?: string | null }, mail
 
 function EmailContent({
     email,
-}: { email: { body: string; html?: string | null } }) {
+}: { email: { body: string; html?: string | null, subject?: string | null } }) {
     const searchParams = useSearchParams()[0]
     const lastView = (localStorage || {}).getItem('last-view')
     const view = (
@@ -296,14 +296,34 @@ function EmailContent({
         || "markdown"
     ) as "text" | "markdown" | "html" | "html-raw"
 
+    const ref = useRef<HTMLIFrameElement>(null)
+    const [htmlLoaded, setHtmlLoaded] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setHtmlLoaded(true)
+            if (ref.current?.contentWindow?.document.documentElement) {
+                ref.current.style.height = `${ref.current.contentWindow.document.documentElement.scrollHeight}px`;
+            } else if (ref.current) {
+                ref.current.style.height = 'calc(100vh - 100px)';
+            }
+        }
+        window.addEventListener("resize", handleResize)
+        ref.current?.addEventListener("load", handleResize)
+        return () => {
+            window.removeEventListener("resize", handleResize)
+            ref.current?.removeEventListener("load", handleResize)
+        }
+    }, [email.html])
+
     if (view === "text") {
-        return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal">{email.body}</p>;
+        return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal p-3 pt-0">{email.body}</p>;
     }
 
     else if (view === "markdown") {
         return (
             <div
-                className="prose dark:prose-invert max-w-full overflow-auto break-words"
+                className="prose dark:prose-invert max-w-full overflow-auto break-words p-3 pt-0"
                 dangerouslySetInnerHTML={{
                     __html:
                         parseHTML(markedParse(email.body, { breaks: true, async: false }), false)
@@ -314,12 +334,17 @@ function EmailContent({
 
     else if (view === "html") {
         return (
-            <iframe
-                className="h-screen w-full rounded-lg bg-card"
-                sandbox="allow-popups"
-                srcDoc={parseHTML(email.html || email.body, true)}
-                title="The Email"
-            />
+            <>
+                <iframe
+                    ref={ref}
+                    className="w-full rounded-b-lg bg-card"
+                    style={{ height: '0px', maxHeight: '100%' }}
+                    sandbox="allow-popups allow-same-origin"
+                    srcDoc={parseHTML(email.html || email.body, true)}
+                    title={email.subject || "The Email"}
+                />
+                {!htmlLoaded && <EmailContentSpinner className="h-36" />}
+            </>
         );
     }
 
@@ -330,9 +355,9 @@ function EmailContent({
     return null;
 }
 
-function EmailContentSpinner() {
+function EmailContentSpinner({ className }: { className?: string }) {
     return (
-        <div className="flex h-screen w-full flex-col items-center justify-center fade-in">
+        <div className={cn("flex h-screen w-full flex-col items-center justify-center fade-in", className)}>
             <Loader2 className="size-12 animate-spin text-muted-foreground" />
         </div>
     );

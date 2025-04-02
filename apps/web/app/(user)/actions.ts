@@ -121,7 +121,7 @@ export async function changeBackupEmail(_prevState: any, data: FormData, redirec
     });
     mail.setRecipient(email);
     mail.setSubject("Someone has added you as a backup email! 🎉");
-    const message = `Hello!
+    const message = `### Hello!
 
 **${user.username}** has added you as a backup email on EmailThing! 🎉
 
@@ -133,7 +133,7 @@ Please click here to continue: https://emailthing.app/settings/authentication?ve
 
 If you did not expect this email or have any questions, please contact us at contact@emailthing.app
 `;
-    const html = makeHtml(`\n${await marked.parse(message)}`);
+    const html = makeHtml(await marked.parse(message));
 
     mail.addMessage({
         contentType: "text/plain",

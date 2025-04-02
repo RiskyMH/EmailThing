@@ -41,7 +41,7 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
     // const email = data ? data[0] : { isStarred: false, binnedAt: null, category: null }
 
     return (
-        <div className="-mt-1 flex w-full min-w-0 flex-row gap-6 border-b-2 pb-3 text-muted-foreground">
+        <div className="sm:-mt-1 flex w-full min-w-0 flex-row gap-6 border-b-2 pb-3 text-muted-foreground">
             <BackButton fallbackUrl={`/mail/${mailboxId}`} />
 
             <div className="-mx-2 border-e-2" />

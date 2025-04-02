@@ -1,6 +1,6 @@
 import { marked } from "marked";
 
-export async function welcomeEmail({ mailboxId, username }: { mailboxId: string; username: string }) {
+export function welcomeEmail({ mailboxId, username }: { mailboxId: string; username: string }) {
     const msg = `### Hi **@${username}**,
 
 Welcome to EmailThing!
@@ -35,9 +35,7 @@ Best regards,
 [contact page]: https://emailthing.app/settings/emailthing-me
 [GitHub]: https://github.com/RiskyMH/EmailThing`;
 
-    const html = (typeof window === "undefined" && process?.platform === "win32")
-        ? undefined
-        : await marked.parse(msg)
+    const html = marked.parse(msg, { breaks: true, async: false })
 
     const snippet = `Hi @${username}, Welcome to EmailThing! We're excited to have you on board. With EmailThing, you can enjoy a range of features designed to make managing your emails a breeze`;
     const title = "Welcome to EmailThing!";
