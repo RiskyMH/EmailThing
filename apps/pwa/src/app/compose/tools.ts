@@ -74,7 +74,7 @@ export function makeHtml(html: string) {
   blockquote{border-left: 3px solid #cccccc80;padding-left:10px;}
 </style>
 </head>
-<body style="font-family: Arial, sans-serif;margin:0px;padding:0px;background-color:transparent">
+<body style="font-family: Arial, sans-serif;padding:0px;background-color:transparent">
 <div class="main" style="background-color:rgb(241,240,245);color:black;padding:20px;border-radius:0.5rem;height:100%;">
 ${html}
 </div>

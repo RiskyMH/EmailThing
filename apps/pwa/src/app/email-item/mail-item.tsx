@@ -314,7 +314,7 @@ function EmailContent({
             window.removeEventListener("resize", handleResize)
             ref.current?.removeEventListener("load", handleResize)
         }
-    }, [email.html])
+    }, [email.html, view])
 
     if (view === "text") {
         return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal p-3 pt-0">{email.body}</p>;
@@ -349,7 +349,7 @@ function EmailContent({
     }
 
     else if (view === "html-raw") {
-        return <p className="leading-normal font-mono overflow-x-auto h-full rounded-lg bg-tertiary p-3 whitespace-pre text-sm">{email.html || email.body}</p>;
+        return <p className="leading-normal font-mono overflow-x-auto h-full rounded-b-lg bg-tertiary p-3 whitespace-pre text-sm">{email.html || email.body}</p>;
     }
 
     return null;
