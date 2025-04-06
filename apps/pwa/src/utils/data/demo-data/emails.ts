@@ -4,19 +4,22 @@ import { welcomeEmail } from "./email.macro" with { type: "macro" };
 import { makeHtml } from "@/app/compose/tools";
 
 const welcome = welcomeEmail({ mailboxId: "demo", username: "User" })
+const welcomeBody =  welcome.body
+const welcomeHtml = makeHtml(welcome.html)
+
 export const demoEmails: DBEmail[] = [
     {
         id: "1",
         mailboxId: demoMailboxId,
         subject: "Welcome to EmailThing!",
         snippet: welcome.snippet,
-        body: welcome.body,
+        body: welcomeBody,
         createdAt: new Date(),
         updatedAt: new Date(),
         isRead: 0,
         isStarred: 1,
         isSender: 0,
-        html: welcome.html ? makeHtml(welcome.html) : 0,
+        html: welcomeHtml,
         size: 1024,
         raw: "s3",
         replyTo: "hello@riskymh.dev",
@@ -265,7 +268,7 @@ export const demoDrafts: DBEmailDraft[] = [
         id: "1",
         mailboxId: demoMailboxId,
         subject: "Welcome to EmailThing!",
-        body: (welcome.html ? welcome.html + "<!--tiptap-->" : undefined) || welcome.body,
+        body: welcomeHtml + "<!--tiptap-->",
         createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
         updatedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
         to: [],
