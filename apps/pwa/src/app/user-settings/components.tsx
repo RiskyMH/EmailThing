@@ -10,7 +10,7 @@ import { Textarea, type TextareaProps } from "@/components/ui/textarea";
 import { cn } from "@/utils/tw";
 import type { SelectProps } from "@radix-ui/react-select";
 import type { SwitchProps } from "@radix-ui/react-switch";
-import { Loader2, ChevronDown, ChevronDown } from "lucide-react";
+import { Loader2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useId } from "react";

@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { build, type BuildConfig } from "bun";
 import plugin from "bun-plugin-tailwind";
+import { reactCompiler } from "./src/build-plugins/react-compiler";
 import { existsSync } from "fs";
 import { rm, cp, readdir, writeFile } from "fs/promises";
 import path from "path";
@@ -41,7 +42,7 @@ console.log(`📄 Found ${entrypoints.length} HTML ${entrypoints.length === 1 ? 
 const result = await build({
   entrypoints,
   outdir,
-  plugins: [plugin],
+  plugins: [plugin, reactCompiler()],
   // packages: 'external',
   minify: true,
   target: "browser",

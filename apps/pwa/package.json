@@ -16,10 +16,12 @@
     "install": "bun _dev.ts revert"
   },
   "dependencies": {
+    "@babel/core": "^7.26.10",
     "@fontsource/inter": "^5.2.5",
     "@paralleldrive/cuid2": "^2.2.2",
     "@tailwindcss/typography": "^0.5.16",
     "@types/bun": "^1.2.8",
+    "babel-plugin-react-compiler": "^19.0.0-beta-e993439-20250328",
     "bun-plugin-tailwind": "^0.0.15",
     "clsx": "^2.1.1",
     "dexie": "^4.0.11",
