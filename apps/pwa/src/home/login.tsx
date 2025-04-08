@@ -64,8 +64,13 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { db } from "@/utils/data/db";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
+
+
+// const apiUrl = "https://emailthing.app"
+const apiUrl = "http://localhost:3001"
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
@@ -91,13 +96,19 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             // router.refresh();
             // setLoading(false);
 
-            const res = await fetch("https://emailthing.app/api/internal/login", {
+            const res = await fetch(`${apiUrl}/api/internal/login`, {
                 method: "POST",
                 body: JSON.stringify({
                     username: (event.target as HTMLFormElement).username.value,
                     password: (event.target as HTMLFormElement).password.value
                 })
             });
+
+            if (!res.ok) {
+                setHadAnError((event.target as HTMLFormElement).username.value ?? "unknown");
+                setLoading(false);
+                return void toast.error(await res.text());
+            }
 
             const data = await res.json();
             if (data.error) {
@@ -108,16 +119,23 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
             const { token, mailboxes } = data;
 
-            document.cookie = `token=${token}; path=/;`;
-            localStorage.setItem("token", token);
-            localStorage.removeItem("lastSynced");
-            // document.cookie = `mailboxId=${mailboxes[0]}; path=/;`;
+            // document.cookie = `token=${token}; path=/;`;
+            // localStorage.setItem("token", token);
+            // localStorage.removeItem("lastSynced");
+            await db.open()
+            await db.localSyncData.put({
+                token,
+                lastSync: 0,
+                isSyncing: true,
+                userId: data.userId,
+                apiUrl
+            }, data.userId)
 
             // Get mailboxId from cookie if it exists and is valid, otherwise use first mailbox
-            const mailboxId = document.cookie.includes('mailboxId=') 
+            const mailboxId = document.cookie.includes('mailboxId=')
                 ? document.cookie.split('mailboxId=')[1].split(';')[0]
                 : undefined;
-            
+
             const selectedMailbox = mailboxId && mailboxes.includes(mailboxId)
                 ? mailboxId
                 : mailboxes[0];
@@ -127,7 +145,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
             toast.success("Welcome back!");
 
-
+            db.initialFetchSync()
         });
     }
 
@@ -249,7 +267,7 @@ function PasskeysLogin() {
             className={cn(buttonVariants({ variant: "secondary", className: "gap-2" }))}
             // onClick={handleLogin}
             onClick={() => toast.warning("todo")}
-            // disabled={isPending || !support}
+        // disabled={isPending || !support}
         >
             {/* {loading ? <Loader2Icon className="mr-2 size-4 animate-spin" /> : <KeyRoundIcon className="mr-2 size-4" />} */}
             <KeyRoundIcon className="mr-2 size-4" />

@@ -247,7 +247,7 @@ function MailItem() {
 
                 {/* attachments */}
                 {email.attachments.length > 0 && (
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-3">
                         {email.attachments.map((a) => (
                             <a
                                 key={a.id}
@@ -289,7 +289,7 @@ function EmailContent({
     email,
 }: { email: { body: string; html?: string | null, subject?: string | null } }) {
     const searchParams = useSearchParams()[0]
-    const lastView = (localStorage || {}).getItem('last-view')
+    const lastView = (localStorage || {}).getItem('email-item:last-view')
     const view = (
         searchParams.get("view")
         || (lastView?.startsWith("html") && !email?.html ? "markdown" : lastView)
@@ -368,10 +368,10 @@ function ViewSelect({
 }: { htmlValid?: boolean }) {
     const navigate = useNavigate()
     const searchParams = useSearchParams()[0]
-    const view = (searchParams.get("view") || (localStorage || {}).getItem('last-view') || "markdown")
+    const view = (searchParams.get("view") || (localStorage || {}).getItem('email-item:last-view') || "markdown")
 
     function onValueChange(v: string) {
-        localStorage.setItem('last-view', v)
+        localStorage.setItem('email-item:last-view', v)
         navigate(`?view=${v}`, { replace: true });
     }
 

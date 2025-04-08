@@ -5,12 +5,17 @@ import { useTransition, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/utils/tw";
 import { useParams } from "react-router-dom";
-import { syncUser } from "@/utils/data/sync-user";
+import { db } from "@/utils/data/db";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export default function RefreshButton({ className }: { className?: string }) {
     const online = useOnline();
     const [isPending, startTransition] = useTransition();
     const params = useParams<{ mailboxId: string }>();
+
+    const syncing = useLiveQuery(
+        () => db.localSyncData.toArray(),
+    )
 
     const reload = () => {
         if (params.mailboxId === 'demo') {
@@ -22,9 +27,7 @@ export default function RefreshButton({ className }: { className?: string }) {
                 return
             }
             if (isPending) return
-            startTransition(async () => {
-                await syncUser(false, new Date(localStorage.getItem('last-sync') || 0))
-            })
+            startTransition(async () => { await db.sync() })
         }
     }
 
@@ -66,7 +69,7 @@ export default function RefreshButton({ className }: { className?: string }) {
         >
             {online === false
                 ? <CloudOff className="size-5 text-muted-foreground" />
-                : <RotateCcwIcon className={cn(isPending && "animate-spin animate-direction-reverse", "size-5 text-muted-foreground")} />
+                : <RotateCcwIcon className={cn((isPending || syncing?.some(s => s.isSyncing)) && "animate-spin animate-direction-reverse", "size-5 text-muted-foreground")} />
             }
         </Button>
 

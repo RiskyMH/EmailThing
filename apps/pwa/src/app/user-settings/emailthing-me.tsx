@@ -5,13 +5,18 @@ import { CardForm, ClientSelect, ClientSwitch } from "./components";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getAllAliases, getMe } from "@/utils/data/queries/user";
 import { toast } from "sonner";
+import changeUserSettings from "./api";
 
-const changePublicEmailStatus = async (enabled: boolean) => {
-    toast.info("todo")
+const changePublicEmailStatus = (formData: FormData) => {
+    return changeUserSettings("change-public-email-status", {
+        enabled: formData.get("enabled") === "true",
+    })
 }
 
-const changePublicEmail = async (email: string) => {
-    toast.info("todo")
+const changePublicEmail = async (_: any, formData: FormData) => {
+    return changeUserSettings("change-public-email", {
+        email: formData.get("email") as string,
+    })
 }
 
 

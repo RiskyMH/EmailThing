@@ -15,3 +15,16 @@ export const isValidOrigin = (origin: string) => {
     }
     return allowedOrigins.includes(origin)
 }
+
+import { cookies, headers } from "next/headers";
+import { getUserByToken } from "@/utils/jwt";
+
+export const getCurrentUser = async () => {
+    const token = (await cookies()).get("token")?.value || (await headers()).get("authorization");
+    if (!token) return null;
+    try {
+        return await getUserByToken(token);
+    } catch (e) {
+        return null;
+    }
+};

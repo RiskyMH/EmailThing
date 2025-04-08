@@ -1,5 +1,4 @@
 import { db } from '../db';
-import { proposeSync } from '../sync-user';
 import type { DBEmail, DBMailboxCategory, DBEmailDraft } from '../types';
 import Dexie from 'dexie';
 import { createId } from '@paralleldrive/cuid2';
@@ -190,6 +189,10 @@ export async function getEmailList({
                     item.subject,
                     item.body,
                     item.snippet,
+                    item.sender.name,
+                    item.sender.address,
+                    item.recipients.map(r => r.name).join(', '),
+                    item.recipients.map(r => r.address).join(', '),
                 ].filter(Boolean);
 
                 return searchableFields.some(field =>
@@ -215,46 +218,29 @@ export async function getEmailList({
             .toArray();
 
     // Get sender/recipient info for each email
-    const emailsWithDetails = await Promise.all(
-        emails.map(async (email) => {
+    const emailsWithDetails =
+        emails.map((email) => {
             if (type === 'drafts') {
                 return {
                     ...email,
                     from: {
-                        name: "demo@emailthing.app",
-                        address: "demo@emailthing.app"
+                        address: email.from
                     },
-                    to: email.to || [],
+                    to: email.to,
                     isRead: true,
+                    body: ''
                 };
             }
 
-            const [sender, recipients, attachments] = await Promise.all([
-                db.emailSenders
-                    .where('emailId')
-                    .equals(email.id)
-                    .first(),
-                db.emailRecipients
-                    .where('emailId')
-                    .equals(email.id)
-                    .toArray(),
-                db.emailAttachments
-                    .where('emailId')
-                    .equals(email.id)
-                    .first()
-            ]);
-
             return {
                 ...email,
-                from: sender || {
-                    name: "Unknown",
-                    address: "unknown@emailthing.com"
-                },
-                to: recipients || [],
-                hasAttachments: attachments ? true : false
+                from: email.sender,
+                to: email.recipients,
+                html: '',
+                text: ''
             };
         })
-    );
+
 
     return {
         emails: emailsWithDetails,
@@ -310,10 +296,25 @@ export async function getEmailCategoriesList({
     if (search) {
         const searchLower = search.toLowerCase();
         const allCount = await emailQuery.filter(item => {
-            const searchableFields = [item.subject, item.body, item.snippet].filter(Boolean);
-            return searchableFields.some(field =>
-                (field || "")?.toLowerCase().includes(searchLower)
-            );
+            if (type === 'drafts') {
+                const searchableFields = [item.subject, item.body].filter(Boolean);
+                return searchableFields.some(field =>
+                    (field || "")?.toLowerCase().includes(searchLower)
+                );
+            } else {
+                const searchableFields = [
+                    item.subject,
+                    item.body,
+                    item.snippet,
+                    item.sender.name,
+                    item.sender.address,
+                    item.recipients.map(r => r.name).join(', '),
+                    item.recipients.map(r => r.address).join(', '),
+                ].filter(Boolean);
+                return searchableFields.some(field =>
+                    (field || "")?.toLowerCase().includes(searchLower)
+                );
+            }
         }).count();
 
         return {
@@ -407,7 +408,7 @@ export const getEmail = (mailboxId: string, emailId: string) => {
 // Helper function to get a single email with related data
 export async function getEmailWithDetails(mailboxId: string, emailId: string) {
     return db.transaction('r',
-        [db.emails, db.emailSenders, db.emailRecipients, db.emailAttachments],
+        [db.emails],
         async () => {
             const email = await db.emails
                 .where("[id+mailboxId]")
@@ -416,27 +417,7 @@ export async function getEmailWithDetails(mailboxId: string, emailId: string) {
 
             if (!email) return null;
 
-            const [sender, recipients, attachments] = await Promise.all([
-                db.emailSenders
-                    .where('emailId')
-                    .equals(emailId)
-                    .first(),
-                db.emailRecipients
-                    .where('emailId')
-                    .equals(emailId)
-                    .toArray(),
-                db.emailAttachments
-                    .where('emailId')
-                    .equals(emailId)
-                    .toArray()
-            ]);
-
-            return {
-                ...email,
-                sender,
-                recipients,
-                attachments
-            };
+            return email;
         }
     );
 }
@@ -467,28 +448,14 @@ export async function updateEmailProperties(
             await db.transaction('rw',
                 [db.emails],
                 async () => {
-                    if (mailboxId === 'demo') {
-                        // Permanent delete from trash
-                        await Promise.all([
-                            db.emails.delete(emailId),
-                            db.emailSenders.where('emailId').equals(emailId).delete(),
-                            db.emailRecipients.where('emailId').equals(emailId).delete(),
-                            db.emailAttachments.where('emailId').equals(emailId).delete()
-                        ]);
-                    } else {
-                        await db.emails
-                            .where('id')
-                            .equals(emailId)
-                            .modify({ isDeleted: 1 });
-                        // will properly delete the other tables on api response
-                    }
+                    await db.emails
+                        .where('id')
+                        .equals(emailId)
+                        .modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() });
                 }
             );
         } else {
-            // Update using modify instead of delete/add
-            // Update using modify instead of delete/add
-
-            const modify: Partial<DBEmail> = {}
+            const modify: Partial<DBEmail> = { needsSync: 1, updatedAt: new Date() }
             if (updates.isStarred !== undefined) modify.isStarred = updates.isStarred === true ? 1 : 0
             if (updates.isRead !== undefined) modify.isRead = updates.isRead === true ? 1 : 0
             if (updates.categoryId !== undefined) modify.categoryId = updates.categoryId || 0
@@ -500,14 +467,7 @@ export async function updateEmailProperties(
         }
     });
     if (mailboxId !== 'demo') {
-        await proposeSync({
-            emails: [{
-                id: emailId,
-                mailboxId,
-                lastUpdated: new Date().toISOString(),
-                ...updates
-            }],
-        }, new Date(localStorage.getItem('last-sync') || 0))
+        await db.sync()
     }
 }
 
@@ -547,18 +507,11 @@ export async function getDraftEmail(mailboxId: string, draftId: string) {
 
 export async function updateDraftEmail(mailboxId: string, draftId: string, updates: Partial<DBEmailDraft>) {
     await db.transaction('rw', [db.draftEmails], () =>
-        db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).modify(updates)
+        db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).modify({ ...updates, needsSync: 1, updatedAt: new Date() })
     );
 
     if (mailboxId !== 'demo') {
-        await proposeSync({
-            draftEmails: [{
-                id: draftId,
-                mailboxId,
-                lastUpdated: new Date().toISOString(),
-                ...updates
-            }]
-        }, new Date(localStorage.getItem('last-sync') || 0))
+        await db.sync()
     }
 
 }
@@ -567,18 +520,11 @@ export async function deleteDraftEmail(mailboxId: string, draftId: string) {
     await db.transaction('rw', [db.draftEmails], () =>
         mailboxId === "demo"
             ? db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).delete()
-            : db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).modify({ isDeleted: 1 })
+            : db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() })
     );
 
     if (mailboxId !== 'demo') {
-        await proposeSync({
-            draftEmails: [{
-                id: draftId,
-                mailboxId,
-                lastUpdated: new Date().toISOString(),
-                hardDelete: true
-            }]
-        }, new Date(localStorage.getItem('last-sync') || 0))
+        await db.sync()
     }
 
 }
@@ -592,7 +538,7 @@ export async function createDraftEmail(mailboxId: string, options?: {
     const draftId = createId();
     let draftData = {} as DBEmailDraft
 
-    await db.transaction('rw', [db.draftEmails, db.emails, db.emailRecipients, db.emailSenders, db.mailboxAliases], async () => {
+    await db.transaction('rw', [db.draftEmails, db.emails, db.mailboxAliases], async () => {
         const maybeEmailId = options?.reply || options?.replyAll || options?.forward
         const email = maybeEmailId ? await db.emails.where("[id+mailboxId]").equals([maybeEmailId, mailboxId]).first() : null;
 
@@ -600,17 +546,15 @@ export async function createDraftEmail(mailboxId: string, options?: {
             let subject = email.subject || '';
             let to: { name: string | null; address: string; cc?: 'cc' | 'bcc' | null }[] = [];
 
-            const [recipients, sender, aliases] = await Promise.all([
-                db.emailRecipients.where('emailId').equals(email.id).toArray(),
-                db.emailSenders.where('emailId').equals(email.id).first(),
+            const [aliases] = await Promise.all([
                 db.mailboxAliases.where('mailboxId').equals(mailboxId).toArray(),
             ])
 
             const aliasesList = aliases.map((a) => a.alias);
             const defaultAlias = aliases.find((a) => a.alias === options.from)?.alias;
-            const yourAlias = recipients.find((r) => aliasesList.includes(r.address))?.address || defaultAlias;
+            const yourAlias = email.recipients.find((r) => aliasesList.includes(r.address))?.address || defaultAlias;
 
-            const replyTo = email.replyTo ? { address: email.replyTo, name: null } : sender;
+            const replyTo = email.replyTo ? { address: email.replyTo, name: null } : email.sender;
 
             if (options.reply) {
                 if (!subject?.startsWith("Re: ")) {
@@ -625,7 +569,7 @@ export async function createDraftEmail(mailboxId: string, options?: {
                 }
                 to = [
                     { name: replyTo?.name || null, address: replyTo?.address || '', cc: null },
-                    ...recipients.map(r => ({
+                    ...email.recipients.map(r => ({
                         name: r.name || null,
                         address: r.address || '',
                         cc: r.cc ? "cc" as const : null
@@ -638,18 +582,18 @@ export async function createDraftEmail(mailboxId: string, options?: {
             }
 
             if (email.isSender == 1 && (options.reply || options.replyAll || options.forward)) {
-                to = recipients.map(r => ({
+                to = email.recipients.map(r => ({
                     name: r.name || null,
                     address: r.address || '',
                     cc: r.cc ? "cc" as const : null
                 })).filter(r => r.address !== yourAlias);
             }
 
-            let emailBody = `<p></p>\n<p></p>\n<p>\nOn ${email.createdAt.toLocaleString()}, ${sender?.name ? `${sender.name} &lt;${sender.address}&gt;` : `${sender?.address ?? "*someone@idk.com*"}`} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`;
+            let emailBody = `<p></p>\n<p></p>\n<p>\nOn ${email.createdAt.toLocaleString()}, ${email.sender?.name ? `${email.sender.name} &lt;${email.sender.address}&gt;` : `${email.sender?.address ?? "*someone@idk.com*"}`} wrote:\n\n> ${email.body.split("\n").join("\n> ")}`;
             if (options.forward) {
-                const to = recipients.filter(t => !t.cc).map(t => t.name ? `${t.name} &lt;${t.address}&gt;` : t.address);
-                const cc = recipients.filter(t => t.cc).map(t => t.name ? `${t.name} &lt;${t.address}&gt;` : t.address);
-                const from = sender?.name ? `<b>${sender.name}</b> &lt;${sender.address}&gt;` : `${sender?.address ?? "*someone@idk.com*"}`;
+                const to = email.recipients.filter(t => !t.cc).map(t => t.name ? `${t.name} &lt;${t.address}&gt;` : t.address);
+                const cc = email.recipients.filter(t => t.cc).map(t => t.name ? `${t.name} &lt;${t.address}&gt;` : t.address);
+                const from = email.sender?.name ? `<b>${email.sender.name}</b> &lt;${email.sender.address}&gt;` : `${email.sender?.address ?? "*someone@idk.com*"}`;
                 emailBody = `<p></p>\n<p></p>\n<p>\n---------- Forwarded message ---------<br>\nFrom: ${from}<br>\nDate: ${email.createdAt.toLocaleString()}<br>\nSubject: ${email.subject}<br>\nTo: ${to.join(", ")}${cc.length > 0 ? `<br>\nCc: ${cc.join(", ")}` : ""}<br>\n</p>\n\n${email.body}`;
             }
 
@@ -669,7 +613,8 @@ export async function createDraftEmail(mailboxId: string, options?: {
                 ] : [],
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                isDeleted: 0
+                isDeleted: 0,
+                isNew: true,
             }
 
         } else {
@@ -683,7 +628,8 @@ export async function createDraftEmail(mailboxId: string, options?: {
                 body: '',
                 to: [],
                 headers: [],
-                isDeleted: 0
+                isDeleted: 0,
+                isNew: true,
             }
         }
 
@@ -693,23 +639,7 @@ export async function createDraftEmail(mailboxId: string, options?: {
     });
     if (mailboxId !== 'demo') {
         // intentionally not awaited
-        proposeSync({
-            draftEmails: [{
-                lastUpdated: new Date().toISOString(),
-                ...draftData,
-                id: `new:${draftId}`,
-                mailboxId,
-                from: draftData?.from || '',
-                // createdAt: new Date(),
-                // updatedAt: new Date(),
-                subject: draftData?.subject || '',
-                body: draftData?.body || '',
-                to: draftData?.to || [],
-                headers: draftData?.headers || [],
-                isDeleted: false,
-
-            }]
-        }, new Date(localStorage.getItem('last-sync') || 0))
+        db.sync()
     }
 
     return draftId;

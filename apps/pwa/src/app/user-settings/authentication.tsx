@@ -25,14 +25,19 @@ import { getMe, getPasskeys } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { DeleteButton } from "../compose/editor.client";
+import changeUserSettings from "./api";
 
-
-const changePassword = async (password: string) => {
-    toast.info("todo")
+const changePassword =  (_: any, formData: FormData) => {
+    return changeUserSettings("change-password", {
+        oldPassword: formData.get("password") as string,
+        newPassword: formData.get("new-password") as string,
+    })
 }
 
-const changeBackupEmail = async (email: string) => {
-    toast.info("todo")
+const changeBackupEmail =  (_: any, formData: FormData) => {
+    return changeUserSettings("change-backup-email", {
+        email: formData.get("email") as string,
+    })
 }
 
 const deletePasskey = async (id: string) => {
@@ -217,7 +222,7 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
         (async () => {
             const { UAParser } = await import("ua-parser-js")
             console.log(new UAParser(navigator.userAgent).getResult())
-        })().catch(e=> {console.error(e); toast.error("Failed to get user agent")})
+        })().catch(e => { console.error(e); toast.error("Failed to get user agent") })
 
         if (!userId || !username) return toast.error("No user ID or username...?");
         startTransition(async () => {

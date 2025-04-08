@@ -29,6 +29,17 @@ export const demoEmails: DBEmail[] = [
         categoryId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "EmailThing",
+            address: "hello@emailthing.app",
+        },
+        recipients: [{
+            id: "1",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "2",
@@ -51,6 +62,17 @@ export const demoEmails: DBEmail[] = [
         categoryId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "Google Security",
+            address: "security@google.com",
+        },
+        recipients: [{
+            id: "2",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "3",
@@ -73,6 +95,17 @@ export const demoEmails: DBEmail[] = [
         tempId: 0,
         categoryId: 0,
         isDeleted: 0,
+        sender: {
+            name: "EmailThing",
+            address: "hello@emailthing.app",
+        },
+        recipients: [{
+            id: "3",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "4",
@@ -95,6 +128,17 @@ export const demoEmails: DBEmail[] = [
         categoryId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "Microsoft",
+            address: "windows@microsoft.com",
+        },
+        recipients: [{
+            id: "4",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "5",
@@ -117,6 +161,17 @@ export const demoEmails: DBEmail[] = [
         tempId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "Sarah Wilson",
+            address: "sarah.w@example.com",
+        },
+        recipients: [{
+            id: "5",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "6",
@@ -139,6 +194,17 @@ export const demoEmails: DBEmail[] = [
         categoryId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "Amazon",
+            address: "amazon@amazon.com",
+        },
+        recipients: [{
+            id: "6",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "7",
@@ -161,6 +227,17 @@ export const demoEmails: DBEmail[] = [
         categoryId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "EmailThing",
+            address: "hello@emailthing.app",
+        },
+        recipients: [{
+            id: "7",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "8",
@@ -183,6 +260,17 @@ export const demoEmails: DBEmail[] = [
         tempId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "Team",
+            address: "team@example.com",
+        },
+        recipients: [{
+            id: "8",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
     {
         id: "9",
@@ -205,6 +293,17 @@ export const demoEmails: DBEmail[] = [
         categoryId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "GitHub",
+            address: "updates@github.com",
+        },
+        recipients: [{
+            id: "9",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     },
 
 ];
@@ -232,6 +331,17 @@ export const demoSentEmails: DBEmail[] = [
         tempId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "User",
+            address: "user@emailthing.app",
+        },
+        recipients: [{
+            id: "16",
+            name: "Someone Else",
+            address: "another-user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     }
 ];
 
@@ -258,6 +368,17 @@ export const demoTempEmails: DBEmail[] = [
         categoryId: 0,
         binnedAt: 0,
         isDeleted: 0,
+        sender: {
+            name: "System",
+            address: "system@suspicious.site",
+        },
+        recipients: [{
+            id: "17",
+            name: "User",
+            address: "user@emailthing.app",
+            cc: 0,
+        }],
+        attachments: [],
     }
 ];
 

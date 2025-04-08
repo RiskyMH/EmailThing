@@ -1,10 +1,8 @@
-import { getUserByToken } from "@/utils/jwt";
 import db, { DefaultDomain, DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens, PasskeyCredentials, User, UserNotification } from "@/db";
 import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTableColumns, sql, lte, or } from "drizzle-orm";
 import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
-import { cookies, headers } from "next/headers";
 import type { BatchItem } from "drizzle-orm/batch";
-import { isValidOrigin } from "../tools";
+import { getCurrentUser, isValidOrigin } from "../tools";
 
 
 export function OPTIONS(request: Request) {
@@ -21,16 +19,6 @@ export function OPTIONS(request: Request) {
         }
     });
 }
-
-const getCurrentUser = async () => {
-    const token = (await cookies()).get("token")?.value || (await headers()).get("authorization");
-    if (!token) return null;
-    try {
-        return await getUserByToken(token);
-    } catch (e) {
-        return null;
-    }
-};
 
 
 export async function GET(request: Request) {
@@ -563,10 +551,12 @@ async function getMinimalChanges(currentUser: InferSelectModel<typeof User>, mai
             password: undefined as never,
         } as Omit<Partial<typeof currentUser>, "password">,
         mailboxesForUser,
-        emails,
-        emailSenders,
-        emailRecipients,
-        emailAttachments,
+        emails: emails.map((e) => ({
+            ...e,
+            sender: emailSenders.find((s) => s.emailId === e.id),
+            recipients: emailRecipients.filter((r) => r.emailId === e.id),
+            attachments: emailAttachments.filter((a) => a.emailId === e.id),
+        })),
         mailboxes,
         mailboxCategories,
         draftEmails,
@@ -709,10 +699,12 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             })),
             ...mailboxesForUser2,
         ],
-        emails,
-        emailSenders,
-        emailRecipients,
-        emailAttachments,
+        emails: emails.map((e) => ({
+            ...e,
+            sender: emailSenders.find((s) => s.emailId === e.id),
+            recipients: emailRecipients.filter((r) => r.emailId === e.id),
+            attachments: emailAttachments.filter((a) => a.emailId === e.id),
+        })),
         mailboxes,
         mailboxCategories,
         draftEmails,

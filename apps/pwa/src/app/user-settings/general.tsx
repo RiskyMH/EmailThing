@@ -1,18 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardForm, ClientInput, ClientSelect } from "./components";
-import { toast } from "sonner";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getMe } from "@/utils/data/queries/user";
 import { getUserMailboxes } from "@/utils/data/queries/mailbox";
+import changeUserSettings from "./api";
 
-
-async function changeEmail() {
-    toast.info("todo")
+function changeEmail(_: any, formData: FormData) {
+    return changeUserSettings("change-email", {
+        email: formData.get("email") as string,
+    })
 }
 
-async function changeUsername() {
-    toast.info("todo")
+function changeUsername(_: any, formData: FormData) {
+    return changeUserSettings("change-username", {
+        newName: formData.get("new-name") as string,
+    })
 }
 
 export default function UserSettingsPage() {

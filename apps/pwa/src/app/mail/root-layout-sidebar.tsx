@@ -16,6 +16,7 @@ import {
     ChevronsUpDownIcon,
     FileIcon,
     InboxIcon,
+    LogInIcon,
     PenSquareIcon,
     PlusCircleIcon,
     SendIcon,
@@ -218,7 +219,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     //     },
     // ]
     const _mailboxes = useLiveQuery(async () => getUserMailboxes(), [])
-    const mailboxes = _mailboxes?.filter(m => mailboxId === "demo" ? m.id === "demo" : m.id !== "demo")
+    const mailboxes = _mailboxes?.filter(m => m.id !== "demo")
 
     // type _defaultAlias = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["mailboxAliases"]>>
     // const { default: defaultAlias } = {
@@ -262,6 +263,14 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
                         </MailboxLink>
                     </DropdownMenuItem>
                 ))}
+                {(mailboxId === "demo" && !mailboxes?.length) && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/register">
+                            <LogInIcon className="mr-2 size-4 text-muted-foreground" />
+                            <span>Register</span>
+                        </Link>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem disabled>
                     <PlusCircleIcon className="mr-2 size-4 text-muted-foreground" />

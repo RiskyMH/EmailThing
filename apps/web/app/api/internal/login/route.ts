@@ -134,7 +134,8 @@ export async function POST(request: Request) {
 
         return ResponseJson({
             token,
-            mailboxes: mailboxes.map(({ mailboxId }) => mailboxId)
+            mailboxes: mailboxes.map(({ mailboxId }) => mailboxId),
+            userId: user.id
         });
 
     } catch (error) {

@@ -18,8 +18,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { useGravatars } from "@/utils/fetching";
 import { toast } from "sonner";
+import changeUserSettings from "./api";
 
 const leaveMailbox = async (mailboxId: string) => {
+    // leaving and actually deleting data doesn't exist rn lol
     toast.info("todo")
 }
 

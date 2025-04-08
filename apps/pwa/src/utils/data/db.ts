@@ -1,9 +1,6 @@
 import Dexie, { Table } from 'dexie';
 import type {
   DBEmail,
-  DBEmailSender,
-  DBEmailRecipient,
-  DBEmailAttachment,
   DBMailbox,
   DBMailboxAlias,
   DBMailboxCategory,
@@ -15,16 +12,15 @@ import type {
   DBPasskeyCredentials,
   DBUser,
   DBUserNotification,
-  DBMailboxForUser
+  DBMailboxForUser,
+  LocalSyncData,
 } from './types';
+import { fetchSync, syncLocal } from './sync-user';
 
 export class EmailDB extends Dexie {
   // Tables
   emails!: Table<DBEmail, string>;
   draftEmails!: Table<DBEmailDraft, string>;
-  emailSenders!: Table<DBEmailSender, string>;
-  emailRecipients!: Table<DBEmailRecipient, string>;
-  emailAttachments!: Table<DBEmailAttachment, string>;
   mailboxes!: Table<DBMailbox, string>;
   mailboxAliases!: Table<DBMailboxAlias, string>;
   mailboxCategories!: Table<DBMailboxCategory, string>;
@@ -36,6 +32,7 @@ export class EmailDB extends Dexie {
   userNotifications!: Table<DBUserNotification, string>;
   defaultDomains!: Table<DBDefaultDomain, string>;
   mailboxForUser!: Table<DBMailboxForUser, string>;
+  localSyncData!: Table<LocalSyncData, string>;
 
   constructor() {
     super('EmailDB');
@@ -77,16 +74,15 @@ export class EmailDB extends Dexie {
         '[mailboxId+categoryId+isStarred+isSender+binnedAt+isDeleted]',
         '[mailboxId+categoryId+tempId+isSender+binnedAt+isDeleted]',
         '[mailboxId+isRead+isSender+binnedAt+tempId+isDeleted]',
+
+        'needsSync',
       ].join(','),
 
       // Keep other tables as they were
-      draftEmails: 'id,mailboxId,[mailboxId+createdAt],[id+mailboxId],[mailboxId+deletedAt],updatedAt,[mailboxId+createdAt+isDeleted],[mailboxId+isDeleted]',
-      emailSenders: 'emailId,[emailId+address],emailId,address',
-      emailRecipients: 'id,[emailId+address],emailId,address',
-      emailAttachments: 'id,[emailId+id],emailId',
+      draftEmails: 'id,mailboxId,[mailboxId+createdAt],[id+mailboxId],[mailboxId+deletedAt],updatedAt,[mailboxId+createdAt+isDeleted],[mailboxId+isDeleted],needsSync',
       mailboxes: 'id,createdAt',
-      mailboxAliases: 'id,[mailboxId+alias],mailboxId,alias,default,[mailboxId+default]',
-      mailboxCategories: 'id,[mailboxId+name],mailboxId,name,[mailboxId+isDeleted]',
+      mailboxAliases: 'id,[mailboxId+alias],mailboxId,alias,default,[mailboxId+default],needsSync',
+      mailboxCategories: 'id,[mailboxId+name],mailboxId,name,[mailboxId+isDeleted],needsSync',
       tempAliases: 'id,[mailboxId+alias],mailboxId,alias,expiresAt',
       user: 'id',
       passkeyCredentials: 'id,[userId+id],userId,id',
@@ -94,10 +90,70 @@ export class EmailDB extends Dexie {
       defaultDomains: 'id',
       mailboxForUser: '[userId+mailboxId],userId,mailboxId',
       mailboxTokens: 'id,[mailboxId+id],mailboxId,id',
-      mailboxCustomDomains: 'id,[mailboxId+id],mailboxId,id'
+      mailboxCustomDomains: 'id,[mailboxId+id],mailboxId,id',
+      localSyncData: 'userId'
     });
   }
+
+  /** check some indexdb tables and see if any changes need to be synced */
+  async sync(): Promise<{ error?: string } | undefined> {
+    const localSyncData = await this.localSyncData.toArray();
+    if (!localSyncData.length) return;
+
+    if (isSyncing) {
+      // wait 200ms and try again (prob better to not do double and instead do more batching)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      return this.sync();
+    };
+
+    try {
+      this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
+      isSyncing = true;
+      await syncLocal(localSyncData[0]);
+      await this.localSyncData.update(localSyncData[0].userId, { lastSync: new Date(), isSyncing: false });
+      isSyncing = false;
+      return
+    } catch (error) {
+      console.error('Failed to sync', error);
+      return { error: error instanceof Error ? error.message : "failed to sync" };
+    }
+  }
+
+  /** just check with server for outdated data */
+  async fetchSync(): Promise<void> {
+    const localSyncData = await this.localSyncData.toArray();
+    if (!localSyncData.length) return;
+    if (isSyncing) {
+      // wait 200ms and try again (prob better to not do double and instead do more batching)
+      await new Promise(resolve => setTimeout(resolve, 200));
+      return this.fetchSync();
+    };
+
+    try {
+      this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
+      isSyncing = true;
+      await fetchSync(localSyncData[0]);
+      await this.localSyncData.update(localSyncData[0].userId, { lastSync: new Date(), isSyncing: false });
+      isSyncing = false;
+    } catch (error) {
+      console.error('Failed to fetch sync', error);
+    }
+  }
+
+  /** initial fetch of some data from server - more minor so */
+  async initialFetchSync() {
+    const localSyncData = await this.localSyncData.toArray();
+    if (!localSyncData.length) return;
+
+    try {
+      await fetchSync({ minimal: true, ...localSyncData[0] });
+    } catch (error) {
+      console.error('Failed to initial fetch sync', error);
+    }
+  }
 }
+
+let isSyncing = false;
 
 export const db = new EmailDB();
 

@@ -1,17 +1,12 @@
 import { db } from "../db";
 import { demoEmails, demoSentEmails, demoTempEmails, demoDrafts } from "./emails";
 import { demoMailbox, demoCategories, demoMailboxAliases } from "./mailbox";
-import { demoEmailRecipients } from "./recipients";
-import { demoEmailSenders } from "./senders";
-
 
 export async function loadDemoData(force = 0) {
     try {
         await db.transaction('rw',
             [
                 db.emails,
-                db.emailSenders,
-                db.emailRecipients,
                 db.mailboxes,
                 db.mailboxCategories,
                 db.draftEmails,
@@ -29,14 +24,6 @@ export async function loadDemoData(force = 0) {
                     db.emails
                         .where('mailboxId')
                         .equals(demoMailbox.id)
-                        .delete(),
-                    db.emailSenders
-                        .where('emailId')
-                        .anyOf([...demoEmails, ...demoSentEmails, ...demoTempEmails].map(e => e.id))
-                        .delete(),
-                    db.emailRecipients
-                        .where('emailId')
-                        .anyOf([...demoEmails, ...demoSentEmails, ...demoTempEmails].map(e => e.id))
                         .delete(),
                     db.mailboxes
                         .where('id')
@@ -61,8 +48,6 @@ export async function loadDemoData(force = 0) {
                     db.mailboxes.add(demoMailbox),
                     db.mailboxCategories.bulkAdd(demoCategories),
                     db.emails.bulkAdd([...demoEmails, ...demoSentEmails, ...demoTempEmails]),
-                    db.emailSenders.bulkAdd(demoEmailSenders),
-                    db.emailRecipients.bulkAdd(demoEmailRecipients),
                     db.draftEmails.bulkAdd(demoDrafts),
                     db.mailboxAliases.bulkAdd(demoMailboxAliases),
                     // db.mailboxTokens.bulkAdd(demoMailboxTokens),

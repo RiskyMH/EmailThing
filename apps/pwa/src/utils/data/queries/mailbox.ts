@@ -1,7 +1,6 @@
 import { db } from "@/utils/data/db"
 import { getMe } from "./user"
 import { createId } from "@paralleldrive/cuid2"
-import { proposeSync } from "../sync-user"
 
 export async function getMailbox(mailboxId: string) {
     const mailbox = await db.mailboxes.get(mailboxId)
@@ -79,20 +78,13 @@ export async function createCategory(mailboxId: string, name: string, color?: st
         color: color ?? 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        isDeleted: 0
+        isDeleted: 0,
+        isNew: true,
     })
 
     if (mailboxId !== 'demo') {
         // intentionally not awaited
-        proposeSync({
-            mailboxCategories: [{
-                id: `new:${categoryId}`,
-                lastUpdated: new Date().toISOString() as any,
-                mailboxId,
-                name,
-                color: color ?? null,
-            }]
-        }, new Date(localStorage.getItem('last-sync') || 0))
+        db.sync()
     }
 
     return categoryId;
@@ -105,24 +97,14 @@ export async function deleteCategory(mailboxId: string, categoryId: string) {
             updatedAt: new Date(),
             name: "<deleted>",
             color: 0,
+            needsSync: 1,
         })
     )
 
     if (mailboxId !== 'demo') {
         // intentionally not awaited
-        proposeSync({
-            mailboxCategories: [{
-                id: categoryId,
-                lastUpdated: new Date().toISOString() as any,
-                mailboxId,
-                name: "",
-                hardDelete: true,
-            }]
-        }, new Date(localStorage.getItem('last-sync') || 0))
-    } else {
-        // we dont care for demo
-        await db.mailboxCategories.where("id").equals(categoryId).and(item => item.mailboxId === mailboxId).delete()
-    }    
+        db.sync()
+    }
 }
 
 export async function updateCategory(mailboxId: string, categoryId: string, name: string, color?: string | null) {
@@ -130,19 +112,12 @@ export async function updateCategory(mailboxId: string, categoryId: string, name
         db.mailboxCategories.where("id").equals(categoryId).and(item => item.mailboxId === mailboxId).modify({
             name,
             color: color ?? 0,
+            needsSync: 1,
         })
     )
     if (mailboxId !== 'demo') {
         // intentionally not awaited
-        proposeSync({
-            mailboxCategories: [{
-                id: categoryId,
-                lastUpdated: new Date().toISOString() as any,
-                mailboxId,
-                name,
-                color: color ?? null,
-            }]
-        }, new Date(localStorage.getItem('last-sync') || 0))
+        db.sync()
     }
 
 }

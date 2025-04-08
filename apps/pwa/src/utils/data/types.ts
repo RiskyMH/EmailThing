@@ -13,15 +13,20 @@ type T<Obj> = {
   : Obj[K]
 };
 
+type Updatable<T> = T & {
+  needsSync?: 1;
+}
+
 // Core types from DB schema
-export type DBEmail = T<InferSelectModel<typeof Email>>;
-export type DBEmailDraft = T<InferSelectModel<typeof DraftEmail>>;
-export type DBEmailSender = T<InferSelectModel<typeof EmailSender>>;
-export type DBEmailRecipient = T<InferSelectModel<typeof EmailRecipient>>;
-export type DBEmailAttachment = T<InferSelectModel<typeof EmailAttachments>>;
+export type DBEmail = Updatable<T<InferSelectModel<typeof Email>> & {
+  sender: Omit<T<InferSelectModel<typeof EmailSender>>, "emailId">;
+  recipients: Omit<T<InferSelectModel<typeof EmailRecipient>>, "emailId">[];
+  attachments: Omit<T<InferSelectModel<typeof EmailAttachments>>, "emailId">[];
+}>;
+export type DBEmailDraft = Updatable<T<InferSelectModel<typeof DraftEmail>>> & { isNew?: boolean };
 export type DBMailbox = T<InferSelectModel<typeof Mailbox>> | (T<InferSelectModel<typeof Mailbox>> & { plan: "DEMO" });
 export type DBMailboxAlias = T<InferSelectModel<typeof MailboxAlias>>;
-export type DBMailboxCategory = T<InferSelectModel<typeof MailboxCategory>>;
+export type DBMailboxCategory = Updatable<T<InferSelectModel<typeof MailboxCategory>>> & { isNew?: boolean };
 export type DBMailboxCustomDomain = T<InferSelectModel<typeof MailboxCustomDomain>>;
 export type DBTempAlias = T<InferSelectModel<typeof TempAlias>>;
 export type DBMailboxTokens = T<InferSelectModel<typeof MailboxTokens>>; // token anonymized - et__abc......wxyZ
@@ -30,3 +35,13 @@ export type DBDefaultDomain = Omit<T<InferSelectModel<typeof DefaultDomain>>, "a
 export type DBUser = T<Omit<InferSelectModel<typeof User>, "password">>;
 export type DBPasskeyCredentials = T<Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">>;
 export type DBUserNotification = T<Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">>;
+
+
+export type LocalSyncData = {
+  lastSync: Date | 0;
+  token: string;
+  userId: string;
+  isSyncing?: boolean;
+  apiUrl?: string; // default is https://emailthing.app
+}
+
