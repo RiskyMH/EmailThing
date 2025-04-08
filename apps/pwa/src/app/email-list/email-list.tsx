@@ -191,10 +191,10 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
 
     const hasMore = emails_.length > 50
 
-    const hasSynced = "window" in globalThis && globalThis.window?.localStorage?.getItem("last-sync")
-    if (!hasSynced && emails.length === 0 && mailboxId !== "demo") {
-        return <EmailListLoadingSkeleton />
-    }
+    // const hasSynced = "window" in globalThis && globalThis.window?.localStorage?.getItem("last-sync")
+    // if (!hasSynced && emails.length === 0 && mailboxId !== "demo") {
+    //     return <EmailListLoadingSkeleton />
+    // }
 
     return (
         <>

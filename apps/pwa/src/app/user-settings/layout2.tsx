@@ -2,7 +2,8 @@ import { ReactNode, Suspense, use } from "react";
 import { Navigate, useMatch, useLocation } from "react-router-dom";
 import Link from "@/components/link";
 import RootLayout from "../layout";
-import { getMe } from "@/utils/data/queries/user";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/utils/data/db";
 
 interface DocsLayoutProps {
     children: React.ReactNode;
@@ -27,9 +28,9 @@ export default function SettingsLayout({ children }: DocsLayoutProps) {
                     <div className="grid gap-6">{children}</div>
                 </div>
             </main>
-            {/* <Suspense>
+            <Suspense>
                 <RedirectToLoginOnLogout />
-            </Suspense> */}
+            </Suspense>
         </RootLayout>
     );
 }
@@ -45,9 +46,16 @@ export function MenuItem({ href, children }: { href: string; children: ReactNode
 
 
 function RedirectToLoginOnLogout() {
-    const user = use(getMe())
+    const user = useLiveQuery(async () => {
+        const localSyncData = await db.localSyncData.toArray()
+        if (localSyncData.length === 0) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+            return (await db.localSyncData.toArray()).length > 0
+        }
+        return localSyncData.length > 0
+    }, [], null)
     const location = useLocation()
-    if (user === undefined) {
+    if (user === false) {
         return <Navigate to={`/login?from=${location.pathname}`} state={{ from: location }} />
     }
     else return null

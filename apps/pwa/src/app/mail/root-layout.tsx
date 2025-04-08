@@ -1,10 +1,10 @@
 import Header from "./root-layout-header";
-import { useParams, Outlet } from "react-router-dom";
+import { useParams, useLocation, Navigate } from "react-router-dom";
 import Sidebar from "./root-layout-sidebar";
 import RootLayout from "../layout";
-import { useMailbox } from "@/utils/hooks";
-
-
+import { Suspense } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/utils/data/db";
 export default function MailLayout({ children }: { children: React.ReactNode }) {
     // const params = useParams<"mailboxId" | "mailId">()
     
@@ -25,6 +25,28 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
                     </div>
                 </div>
             </div>
+            <Suspense>
+                <RedirectToLoginOnLogout />
+            </Suspense>
         </RootLayout>
     );
 }
+
+
+function RedirectToLoginOnLogout() {
+    const user = useLiveQuery(async () => {
+        // return db.localSyncData.toArray()
+        const localSyncData = await db.localSyncData.toArray()
+        if (localSyncData.length === 0) {
+            // sleep 100ms and try again
+            await new Promise(resolve => setTimeout(resolve, 100))
+            return (await db.localSyncData.toArray()).length > 0
+        }
+        return localSyncData.length > 0
+    }, [], null)
+    const location = useLocation()
+    const mailboxId = useParams<"mailboxId">().mailboxId
+    if (user === false && mailboxId !== "demo") {
+        return <Navigate to={`/login?from=${location.pathname}`} state={{ from: location }} />
+    }
+}   

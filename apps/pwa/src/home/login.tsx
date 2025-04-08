@@ -69,8 +69,7 @@ import { db } from "@/utils/data/db";
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 
-// const apiUrl = "https://emailthing.app"
-const apiUrl = "http://localhost:3001"
+const apiUrl = "https://emailthing.app"
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
