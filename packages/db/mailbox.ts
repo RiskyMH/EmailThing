@@ -66,6 +66,7 @@ export const MailboxAlias = sqliteTable(
             idx: index("mailbox_aliases_idx").on(table.mailboxId, table.default),
             unique: unique("mailbox_aliases_unique").on(table.alias, table.mailboxId),
             alias: unique("mailbox_aliases_alias").on(table.alias),
+            updatedMailboxIdx: index("mailbox_alias_updated_idx").on(table.updatedAt, table.mailboxId),
         };
     },
 );
@@ -144,6 +145,7 @@ export const MailboxCustomDomain = sqliteTable(
     (table) => {
         return {
             unique: unique("mailbox_custom_domain_unique").on(table.domain, table.mailboxId),
+            updatedMailboxIdx: index("mailbox_domain_updated_idx").on(table.updatedAt, table.mailboxId),
         };
     },
 );
@@ -156,28 +158,31 @@ export const MailboxCustomDomainRelations = relations(MailboxCustomDomain, ({ ma
 }));
 
 // API Tokens
-export const MailboxTokens = sqliteTable("mailbox_token", {
-    id: text("id", { length: 50 })
-        .primaryKey()
-        .unique()
-        .$defaultFn(() => createId()),
-    token: text("token", { length: 50 }).unique().notNull(),
-    mailboxId: text("mailbox_id", { length: 24 })
-        .notNull()
-        .references(() => Mailbox.id, { onDelete: "cascade" }),
-    createdAt: integer("created_at", { mode: "timestamp" })
-        .notNull()
-        .$defaultFn(() => new Date()),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
-        // .notNull()
-        .$defaultFn(() => new Date())
-        .$onUpdateFn(() => new Date()),
-    expiresAt: integer("expires_at", { mode: "timestamp" }),
-    name: text("name"),
-
-    // anonymous data - but here for syncing
-    isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
-});
+export const MailboxTokens = sqliteTable(
+    "mailbox_token",
+    {
+        id: text("id", { length: 50 })
+            .primaryKey()
+            .unique()
+            .$defaultFn(() => createId()),
+        token: text("token", { length: 50 }).unique().notNull(),
+        mailboxId: text("mailbox_id", { length: 24 })
+            .notNull()
+            .references(() => Mailbox.id, { onDelete: "cascade" }),
+        createdAt: integer("created_at", { mode: "timestamp" })
+            .notNull()
+            .$defaultFn(() => new Date()),
+        updatedAt: integer("updated_at", { mode: "timestamp" })
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
+        expiresAt: integer("expires_at", { mode: "timestamp" }),
+        name: text("name"),
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+    },
+    (table) => ({
+        updatedMailboxIdx: index("mailbox_token_updated_idx").on(table.updatedAt, table.mailboxId),
+    }),
+);
 
 export const MailboxTokensRelations = relations(MailboxTokens, ({ many, one }) => ({
     mailbox: one(Mailbox, {
@@ -213,6 +218,7 @@ export const MailboxCategory = sqliteTable(
     (table) => {
         return {
             mailboxIdx: index("mailbox_category_mailbox_idx").on(table.mailboxId),
+            updatedMailboxIdx: index("mailbox_category_updated_idx").on(table.updatedAt, table.mailboxId),
         };
     },
 );
@@ -250,6 +256,8 @@ export const MailboxForUser = sqliteTable(
     (table) => {
         return {
             pk: primaryKey({ columns: [table.mailboxId, table.userId] }),
+            userJoinedIdx: index("mailbox_user_joined_idx").on(table.userId, table.joinedAt),
+            userUpdatedIdx: index("mailbox_user_updated_idx").on(table.userId, table.updatedAt),
         };
     },
 );

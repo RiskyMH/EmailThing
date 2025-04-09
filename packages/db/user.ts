@@ -34,6 +34,7 @@ export const User = sqliteTable(
     },
     (table) => ({
         usernameIdx: index("user_username").on(table.username),
+        updatedAtIdx: index("user_updated_at_idx").on(table.updatedAt),
     }),
 );
 
@@ -64,7 +65,12 @@ export const PasskeyCredentials = sqliteTable("passkey_credentials", {
     name: text("name"),
     publicKey: text("public_key").notNull(),
     isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
-});
+},
+(table) => ({
+    userCreatedIdx: index("passkey_user_created_idx").on(table.userId, table.createdAt),
+    userUpdatedIdx: index("passkey_user_updated_idx").on(table.userId, table.updatedAt),
+}),
+);
 
 export const PasskeyCredentialsSchemaRelations = relations(PasskeyCredentials, ({ many, one }) => ({
     user: one(User, {
@@ -96,6 +102,7 @@ export const UserNotification = sqliteTable(
     (table) => {
         return {
             userIdx: index("notification_user_id").on(table.userId),
+            userCreatedIdx: index("notification_user_created_idx").on(table.userId, table.createdAt),
         };
     },
 );

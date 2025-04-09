@@ -76,6 +76,8 @@ export const Email = sqliteTable(
             ),
 
             createdIdIdx: index("email_created_id_idx").on(table.createdAt, table.id),
+            updatedAtIdx: index("email_updated_at_idx").on(table.updatedAt),
+            updatedMailboxIdx: index("email_updated_mailbox_idx").on(table.updatedAt, table.mailboxId),
         };
     },
 );
@@ -209,6 +211,7 @@ export const DraftEmail = sqliteTable(
             mailboxIdx: index("draft_mailbox_idx").on(table.mailboxId),
 
             createdIdIdx: index("draft_created_id_idx").on(table.createdAt, table.id),
+            updatedMailboxIdx: index("draft_updated_mailbox_idx").on(table.updatedAt, table.mailboxId),
         };
     },
 );
