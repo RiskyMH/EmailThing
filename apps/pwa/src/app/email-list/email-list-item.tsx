@@ -73,8 +73,14 @@ function useInView() {
     return [setRef, isInView] as const;
 }
 
-export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps) {
-    const emailId = email.id;
+export function EmailItem({ email: _email, mailboxId, type, categories }: EmailItemProps) {
+    const emailId = _email.id;
+    const [email, setEmail] = useState(_email)
+    useEffect(() => {
+        if (JSON.stringify(email) !== JSON.stringify(_email)) {
+            setEmail(_email)
+        }
+    }, [_email])
 
     const updateEmail = async (updates: any) => {
         if (mailboxId === 'demo') {
@@ -82,19 +88,20 @@ export function EmailItem({ email, mailboxId, type, categories }: EmailItemProps
         } else if (!navigator.onLine) {
             toast.info("You are offline - changes will be synced when you come back online")
         }
+        setEmail({ ...email, ...updates })
         await updateEmailProperties(mailboxId, emailId, updates);
     };
 
     const deleteEmail = async () => {
-        if (mailboxId === "demo") {
-            toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
-        } else if (!navigator.onLine) {
-            toast.info("You are offline - changes will be synced when you come back online")
-        }
         if (type === "drafts") {
+            if (mailboxId === "demo") {
+                toast("This is a demo - changes won't actually do anything", { description: "But you can see how it would work in the real app!" });
+            } else if (!navigator.onLine) {
+                toast.info("You are offline - changes will be synced when you come back online")
+            }
             await deleteDraftEmail(mailboxId, emailId);
         } else {
-            await updateEmail({ hardDelete: true });
+            await updateEmail({ hardDelete: true, isDeleted: 1 });
         }
     };
 

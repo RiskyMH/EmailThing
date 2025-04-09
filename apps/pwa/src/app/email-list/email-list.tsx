@@ -1,6 +1,6 @@
 "use client"
 import { useParams, useSearchParams } from "react-router-dom"
-import { Suspense, useEffect } from "react"
+import { Suspense, useEffect, useState, useRef, useCallback, useMemo } from "react"
 import Loading, { EmailListLoadingSkeleton, EmailListCategoryLoadingSkeleton } from "./email-list-loading"
 import { Button, buttonVariants } from "@/components/ui/button"
 import RefreshButton from "./refresh-button"
@@ -13,10 +13,10 @@ import { cn } from "@/utils/tw"
 import { formatTimeAgo } from "@/utils/tools"
 import { getEmailList, getEmailCategoriesList, getEmailCount } from "@/utils/data/queries/email-list"
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getMailboxName } from "@/utils/data/queries/mailbox";
-import { useInView } from "react-intersection-observer";
+import { Observable, liveQuery } from 'dexie';
+import { getCategories, getMailboxName } from "@/utils/data/queries/mailbox";
 import { Loader2 } from "lucide-react"
-
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     if (typeof window === "undefined") return <Loading />
@@ -56,6 +56,9 @@ declare global {
         _tempData?: {
             emailList?: Record<string, any>
             emailCategoriesList?: Record<string, any>
+            scrollY?: {
+                emailList?: Record<string, number>
+            }
         }
     }
 }
@@ -63,8 +66,8 @@ declare global {
 
 function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     return (
-        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
-            <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-1 sm:px-3 pt-0">
+            <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2 sm:px-3">
                 <Categories filter={type} />
             </div>
 
@@ -130,80 +133,148 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
     return null
 }
 
-function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp", skip?: number }) {
+const pageSize = 25
+
+function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     const params = useParams<"mailboxId">()
     const searchParams = useSearchParams()[0]
     const categoryId = searchParams.get("category") as string | null
     const search = searchParams.get("q") as string | null
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
 
+    const key = JSON.stringify({ m: mailboxId, t: type, c: categoryId, q: search })
 
-    const [loadMore, inView] = useInView({
-        threshold: 0,
-        rootMargin: '500px',
-        triggerOnce: true,
-        initialInView: false,
-    })
+    const categories = useLiveQuery(() => getCategories(mailboxId), [mailboxId])
 
-
-    const key = JSON.stringify({ mailboxId, type, categoryId, search, skip })
-    const _data = window?._tempData?.emailList?.[key]
-
-    const data = useLiveQuery(async () => {
-        const emails = await getEmailList({
-            mailboxId,
-            type,
-            categoryId: categoryId ?? undefined,
-            search: search ?? undefined,
-            take: 50 + 1,
-            skip: skip,
-        })
-        return [emails, key] as const
-    }, [mailboxId, type, categoryId, search, key])
-
-    const loading = skip > 0 ?
-        <div className={buttonVariants({ variant: "outline", size: "lg", className: "flex gap-2" })}>
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-        </div>
-        : <EmailListLoadingSkeleton />
+    const createLiveQuery = useCallback((pageNo: number) =>
+        liveQuery(() =>
+            getEmailList({
+                mailboxId,
+                type,
+                categoryId: categoryId ?? undefined,
+                search: search ?? undefined,
+                take: pageSize,
+                skip: pageSize * pageNo,
+            })
+        ), [mailboxId, type, categoryId, search]);
 
 
-    const isLoading = !data && !_data
-    if (isLoading) return loading
+    const initialData = typeof window !== "undefined" ? window._tempData?.emailList?.[key] || [] : [];
+    const queriesRef = useRef<Observable<Awaited<ReturnType<typeof getEmailList>>>[]>(
+        [createLiveQuery(0)]
+    );
+    const [resultArrays, setResultArrays] = useState<Awaited<ReturnType<typeof getEmailList>>[][]>(initialData);
 
-    if (data?.[1] !== key && _data?.[1] !== key) {
-        return loading
-    }
+    const initial = useRef(true)
 
-    const __data = data?.[1] === key ? data : _data
-    if (!__data) return loading
+    useEffect(() => {
+        const initialScrollY = (initial.current && key)
+            ? window._tempData?.scrollY?.emailList?.[key + window.history.state?.idx.toString()] || 0
+            : 0
 
-    if (data && typeof window !== "undefined" && data?.[1] === key) {
+        if (window._tempData?.emailList?.[key]) {
+            // only do the whole data if back button is used, otherwise use first page
+            if (initial.current && key) {
+                const count = window._tempData.emailList[key].length;
+                queriesRef.current = Array.from({ length: count }, (_, i) => createLiveQuery(i));
+                setResultArrays(window._tempData.emailList[key]);
+            } else {
+                queriesRef.current = [createLiveQuery(0)];
+                setResultArrays(window._tempData.emailList[key].slice(0, 1));
+            }
+            initial.current = false
+        } else {
+            if (initial.current) {
+                console.log("initial")
+                initial.current = false
+                document.getElementById("mail-layout-content")?.scrollTo({ top: 0, behavior: "smooth" })
+                return
+            }
+            queriesRef.current = [createLiveQuery(0)];
+            setResultArrays([]);
+        }
+
+        document.getElementById("mail-layout-content")?.scrollTo({ top: initialScrollY, behavior: "smooth" })
+        setTimeout(() => {
+            document.getElementById("mail-layout-content")?.scrollTo({ top: initialScrollY, behavior: "smooth" })
+        }, 0)
+    }, [categoryId, search, type, mailboxId, key, createLiveQuery]);
+
+    // bind pgup and pgdown to scroll
+    useEffect(() => {
+        const content = document.getElementById("mail-layout-content")
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "PageUp") {
+                content?.scrollTo({ top: content?.scrollTop - window.innerHeight, behavior: "smooth" })
+            }
+            if (e.key === "PageDown") {
+                content?.scrollTo({ top: content?.scrollTop + window.innerHeight, behavior: "smooth" })
+            }
+            if (e.key === "End") {
+                content?.scrollTo({ top: content?.scrollHeight, behavior: "smooth" })
+            }
+            if (e.key === "Home") {
+                content?.scrollTo({ top: 0, behavior: "smooth" })
+            }
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [])
+
+    useEffect(() => {
         window._tempData ||= {}
         window._tempData.emailList ||= {}
-        window._tempData.emailList[key] = data
-    }
+        window._tempData.emailList[key] = resultArrays
+    }, [resultArrays])
 
+    useEffect(() => {
+        const subscriptions = queriesRef.current.map((q, i) => q.subscribe(
+            results => setResultArrays(prev => {
+                if (JSON.stringify(prev[i]) === JSON.stringify(results)) {
+                    return prev;
+                }
+                const arrayClone = [...prev];
+                arrayClone[i] = results;
+                return arrayClone;
+            })
+        ));
 
-    const { emails: emails_, categories } = (__data?.[0]) as Awaited<ReturnType<typeof getEmailList>>
+        return () => subscriptions.forEach(s => s.unsubscribe());
+    }, [queriesRef.current]);
 
-    const emails = emails_.slice(0, 50)
+    const fetchMoreData = useCallback(() => {
+        const nextPageNo = queriesRef.current.length;
+        const newQuery = createLiveQuery(nextPageNo);
+        queriesRef.current = [...queriesRef.current, newQuery];
 
-    const hasMore = emails_.length > 50
+        // Force effect to run again with new query
+        setResultArrays(prev => [...prev]);
+    }, [createLiveQuery]);
 
-    // const hasSynced = "window" in globalThis && globalThis.window?.localStorage?.getItem("last-sync")
-    // if (!hasSynced && emails.length === 0 && mailboxId !== "demo") {
-    //     return <EmailListLoadingSkeleton />
-    // }
+    const emails = useMemo(() => resultArrays.flat(1), [resultArrays]);
 
     return (
-        <>
-            {skip > 0 ? (
-                // "loading"
-                <></>
-            ) : (
+        <InfiniteScroll
+            dataLength={emails.length}
+            next={fetchMoreData}
+            hasMore={resultArrays.at(-1)?.length === pageSize}
+            loader={<div className={buttonVariants({ variant: "outline", size: "lg", className: "flex gap-2" })}>
+                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            </div>}
+            className="flex w-full min-w-0 flex-col gap-2"
+            scrollableTarget="mail-layout-content"
+            scrollThreshold={0.75}
+            // initialScrollY={initialScrollY || -10000}
+            onScroll={(e) => {
+                window._tempData ||= {}
+                window._tempData.scrollY ||= {}
+                window._tempData.scrollY.emailList ||= {}
+                window._tempData.scrollY.emailList[key + window.history.state?.idx.toString()] = e.target?.scrollTop
+            }}
+        >
+            {resultArrays.length > 0 || initialData.length > 0 ? (
                 <>
-
                     {type === "trash" && (
                         <div className="text-center font-bold text-muted-foreground">
                             Messages that have been in the Bin for more than 30 days will be deleted automatically
@@ -233,35 +304,14 @@ function Emails({ filter: type, skip = 0 }: { filter: "inbox" | "drafts" | "sent
                         </div>
                     )}
                 </>
-            )}
-            {emails.map((email) => (
-                <EmailItem
-                    key={email.id}
-                    email={email}
-                    categories={categories || undefined}
-                    mailboxId={mailboxId}
-                    type={type}
-                />
-            ))}
-            {hasMore && (
-                inView
-                    ? <Emails filter={type} skip={emails.length + skip} />
-                    : <div ref={loadMore} className={buttonVariants({ variant: "outline", size: "lg", className: "flex gap-2" })}>
-                        <Loader2 className="size-5 animate-spin text-muted-foreground" />
-                    </div>
+            ) : (
+                <EmailListLoadingSkeleton />
             )}
 
-            {!hasMore && skip > 0 && (
-                <Button
-                    variant="outline"
-                    className="flex gap-2"
-                    size="lg"
-                    disabled
-                >
-                    You have reached the bottom
-                </Button>
-            )}
-        </>
+            {emails.map((email) => (
+                <EmailItem key={email.id} email={email} categories={categories || undefined} mailboxId={mailboxId} type={type} />
+            ))}
+        </InfiniteScroll>
     );
 }
 
@@ -402,6 +452,14 @@ export function CategoryItem({
                 "group inline-flex w-auto max-w-fit shrink-0 items-center gap-1 border-transparent border-b-3 px-1 font-bold",
                 isCurrent && "border-blue",
             )}
+            onClick={() => {
+                if (window._tempData?.scrollY?.emailList) {
+                    window._tempData.scrollY.emailList = {}
+                }
+                setTimeout(() => {
+                    document.getElementById("mail-layout-content")?.scrollTo({ top: 0, behavior: "smooth" })
+                }, 0)
+            }}
         >
             {circleColor && <div className="mr-1 size-2.5 rounded-full" style={{ backgroundColor: circleColor }} />}
             <span className="font-medium text-base group-hover:text-muted-foreground">{name}</span>

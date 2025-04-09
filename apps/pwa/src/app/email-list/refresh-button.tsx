@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useOnline } from "@/utils/hooks";
 import { RotateCcwIcon, CloudOff } from "lucide-react";
-import { useTransition, useEffect } from "react";
+import { useTransition, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/utils/tw";
 import { useParams } from "react-router-dom";
@@ -17,6 +17,8 @@ export default function RefreshButton({ className }: { className?: string }) {
         () => db.localSyncData.toArray(),
     )
 
+    const isSyncing = useMemo(() => syncing?.some(s => s.isSyncing), [syncing])
+
     const reload = () => {
         if (params.mailboxId === 'demo') {
             // TODO: do something more useful here
@@ -26,8 +28,9 @@ export default function RefreshButton({ className }: { className?: string }) {
                 toast.info("You are offline")
                 return
             }
-            if (isPending) return
-            startTransition(async () => { await db.sync() })
+            if (isSyncing || isPending) return console.log("isSyncing or isPending")
+            console.log("syncing")
+            startTransition(async () => { await db.fetchSync() })
         }
     }
 
@@ -35,11 +38,11 @@ export default function RefreshButton({ className }: { className?: string }) {
     useEffect(() => {
         const fn = () => online ? reload() : void toast.warning("Offline");
 
-        const focus = () => !document.hidden && online && startTransition(fn);
+        const focus = () => !document.hidden && online && fn();
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "r" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                startTransition(fn);
+                fn();
             }
         };
 
@@ -61,15 +64,13 @@ export default function RefreshButton({ className }: { className?: string }) {
             className={cn("-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground shrink-0", className)}
             onClick={() => {
                 !isPending &&
-                    startTransition(() =>
-                        online ? reload() : void toast.warning("Offline")
-                    )
+                    online ? reload() : void toast.warning("Offline")
             }}
             disabled={!online}
         >
             {online === false
                 ? <CloudOff className="size-5 text-muted-foreground" />
-                : <RotateCcwIcon className={cn((isPending || syncing?.some(s => s.isSyncing)) && "animate-spin animate-direction-reverse", "size-5 text-muted-foreground")} />
+                : <RotateCcwIcon className={cn((isPending || isSyncing) && "animate-spin animate-direction-reverse", "size-5 text-muted-foreground")} />
             }
         </Button>
 

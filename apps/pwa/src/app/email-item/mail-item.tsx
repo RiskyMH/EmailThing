@@ -69,7 +69,7 @@ function MailItem() {
     return (
         <div className="flex size-full min-w-0 flex-col gap-3 overflow-auto p-3 sm:p-5">
             <TopButtons mailboxId={params.mailboxId} emailId={params.mailId} email={email} onUpdateEmail={updateEmail} />
-            <Title email={email} mailboxId={params.mailboxId} />
+            <Title subject={email.subject} mailboxId={params.mailboxId} />
 
             <h1 className="mt-3 px-3 break-words font-bold text-2xl sm:text-3xl">{email.subject}</h1>
             <div className="flex flex-col gap-3 rounded-md bg-card">
@@ -265,7 +265,7 @@ function MailItem() {
                         ))}
                     </div>
                 )}
-                <EmailContent email={email} />
+                <EmailContent body={email.body} html={email.html || null} subject={email.subject || null} />
             </div>
 
             {/* // TODO: show references snippets for email */}
@@ -273,26 +273,26 @@ function MailItem() {
     );
 }
 
-function Title({ email, mailboxId }: { email?: { subject?: string | null }, mailboxId: string }) {
+function Title({ subject, mailboxId }: { subject?: string | null, mailboxId: string }) {
     const mailboxName = useLiveQuery(async () => getMailboxName(mailboxId), [mailboxId])
 
     useEffect(() => {
-        if (!email?.subject) document.title = "EmailThing"
-        else document.title = `${email.subject}${mailboxName ? ` - ${mailboxName}` : ""} - EmailThing`
+        if (!subject) document.title = "EmailThing"
+        else document.title = `${subject}${mailboxName ? ` - ${mailboxName}` : ""} - EmailThing`
         return () => { document.title = "EmailThing" }
-    }, [email, mailboxName])
+    }, [subject, mailboxName])
 
     return null
 }
 
 function EmailContent({
-    email,
-}: { email: { body: string; html?: string | null, subject?: string | null } }) {
+    body, html, subject,
+}: { body: string; html?: string | null, subject?: string | null }) {
     const searchParams = useSearchParams()[0]
     const lastView = (localStorage || {}).getItem('email-item:last-view')
     const view = (
         searchParams.get("view")
-        || (lastView?.startsWith("html") && !email?.html ? "markdown" : lastView)
+        || (lastView?.startsWith("html") && !html ? "markdown" : lastView)
         || "markdown"
     ) as "text" | "markdown" | "html" | "html-raw"
 
@@ -314,10 +314,10 @@ function EmailContent({
             window.removeEventListener("resize", handleResize)
             ref.current?.removeEventListener("load", handleResize)
         }
-    }, [email.html, view])
+    }, [html, view])
 
     if (view === "text") {
-        return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal p-3 pt-0">{email.body}</p>;
+        return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal p-3 pt-0">{body}</p>;
     }
 
     else if (view === "markdown") {
@@ -326,7 +326,7 @@ function EmailContent({
                 className="prose dark:prose-invert max-w-full overflow-auto break-words p-3 pt-0"
                 dangerouslySetInnerHTML={{
                     __html:
-                        parseHTML(markedParse(email.body, { breaks: true, async: false }), false)
+                        parseHTML(markedParse(body, { breaks: true, async: false }), false)
                 }}
             />
         );
@@ -340,8 +340,8 @@ function EmailContent({
                     className="w-full rounded-b-lg bg-card"
                     style={{ height: '0px', maxHeight: '100%' }}
                     sandbox="allow-popups allow-same-origin"
-                    srcDoc={parseHTML(email.html || email.body, true)}
-                    title={email.subject || "The Email"}
+                    srcDoc={parseHTML(html || body, true)}
+                    title={subject || "The Email"}
                 />
                 {!htmlLoaded && <EmailContentSpinner className="h-36" />}
             </>
@@ -349,7 +349,7 @@ function EmailContent({
     }
 
     else if (view === "html-raw") {
-        return <p className="leading-normal font-mono overflow-x-auto h-full rounded-b-lg bg-tertiary p-3 whitespace-pre text-sm">{email.html || email.body}</p>;
+        return <p className="leading-normal font-mono overflow-x-auto h-full rounded-b-lg bg-tertiary p-3 whitespace-pre text-sm">{html || body}</p>;
     }
 
     return null;
@@ -439,10 +439,11 @@ function GetAttachmentIcon(extension: string) {
 function EmailPicture({ email, fallback }: { email: string, fallback?: string }) {
     const img = useEmailImage(email)
     const isGravatar = !img || img.startsWith("https://www.gravatar.com/avatar/")
+    console.log("email", email, img, isGravatar)
 
     return (
-        <Avatar className={cn("size-12 bg-tertiary transition-all", isGravatar ? "rounded-full" : "rounded-lg")}>
-            <AvatarImage src={img} className={(isGravatar ? "" : "p-2 rounded-[20%]")} />
+        <Avatar className={"size-12 bg-tertiary transition-all data-[gravatar=true]:rounded-full data-[gravatar=false]:rounded-lg data-[gravatar=false]:[&>img]:p-2 data-[gravatar=false]:[&>img]:rounded-[20%]"} data-gravatar={isGravatar}>
+            <AvatarImage src={img} />
             <AvatarFallback className="bg-tertiary">
                 {fallback}
             </AvatarFallback>

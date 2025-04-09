@@ -16,6 +16,7 @@ const STATIC_ASSETS = [
 
 // cache for up to month (so mm/yy)
 const THIRD_PARTY_CACHE_NAME = `3rd-party-cache-${new Date().getMonth()}${new Date().getFullYear()}`;
+const FONTS_CACHE_NAME = `fonts-v1`;
 
 // dont try to be smart for dev
 if (CACHE_NAME !== 'emailthing-offline-v1') {
@@ -45,7 +46,7 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
     event.waitUntil(
       caches.keys().then(cacheNames => {
         return Promise.all(
-          cacheNames.filter(e => e !== CACHE_NAME && e !== THIRD_PARTY_CACHE_NAME)
+          cacheNames.filter(e => e !== CACHE_NAME && e !== THIRD_PARTY_CACHE_NAME && e !== FONTS_CACHE_NAME)
             .map(cacheName => caches.delete(cacheName))
         );
       })
@@ -78,8 +79,13 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
           try {
             const response = await fetch(event.request);
             if (response.ok) {
-              const cache = await caches.open(CACHE_NAME);
-              await cache.put(event.request, response.clone());
+              if (event.request.url.includes('/_bun/static/fonts/') || event.request.url.endsWith('.woff2')) {
+                const cache = await caches.open(FONTS_CACHE_NAME);
+                await cache.put(event.request, response.clone());
+              } else {
+                const cache = await caches.open(CACHE_NAME);
+                await cache.put(event.request, response.clone());
+              }
             }
             return response;
           } catch (error) {

@@ -107,7 +107,7 @@ export class EmailDB extends Dexie {
     };
 
     try {
-      this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
+      // this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
       isSyncing = true;
       await syncLocal(localSyncData[0]);
       await this.localSyncData.update(localSyncData[0].userId, { lastSync: new Date(), isSyncing: false });
@@ -115,6 +115,8 @@ export class EmailDB extends Dexie {
       return
     } catch (error) {
       console.error('Failed to sync', error);
+      this.localSyncData.update(localSyncData[0].userId, { isSyncing: false });
+      isSyncing = false;
       return { error: error instanceof Error ? error.message : "failed to sync" };
     }
   }
@@ -136,6 +138,8 @@ export class EmailDB extends Dexie {
       await this.localSyncData.update(localSyncData[0].userId, { lastSync: new Date(), isSyncing: false });
       isSyncing = false;
     } catch (error) {
+      this.localSyncData.update(localSyncData[0].userId, { isSyncing: false });
+      isSyncing = false;
       console.error('Failed to fetch sync', error);
     }
   }

@@ -24,7 +24,7 @@ interface BaseEmail {
 }
 
 interface EmailWithRecipients extends BaseEmail {
-    from: { name: string; address: string };
+    from: { name: string | null; address: string };
     to: { name: string | null; address: string; cc?: 'cc' | 'bcc' | null }[];
     cc?: { name: string | null; address: string }[];
     bcc?: { name: string | null; address: string }[];
@@ -37,16 +37,6 @@ interface EmailListOptions {
     search?: string;
     take?: number;
     skip?: number;
-}
-
-interface EmailListResult {
-    emails: EmailWithRecipients[];
-    categories: {
-        id: string;
-        name: string;
-        color?: string | 0;
-    }[];
-    hasAttachments?: boolean;
 }
 
 interface EmailCategoriesListResult {
@@ -69,7 +59,7 @@ export async function getEmailList({
     search,
     take = 100,
     skip = 0,
-}: EmailListOptions): Promise<EmailListResult> {
+}: EmailListOptions) {
     // Start with base query using mailboxId+createdAt index
     let emailQuery = (type === 'drafts'
         ? db.draftEmails.where('[mailboxId+createdAt+isDeleted]').between(
@@ -204,55 +194,39 @@ export async function getEmailList({
 
     // Apply pagination
     const emails = await emailQuery
-        .reverse() // Newest first
+        .reverse()
         .offset(skip)
         .limit(take)
         .toArray();
 
-    // Get categories
-    const categories = type === 'drafts' ? [] :
-        await db.mailboxCategories
-            .where('mailboxId')
-            .equals(mailboxId)
-            .and(item => item.isDeleted !== 1)
-            .toArray();
-
-    // Get sender/recipient info for each email
-    const emailsWithDetails =
-        emails.map((email) => {
-            if (type === 'drafts') {
-                return {
-                    ...email,
-                    from: {
-                        address: email.from
-                    },
-                    to: email.to,
-                    isRead: true,
-                    body: ''
-                };
-            }
-
+    return emails.map((email) => {
+        if (type === 'drafts') {
             return {
                 ...email,
-                from: email.sender,
-                to: email.recipients,
-                html: '',
-                text: ''
+                from: {
+                    address: email.from
+                },
+                to: email.to,
+                isRead: true,
+                body: ''
             };
-        })
+        }
 
-
-    return {
-        emails: emailsWithDetails,
-        categories,
-    };
+        return {
+            ...email,
+            from: email.sender,
+            to: email.recipients,
+            html: '',
+            text: ''
+        };
+    })
 }
 
 export async function getEmailCategoriesList({
     mailboxId,
     type,
     search,
-}: EmailListOptions): Promise<EmailCategoriesListResult> {
+}: EmailListOptions) {
     // Start with base query using mailboxId index
     let emailQuery = (type === 'drafts'
         ? db.draftEmails.where("[mailboxId+isDeleted]").equals([mailboxId, 0])

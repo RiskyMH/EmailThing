@@ -126,7 +126,7 @@ async function getActiveSponsors(): Promise<{ username: string; avatar: string; 
             "content-type": "application/json",
         },
         body: JSON.stringify({
-            query: `{ user(login: \"riskymh\") { ... on Sponsorable { sponsors(first: 100) { totalCount nodes { ... on User { login name avatarUrl } ... on Organization { login name avatarUrl } } } } } } }`,
+            query: `{ user(login: \"riskymh\") { ... on Sponsorable { sponsors(first: 100) { totalCount nodes { ... on User { login name avatarUrl } ... on Organization { login name avatarUrl } } } } } }`,
         }),
     });
 

@@ -20,7 +20,7 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
                 <Header />
                 <div className="flex h-[calc(100vh-4.1rem)] w-screen max-w-full">
                 <Sidebar className="hidden min-h-[calc(100vh-4.1rem)] sm:flex" />
-                    <div className="h-[calc(100vh-4.1rem)] w-screen max-w-full overflow-y-auto">
+                    <div className="h-[calc(100vh-4.1rem)] w-screen max-w-full overflow-y-auto" id="mail-layout-content">
                         {children}
                     </div>
                 </div>

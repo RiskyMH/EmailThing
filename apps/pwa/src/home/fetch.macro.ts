@@ -1,8 +1,8 @@
 export async function getGithubStars() {
     if (typeof window === "undefined" && process.platform === "win32") return "∞"
-    
+
     const fn = async () => (await (await fetch("https://api.github.com/repos/RiskyMH/EmailThing")).json()).stargazers_count
-    
+
     if (import.meta.hot) {
         return (import.meta.hot.data.githubStars ??= await fn())
     }
@@ -42,13 +42,18 @@ async function getActiveSponsors(): Promise<{ username: string; avatar: string; 
         headers: {
             authorization: `token ${process.env.GITHUB_PAT}`,
             "content-type": "application/json",
+            "X-GitHub-Api-Version": "2025-01-01",
         },
         body: JSON.stringify({
-            query: `{ user(login: \"riskymh\") { ... on Sponsorable { sponsors(first: 100) { totalCount nodes { ... on User { login name avatarUrl } ... on Organization { login name avatarUrl } } } } } } }`,
+            query: `{ user(login: \"riskymh\") { ... on Sponsorable { sponsors(first: 100) { totalCount nodes { ... on User { login name avatarUrl } ... on Organization { login name avatarUrl } } } } } }`,
         }),
     });
 
     const body = await res.json();
+    if (!body) {
+        process.env.GITHUB_PAT = undefined
+        return getActiveSponsors()
+    }
 
     return body.data.user.sponsors.nodes.map(
         (e: Record<string, string>) =>
@@ -67,18 +72,18 @@ export const getSponsors = async () => {
         const [active, inactive] = await Promise.all([
             getActiveSponsors(),
 
-        fetch("https://github.com/sponsors/riskymh/sponsors_partial?filter=inactive")
-            .then((e) => e.text())
-            .then(parseSponsors),
-    ]);
+            fetch("https://github.com/sponsors/riskymh/sponsors_partial?filter=inactive")
+                .then((e) => e.text())
+                .then(parseSponsors),
+        ]);
 
-    return [
-        ...active.map((sponsor) => ({
-            ...sponsor,
-            type: "current" as const,
-        })),
+        return [
+            ...active.map((sponsor) => ({
+                ...sponsor,
+                type: "current" as const,
+            })),
 
-        ...inactive.map((sponsor) => ({
+            ...inactive.map((sponsor) => ({
                 ...sponsor,
                 type: "past" as const,
             })),

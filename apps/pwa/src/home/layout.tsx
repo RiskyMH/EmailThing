@@ -1,3 +1,4 @@
+'use client'
 import { EmailThing } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import UserNav from "@/components/user-navbar";

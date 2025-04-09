@@ -2,8 +2,8 @@ import { StarIcon } from "lucide-react";
 
 export default function Loading() {
     return (
-        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
-            <div className="sticky top-0 z-10 flex h-12 w-full min-w-0 animate-pulse flex-row items-center justify-center gap-3 border-b-2 bg-background px-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-1 pt-0 sm:px-3">
+            <div className="sticky top-0 z-10 flex h-12 w-full min-w-0 animate-pulse flex-row items-center justify-center gap-3 border-b-2 bg-background px-2 sm:px-3">
                 <EmailListCategoryLoadingSkeleton />
             </div>
 
