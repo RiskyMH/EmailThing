@@ -28,8 +28,7 @@ export default function RefreshButton({ className }: { className?: string }) {
                 toast.info("You are offline")
                 return
             }
-            if (isSyncing || isPending) return console.log("isSyncing or isPending")
-            console.log("syncing")
+            if (isSyncing || isPending) return
             startTransition(async () => { await db.fetchSync() })
         }
     }

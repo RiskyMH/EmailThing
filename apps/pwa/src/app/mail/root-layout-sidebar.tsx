@@ -195,7 +195,7 @@ function ItemCount({
 function MailboxesFallback() {
     return (
         <div className="flex h-10 w-full animate-pulse gap-3 rounded-md bg-tertiary px-3 py-2 sm:max-lg:px-1">
-            <div className="size-7 animate-pulse rounded-full bg-secondary" />
+            <div className="size-7 animate-pulse rounded-full bg-secondary sm:max-lg:mx-auto" />
 
             <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
         </div>
@@ -242,7 +242,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
                 className={cn(buttonVariants({ variant: "ghost" }), "flex w-full gap-3 px-3 text-left sm:max-lg:px-1")}
             >
                 {mailboxId === "demo" ? (
-                    <UserCircle2 className="size-6 text-yellow-500 me-1" />
+                    <UserCircle2 className="size-6 text-yellow-500 md:me-1" />
                 ) : (
                     <Avatar className="size-7">
                         <AvatarImage className="rounded-full" src={gravatarImg} />

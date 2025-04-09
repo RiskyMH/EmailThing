@@ -26,17 +26,35 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
     self.skipWaiting();
 
     event.waitUntil(
-      caches.open(CACHE_NAME).then(cache => {
-        const files = STATIC_ASSETS.filter(e =>
-          !e.endsWith(".map") &&
-          !e.endsWith(".woff") &&
-          !e.endsWith(".woff2") &&
-          !e.endsWith("/")
-        );
+      Promise.all([
+        caches.open(CACHE_NAME)
+          .then(cache =>
+            cache.addAll(STATIC_ASSETS.filter(e =>
+              !e.endsWith(".map") &&
+              !e.endsWith(".woff") &&
+              !e.endsWith(".woff2") &&
+              !e.endsWith("/") &&
+              !e.startsWith("../")
+            ))
+          ).catch(e => console.error(e)),
 
-        // Add all static assets to cache
-        return cache.addAll(files);
-      })
+        caches.open(FONTS_CACHE_NAME)
+          .then(cache =>
+            cache.addAll([
+              '/_bun/static/fonts/inter-latin-400-normal.woff2',
+              '/_bun/static/fonts/inter-latin-500-normal.woff2',
+              '/_bun/static/fonts/inter-latin-600-normal.woff2',
+              '/_bun/static/fonts/inter-latin-700-normal.woff2',
+              '/_bun/static/fonts/inter-latin-ext-400-normal.woff2',
+              '/_bun/static/fonts/inter-vietnamese-400-normal.woff2',
+              '/_bun/static/fonts/inter-greek-400-normal.woff2',
+              '/_bun/static/fonts/inter-greek-ext-400-normal.woff2',
+              '/_bun/static/fonts/inter-cyrillic-400-normal.woff2',
+              '/_bun/static/fonts/inter-cyrillic-ext-400-normal.woff2',
+              '/CalSans-SemiBold.woff2'
+            ])
+          ).catch(e => console.error(e)),
+      ])
     );
   });
 
@@ -46,7 +64,7 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
     event.waitUntil(
       caches.keys().then(cacheNames => {
         return Promise.all(
-          cacheNames.filter(e => e !== CACHE_NAME && e !== THIRD_PARTY_CACHE_NAME && e !== FONTS_CACHE_NAME)
+          cacheNames.filter(e => ![CACHE_NAME, THIRD_PARTY_CACHE_NAME, FONTS_CACHE_NAME].includes(e))
             .map(cacheName => caches.delete(cacheName))
         );
       })
@@ -60,7 +78,9 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
     if (event.request.mode === 'navigate') {
       if (navigator.onLine) {
         event.respondWith(
-          fetch(event.request).catch(() => caches.match(OFFLINE_URL))
+          fetch(Object.assign(event.request, { signal: AbortSignal.timeout(5_000) }))
+            .catch(() => caches.match(OFFLINE_URL))
+            .then(e => e || fetch(event.request))
         );
       } else {
         event.respondWith(caches.match(OFFLINE_URL));

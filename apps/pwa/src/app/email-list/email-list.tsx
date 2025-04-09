@@ -185,7 +185,6 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
             initial.current = false
         } else {
             if (initial.current) {
-                console.log("initial")
                 initial.current = false
                 document.getElementById("mail-layout-content")?.scrollTo({ top: 0, behavior: "smooth" })
                 return

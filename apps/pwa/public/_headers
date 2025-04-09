@@ -17,7 +17,7 @@
     Link: </CalSans-SemiBold.woff2>; rel="preload"; as="font" type="font/woff2"
 
 /mail/*
-    </_bun/static/fonts/inter-latin-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-vietnamese-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-latin-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-vietnamese-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-greek-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-greek-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-cyrillic-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-cyrillic-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2"
+    Link: </_bun/static/fonts/inter-latin-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-vietnamese-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-latin-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-vietnamese-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-greek-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-greek-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-cyrillic-400-normal.woff2>; rel="preload"; as="font" type="font/woff2", </_bun/static/fonts/inter-cyrillic-ext-400-normal.woff2>; rel="preload"; as="font" type="font/woff2"
 
 /service.js
     Content-Type: application/javascript; charset=utf-8

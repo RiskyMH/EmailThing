@@ -439,7 +439,6 @@ function GetAttachmentIcon(extension: string) {
 function EmailPicture({ email, fallback }: { email: string, fallback?: string }) {
     const img = useEmailImage(email)
     const isGravatar = !img || img.startsWith("https://www.gravatar.com/avatar/")
-    console.log("email", email, img, isGravatar)
 
     return (
         <Avatar className={"size-12 bg-tertiary transition-all data-[gravatar=true]:rounded-full data-[gravatar=false]:rounded-lg data-[gravatar=false]:[&>img]:p-2 data-[gravatar=false]:[&>img]:rounded-[20%]"} data-gravatar={isGravatar}>

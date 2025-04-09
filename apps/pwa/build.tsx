@@ -180,7 +180,7 @@ const promises = []
 for (const route of routes) {
   if (route.children) {
     for (const child of route.children) {
-      promises.push(processRoute({preferTemplate: route.preferTemplate, ...child}))
+      promises.push(processRoute({ preferTemplate: route.preferTemplate, ...child }))
     }
   } else {
     promises.push(processRoute(route))
@@ -211,7 +211,9 @@ const generateServiceWorkerAssets = async () => {
 
   // Add static files from bun build
   for (const file of result.outputs) {
-    staticAssets.add(path.relative(import.meta.dir + "/dist", file.path).replaceAll("\\", "/"))
+    const relative = path.relative(import.meta.dir + "/dist", file.path).replaceAll("\\", "/")
+    if (relative.startsWith("../")) continue
+    staticAssets.add('/' + relative)
   }
 
 
