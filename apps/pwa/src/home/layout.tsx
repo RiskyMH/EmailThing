@@ -5,7 +5,10 @@ import { useMatch } from "react-router-dom";
 import Link from "@/components/link";
 import { useEffect, useState, type PropsWithChildren } from "react";
 import { cn } from "@/utils/tw";
-import { ExternalLinkIcon } from "lucide-react"
+import { ExternalLinkIcon, ArrowRightIcon } from "lucide-react"
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/utils/data/db";
+import { Button } from "@/components/ui/button";
 
 export default function HomeLayout({ children }: PropsWithChildren) {
     return (
@@ -21,7 +24,8 @@ export default function HomeLayout({ children }: PropsWithChildren) {
                         <MainNavItem href="/docs" title="Documentation" />
                     </div>
                 </div>
-                <nav>
+                <nav className="flex items-center gap-4">
+                    <DemoLink />
                     <UserNav fallbackLogin={true} />
                 </nav>
             </Header>
@@ -78,4 +82,22 @@ export function Header({ children, className }: PropsWithChildren<{ className?: 
     }, []);
 
     return <header className={cn(className, scrolled && "h-16 border-b-2 bg-background")}>{children}</header>;
+}
+
+
+function DemoLink() {
+    const isLoggedIn = useLiveQuery(async () => {
+        const users = await db.user.count()
+        return users > 0
+    }, [], null)
+
+    if (isLoggedIn === true || isLoggedIn === null) return null
+    return (
+        <Button variant="ghost" asChild size="sm">
+            <Link href="/mail/demo" className="flex items-center gap-2 group max-sm:hidden">
+                Demo
+                <ArrowRightIcon className="size-4 text-muted-foreground group-hover:-me-0.5 group-hover:ms-0.5 transition-all" />
+            </Link>
+        </Button>
+    )
 }

@@ -50,7 +50,7 @@ function RedirectToLoginOnLogout() {
         const localSyncData = await db.localSyncData.toArray()
         if (localSyncData.length === 0) {
             await new Promise(resolve => setTimeout(resolve, 100))
-            return (await db.localSyncData.toArray()).length > 0
+            return (await db.localSyncData.count()) > 0
         }
         return localSyncData.length > 0
     }, [], null)

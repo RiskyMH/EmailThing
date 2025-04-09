@@ -25,6 +25,7 @@ import {
     StarIcon,
     TimerIcon,
     Trash2Icon,
+    UserCircle2,
 } from "lucide-react";
 import Link from "@/components/link";
 import { Suspense, use } from "react";
@@ -240,12 +241,16 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
             <DropdownMenuTrigger
                 className={cn(buttonVariants({ variant: "ghost" }), "flex w-full gap-3 px-3 text-left sm:max-lg:px-1")}
             >
-                <Avatar className="size-7">
-                    <AvatarImage className="rounded-full" src={gravatarImg} />
-                    <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
-                        {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                </Avatar>
+                {mailboxId === "demo" ? (
+                    <UserCircle2 className="size-6 text-yellow-500 me-1" />
+                ) : (
+                    <Avatar className="size-7">
+                        <AvatarImage className="rounded-full" src={gravatarImg} />
+                        <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
+                            {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                )}
                 <span className="text-foreground text-sm sm:max-lg:hidden">{defaultAlias?.name}</span>
 
                 <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />

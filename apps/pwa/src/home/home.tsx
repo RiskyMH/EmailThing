@@ -5,6 +5,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import {
     CloudCogIcon,
+    CloudIcon,
+    CloudOffIcon,
     type LucideIcon,
     ReceiptTextIcon,
     SmartphoneIcon,
@@ -135,7 +137,7 @@ export default function Home() {
                     <Feature
                         icon={UsersIcon}
                         title="Multi-user support"
-                        description="Useful for teams, you can add up to 3 users per mailbox."
+                        description="Useful for teams, you can invite others to your mailbox."
                     />
                     <Feature
                         icon={TimerIcon}
@@ -143,9 +145,9 @@ export default function Home() {
                         description="Incase you need a burner email, we got you covered."
                     />
                     <Feature
-                        icon={SmartphoneIcon}
-                        title="Mobile support"
-                        description="EmailThing is mobile friendly, so you can use it on the go."
+                        icon={CloudOffIcon}
+                        title="Offline support"
+                        description="Access your emails even without internet - perfect for on the go."
                     />
                 </div>
                 <div className="mx-auto text-center md:max-w-[58rem]">

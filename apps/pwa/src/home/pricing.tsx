@@ -30,13 +30,13 @@ export default function Pricing() {
                                 <CheckIcon className="mr-2 size-4" /> 100mb Storage
                             </li>
                             <li className="flex items-center">
-                                <CheckIcon className="mr-2 size-4" /> 3 custom domain per mailbox
+                                <CheckIcon className="mr-2 size-4" /> 3 Custom domain per mailbox
                             </li>
                             <li className="flex items-center">
-                                <CheckIcon className="mr-2 size-4" /> 3 users per mailbox
+                                <CheckIcon className="mr-2 size-4" /> 3 Users per mailbox
                             </li>
                             <li className="flex items-center">
-                                <CheckIcon className="mr-2 size-4" /> 5 Mailboxes
+                                <CheckIcon className="mr-2 size-4" /> 5 Mailboxes per user
                             </li>
                             <li className="flex items-center">
                                 <CheckIcon className="mr-2 size-4" /> Basic Support

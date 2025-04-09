@@ -40,7 +40,7 @@ function RedirectToLoginOnLogout() {
         if (localSyncData.length === 0) {
             // sleep 100ms and try again
             await new Promise(resolve => setTimeout(resolve, 100))
-            return (await db.localSyncData.toArray()).length > 0
+            return (await db.localSyncData.count()) > 0
         }
         return localSyncData.length > 0
     }, [], null)
