@@ -12,13 +12,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         async function init() {
             // Initialize DB and load demo data
             try {
-                const v = localStorage.getItem("indexdb-test-version")
-                if (v !== "v1.1b") {
-                    // delete the indexdb
-                    await asyncDeleteIndexDB("EmailDB");
-                    localStorage.setItem("indexdb-test-version", "v1.1b");
-                }
-
                 await initializeDB();
                 if (sessionStorage.getItem('demo') !== 'v1') await loadDemoData();
                 sessionStorage.setItem('demo', 'v1');
@@ -52,11 +45,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return <>{children}</>;
 }
 
-
-function asyncDeleteIndexDB(name: string) {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.deleteDatabase(name);
-        request.onerror = reject;
-        request.onsuccess = resolve;
-    });
-}

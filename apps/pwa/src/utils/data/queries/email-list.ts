@@ -62,13 +62,13 @@ export async function getEmailList({
 }: EmailListOptions) {
     // Start with base query using mailboxId+createdAt index
     let emailQuery = (type === 'drafts'
-        ? db.draftEmails.where('[mailboxId+createdAt+isDeleted]').between(
-            [mailboxId, Dexie.minKey, 0],
-            [mailboxId, Dexie.maxKey, 0]
+        ? db.draftEmails.where('[mailboxId+isDeleted+updatedAt]').between(
+            [mailboxId, 0, Dexie.minKey],
+            [mailboxId, 0, Dexie.maxKey]
         )
-        : db.emails.where('[mailboxId+createdAt+deletedAt+isDeleted]').between(
-            [mailboxId, Dexie.minKey, 0, 0],
-            [mailboxId, Dexie.maxKey, 0, 0]
+        : db.emails.where('[mailboxId+isDeleted+createdAt]').between(
+            [mailboxId, 0, Dexie.minKey],
+            [mailboxId, 0, Dexie.maxKey]
         )
     ) as ReturnType<typeof db.emails.where>
 
@@ -203,6 +203,7 @@ export async function getEmailList({
         if (type === 'drafts') {
             return {
                 ...email,
+                createdAt: email.updatedAt || email.createdAt,
                 from: {
                     address: email.from
                 },

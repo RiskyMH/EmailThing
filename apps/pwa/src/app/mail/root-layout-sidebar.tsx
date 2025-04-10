@@ -231,7 +231,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
         <> {settingsLink}
             <DropdownMenu>
                 <DropdownMenuTrigger
-                    className={cn(buttonVariants({ variant: "ghost" }), "sm:max-lg:h-9 h-12 flex w-full gap-2 px-3 text-left sm:max-lg:px-1", mailboxId === "demo" && "h-10")}
+                    className={cn(buttonVariants({ variant: "ghost" }), "sm:max-lg:h-9 h-10 flex w-full gap-2 px-3 text-left sm:max-lg:px-1")}
                 >
                     {mailboxId === "demo" ? (
                         <UserCircle2 className="size-6 text-yellow-500 sm:max-lg:ms-auto sm:max-lg:-me-0.5" />
@@ -256,7 +256,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
                         </span>
                     </div>
 
-                    <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
+                    <ChevronsUpDownIcon className="ms-auto -me-2 size-5 self-center text-muted-foreground sm:max-lg:hidden" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     {mailboxes?.map((m) => (

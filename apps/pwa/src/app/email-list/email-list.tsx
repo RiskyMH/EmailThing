@@ -17,6 +17,7 @@ import { Observable, liveQuery } from 'dexie';
 import { getCategories, getMailboxName } from "@/utils/data/queries/mailbox";
 import { Loader2 } from "lucide-react"
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { startOfToday, startOfYesterday, startOfWeek, subWeeks, subMonths, subYears, format, isAfter, isBefore, isSameMonth, isSameYear, isSameDay, isThisWeek, isYesterday, isToday, isSameWeek } from 'date-fns'
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     if (typeof window === "undefined") return <Loading />
@@ -253,6 +254,8 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
 
     const emails = useMemo(() => resultArrays.flat(1), [resultArrays]);
 
+    const today = new Date().getDate()
+
     return (
         <InfiniteScroll
             dataLength={emails.length}
@@ -309,7 +312,7 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
 
             {emails.map((email, i) => (
                 <Fragment key={email.id}>
-                    <EmailDate dateA={email.createdAt} dateB={emails[i - 1]?.createdAt} />
+                    <EmailDate dateA={email.createdAt.toISOString()} dateB={emails[i - 1]?.createdAt.toISOString()} today={today} />
                     <EmailItem
                         key={email.id}
                         email={email}
@@ -324,19 +327,45 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
     );
 }
 
-const currentYear = new Date().getFullYear()
-function EmailDate({ dateA, dateB }: { dateA: Date, dateB?: Date | null}) {
-    if (dateB && dateA.toDateString() === dateB.toDateString()) return null;
+const now = new Date()
+const today = startOfToday()
+const yesterday = startOfYesterday()
+const thisWeekStart = startOfWeek(today)
+const lastWeekStart = subWeeks(thisWeekStart, 1)
+const lastMonthStart = subMonths(today, 1)
+const lastYearStart = subYears(today, 1)
+
+function getDateString(date: Date, _today: number) {
+    let dateString
+    if (isToday(date)) {
+        dateString = "Today"
+    } else if (isYesterday(date)) {
+        dateString = "Yesterday"
+    } else if (isThisWeek(date)) {
+        // If it's this week but before yesterday, show the day name
+        dateString = format(date, 'EEEE')
+    } else if (isSameWeek(date, lastWeekStart)) {
+        dateString = "Last week"
+    } else if (isSameMonth(date, lastMonthStart)) {
+        dateString = format(date, 'MMMM')
+    } else if (isSameYear(date, now)) {
+        dateString = format(date, 'MMMM')
+    } else {
+        dateString = format(date, 'MMMM yyyy')
+    }
+
+    return dateString
+}
+
+function EmailDate({ dateA, dateB, today }: { dateA: string, dateB?: string | null, today: number }) {
+    const dateString = getDateString(new Date(dateA), today)
+    const dateStringB = dateB ? getDateString(new Date(dateB), today) : null
+    if (dateB && dateString === dateStringB) return null;
 
     return (
-        <div className="text-xs font-medium text-muted-foreground flex h-5 px-4">
+        <div className="text-xs font-medium text-muted-foreground flex h-5 px-2 sm:px-4">
             <p className="self-end">
-                {dateA.toLocaleDateString(undefined, {
-                    weekday: 'long',
-                    year: dateA.getFullYear() === currentYear ? undefined : 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                })}
+                {dateString}
             </p>
         </div>
     )

@@ -56,6 +56,7 @@ export class EmailDB extends Dexie {
         '[mailboxId+createdAt]',
         '[mailboxId+isDeleted]',
         '[mailboxId+createdAt+deletedAt+isDeleted]',
+        '[mailboxId+isDeleted+createdAt]',
 
         '[mailboxId+categoryId+isSender+binnedAt+tempId+isDeleted+createdAt]',
         '[mailboxId+isSender+binnedAt+tempId+isDeleted+createdAt]',
@@ -79,7 +80,7 @@ export class EmailDB extends Dexie {
       ].join(','),
 
       // Keep other tables as they were
-      draftEmails: 'id,mailboxId,[mailboxId+createdAt],[id+mailboxId],[mailboxId+deletedAt],updatedAt,[mailboxId+createdAt+isDeleted],[mailboxId+isDeleted],needsSync',
+      draftEmails: 'id,mailboxId,[mailboxId+createdAt],[id+mailboxId],[mailboxId+deletedAt],updatedAt,[mailboxId+createdAt+isDeleted],[mailboxId+isDeleted],needsSync,[mailboxId+isDeleted+updatedAt]',
       mailboxes: 'id,createdAt',
       mailboxAliases: 'id,[mailboxId+alias],mailboxId,alias,default,[mailboxId+default],needsSync',
       mailboxCategories: 'id,[mailboxId+name],mailboxId,name,[mailboxId+isDeleted],needsSync',
@@ -163,5 +164,22 @@ export const db = new EmailDB();
 
 // Initialize database
 export async function initializeDB() {
+  const v = localStorage.getItem("indexdb-test-version")
+  if (v !== "v1.1b") {
+    // delete the indexdb
+    await asyncDeleteIndexDB("EmailDB");
+    localStorage.setItem("indexdb-test-version", "v1.1b");
+  }
+
+
   await db.open();
+}
+
+
+function asyncDeleteIndexDB(name: string) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.onerror = reject;
+    request.onsuccess = resolve;
+  });
 }

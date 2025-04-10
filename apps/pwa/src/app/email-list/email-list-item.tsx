@@ -11,7 +11,7 @@ import {
     ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { cn } from "@/utils/tw";
-import { ArchiveRestoreIcon, ExternalLink, ForwardIcon, MailOpenIcon, ReplyAllIcon, ReplyIcon, TagIcon, Trash2Icon } from "lucide-react";
+import { ArchiveRestoreIcon, ExternalLink, ForwardIcon, MailOpenIcon, PaperclipIcon, ReplyAllIcon, ReplyIcon, TagIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { ClientStar, ContextMenuAction } from "../components";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ export interface EmailItemProps {
             name?: string;
             address: string;
         }>;
+        attachments?: any[]
     };
     mailboxId: string;
     type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
@@ -181,13 +182,19 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
                         )}
                         <span className="line-clamp-2 break-all text-muted-foreground text-sm">{email.snippet}</span>
                     </span> */}
-            <LocalTime
-                type="smart"
-                time={email.createdAt}
-                tooltip={false}
-                className="float-right ms-auto w-auto shrink-0 self-center text-right text-muted-foreground text-xs group-hover:sm:hidden"
-            />
-            <div className="float-right ms-auto me-1.5 hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
+
+            <div className="flex gap-1 sm:gap-2 float-right ms-auto group-hover:sm:hidden self-center text-right text-muted-foreground shrink-0 ">
+                {(email.attachments?.length ?? 0) > 0 && (
+                    <PaperclipIcon className="size-4 self-center" />
+                )}
+                <LocalTime
+                    type="smart"
+                    time={email.createdAt}
+                    tooltip={false}
+                    className="w-auto self-center text-xs"
+                />
+            </div>
+            <div className="float-right ms-auto hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
                 {isInView ? (
                     <>
                         {type !== "drafts" && <ContextMenuAction
