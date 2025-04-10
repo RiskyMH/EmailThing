@@ -1,6 +1,6 @@
 "use client"
 import { useParams, useSearchParams } from "react-router-dom"
-import { Suspense, useEffect, useState, useRef, useCallback, useMemo } from "react"
+import { Suspense, useEffect, useState, useRef, useCallback, useMemo, Fragment } from "react"
 import Loading, { EmailListLoadingSkeleton, EmailListCategoryLoadingSkeleton } from "./email-list-loading"
 import { Button, buttonVariants } from "@/components/ui/button"
 import RefreshButton from "./refresh-button"
@@ -66,8 +66,8 @@ declare global {
 
 function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     return (
-        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-1 sm:px-3 pt-0">
-            <div className="overflow sticky top-0 z-10 flex h-12 w-full min-w-0 flex-row items-center justify-center gap-3 overflow-y-hidden border-b-2 bg-background px-2 sm:px-3">
+        <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 sm:px-3 pt-0">
+            <div className="overflow sticky top-0 z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 z-10 overflow-y-hidden border-b-2 bg-background px-2 sm:px-3">
                 <Categories filter={type} />
             </div>
 
@@ -163,7 +163,7 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
     const queriesRef = useRef<Observable<Awaited<ReturnType<typeof getEmailList>>>[]>(
         [createLiveQuery(0)]
     );
-    const [resultArrays, setResultArrays] = useState<Awaited<ReturnType<typeof getEmailList>>[][]>(initialData);
+    const [resultArrays, setResultArrays] = useState<Awaited<ReturnType<typeof getEmailList>>[]>(initialData);
 
     const initial = useRef(true)
 
@@ -307,11 +307,39 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
                 <EmailListLoadingSkeleton />
             )}
 
-            {emails.map((email) => (
-                <EmailItem key={email.id} email={email} categories={categories || undefined} mailboxId={mailboxId} type={type} />
+            {emails.map((email, i) => (
+                <Fragment key={email.id}>
+                    <EmailDate dateA={email.createdAt} dateB={emails[i - 1]?.createdAt} />
+                    <EmailItem
+                        key={email.id}
+                        email={email}
+                        categories={categories || undefined}
+                        mailboxId={mailboxId}
+                        type={type}
+                    />
+                </Fragment>
             ))}
+
         </InfiniteScroll>
     );
+}
+
+const currentYear = new Date().getFullYear()
+function EmailDate({ dateA, dateB }: { dateA: Date, dateB?: Date | null}) {
+    if (dateB && dateA.toDateString() === dateB.toDateString()) return null;
+
+    return (
+        <div className="text-xs font-medium text-muted-foreground flex h-5 px-4">
+            <p className="self-end">
+                {dateA.toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    year: dateA.getFullYear() === currentYear ? undefined : 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                })}
+            </p>
+        </div>
+    )
 }
 
 
@@ -350,7 +378,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
         return (
             <>
                 <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
-                <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden text-nowrap">
+                <div className="flex h-10 w-full min-w-0 flex-row overflow-y-hidden text-nowrap">
                     <CategoryItem
                         circleColor={null}
                         name={search ? "Search results" : name || "All"}
@@ -377,7 +405,7 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
     return (
         <>
             <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 shrink-0 self-start" />
-            <div className="flex h-6 w-full min-w-0 flex-row gap-6 overflow-y-hidden text-nowrap">
+            <div className="flex h-10 w-full min-w-0 flex-row gap-4 overflow-y-hidden text-nowrap">
                 <CategoryItem
                     circleColor={null}
                     name={search ? "Search results" : name || "All"}
@@ -448,8 +476,8 @@ export function CategoryItem({
         <Link
             href={link + (category ? `?category=${category}` : "")}
             className={cn(
-                "group inline-flex w-auto max-w-fit shrink-0 items-center gap-1 border-transparent border-b-3 px-1 font-bold",
-                isCurrent && "border-blue",
+                "group inline-flex w-auto max-w-fit shrink-0 items-center gap-2 border-transparent border-b-3 px-1 relative",
+                // isCurrent && "border-blue",
             )}
             onClick={() => {
                 if (window._tempData?.scrollY?.emailList) {
@@ -460,9 +488,13 @@ export function CategoryItem({
                 }, 0)
             }}
         >
-            {circleColor && <div className="mr-1 size-2.5 rounded-full" style={{ backgroundColor: circleColor }} />}
-            <span className="font-medium text-base group-hover:text-muted-foreground">{name}</span>
-            {count !== null && <span className="text-muted-foreground text-sm group-hover:text-muted-foreground/50">({count})</span>}
+            {/* absolute blue border for the width of the current category */}
+            {isCurrent && (
+                <div className="absolute bottom-1 left-0 right-0 h-[2.5px] bg-blue z-10 rounded" />
+            )}
+            {circleColor && <div className="size-2.5 rounded-full" style={{ backgroundColor: circleColor }} />}
+            <span className="font-medium text-sm group-hover:text-muted-foreground">{name}</span>
+            {count !== null && <span className="text-muted-foreground text-xs font-medium group-hover:text-muted-foreground/50">{count}</span>}
         </Link>
     );
 }

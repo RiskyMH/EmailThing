@@ -115,7 +115,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
             ref={ref}
             href={link}
             className={cn(
-                "group inline-flex h-12 gap-3 rounded-md px-4 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "group inline-flex h-10 gap-3 rounded-md px-2 sm:px-4 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 email.isRead ? "hover:bg-card/60" : "bg-card text-card-foreground shadow-sm hover:bg-card/60",
             )}
         >

@@ -8,7 +8,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MailboxLink } from "@/(email)/mail/[mailbox]/components.client";
-import { SidebarLink } from "@/(email)/mail/[mailbox]/sidebar.client";
 import { cn } from "@/utils/tw";
 
 import {
@@ -28,12 +27,12 @@ import {
     UserCircle2,
 } from "lucide-react";
 import Link from "@/components/link";
-import { Suspense, use } from "react";
 import { getEmailCount } from "@/utils/data/queries/email-list";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useGravatar } from "@/utils/fetching";
 import { useParams } from "react-router-dom";
 import { getMailboxDefaultAlias, getUserMailboxes } from "@/utils/data/queries/mailbox";
+import { usePathname } from "next/navigation";
 
 export const Sidebar = ({ className }: { className?: string }) => {
     const params = useParams<"mailboxId" | "mailId">()
@@ -63,14 +62,15 @@ export const Sidebar = ({ className }: { className?: string }) => {
             href: `/mail/${mailboxId}/sent`,
         },
         {
-            name: "Trash",
-            icon: Trash2Icon,
-            href: `/mail/${mailboxId}/trash`,
-        },
-        {
             name: "Temporary Mail",
             icon: TimerIcon,
             href: `/mail/${mailboxId}/temp`,
+        },
+        "---",
+        {
+            name: "Trash",
+            icon: Trash2Icon,
+            href: `/mail/${mailboxId}/trash`,
         },
         {
             name: "Spam",
@@ -78,48 +78,33 @@ export const Sidebar = ({ className }: { className?: string }) => {
             href: `/mail/${mailboxId}/#spam`,
             disabled: true,
         },
-    ];
+    ] as const;
 
     return (
         <div
             className={cn(
-                "flex min-h-screen flex-col overflow-y-auto text-tertiary-foreground sm:shrink-0 sm:bg-tertiary sm:p-3 lg:w-60",
+                "flex min-h-screen flex-col overflow-y-auto text-tertiary-foreground sm:shrink-0 sm:bg-tertiary sm:p-2 lg:w-60 sm:max-lg:p-2",
                 className,
             )}
         >
-            <br className="sm:hidden" />
 
-            <Button asChild variant="secondary" className="my-3 w-full gap-2 rounded p-6 px-4 font-bold lg:px-6">
+            <Button asChild variant="secondary" size="sm" className="gap-2 rounded-lg p-5 px-3 lg:px-6 mx-">
                 <Link href={`/mail/${mailboxId}/draft/new`}>
-                    <PenSquareIcon className="size-5" />
+                    <PenSquareIcon className="size-5 text-muted-foreground sm:max-lg:text-foreground/80" />
                     <span className="sm:max-lg:hidden">New Message</span>
                 </Link>
             </Button>
 
-            <div className="flex flex-col gap-2 py-2 text-sm">
+            <div className="flex flex-col gap-1.5 py-2 text-sm mt-2">
                 {items.map((item) => (
-                    <LinkElement key={item.href} {...item} />
+                    item === "---"
+                        ? <hr className="bg-border sm:max-lg:w-full m-2 sm:max-lg:m-0" />
+                        : <LinkElement key={item.href} {...item} />
                 ))}
-
-                {/* <hr className="bg-border w-full" />
-                <LinkElement
-                    name="Mailbox Config"
-                    icon={SettingsIcon}
-                    href={`/mail/${mailboxId}/config`}
-                /> */}
             </div>
 
             <div className="mt-auto flex flex-col justify-end gap-1">
-                <hr className="w-full bg-border " />
-                <LinkElement
-                    name="Mailbox Config"
-                    icon={SettingsIcon}
-                    href={`/mail/${mailboxId}/config`}
-                    className="py-4"
-                />
-                <Suspense fallback={<MailboxesFallback />}>
-                    <Mailboxes mailbox={mailboxId} />
-                </Suspense>
+                <Mailboxes mailbox={mailboxId} />
             </div>
         </div>
     );
@@ -142,18 +127,31 @@ function LinkElement({
     className?: string;
     alaisMatch?: string;
 }) {
+    const pathName = usePathname();
+
+    const isActive = pathName === href || (alaisMatch && pathName === alaisMatch)
+
+
     return (
         <Button
             asChild
             variant="ghost"
+            size="sm"
             className={cn(
-                "flex w-full justify-normal gap-4 self-center px-3 py-6 text-center font-bold transition-colors hover:text-foreground lg:self-auto",
+                disabled && "group relative flex h-9 w-full cursor-not-allowed items-center gap-4 rounded px-5 opacity-50",
+                "flex w-full justify-normal gap-3 self-center px-3 py-2.5 text-center transition-colors text-foreground/80 lg:self-auto",
+                isActive && "text-blue dark:text-foreground bg-accent/65",
+                "hover:bg-accent/65 active:bg-accent/80",
                 className,
             )}
         >
-            <SidebarLink href={href} className="" disabled={disabled} alaisMatch={alaisMatch}>
-                <Icon className="size-6 self-center sm:max-lg:mx-auto" />
-                <span className="self-center sm:max-lg:hidden">{name}</span>
+            <Link href={href || "#"}>
+                {/* {isActive && (
+                    <span className="sm:-ms-5 absolute start-0 me-1 h-9 w-1 self-center rounded-e bg-blue sm:relative sm:start-auto dark:bg-foreground" />
+                )} */}
+
+                <Icon className={cn("size-5 self-center sm:max-lg:mx-auto text-muted-foreground group-hover:text-foreground", isActive && "text-blue dark:text-foreground")} />
+                <span className={cn("self-center sm:max-lg:hidden", isActive && "font-bold")}>{name}</span>
                 {name === "Inbox" ? (
                     <ItemCount mailboxId={href.split("/")[2]} type="unread" primary />
                 ) : name === "Draft" ? (
@@ -163,10 +161,12 @@ function LinkElement({
                 ) : name === "Temporary Mail" ? (
                     <ItemCount mailboxId={href.split("/")[2]} type="temp" />
                 ) : null}
-            </SidebarLink>
+            </Link>
         </Button>
     );
 }
+
+
 
 
 function ItemCount({
@@ -185,7 +185,7 @@ function ItemCount({
 
     return (
         <span
-            className={`${primary ? "bg-blue text-blue-foreground" : "bg-secondary text-foreground"} float-right ms-auto select-none self-center rounded px-3 py-1 font-bold text-xs sm:max-lg:hidden`}
+            className={`${primary ? "bg-blue text-blue-foreground py-0.5 px-1 min-w-6" : "text-muted-foreground pe-1"} float-right ms-auto select-none self-center rounded text-xs sm:max-lg:hidden -me-1`}
         >
             {count}
         </span>
@@ -203,85 +203,92 @@ function MailboxesFallback() {
 }
 
 const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
-    // const userId = await getCurrentUser();
-    // if (!(userId && (await userMailboxAccess(mailboxId, userId)))) return null;
 
-    // const mailboxes = await userMailboxes(userId);
-    // const { default: defaultAlias } = await mailboxAliases(mailboxId);
-    const userId = "a"
+    const settingsLink = (
+        <>
+            <hr className="w-full bg-border " />
+            <LinkElement
+                name="Mailbox Config"
+                icon={SettingsIcon}
+                href={`/mail/${mailboxId}/config`}
+            // className="py-4"
+            />
+        </>
+    )
 
-    // type _mailboxes = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["userMailboxes"]>>
-    // const mailboxes = [
-    //     {
-    //         id: mailboxId,
-    //         name: "demo@emailthing.xyz",
-    //         alias: "demo@emailthing.xyz",
-    //         role: "DEMO",
-    //     },
-    // ]
     const _mailboxes = useLiveQuery(async () => getUserMailboxes(), [])
     const mailboxes = _mailboxes?.filter(m => m.id !== "demo")
 
-    // type _defaultAlias = Awaited<ReturnType<typeof import("@/(email)/mail/[mailbox]/tools")["mailboxAliases"]>>
-    // const { default: defaultAlias } = {
-    //     default: {
-    //         alias: "demo@emailthing.xyz",
-    //         name: "Demo"
-    //     }
-    // }
     const defaultAlias = useLiveQuery(async () => getMailboxDefaultAlias(mailboxId), [mailboxId])
-
-    // const gravatarImg = use(gravatar(defaultAlias?.alias ?? "ab@c.com"))
     const gravatarImg = useGravatar(defaultAlias?.alias ?? "ab@c.com")
 
-    if (!defaultAlias) return <MailboxesFallback />
+    if (mailboxId !== "demo") {
+        if (!mailboxes) return null
+        if (mailboxes.length < 2) return settingsLink
+    }
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger
-                className={cn(buttonVariants({ variant: "ghost" }), "flex w-full gap-3 px-3 text-left sm:max-lg:px-1")}
-            >
-                {mailboxId === "demo" ? (
-                    <UserCircle2 className="size-6 text-yellow-500 md:me-1" />
-                ) : (
-                    <Avatar className="size-7">
-                        <AvatarImage className="rounded-full" src={gravatarImg} />
-                        <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
-                            {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
-                )}
-                <span className="text-foreground text-sm sm:max-lg:hidden">{defaultAlias?.name}</span>
+        <> {settingsLink}
+            <DropdownMenu>
+                <DropdownMenuTrigger
+                    className={cn(buttonVariants({ variant: "ghost" }), "sm:max-lg:h-9 h-12 flex w-full gap-2 px-3 text-left sm:max-lg:px-1", mailboxId === "demo" && "h-10")}
+                >
+                    {mailboxId === "demo" ? (
+                        <UserCircle2 className="size-6 text-yellow-500 sm:max-lg:ms-auto sm:max-lg:-me-0.5" />
+                    ) : (
+                        // null
+                        <Avatar className="size-7 -ms-1 sm:max-lg:ms-auto sm:max-lg:-me-1">
+                            <AvatarImage className="rounded-full" src={gravatarImg} />
+                            <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
+                                {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                        </Avatar>
+                    )}
+                    <div className="flex flex-col overflow-hidden text-ellipsis">
+                        <span className="text-foreground text-sm sm:max-lg:hidden overflow-hidden text-ellipsis">
+                            {mailboxId === "demo" ? "Demo" : defaultAlias?.alias}
+                        </span>
+                        <span className="text-muted-foreground text-xs sm:max-lg:hidden">
+                            {mailboxId === "demo"
+                                ? "Test account"
+                                : mailboxes?.find(m => m.id === mailboxId)?.role === "OWNER" ? "Personal" : "Personal (shared)"
+                            }
+                        </span>
+                    </div>
 
-                <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                {mailboxes?.map((m) => (
-                    <DropdownMenuItem key={m.id} asChild className="flex cursor-pointer gap-2">
-                        <MailboxLink mailboxId={m.id}>
-                            {m.id === mailboxId ? (
-                                <CheckIcon className="size-4 text-muted-foreground" />
-                            ) : (
-                                <span className="w-4" />
-                            )}
-                            {m.name}
-                        </MailboxLink>
-                    </DropdownMenuItem>
-                ))}
-                {(mailboxId === "demo" && !mailboxes?.length) && (
-                    <DropdownMenuItem asChild>
-                        <Link href="/register">
-                            <LogInIcon className="mr-2 size-4 text-muted-foreground" />
-                            <span>Register</span>
-                        </Link>
-                    </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem disabled>
-                    <PlusCircleIcon className="mr-2 size-4 text-muted-foreground" />
-                    <span>New mailbox</span>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    {mailboxes?.map((m) => (
+                        <DropdownMenuItem key={m.id} asChild className="flex cursor-pointer gap-2">
+                            <MailboxLink mailboxId={m.id}>
+                                {m.id === mailboxId ? (
+                                    <CheckIcon className="size-4 text-muted-foreground" />
+                                ) : (
+                                    <span className="w-4" />
+                                )}
+                                {m.name}
+                            </MailboxLink>
+                        </DropdownMenuItem>
+                    ))}
+                    {(mailboxId === "demo" && !mailboxes?.length) ? (
+                        <DropdownMenuItem asChild>
+                            <Link href="/register">
+                                <LogInIcon className="mr-2 size-4 text-muted-foreground" />
+                                <span>Register</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    ) : (
+                        <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem disabled>
+                                <PlusCircleIcon className="mr-2 size-4 text-muted-foreground" />
+                                <span>New shared mailbox</span>
+                            </DropdownMenuItem>
+                        </>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </>
     );
 };

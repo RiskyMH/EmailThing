@@ -4,8 +4,12 @@ import UserNav from "@/components/user-navbar";
 import Link from "next/link";
 import { Search } from "@/(email)/mail/[mailbox]/nav.search";
 import Sidebar from "./root-layout-sidebar";
-import { MobileNav } from "@/(email)/mail/[mailbox]/sidebar.client";
 import { useParams } from "react-router-dom";
+import { Drawer, DrawerTrigger, DrawerContent, DrawerClose } from "@/components/ui/drawer";
+import { MenuIcon, XIcon } from "lucide-react";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
+import { type PropsWithChildren, useState, useEffect } from "react";
+import { useWindowSize } from "usehooks-ts";
 
 export default function Header() {
     const params = useParams<"mailboxId" | "mailId">()
@@ -15,11 +19,11 @@ export default function Header() {
         <div className="sticky top-0 z-40 flex items-center justify-between border-b-2 bg-secondary px-7 dark:bg-tertiary">
             <header className="flex h-16 w-full items-center">
                 <MobileNav>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 p-3 mb-2">
                         <Logo className="size-7" />
                         <h2 className="inline-block whitespace-nowrap font-bold text-xl">EmailThing</h2>
                     </div>
-                    <Sidebar className="min-h-[calc(100%-2rem)]" />
+                    <Sidebar className="min-h-[calc(100svh-5.3rem)]" />
                 </MobileNav>
 
                 <nav className="mx-auto me-auto w-auto sm:mx-0 sm:ms-0 lg:w-[calc(15rem-1.75rem)]">
@@ -53,5 +57,38 @@ export default function Header() {
                 </div>
             </header>
         </div>
+    );
+}
+
+export function MobileNav({ children }: PropsWithChildren) {
+    const [open, setOpen] = useState(false);
+    const windowSize = useWindowSize();
+    useEffect(() => setOpen(false), [windowSize]);
+
+    return (
+        <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger className="-ms-2 me-auto inline p-2 hover:bg-transparent sm:hidden" asChild>
+                <Button variant="ghost" size="icon">
+                    <MenuIcon />
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="overflow-y-auto overflow-x-hidden p-3" onClick={() => setOpen(false)}>
+                {children}
+            </SheetContent>
+        </Sheet>
+        // <Drawer open={open} onOpenChange={setOpen} direction="left">
+        //     <DrawerTrigger className="-ms-2 me-auto inline p-2 hover:bg-transparent sm:hidden" asChild>
+        //         <Button variant="ghost" size="icon">
+        //             <MenuIcon />
+        //         </Button>
+        //     </DrawerTrigger>
+        //     <DrawerContent className="overflow-y-auto overflow-x-hidden p-3">
+        //         <DrawerClose className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+        //             <XIcon className="size-4" />
+        //             <span className="sr-only">Close</span>
+        //         </DrawerClose>
+        //         {children}
+        //     </DrawerContent>
+        // </Drawer>
     );
 }
