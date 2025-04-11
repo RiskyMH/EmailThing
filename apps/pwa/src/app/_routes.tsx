@@ -100,10 +100,8 @@ export const routes = [
 
 function RedirectToMail() {
     if (typeof window === "undefined") return <EmailListLoading />;
-    // const mailboxId = document.cookie.split("; ").find(row => row.startsWith("mailboxId="))?.split("=")[1];
     const mailboxId = document.cookie.split("; ").find(row => row.startsWith("mailboxId="))?.split("=")[1] || "demo";
     return <><EmailListLoading /><Navigate to={`/mail/${mailboxId}`} replace /></>
 }
-
 
 export default routes

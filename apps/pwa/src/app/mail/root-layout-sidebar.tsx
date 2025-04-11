@@ -36,7 +36,7 @@ import { usePathname } from "next/navigation";
 
 export const Sidebar = ({ className }: { className?: string }) => {
     const params = useParams<"mailboxId" | "mailId">()
-    const mailboxId = params.mailboxId || "demo"
+    const mailboxId = params.mailboxId || "~"
 
 
     const items = [
@@ -246,7 +246,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
                     )}
                     <div className="flex flex-col overflow-hidden text-ellipsis">
                         <span className="text-foreground text-sm sm:max-lg:hidden overflow-hidden text-ellipsis">
-                            {mailboxId === "demo" ? "Demo" : defaultAlias?.alias}
+                            {mailboxId === "demo" ? "Demo" : defaultAlias?.alias || "Unknown Mailbox?"}
                         </span>
                         <span className="text-muted-foreground text-xs sm:max-lg:hidden">
                             {mailboxId === "demo"

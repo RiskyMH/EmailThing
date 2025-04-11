@@ -27,6 +27,7 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
             </div>
             <Suspense>
                 <RedirectToLoginOnLogout />
+                <RedirectTilde />
             </Suspense>
         </RootLayout>
     );
@@ -50,3 +51,13 @@ function RedirectToLoginOnLogout() {
         return <Navigate to={`/login?from=${location.pathname}`} state={{ from: location }} />
     }
 }   
+
+function RedirectTilde() {
+    const params = useParams<"mailboxId">()
+    const url = useLocation()
+    const mailboxId = params.mailboxId
+    if (mailboxId === "~") {
+        const defaultMailboxId = document.cookie.split("; ").find(row => row.startsWith("mailboxId="))?.split("=")[1] || "demo";
+        return <Navigate to={url.pathname.replace("~", defaultMailboxId)} replace />
+    }
+}

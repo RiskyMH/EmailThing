@@ -144,7 +144,7 @@ const { query, dataRoutes } = createStaticHandler(routes);
 
 
 async function processRoute(route: RouteObject & { preferTemplate?: string }) {
-  if (!route.path || route.path === "*") return;
+  if (!route.path || route.path.includes("*")) return;
 
   const path = route.path
     .replaceAll(/:(\w*)/g, '[$1]')
