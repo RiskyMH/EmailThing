@@ -68,6 +68,9 @@ await cp(path.join(import.meta.dir, "../web/public"), path.join(import.meta.dir,
 await cp(path.join(import.meta.dir, "./public"), path.join(import.meta.dir, "./dist"), { recursive: true })
 await cp(path.join(require.resolve("@fontsource/inter"), "/../files"), path.join(import.meta.dir, "./dist/_bun/static/fonts"), { recursive: true })
 
+const cssFile = (await Bun.file(path.join(import.meta.dir, "./dist/app.html")).text())
+const cssFilePath = cssFile.match(/(<link rel="stylesheet".*?_bun.*?>)/)?.[1]
+
 for (const file of result.outputs) {
   if (file.path.endsWith(".css")) {
     const content = (await Bun.file(file.path).text())
@@ -78,6 +81,7 @@ for (const file of result.outputs) {
 
   else if (file.path.endsWith(".html")) {
     const content = (await Bun.file(file.path).text())
+      .replace(/(<link rel="stylesheet".*?_bun.*?>)/, cssFilePath || "")
       .replaceAll("./_bun/", "/_bun/")
       .replaceAll("../public/", "/")
     await Bun.write(file.path, content)

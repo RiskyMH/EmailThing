@@ -1,12 +1,12 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
-@source  "../../web/app";
-@source  "../src";
+@source "../../web/app";
+@source "../src";
 
-/* @import "@fontsource/inter/200.css";
+/* @import "@fontsource/inter/100.css";
+@import "@fontsource/inter/200.css";
 @import "@fontsource/inter/300.css";
-@import "@fontsource/inter/100.css";
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
