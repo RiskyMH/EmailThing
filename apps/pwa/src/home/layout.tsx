@@ -1,15 +1,16 @@
 'use client'
 import { EmailThing } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
-import UserNav from "@/components/user-navbar";
 import { useMatch } from "react-router-dom";
 import Link from "@/components/link";
-import { useEffect, useState, type PropsWithChildren } from "react";
+import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { cn } from "@/utils/tw";
-import { ExternalLinkIcon, ArrowRightIcon } from "lucide-react"
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/utils/data/db";
-import { Button } from "@/components/ui/button";
+import { ExternalLinkIcon } from "lucide-react"
+import { lazy } from "react";
+import { UserNavLogin } from "@/components/user-navbar";
+
+const UserNav = lazy(() => import("@/components/user-navbar"))
+const DemoLink = lazy(() => import("@/components/user-navbar").then(mod => ({ default: mod.DemoLink })))
 
 export default function HomeLayout({ children }: PropsWithChildren) {
     return (
@@ -26,8 +27,10 @@ export default function HomeLayout({ children }: PropsWithChildren) {
                     </div>
                 </div>
                 <nav className="flex items-center gap-4">
-                    <DemoLink />
-                    <UserNav fallbackLogin={true} />
+                    <Suspense fallback={<UserNavLogin />}>
+                        <DemoLink />
+                        <UserNav fallbackLogin={true} />
+                    </Suspense>
                 </nav>
             </Header>
             <main className="flex-1 bg-background">{children}</main>
@@ -86,19 +89,3 @@ export function Header({ children, className }: PropsWithChildren<{ className?: 
 }
 
 
-function DemoLink() {
-    const isLoggedIn = useLiveQuery(async () => {
-        const users = await db.user.count()
-        return users > 0
-    }, [], null)
-
-    if (isLoggedIn === true || isLoggedIn === null) return null
-    return (
-        <Button variant="ghost" asChild size="sm">
-            <Link href="/mail/demo" className="flex items-center gap-2 group max-sm:hidden">
-                Demo
-                <ArrowRightIcon className="size-4 text-muted-foreground group-hover:-me-0.5 group-hover:ms-0.5 transition-all" />
-            </Link>
-        </Button>
-    )
-}

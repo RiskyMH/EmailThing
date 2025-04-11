@@ -64,7 +64,6 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { db } from "@/utils/data/db";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -121,6 +120,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             // document.cookie = `token=${token}; path=/;`;
             // localStorage.setItem("token", token);
             // localStorage.removeItem("lastSynced");
+            const { db } = await import("@/utils/data/db")
             await db.open()
             await db.localSyncData.put({
                 token,

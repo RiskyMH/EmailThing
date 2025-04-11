@@ -1,7 +1,7 @@
 import { type RouteObject, Outlet } from "react-router-dom";
 import Docs from "./1-introduction";
 import CustomDomainDocs from "./2-custom-domain";
-import DocsLayout from "@/(docs)/layout"
+import DocsLayout from "./layout"
 import DocsLayout2 from "@/(docs)/docs/layout"
 import AboutPage from "@/(docs)/docs/page"
 import CustomDomainPage from "@/(docs)/docs/custom-domain/page"
