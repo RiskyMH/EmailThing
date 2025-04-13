@@ -1,9 +1,8 @@
 import db, { DefaultDomain, DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens, PasskeyCredentials, User, UserNotification } from "@/db";
 import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTableColumns, sql, lte, or } from "drizzle-orm";
-import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
+// import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import type { BatchItem } from "drizzle-orm/batch";
-import { getCurrentUser, isValidOrigin } from "../tools";
-
+import { getSession, isValidOrigin } from "../tools";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin")
@@ -41,8 +40,13 @@ export async function GET(request: Request) {
 
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date(0);
 
-    const currentUserid = await getCurrentUser();
-    if (!currentUserid) return new Response("Unauthorized", { status: 401 });
+    const currentUserid = await getSession(request);
+    if (!currentUserid) return new Response("Unauthorized", { status: 401, headers: {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "authorization",
+        "Access-Control-Allow-Credentials": "true",
+    } });
 
     const currentUser = await db.query.User.findFirst({
         where: eq(User.id, currentUserid),
@@ -94,8 +98,13 @@ export async function POST(request: Request) {
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date();
 
 
-    const currentUserid = await getCurrentUser();
-    if (!currentUserid) return new Response("Unauthorized", { status: 401 });
+    const currentUserid = await getSession(request);
+    if (!currentUserid) return new Response("Unauthorized", { status: 401, headers: {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "authorization",
+        "Access-Control-Allow-Credentials": "true",
+    } });
 
     const currentUser = await db.query.User.findFirst({
         where: eq(User.id, currentUserid),
@@ -729,4 +738,12 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             auth: undefined as never,
         })),
     }
+}
+
+
+function hideToken(token: string) {
+    const newToken = "et_";
+    if (!token.startsWith(newToken)) return `${token.slice(0, 4)}......${token.slice(-4)}`;
+    // show first 4 and last 4 characters
+    return `${token.slice(0, newToken.length + 4)}......${token.slice(-4)}`;
 }

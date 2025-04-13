@@ -147,7 +147,7 @@ async function getsLocalSyncData(): Promise<Partial<ChangesRequest>> {
 }
 
 
-export async function syncLocal({ lastSync, token, apiUrl }: { lastSync?: Date, token?: string, apiUrl?: string }) {
+export async function syncLocal({ lastSync, token, apiUrl }: { lastSync?: Date | 0, token?: string, apiUrl?: string }) {
     const payload = await getsLocalSyncData()
     if (!Object.keys(payload).length) return
     if (Object.values(payload).every(v => Array.isArray(v) ? v.length === 0 : v === null)) return
@@ -155,12 +155,16 @@ export async function syncLocal({ lastSync, token, apiUrl }: { lastSync?: Date, 
     const response = await fetch(getApiUrl({ lastSync, apiUrl }), {
         method: 'POST',
         headers: {
-            "authorization": `${token}`
+            "authorization": `session ${token}`
         },
         body: JSON.stringify(payload)
     })
 
     if (!response.ok) {
+        if (response.status === 401) {
+            console.warn('Token expired, refreshing...')
+            return '401'
+        }
         console.error('Failed to sync user data', response);
         throw new Error('Failed to sync user data');
     }
@@ -172,11 +176,15 @@ export async function fetchSync({ lastSync, minimal, apiUrl, token }: { lastSync
     const response = await fetch(getApiUrl({ lastSync, minimal, apiUrl }), {
         method: 'GET',
         headers: {
-            "authorization": `${token}`
+            "authorization": `session ${token}`
         }
     })
 
     if (!response.ok) {
+        if (response.status === 401) {
+            console.warn('Token expired, refreshing...')
+            return '401'
+        }
         console.error('Failed to fetch sync data', response);
         throw new Error('Failed to fetch sync data');
     }
@@ -187,3 +195,25 @@ export async function fetchSync({ lastSync, minimal, apiUrl, token }: { lastSync
 
 
 
+export async function refreshToken(refreshToken: string, apiUrl?: string) {
+    const response = await fetch(`${apiUrl || 'https://emailthing.app'}/api/internal/refresh-token`, {
+        method: 'POST',
+        headers: {
+            "authorization": `refresh ${refreshToken}`
+        }
+    })
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            console.warn('Token expired, must relogin')
+            return '401'
+        }
+        console.error('Failed to refresh token', response);
+        throw new Error('Failed to refresh token');
+    }
+
+    const data = await response.json() as
+        { token: string, refreshToken: string, tokenExpiresAt: Date }
+
+    return data;
+}

@@ -3,7 +3,7 @@ import { db, MailboxForUser, PasskeyCredentials, UserNotification } from "@/db";
 import { User } from "@/db";
 import { and, eq, gte, not, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
-import { isValidOrigin, getCurrentUser } from "../tools";
+import { isValidOrigin, getSession } from "../tools";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { makeHtml } from "@/(email)/mail/[mailbox]/draft/[draft]/tools";
 import { verifyCredentials } from "@/utils/passkeys";
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const type = new URL(request.url).searchParams.get("type")!
     const date = new Date()
 
-    const currentUserid = await getCurrentUser();
+    const currentUserid = await getSession(request);
     if (!currentUserid) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
     const currentUser = await db.query.User.findFirst({

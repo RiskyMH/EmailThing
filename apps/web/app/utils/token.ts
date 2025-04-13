@@ -38,7 +38,7 @@ function generateChecksum(token: string) {
 }
 
 function generateRandomToken(length = 30) {
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const charsetLength = charset.length;
     const maxValidValue = 256 - (256 % charsetLength); // Ensure no bias
 
@@ -63,6 +63,23 @@ export function generateToken() {
 
     return `${prefix}_${random}${checksum}`;
 }
+
+export function generateSessionToken() {
+    const prefix = "ets";
+    const random = generateRandomToken(50);
+    const checksum = generateChecksum(random);
+
+    return `${prefix}_${random}${checksum}`;
+}
+
+export function generateRefreshToken() {
+    const prefix = "etr";
+    const random = generateRandomToken(50);
+    const checksum = generateChecksum(random);
+
+    return `${prefix}_${random}${checksum}`;
+}
+
 
 /** Function to verify last 6 digit checksum (works on emailthing and github tokens) */
 export function verifyTokenChecksum(token: string) {

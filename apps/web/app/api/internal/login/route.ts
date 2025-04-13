@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { verifyPassword } from "@/utils/password";
-import { db, MailboxForUser } from "@/db";
+import { db, MailboxForUser, UserSession } from "@/db";
 import { User } from "@/db";
 import { eq } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { createUserToken } from "@/utils/jwt";
 import { isValidOrigin } from "../tools";
-
+import { generateSessionToken, generateRefreshToken } from "@/utils/token";
 
 
 const errorMsg = "Invalid username or password";
@@ -126,14 +126,33 @@ export async function POST(request: Request) {
         attempts.delete(ip);
         timestamps.delete(ip);
 
-        const token = await createUserToken(user);
-        const mailboxes = await db.query.MailboxForUser.findMany({
-            where: eq(MailboxForUser.userId, user.id),
-            columns: { mailboxId: true },
-        });
+        // const token = await createUserToken(user);
+        const token = generateSessionToken();
+        const refreshToken = generateRefreshToken();
+
+        const tokenExpiresAt = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
+        const refreshTokenExpiresAt = new Date(Date.now() + 1 * 365 * 24 * 60 * 60 * 1000);
+
+        const [mailboxes, _] = await db.batch([
+            db.query.MailboxForUser.findMany({
+                where: eq(MailboxForUser.userId, user.id),
+                columns: { mailboxId: true },
+            }),
+            db.insert(UserSession).values({
+                userId: user.id,
+                token,
+                method: "password",
+                refreshToken,
+                tokenExpiresAt,
+                refreshTokenExpiresAt,
+            }),
+        ]);
 
         return ResponseJson({
             token,
+            refreshToken,
+            tokenExpiresAt,
+            refreshTokenExpiresAt,
             mailboxes: mailboxes.map(({ mailboxId }) => mailboxId),
             userId: user.id
         });

@@ -61,7 +61,7 @@ import {
     SmartDrawerTrigger,
 } from "@/components/ui/smart-drawer";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -75,6 +75,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [hadAnError, setHadAnError] = useState<false | string>(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+    const searchParams = useSearchParams();
+    const username = searchParams.get("username");
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -115,7 +118,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 return void toast.error(data.error);
             }
 
-            const { token, mailboxes } = data;
+            const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes } = data;
 
             // document.cookie = `token=${token}; path=/;`;
             // localStorage.setItem("token", token);
@@ -124,6 +127,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             await db.open()
             await db.localSyncData.put({
                 token,
+                refreshToken,
+                tokenExpiresAt,
+                refreshTokenExpiresAt,
                 lastSync: 0,
                 isSyncing: true,
                 userId: data.userId,
@@ -167,6 +173,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 autoCorrect="off"
                                 className="border-none bg-secondary"
                                 disabled={isPending}
+                                defaultValue={username ?? ""}
                             />
                         </div>
                         <div className="grid gap-1">

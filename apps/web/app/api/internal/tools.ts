@@ -1,3 +1,6 @@
+import { db, UserSession } from "@/db";
+import { and, eq, gte, lt } from "drizzle-orm";
+
 export const allowedOrigins = [
     "https://emailthing.app",
     "https://pwa.emailthing.app",
@@ -16,15 +19,62 @@ export const isValidOrigin = (origin: string) => {
     return allowedOrigins.includes(origin)
 }
 
-import { cookies, headers } from "next/headers";
-import { getUserByToken } from "@/utils/jwt";
-
-export const getCurrentUser = async () => {
-    const token = (await cookies()).get("token")?.value || (await headers()).get("authorization");
+export const getSession = async (request: Request, sudo?: boolean) => {
+    const authHeader = request.headers.get("authorization")
+    if (!authHeader?.startsWith("session ")) return null;
+    const token = authHeader.split(" ")[1];
     if (!token) return null;
-    try {
-        return await getUserByToken(token);
-    } catch (e) {
-        return null;
+
+    const sessionInfo = extractUserInfoHeader(request);
+
+    const sessionToken = await db.query.UserSession.findFirst({
+        where: and(
+            eq(UserSession.token, token),
+            gte(UserSession.tokenExpiresAt, new Date()),
+            ...(sudo ? [gte(UserSession.sudoExpiresAt, new Date())] : [])
+        ),
+    });
+    console.log('sessionToken', token, sessionToken, new Date())
+
+    if (sessionToken) {
+        // Fire and forget the update
+        db.update(UserSession)
+            .set({
+                lastUsed: {
+                    date: new Date(),
+                    ip: sessionInfo.ip,
+                    ua: sessionInfo.ua,
+                    location: sessionInfo.location,
+                }
+            })
+            .where(eq(UserSession.token, token))
+            .execute()
+            .then(() => { })
+            .catch(err => {
+                // Silently handle any errors since this is non-critical
+                console.error('Failed to update session:', err);
+            });
+
+        return sessionToken.userId;
     }
+
+    return null;
 };
+
+
+export const extractUserInfoHeader = (request: Request) => {
+    // get IP, User-Agent, and location (note, using cloudflare proxy)
+    // location should be detailed as possible (city, region, country)
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const ua = request.headers.get("user-agent") || "unknown";
+    const city = request.headers.get("cf-ipcity") || "unknown";
+    const region = request.headers.get("cf-ipregion") || "unknown";
+    const country = request.headers.get("cf-ipcountry") || "unknown";
+
+    return {
+        ip,
+        ua,
+        location: `${city}, ${region}, ${country}`,
+    }
+
+}

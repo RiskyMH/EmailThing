@@ -40,6 +40,9 @@ export type DBUserNotification = T<Omit<InferSelectModel<typeof UserNotification
 export type LocalSyncData = {
   lastSync: Date | 0;
   token: string;
+  refreshToken: string;
+  tokenExpiresAt: Date;
+  refreshTokenExpiresAt: Date;
   userId: string;
   isSyncing?: boolean;
   apiUrl?: string; // default is https://emailthing.app
