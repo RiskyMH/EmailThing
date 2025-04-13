@@ -126,9 +126,10 @@ export class EmailDB extends Dexie {
       return
     } catch (error) {
       console.error('Failed to sync', error);
+      return { error: error instanceof Error ? error.message : "failed to sync" };
+    } finally {
       this.localSyncData.update(localSyncData[0].userId, { isSyncing: false });
       isSyncing = false;
-      return { error: error instanceof Error ? error.message : "failed to sync" };
     }
   }
 
@@ -157,11 +158,11 @@ export class EmailDB extends Dexie {
         return this.fetchSync({ alreadyRefreshed: true });
       }
       await this.localSyncData.update(localSyncData[0].userId, { lastSync: new Date(), isSyncing: false });
-      isSyncing = false;
     } catch (error) {
+      console.error('Failed to fetch sync', error);
+    } finally {
       this.localSyncData.update(localSyncData[0].userId, { isSyncing: false });
       isSyncing = false;
-      console.error('Failed to fetch sync', error);
     }
   }
 

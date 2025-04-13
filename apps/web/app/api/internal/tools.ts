@@ -34,7 +34,6 @@ export const getSession = async (request: Request, sudo?: boolean) => {
             ...(sudo ? [gte(UserSession.sudoExpiresAt, new Date())] : [])
         ),
     });
-    console.log('sessionToken', token, sessionToken, new Date())
 
     if (sessionToken) {
         // Fire and forget the update
@@ -68,7 +67,7 @@ export const extractUserInfoHeader = (request: Request) => {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
     const ua = request.headers.get("user-agent") || "unknown";
     const city = request.headers.get("cf-ipcity") || "unknown";
-    const region = request.headers.get("cf-ipregion") || "unknown";
+    const region = request.headers.get("cf-region") || "unknown";
     const country = request.headers.get("cf-ipcountry") || "unknown";
 
     return {
