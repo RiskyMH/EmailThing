@@ -79,9 +79,10 @@ export default function Home() {
                             GitHub
                             <span className="font-normal text-muted-foreground">
                                 •
-                                <Suspense fallback={defaultStars}>
+                                {/* <Suspense fallback={defaultStars}>
                                     <GitHubStars />
-                                </Suspense>
+                                </Suspense> */}
+                                {defaultStars}
                             </span>
                         </Link>
                     </div>

@@ -101,6 +101,7 @@ for (const file of result.outputs) {
   }
 }
 
+
 const publicFiles = [
   ...await readdir(path.join(import.meta.dir, "./public"), { recursive: true }),
   ...await readdir(path.join(import.meta.dir, "../web/public"), { recursive: true }),
@@ -121,6 +122,16 @@ const outputTable = [
     "Size": ""
   }))
 ]
+
+if (cssFilePath) {
+  const css = (await Bun.file(path.join(import.meta.dir, "./dist/app.html")).text())
+    .match(/<link rel="stylesheet".*?href="(\/_bun\/static.*?\.css)"*?>/)?.[1]
+
+  await Bun.write("./dist/_headers",
+    (await Bun.file("./public/_headers").text())
+      .replace(`# Link: </index.css>; `, `Link: <${css}>; `)
+  )
+}
 
 console.table(outputTable);
 const buildTime = (end - start).toFixed(2);
