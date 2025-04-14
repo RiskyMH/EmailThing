@@ -41,16 +41,7 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
         caches.open(FONTS_CACHE_NAME)
           .then(cache =>
             cache.addAll([
-              '/_bun/static/fonts/inter-latin-400-normal.woff2',
-              '/_bun/static/fonts/inter-latin-500-normal.woff2',
-              '/_bun/static/fonts/inter-latin-600-normal.woff2',
-              '/_bun/static/fonts/inter-latin-700-normal.woff2',
-              '/_bun/static/fonts/inter-latin-ext-400-normal.woff2',
-              '/_bun/static/fonts/inter-vietnamese-400-normal.woff2',
-              '/_bun/static/fonts/inter-greek-400-normal.woff2',
-              '/_bun/static/fonts/inter-greek-ext-400-normal.woff2',
-              '/_bun/static/fonts/inter-cyrillic-400-normal.woff2',
-              '/_bun/static/fonts/inter-cyrillic-ext-400-normal.woff2',
+              '/_bun/static/fonts/inter-latin-wght-normal.woff2',
               '/CalSans-SemiBold.woff2'
             ])
           ).catch(e => console.error(e)),

@@ -66,7 +66,19 @@ const result = await build({
 
 await cp(path.join(import.meta.dir, "../web/public"), path.join(import.meta.dir, "./dist"), { recursive: true })
 await cp(path.join(import.meta.dir, "./public"), path.join(import.meta.dir, "./dist"), { recursive: true })
-await cp(path.join(require.resolve("@fontsource/inter"), "/../files"), path.join(import.meta.dir, "./dist/_bun/static/fonts"), { recursive: true })
+// await cp(path.join(require.resolve("@fontsource/inter"), "/../files"), path.join(import.meta.dir, "./dist/_bun/static/fonts"), { recursive: true })
+const fontFiles = [
+  'inter-cyrillic-ext-wght-normal.woff2',
+  'inter-cyrillic-wght-normal.woff2',
+  'inter-greek-ext-wght-normal.woff2',
+  'inter-greek-wght-normal.woff2',
+  'inter-vietnamese-wght-normal.woff2',
+  'inter-latin-ext-wght-normal.woff2',
+  'inter-latin-wght-normal.woff2'
+]
+await Promise.all(fontFiles.map(async file => {
+  await cp(path.join(require.resolve("@fontsource-variable/inter"), "/../files/" + file), path.join(import.meta.dir, "./dist/_bun/static/fonts/" + file))
+}))
 
 const cssFile = (await Bun.file(path.join(import.meta.dir, "./dist/app.html")).text())
 const cssFilePath = cssFile.match(/(<link rel="stylesheet".*?_bun.*?>)/)?.[1]
@@ -75,6 +87,7 @@ for (const file of result.outputs) {
   if (file.path.endsWith(".css")) {
     const content = (await Bun.file(file.path).text())
       .replaceAll("./files/", "/_bun/static/fonts/")
+      .replaceAll("@fontsource-variable/inter/files/", "/_bun/static/fonts/")
       .replaceAll("../public/", "/")
     await Bun.write(file.path, content)
   }

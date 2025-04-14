@@ -74,13 +74,13 @@ export function UserDropDown({ user }: UserProps) {
                     </DrawerHeader>
 
                     <div className="mx-4 flex flex-col gap-2 pt-2">
-                        <Button variant="secondary" asChild>
+                        {/* <Button variant="secondary" asChild>
                             <DrawerClose asChild>
                                 <Link to="/mail" className="w-full">
                                     Mailbox
                                 </Link>
                             </DrawerClose>
-                        </Button>
+                        </Button> */}
                         <Button variant="secondary" asChild>
                             <DrawerClose asChild>
                                 <Link to="/settings" className="w-full">
@@ -104,11 +104,11 @@ export function UserDropDown({ user }: UserProps) {
                         </Button>
                     </div>
 
-                    {/* <DrawerFooter>
+                    <DrawerFooter>
                         <DrawerClose asChild>
                             <Button variant="default">Close</Button>
                         </DrawerClose>
-                    </DrawerFooter> */}
+                    </DrawerFooter>
                 </DrawerContent>
             </Drawer>
         );
