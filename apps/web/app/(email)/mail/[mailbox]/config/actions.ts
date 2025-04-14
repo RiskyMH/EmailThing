@@ -330,7 +330,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
     await db.batch([
         db.update(MailboxCustomDomain).set({
             isDeleted: true,
-            domain: "<deleted>",
+            domain: `<deleted>@${createId()}_`,
             addedAt: new Date(),
             updatedAt: new Date(),
         }).where(eq(MailboxCustomDomain.id, customDomainId)),
@@ -391,7 +391,7 @@ export async function deleteToken(mailboxId: string, token: string) {
     await db
         .update(MailboxTokens).set({
             isDeleted: true,
-            token: "<deleted>",
+            token: `<deleted>@${createId()}_`,
             name: "<deleted>",
             createdAt: new Date(),
             updatedAt: new Date(),

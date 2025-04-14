@@ -1,6 +1,6 @@
 import { db, UserSession } from '@/db'
-import { eq, and, lt } from 'drizzle-orm'
-import { generateToken, generateRefreshToken } from '@/utils/token'
+import { eq, and, gt } from 'drizzle-orm'
+import { generateSessionToken, generateRefreshToken } from '@/utils/token'
 import { extractUserInfoHeader, isValidOrigin } from '../tools'
 
 export function OPTIONS(request: Request) {
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         } })
     }
 
-    const refreshToken = authHeader.slice(7)
+    const refreshToken = authHeader.slice('refresh '.length)
     if (!refreshToken) {
         return Response.json({ error: 'No refresh token provided' }, { status: 401, headers: {
             "Access-Control-Allow-Origin": origin,
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         const user = await db.query.UserSession.findFirst({
             where: and(
                 eq(UserSession.refreshToken, refreshToken),
-                lt(UserSession.refreshTokenExpiresAt, new Date())
+                gt(UserSession.refreshTokenExpiresAt, new Date())
             ),
             columns: {
                 userId: true,
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
         }
 
         // Generate new tokens
-        const newToken = generateToken()
+        const newToken = generateSessionToken()
         const newRefreshToken = generateRefreshToken()
 
         const tokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24) // 24hr
@@ -91,7 +91,12 @@ export async function POST(request: Request) {
             refreshToken: newRefreshToken,
             tokenExpiresAt,
             userId: user.userId
-        })
+        }, { status: 200, headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "authorization",
+            "Access-Control-Allow-Credentials": "true",
+        } })
 
     } catch (error) {
         console.error('Failed to refresh token:', error)

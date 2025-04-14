@@ -43,6 +43,7 @@ export const UserRelations = relations(User, ({ many, one }) => ({
     mailboxes: many(MailboxForUser),
     passwordResets: many(ResetPasswordToken),
     passkeys: many(PasskeyCredentials),
+    sessions: many(UserSession),
 }));
 
 // user session
@@ -76,6 +77,13 @@ export const UserSession = sqliteTable("user_sessions", {
 }, (table) => ({
     tokenIdx: index("token_idx").on(table.token, table.tokenExpiresAt),
     refreshTokenIdx: index("refresh_token_idx").on(table.refreshToken, table.refreshTokenExpiresAt),
+}));
+
+export const UserSessionRelations = relations(UserSession, ({ one }) => ({
+    user: one(User, {
+        fields: [UserSession.userId],
+        references: [User.id],
+    }),
 }));
 
 // passkeys

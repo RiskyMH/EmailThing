@@ -48,15 +48,16 @@ export async function GET(request: Request) {
         "Access-Control-Allow-Credentials": "true",
     } });
 
-    const currentUser = await db.query.User.findFirst({
-        where: eq(User.id, currentUserid),
-    });
-    if (!currentUser) return new Response("User not found", { status: 404 });
+    const [currentUser, mailboxesForUser] = await db.batch([
+        db.query.User.findFirst({
+            where: eq(User.id, currentUserid),
+        }),
+        db.query.MailboxForUser.findMany({
+            where: eq(MailboxForUser.userId, currentUserid),
+        }),
+    ])
 
-    // get all mailboxes for this user
-    const mailboxesForUser = await db.query.MailboxForUser.findMany({
-        where: eq(MailboxForUser.userId, currentUser.id),
-    });
+    if (!currentUser) return new Response("User not found", { status: 404 });
 
     if (minimal) {
         return Response.json(
@@ -106,14 +107,16 @@ export async function POST(request: Request) {
         "Access-Control-Allow-Credentials": "true",
     } });
 
-    const currentUser = await db.query.User.findFirst({
-        where: eq(User.id, currentUserid),
-    });
-    if (!currentUser) return new Response("User not found", { status: 404 });
+    const [currentUser, mailboxesForUser] = await db.batch([
+        db.query.User.findFirst({
+            where: eq(User.id, currentUserid),
+        }),
+        db.query.MailboxForUser.findMany({
+            where: eq(MailboxForUser.userId, currentUserid),
+        }),
+    ])
 
-    const mailboxesForUser = await db.query.MailboxForUser.findMany({
-        where: eq(MailboxForUser.userId, currentUser.id),
-    });
+    if (!currentUser) return new Response("User not found", { status: 404 });
 
     // body is partial of ChangesResponse
     const body = await request.json() as ChangesRequest;

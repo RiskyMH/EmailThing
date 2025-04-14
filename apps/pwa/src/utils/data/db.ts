@@ -110,6 +110,7 @@ export class EmailDB extends Dexie {
     try {
       // this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
       isSyncing = true;
+      const now = new Date();
       const res = await syncLocal(localSyncData[0]);
       if (res === '401') {
         if (alreadyRefreshed) {
@@ -121,7 +122,7 @@ export class EmailDB extends Dexie {
         }
         return this.sync({ alreadyRefreshed: true });
       }
-      await this.localSyncData.update(localSyncData[0].userId, { lastSync: new Date(), isSyncing: false });
+      await this.localSyncData.update(localSyncData[0].userId, { lastSync: now, isSyncing: false });
       isSyncing = false;
       return
     } catch (error) {
@@ -144,6 +145,7 @@ export class EmailDB extends Dexie {
     };
 
     try {
+      const now = new Date();
       this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
       isSyncing = true;
       const res = await fetchSync(localSyncData[0]);
@@ -157,7 +159,7 @@ export class EmailDB extends Dexie {
         }
         return this.fetchSync({ alreadyRefreshed: true });
       }
-      await this.localSyncData.update(localSyncData[0].userId, { lastSync: new Date(), isSyncing: false });
+      await this.localSyncData.update(localSyncData[0].userId, { lastSync: now, isSyncing: false });
     } catch (error) {
       console.error('Failed to fetch sync', error);
     } finally {
@@ -187,7 +189,7 @@ export class EmailDB extends Dexie {
       if (data === '401') {
         return { error: 'Token expired' };
       }
-      await this.localSyncData.update(localSyncData[0].userId, { token: data.token, refreshToken: data.refreshToken, tokenExpiresAt: data.tokenExpiresAt });
+      await this.localSyncData.update(localSyncData[0].userId, data);
     } catch (error) {
       console.error('Failed to refresh token', error);
     }
