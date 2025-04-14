@@ -16,7 +16,8 @@
 @import "./inter.css";
 
 body {
-    font-family: Inter, "Inter Variable", ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+	font-family: Inter, "Inter Variable", "Inter Fallback", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	font-style: normal;
 }
 
 @layer base {
@@ -202,7 +203,7 @@ body {
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
 
-	--font-heading: CalSans-SemiBold, _Inter, ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+	--font-heading: CalSans-SemiBold, _Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 	--text-6xl--line-height: 60px;
 }
 
