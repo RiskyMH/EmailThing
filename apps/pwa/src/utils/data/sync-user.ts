@@ -72,9 +72,28 @@ export async function parseSync(data: Partial<ChangesResponse>) {
 
             switch (key) {
                 case 'mailboxesForUser':
-                    return db.mailboxForUser?.bulkDelete(
-                        deletedItems.map((m: any) => ([m.userId, m.mailboxId]))
-                    );
+                    const mailboxTables = [
+                        db.emails,
+                        db.mailboxes,
+                        db.mailboxCategories,
+                        db.mailboxAliases,
+                        db.draftEmails,
+                        db.mailboxTokens,
+                        db.mailboxCustomDomains,
+                    ] as const
+                    return db.transaction('rw', mailboxTables, async () => {
+                        await db.mailboxForUser?.bulkDelete(
+                            deletedItems.map((m: any) => ([m.userId, m.mailboxId]))
+                        );
+                        await Promise.all(
+                            mailboxTables.map(table => table
+                                .where('mailboxId')
+                                .equals(deletedItems.map((m: any) => m.mailboxId))
+                                .delete()
+                            )
+                        );
+                    });
+
                 default:
                     return dbMap[key as keyof typeof data]?.bulkDelete(
                         deletedItems.map((item: any) => item.id)

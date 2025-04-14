@@ -194,6 +194,27 @@ export class EmailDB extends Dexie {
       console.error('Failed to refresh token', error);
     }
   }
+
+  async logout() {
+    const tables = [
+      this.emails,
+      this.draftEmails,
+      this.mailboxes,
+      this.mailboxAliases,
+      this.mailboxCategories,
+      this.mailboxTokens,
+      this.mailboxCustomDomains,
+      this.defaultDomains,
+      this.passkeyCredentials,
+      this.userNotifications,
+      this.mailboxForUser,
+      this.user,
+    ]
+    await this.transaction('rw', tables, async () => {
+      await Promise.all(tables.map(table => table.clear()));
+    });
+    sessionStorage.removeItem('demo')
+  }
 }
 
 let isSyncing = false;

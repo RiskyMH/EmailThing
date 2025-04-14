@@ -41,19 +41,21 @@ export async function GET(request: Request) {
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date(0);
 
     const currentUserid = await getSession(request);
-    if (!currentUserid) return new Response("Unauthorized", { status: 401, headers: {
-        "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "authorization",
-        "Access-Control-Allow-Credentials": "true",
-    } });
+    if (!currentUserid) return new Response("Unauthorized", {
+        status: 401, headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "authorization",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    });
 
     const [currentUser, mailboxesForUser] = await db.batch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
         }),
         db.query.MailboxForUser.findMany({
-            where: eq(MailboxForUser.userId, currentUserid),
+            where: and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
         }),
     ])
 
@@ -73,8 +75,10 @@ export async function GET(request: Request) {
         );
     }
 
+    const newMailboxes = mailboxesForUser.filter(m => m.joinedAt > lastSyncDate).map(m => m.mailboxId)
+
     return Response.json(
-        await getChanges(lastSyncDate, currentUser, mailboxesForUser),
+        await getChanges(lastSyncDate, currentUser, mailboxesForUser, {}, newMailboxes),
         {
             headers: {
                 "Access-Control-Allow-Origin": origin,
@@ -100,19 +104,21 @@ export async function POST(request: Request) {
 
 
     const currentUserid = await getSession(request);
-    if (!currentUserid) return new Response("Unauthorized", { status: 401, headers: {
-        "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "authorization",
-        "Access-Control-Allow-Credentials": "true",
-    } });
+    if (!currentUserid) return new Response("Unauthorized", {
+        status: 401, headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "authorization",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    });
 
     const [currentUser, mailboxesForUser] = await db.batch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
         }),
         db.query.MailboxForUser.findMany({
-            where: eq(MailboxForUser.userId, currentUserid),
+            where: and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
         }),
     ])
 
@@ -579,7 +585,7 @@ async function getMinimalChanges(currentUser: InferSelectModel<typeof User>, mai
 export type MinimalChangesResponse = Awaited<ReturnType<typeof getMinimalChanges>>
 export type ChangesResponse = Awaited<ReturnType<typeof getChanges>>
 
-async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<typeof User>, mailboxesForUser: InferSelectModel<typeof MailboxForUser>[], includeIds: Partial<Record<keyof ChangesRequest, string[]>> = {}) {
+async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<typeof User>, mailboxesForUser: InferSelectModel<typeof MailboxForUser>[], includeIds: Partial<Record<keyof ChangesRequest, string[]>> = {}, forceIncludeMailboxes: string[] = []) {
     const mailboxIds = mailboxesForUser.map((m) => m.mailboxId);
     const currentUserid = currentUser.id;
 
@@ -587,7 +593,8 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
         inArray(Email.mailboxId, mailboxIds),
         or(
             gte(Email.updatedAt, lastSyncDate),
-            includeIds.emails ? inArray(Email.id, includeIds.emails) : undefined
+            includeIds.emails ? inArray(Email.id, includeIds.emails) : undefined,
+            forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined
         )
     )).limit(500)
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
@@ -603,35 +610,40 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             inArray(MailboxCategory.mailboxId, mailboxIds),
             or(
                 gte(MailboxCategory.updatedAt, lastSyncDate),
-                includeIds.mailboxCategories ? inArray(MailboxCategory.id, includeIds.mailboxCategories) : undefined
+                includeIds.mailboxCategories ? inArray(MailboxCategory.id, includeIds.mailboxCategories) : undefined,
+                forceIncludeMailboxes ? inArray(MailboxCategory.mailboxId, forceIncludeMailboxes) : undefined
             )
         )),
         db.select().from(MailboxAlias).where(and(
             inArray(MailboxAlias.mailboxId, mailboxIds),
             or(
                 gte(MailboxAlias.updatedAt, lastSyncDate),
-                includeIds.mailboxAliases ? inArray(MailboxAlias.id, includeIds.mailboxAliases) : undefined
+                includeIds.mailboxAliases ? inArray(MailboxAlias.id, includeIds.mailboxAliases) : undefined,
+                forceIncludeMailboxes ? inArray(MailboxAlias.mailboxId, forceIncludeMailboxes) : undefined
             )
         )),
         db.select().from(MailboxTokens).where(and(
             inArray(MailboxTokens.mailboxId, mailboxIds),
             or(
                 gte(MailboxTokens.updatedAt, lastSyncDate),
-                includeIds.mailboxTokens ? inArray(MailboxTokens.id, includeIds.mailboxTokens) : undefined
+                includeIds.mailboxTokens ? inArray(MailboxTokens.id, includeIds.mailboxTokens) : undefined,
+                forceIncludeMailboxes ? inArray(MailboxTokens.mailboxId, forceIncludeMailboxes) : undefined
             )
         )),
         db.select().from(MailboxCustomDomain).where(and(
             inArray(MailboxCustomDomain.mailboxId, mailboxIds),
             or(
                 gte(MailboxCustomDomain.updatedAt, lastSyncDate),
-                includeIds.mailboxCustomDomains ? inArray(MailboxCustomDomain.id, includeIds.mailboxCustomDomains) : undefined
+                includeIds.mailboxCustomDomains ? inArray(MailboxCustomDomain.id, includeIds.mailboxCustomDomains) : undefined,
+                forceIncludeMailboxes ? inArray(MailboxCustomDomain.mailboxId, forceIncludeMailboxes) : undefined
             )
         )),
         db.select().from(DraftEmail).where(and(
             inArray(DraftEmail.mailboxId, mailboxIds),
             or(
                 gte(DraftEmail.updatedAt, lastSyncDate),
-                includeIds.draftEmails ? inArray(DraftEmail.id, includeIds.draftEmails) : undefined
+                includeIds.draftEmails ? inArray(DraftEmail.id, includeIds.draftEmails) : undefined,
+                forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined
             )
         )).limit(500),
 
@@ -644,6 +656,7 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             or(
                 gte(MailboxForUser.updatedAt, lastSyncDate),
                 gte(User.updatedAt, lastSyncDate),
+                forceIncludeMailboxes ? inArray(MailboxForUser.mailboxId, forceIncludeMailboxes) : undefined,
             )
         )),
 
@@ -672,7 +685,11 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
     let getMoreEmails = emails.length >= 500;
     while (getMoreEmails) {
         // get the rest of emails - just in 500 chunks
-        const restOfEmails = await db.select().from(Email).where(and(inArray(Email.mailboxId, mailboxIds), gte(Email.updatedAt, lastSyncDate))).limit(500).offset(emails.length)
+        const restOfEmails = await db.select().from(Email).where(and(
+            inArray(Email.mailboxId, mailboxIds),
+            gte(Email.updatedAt, lastSyncDate),
+            forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined
+        )).limit(500).offset(emails.length)
         const [emailSenders2, emailRecipients2, emailAttachments2] = await db.batch([
             db.select().from(EmailSender).where(inArray(EmailSender.emailId, restOfEmails.map((e) => e.id))),
             db.select().from(EmailRecipient).where(inArray(EmailRecipient.emailId, restOfEmails.map((e) => e.id))),
@@ -690,7 +707,11 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
 
     let getMoreDraftEmails = draftEmails.length >= 500;
     while (getMoreDraftEmails) {
-        const restOfDraftEmails = await db.select().from(DraftEmail).where(and(inArray(DraftEmail.mailboxId, mailboxIds), gte(DraftEmail.updatedAt, lastSyncDate))).limit(500).offset(draftEmails.length)
+        const restOfDraftEmails = await db.select().from(DraftEmail).where(and(
+            inArray(DraftEmail.mailboxId, mailboxIds),
+            gte(DraftEmail.updatedAt, lastSyncDate),
+            forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined
+        )).limit(500).offset(draftEmails.length)
         draftEmails.push.apply(draftEmails, restOfDraftEmails);
         if (restOfDraftEmails.length < 500) {
             getMoreDraftEmails = false;

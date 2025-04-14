@@ -21,11 +21,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
-import { Suspense, use, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Suspense, use, useState, useTransition } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { useGravatar } from "@/utils/fetching";
-
+import { db } from "@/utils/data/db";
+import { Loader2 } from "lucide-react";
 interface UserProps {
     user: {
         name: string;
@@ -34,8 +35,6 @@ interface UserProps {
         email: string;
     };
 }
-
-const logout = () => { window.location = '/' }
 
 function getInitials(name: string) {
     // first 2 characters of name
@@ -77,6 +76,13 @@ export function UserDropDown({ user }: UserProps) {
                     <div className="mx-4 flex flex-col gap-2 pt-2">
                         <Button variant="secondary" asChild>
                             <DrawerClose asChild>
+                                <Link to="/mail" className="w-full">
+                                    Mailbox
+                                </Link>
+                            </DrawerClose>
+                        </Button>
+                        <Button variant="secondary" asChild>
+                            <DrawerClose asChild>
                                 <Link to="/settings" className="w-full">
                                     User settings
                                 </Link>
@@ -90,17 +96,19 @@ export function UserDropDown({ user }: UserProps) {
                             </DrawerClose>
                         </Button>
                         <Button variant="secondary" asChild>
-                            <DrawerClose className="w-full" onClick={() => void logout()}>
-                                Sign out
+                            <DrawerClose className="w-full" asChild>
+                                <LogoutButton>
+                                    Sign out
+                                </LogoutButton>
                             </DrawerClose>
                         </Button>
                     </div>
 
-                    <DrawerFooter>
+                    {/* <DrawerFooter>
                         <DrawerClose asChild>
                             <Button variant="default">Close</Button>
                         </DrawerClose>
-                    </DrawerFooter>
+                    </DrawerFooter> */}
                 </DrawerContent>
             </Drawer>
         );
@@ -121,7 +129,7 @@ export function UserDropDown({ user }: UserProps) {
                 <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
                         <Link to="/mail" className="cursor-pointer">
-                            Dashboard
+                            Mailbox
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -138,12 +146,38 @@ export function UserDropDown({ user }: UserProps) {
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem asChild>
-                    <button className="w-full cursor-pointer" onClick={() => void logout()} type="button">
+                <DropdownMenuItem asChild className="w-full cursor-pointer flex gap-2" >
+                    <LogoutButton>
                         Sign out
-                    </button>
+                    </LogoutButton>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
+}
+
+function LogoutButton(params: { children: React.ReactNode, className?: string, onClick?: () => void }) {
+    const navigate = useNavigate()
+    const [transition, startTransition] = useTransition()
+
+    return (
+        <button
+            {...params}
+            onClick={(e) => {
+                e.preventDefault()
+                startTransition(async () => {
+                    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+                    document.cookie = 'mailboxId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+
+                    await db.logout()
+                    navigate('/')
+                    params.onClick?.()
+                })
+            }}
+            type="button"
+        >
+            {transition ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : null}
+            {params.children}
+        </button>
+    )
 }
