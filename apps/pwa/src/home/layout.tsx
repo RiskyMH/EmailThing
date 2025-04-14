@@ -9,8 +9,9 @@ import { ExternalLinkIcon } from "lucide-react"
 import { lazy } from "react";
 import { UserNavLogin } from "@/components/user-navbar";
 
-const UserNav = lazy(() => import("@/components/user-navbar"))
-const DemoLink = lazy(() => import("@/components/user-navbar").then(mod => ({ default: mod.DemoLink })))
+// const UserNav = lazy(() => import("@/components/user-navbar"))
+// const DemoLink = lazy(() => import("@/components/user-navbar").then(mod => ({ default: mod.DemoLink })))
+import UserNav, { DemoLink } from "@/components/user-navbar";
 
 export default function HomeLayout({ children }: PropsWithChildren) {
     return (
@@ -27,10 +28,10 @@ export default function HomeLayout({ children }: PropsWithChildren) {
                     </div>
                 </div>
                 <nav className="flex items-center gap-4">
-                    <Suspense fallback={<UserNavLogin />}>
+                    {/* <Suspense fallback={<UserNavLogin />}> */}
                         <DemoLink />
                         <UserNav fallbackLogin={true} />
-                    </Suspense>
+                    {/* </Suspense> */}
                 </nav>
             </Header>
             <main className="flex-1 bg-background">{children}</main>
