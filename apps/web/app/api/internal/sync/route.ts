@@ -3,6 +3,7 @@ import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTab
 // import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import type { BatchItem } from "drizzle-orm/batch";
 import { getSession, isValidOrigin } from "../tools";
+import { deleteFile } from "@/utils/s3";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin")
@@ -160,7 +161,7 @@ export async function POST(request: Request) {
                     continue;
                 }
                 // check that the emailid exists and is owned by the user
-                const e = await db.select({ id: Email.id }).from(Email).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)))
+                const e = await db.select({ id: Email.id, size: Email.size }).from(Email).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)))
                 if (!e.length) {
                     errors.push({
                         key: "emails",
@@ -172,30 +173,59 @@ export async function POST(request: Request) {
                 }
 
                 if (email.hardDelete) {
+                    const attachments = await db.query.EmailAttachments.findMany({
+                        where: eq(EmailAttachments.emailId, email.id),
+                        columns: {
+                            id: true,
+                            filename: true,
+                        },
+                    });
+
+                    await Promise.all([
+                        deleteFile(`${email.mailboxId}/${email.id}`),
+                        deleteFile(`${email.mailboxId}/${email.id}/email.eml`),
+                        ...attachments.map((attachment) =>
+                            deleteFile(`${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`),
+                        ),
+                    ]);
+
                     // still not actually delete, but anonimise it
-                    changes.push(db.update(Email).set({
-                        isDeleted: true,
-                        updatedAt: new Date(),
-                        body: "<deleted>",
-                        subject: "<deleted>",
-                        binnedAt: null,
-                        categoryId: null,
-                        givenId: null,
-                        givenReferences: null,
-                        html: null,
-                        isRead: true,
-                        isSender: false,
-                        replyTo: null,
-                        snippet: null,
-                        size: 0,
-                        isStarred: false,
-                        // tempId: null,
-                        createdAt: new Date(),
-                    }).where(and(
-                        eq(Email.id, email.id),
-                        eq(Email.mailboxId, email.mailboxId),
-                        email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined)
-                    ))
+                    changes.push(
+                        db.update(Email).set({
+                            isDeleted: true,
+                            updatedAt: new Date(),
+                            body: "<deleted>",
+                            subject: "<deleted>",
+                            binnedAt: null,
+                            categoryId: null,
+                            givenId: null,
+                            givenReferences: null,
+                            html: null,
+                            isRead: true,
+                            isSender: false,
+                            replyTo: null,
+                            snippet: null,
+                            size: 0,
+                            isStarred: false,
+                            // tempId: null,
+                            createdAt: new Date(),
+                        }).where(and(
+                            eq(Email.id, email.id),
+                            eq(Email.mailboxId, email.mailboxId),
+                            email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined)
+                        ),
+
+                        db.delete(EmailSender).where(eq(EmailSender.emailId, email.id)),
+                        db.delete(EmailRecipient).where(eq(EmailRecipient.emailId, email.id)),
+                        db.delete(EmailAttachments).where(eq(EmailAttachments.emailId, email.id)),
+
+                        db
+                            .update(Mailbox)
+                            .set({
+                                storageUsed: sql`${Mailbox.storageUsed} - ${e[0].size}`,
+                            })
+                            .where(eq(Mailbox.id, email.mailboxId)),
+                    )
                 } else {
                     // update the email
                     changes.push(db.update(Email).set({

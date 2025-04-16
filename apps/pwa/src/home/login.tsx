@@ -145,7 +145,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 ? mailboxId
                 : mailboxes[0];
 
-            document.cookie = `mailboxId=${selectedMailbox}; path=/;`;
+            document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
             router.push(`/mail/${selectedMailbox}`);
 
             toast.success("Welcome back!");

@@ -1,4 +1,4 @@
-import { Email, Mailbox, TempAlias, db } from "@/db";
+import { Email, EmailSender, EmailRecipient, EmailAttachments, Mailbox, TempAlias, UserSession, db } from "@/db";
 import { deleteFile } from "@/utils/s3";
 import { eq, inArray, lt, or, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
@@ -94,13 +94,38 @@ export async function GET(request: NextRequest) {
 
             ),
 
-        db.update(TempAlias).set({ 
+        db.delete(EmailSender).where(
+            emails.length
+                ? inArray(
+                    EmailSender.emailId,
+                    emails.map((email) => email.id),
+                )
+                : sql`1 = 0`,
+        ),
+        db.delete(EmailRecipient).where(
+            emails.length
+                ? inArray(
+                    EmailRecipient.emailId,
+                    emails.map((email) => email.id),
+                )
+                : sql`1 = 0`,
+        ),
+        db.delete(EmailAttachments).where(
+            emails.length
+                ? inArray(
+                    EmailAttachments.emailId,
+                    emails.map((email) => email.id),
+                )
+                : sql`1 = 0`,
+        ),
+
+        db.update(TempAlias).set({
             isDeleted: true,
             createdAt: new Date(),
             name: "<deleted>",
             updatedAt: new Date(),
             // alias: "<deleted>",
-         }).where(
+        }).where(
             tempAliases.length
                 ? inArray(
                     TempAlias.id,
@@ -117,6 +142,8 @@ export async function GET(request: NextRequest) {
                 })
                 .where(eq(Mailbox.id, email.mailboxId)),
         ),
+
+        db.delete(UserSession).where(lt(UserSession.refreshTokenExpiresAt, new Date())),
     ]);
 
     return Response.json({
