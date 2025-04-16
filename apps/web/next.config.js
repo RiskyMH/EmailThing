@@ -46,6 +46,7 @@ const nextConfig = {
     images: {
         unoptimized: true
     },
+    compress: !process.env.STANDALONE,
     productionBrowserSourceMaps: process.env.GITHUB_ACTIONS === "true",
     async headers() {
         return [

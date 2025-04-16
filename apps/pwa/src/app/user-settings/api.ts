@@ -13,7 +13,7 @@ export default async function changeUserSettings<T extends keyof MappedPossibleD
             method: "POST",
             body: JSON.stringify(data),
             headers: {
-                "Authorization": `${sync?.token}`
+                "Authorization": `session ${sync?.token}`
             }
         })
         if (!response.ok) {
