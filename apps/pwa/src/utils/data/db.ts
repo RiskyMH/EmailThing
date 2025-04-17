@@ -196,6 +196,18 @@ export class EmailDB extends Dexie {
   }
 
   async logout() {
+    const localSyncData = await this.localSyncData.toArray();
+    localSyncData.map(async (data) => {
+      return fetch(`${data.apiUrl}/api/internal/revoke-token`, {
+        method: 'DELETE',
+        headers: {
+          // logically it doesn't matter if its a session or refresh token
+          // but refresh lasts longer and there shouldnt be any cases where refresh is invalid but token is
+          'Authorization': `refresh ${data.refreshToken}`
+        }
+      })
+    })
+
     const tables = [
       this.emails,
       this.draftEmails,
@@ -209,7 +221,8 @@ export class EmailDB extends Dexie {
       this.userNotifications,
       this.mailboxForUser,
       this.user,
-    ]
+      this.localSyncData,
+    ] as const
     await this.transaction('rw', tables, async () => {
       await Promise.all(tables.map(table => table.clear()));
     });

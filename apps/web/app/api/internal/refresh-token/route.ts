@@ -11,7 +11,7 @@ export function OPTIONS(request: Request) {
     return new Response("OK", {
         headers: {
             "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
         }
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     if (!authHeader?.startsWith('refresh ')) {
         return Response.json({ error: 'Invalid authorization header' }, { status: 401, headers: {
             "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
         } })
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     if (!refreshToken) {
         return Response.json({ error: 'No refresh token provided' }, { status: 401, headers: {
             "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
         } })
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         if (!user) {
             return Response.json({ error: 'User not found' }, { status: 401, headers: {
                 "Access-Control-Allow-Origin": origin,
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Methods": "POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
             } })
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
             userId: user.userId
         }, { status: 200, headers: {
             "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
         } })
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         console.error('Failed to refresh token:', error)
         return Response.json({ error: 'Invalid refresh token' }, { status: 401, headers: {
             "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
         } })

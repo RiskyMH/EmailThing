@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     const headers = {
         "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "authorization",
         "Access-Control-Allow-Credentials": "true",
     }
