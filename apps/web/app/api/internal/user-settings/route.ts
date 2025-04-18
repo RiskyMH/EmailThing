@@ -1,5 +1,5 @@
 import { createPasswordHash, verifyPassword } from "@/utils/password";
-import { db, MailboxForUser, PasskeyCredentials, UserNotification } from "@/db";
+import { db, MailboxForUser, PasskeyCredentials, UserNotification, UserSession } from "@/db";
 import { User } from "@/db";
 import { and, eq, gte, not, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     const results = {
         "change-username": changeUsername,
-        "change-password": changePassword,
+        "change-password": changePassword.bind(null, request.headers.get("authorization")?.split(" ")[1] || ""),
         "change-backup-email": changeBackupEmail,
         "change-public-email": changePublicEmail,
         "add-passkey": addPasskey,
@@ -217,7 +217,8 @@ export interface ChangePasswordData {
     oldPassword: string
     newPassword: string
 }
-async function changePassword(userId: string, data: ChangePasswordData) {
+// TODO: require sudo perms
+async function changePassword(session: string, userId: string, data: ChangePasswordData) {
     const oldPassword = data.oldPassword;
     const newPassword = data.newPassword;
 
@@ -237,13 +238,16 @@ async function changePassword(userId: string, data: ChangePasswordData) {
     if (newPassword.length < 8) return { error: "Password needs to be at least 8 characters" };
 
     // update password
-    await db
-        .update(User)
-        .set({
-            password: await createPasswordHash(newPassword),
-        })
-        .where(eq(User.id, userId))
-        .execute();
+    await db.batch([
+        db.update(User)
+            .set({
+                password: await createPasswordHash(newPassword),
+            })
+            .where(eq(User.id, userId)),
+
+        // invalidate sessions, but maybe the current one is fine to keep
+        db.delete(UserSession).where(and(eq(UserSession.userId, userId), not(eq(UserSession.token, session)))),
+    ])
 
     revalidatePath("/settings");
     return { success: "Your password has been updated." };

@@ -7,11 +7,11 @@ import type {
   DBTempAlias,
   DBEmailDraft,
   DBMailboxCustomDomain,
-  DBMailboxTokens,
-  DBDefaultDomain,
-  DBPasskeyCredentials,
+  // DBMailboxTokens,
+  // DBDefaultDomain,
+  // DBPasskeyCredentials,
   DBUser,
-  DBUserNotification,
+  // DBUserNotification,
   DBMailboxForUser,
   LocalSyncData,
 } from './types';
@@ -25,12 +25,12 @@ export class EmailDB extends Dexie {
   mailboxAliases!: Table<DBMailboxAlias, string>;
   mailboxCategories!: Table<DBMailboxCategory, string>;
   tempAliases!: Table<DBTempAlias, string>;
-  mailboxTokens!: Table<DBMailboxTokens, string>;
+  // mailboxTokens!: Table<DBMailboxTokens, string>;
   mailboxCustomDomains!: Table<DBMailboxCustomDomain, string>;
   user!: Table<DBUser, string>;
-  passkeyCredentials!: Table<DBPasskeyCredentials, string>;
-  userNotifications!: Table<DBUserNotification, string>;
-  defaultDomains!: Table<DBDefaultDomain, string>;
+  // passkeyCredentials!: Table<DBPasskeyCredentials, string>;
+  // userNotifications!: Table<DBUserNotification, string>;
+  // defaultDomains!: Table<DBDefaultDomain, string>;
   mailboxForUser!: Table<DBMailboxForUser, string>;
   localSyncData!: Table<LocalSyncData, string>;
 
@@ -86,11 +86,11 @@ export class EmailDB extends Dexie {
       mailboxCategories: 'id,[mailboxId+name],mailboxId,name,[mailboxId+isDeleted],needsSync',
       tempAliases: 'id,[mailboxId+alias],mailboxId,alias,expiresAt',
       user: 'id',
-      passkeyCredentials: 'id,[userId+id],userId,id',
-      userNotifications: 'id,[userId+id],userId,id',
-      defaultDomains: 'id',
+      // passkeyCredentials: 'id,[userId+id],userId,id',
+      // userNotifications: 'id,[userId+id],userId,id',
+      // defaultDomains: 'id',
       mailboxForUser: '[userId+mailboxId],userId,mailboxId',
-      mailboxTokens: 'id,[mailboxId+id],mailboxId,id',
+      // mailboxTokens: 'id,[mailboxId+id],mailboxId,id',
       mailboxCustomDomains: 'id,[mailboxId+id],mailboxId,id',
       localSyncData: 'userId'
     });

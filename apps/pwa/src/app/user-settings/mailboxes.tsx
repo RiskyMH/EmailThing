@@ -91,7 +91,7 @@ export default function UserSettingsMailboxes() {
                                                 <SmartDrawerTitle>Leave Mailbox</SmartDrawerTitle>
                                                 <SmartDrawerDescription>
                                                     Are you sure you want to leave <strong>{p.name}</strong>
-                                                    &lsquo;s mailbox. You will require an invite to join again.
+                                                    &lsquo;s mailbox? You will require an invite to join again.
                                                 </SmartDrawerDescription>
                                             </SmartDrawerHeader>
                                             <SmartDrawerFooter className="flex pt-2">

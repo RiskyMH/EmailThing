@@ -51,11 +51,11 @@ export async function parseSync(data: Partial<ChangesResponse>) {
         mailboxCategories: db.mailboxCategories,
         mailboxAliases: db.mailboxAliases,
         draftEmails: db.draftEmails,
-        mailboxTokens: db.mailboxTokens,
+        // mailboxTokens: db.mailboxTokens,
         mailboxCustomDomains: db.mailboxCustomDomains,
-        defaultDomains: db.defaultDomains,
-        passkeyCredentials: db.passkeyCredentials,
-        userNotifications: db.userNotifications,
+        // defaultDomains: db.defaultDomains,
+        // passkeyCredentials: db.passkeyCredentials,
+        // userNotifications: db.userNotifications,
         mailboxesForUser: db.mailboxForUser,
         user: db.user,
     } as const
@@ -78,7 +78,7 @@ export async function parseSync(data: Partial<ChangesResponse>) {
                         db.mailboxCategories,
                         db.mailboxAliases,
                         db.draftEmails,
-                        db.mailboxTokens,
+                        // db.mailboxTokens,
                         db.mailboxCustomDomains,
                     ] as const
                     return db.transaction('rw', mailboxTables, async () => {

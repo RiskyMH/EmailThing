@@ -102,7 +102,7 @@ export default function CustomDomains() {
                                                             <SmartDrawerTitle>Delete Domain</SmartDrawerTitle>
                                                             <SmartDrawerDescription>
                                                                 Are you sure you want to delete{" "}
-                                                                <strong>{row.domain}</strong>. This will also delete {" "}
+                                                                <strong>{row.domain}</strong>? This will also delete {" "}
                                                                 <strong>
                                                                     {
                                                                         aliases?.filter((alias) =>

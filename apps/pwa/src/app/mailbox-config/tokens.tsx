@@ -14,6 +14,10 @@ import { DeleteButton } from "./components.client";
 import { useParams } from "react-router-dom";
 import { getMailboxTokens, getMailbox } from "@/utils/data/queries/mailbox";
 import { useLiveQuery } from "dexie-react-hooks";
+import useSWR from "swr";
+import type { InferSelectModel } from "drizzle-orm";
+import type { MailboxTokens } from "@emailthing/db";
+import { db } from "@/utils/data/db";
 
 const deleteToken = async (mailboxId: string, token: string) => {
     toast.info("Not implemented");
@@ -26,13 +30,28 @@ const makeToken = async (mailboxId: string, name: string) => {
 export default function APITokens() {
     const { mailboxId } = useParams<{ mailboxId: string }>();
 
-    const data = useLiveQuery(
-        () => Promise.all([getMailbox(mailboxId!), getMailboxTokens(mailboxId!)]),
+    const mailbox = useLiveQuery(
+        () => getMailbox(mailboxId!),
         [mailboxId]
     );
 
-    const [mailbox, tokens] = data ?? [];
+    const { data: tokens, ...a } = useSWR(`/api/internal/auth-query?type=mailbox-token:${mailboxId}`, async () => {
+        if (!mailboxId) return;
+        if (mailboxId === "demo") return [];
 
+        const sync = (await db.localSyncData.toArray())[0]
+
+        const response = await fetch(`${sync?.apiUrl || ""}/api/internal/auth-query?type=mailbox-token:${mailboxId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `session ${sync?.token}`
+            }
+        })
+        if (!response.ok) {
+            return []
+        }
+        return response.json() as Promise<InferSelectModel<typeof MailboxTokens>[]>
+    });
 
     return (
         <div className="max-w-[40rem]">
@@ -85,10 +104,10 @@ export default function APITokens() {
                                         )}
                                     </TableCell>
                                     <TableCell className="py-3">
-                                        <LocalTime time={row.createdAt} />
+                                        <LocalTime time={new Date(row.createdAt)} />
                                     </TableCell>
                                     <TableCell className="py-3">
-                                        {row.expiresAt ? <LocalTime time={row.expiresAt} /> : "Never"}
+                                        {row.expiresAt ? <LocalTime time={new Date(row.expiresAt)} /> : "Never"}
                                     </TableCell>
                                     <TableCell className="py-3">
                                         <SmartDrawer>
@@ -107,7 +126,7 @@ export default function APITokens() {
                                                 <SmartDrawerHeader>
                                                     <SmartDrawerTitle>Delete Token</SmartDrawerTitle>
                                                     <SmartDrawerDescription>
-                                                        Are you sure you want to delete this token. This cannot be
+                                                        Are you sure you want to delete this token? This cannot be
                                                         undone.
                                                     </SmartDrawerDescription>
                                                 </SmartDrawerHeader>
@@ -130,8 +149,8 @@ export default function APITokens() {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell className={`h-24 text-center ${!data ? "fade-in" : ""}`} colSpan={4}>
-                                    {data ? "No tokens yet." : <Loader2 className="size-8 animate-spin text-muted-foreground mx-auto" />}
+                                <TableCell className={`h-24 text-center ${!tokens ? "fade-in" : ""}`} colSpan={4}>
+                                    {tokens ? "No tokens yet." : <Loader2 className="size-8 animate-spin text-muted-foreground mx-auto" />}
                                 </TableCell>
                             </TableRow>
                         )}

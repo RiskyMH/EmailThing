@@ -137,8 +137,8 @@ export default function Users() {
                                                             <SmartDrawerHeader>
                                                                 <SmartDrawerTitle>Leave Mailbox</SmartDrawerTitle>
                                                                 <SmartDrawerDescription>
-                                                                    Are you sure you want to leave this mailbox. You
-                                                                    will require an invite to join again.
+                                                                    Are you sure you want to leave this mailbox?{" "}
+                                                                    You will require an invite to join again.
                                                                 </SmartDrawerDescription>
                                                             </SmartDrawerHeader>
                                                             <SmartDrawerFooter className="flex pt-2">
@@ -172,9 +172,9 @@ export default function Users() {
                                                             <SmartDrawerHeader>
                                                                 <SmartDrawerTitle>Remove User</SmartDrawerTitle>
                                                                 <SmartDrawerDescription>
-                                                                    Are you sure you want to remove
-                                                                    <strong>{row.username}</strong>
-                                                                    &apos;s access to this mailbox.
+                                                                    Are you sure you want to remove{" "}
+                                                                    <strong>{row.username}</strong>{" "}
+                                                                    &apos;s access to this mailbox?
                                                                 </SmartDrawerDescription>
                                                             </SmartDrawerHeader>
                                                             <SmartDrawerFooter className="flex pt-2">

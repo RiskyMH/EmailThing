@@ -177,7 +177,7 @@ export default function Aliases() {
                                                             <SmartDrawerTitle>Delete Alias</SmartDrawerTitle>
                                                             <SmartDrawerDescription>
                                                                 Are you sure you want to delete{" "}
-                                                                <strong>{row.alias}</strong>.
+                                                                <strong>{row.alias}</strong>?
                                                             </SmartDrawerDescription>
                                                         </SmartDrawerHeader>
                                                         <SmartDrawerFooter className="flex pt-2">

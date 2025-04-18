@@ -374,14 +374,18 @@ export async function POST(request: Request) {
                 }
 
                 if (mailboxCategory.id?.startsWith("new:")) {
-                    const e = await db.select({ id: MailboxCategory.id }).from(MailboxCategory).where(and(eq(MailboxCategory.id, mailboxCategory.id.replace("new:", "")), eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)))
+                    const e = await db.select({ id: MailboxCategory.id, mailboxId: MailboxCategory.mailboxId }).from(MailboxCategory).where(and(eq(MailboxCategory.id, mailboxCategory.id.replace("new:", "")), /*eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)*/))
                     if (e.length) {
-                        errors.push({
-                            key: "mailboxCategories",
-                            id: mailboxCategory.id,
-                            error: "Mailbox category already exists",
-                        });
-                        mailboxCategory.id = null;
+                        if (e.length > 0 && !e.some((e) => e.mailboxId === mailboxCategory.mailboxId)) {
+                            errors.push({
+                                key: "mailboxCategories",
+                                id: mailboxCategory.id,
+                                error: "Mailbox category already exists",
+                            });
+                            mailboxCategory.id = null;
+                        } else {
+                            mailboxCategory.id = mailboxCategory.id.replace("new:", "");
+                        }
                     }
                 }
                 else if (mailboxCategory.id !== null) {
@@ -393,7 +397,7 @@ export async function POST(request: Request) {
                             error: "Mailbox category not found",
                         });
                         continue;
-                    }
+                    } 
                 }
 
                 const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
@@ -540,22 +544,22 @@ export type ChangesRequest = {
     }[];
     /** //todo: */
     mailboxAliases?: {}
-    /** //todo: */
-    mailboxTokens?: {}
-    /** //todo: */
-    mailboxCustomDomains?: {}
-    /** //todo: */
-    passkeyCredentials?: {}
-    userNotifications?: {
-        /** null for create */
-        id: null;
-        userId: string;
-        expiresAt?: Date;
-        endpoint?: string | null;
-        p256dh?: string | null;
-    }[];
-    /** //todo: */
-    mailboxesForUser?: {}
+    // /** //todo: */
+    // mailboxTokens?: {}
+    // /** //todo: */
+    // mailboxCustomDomains?: {}
+    // /** //todo: */
+    // passkeyCredentials?: {}
+    // userNotifications?: {
+    //     /** null for create */
+    //     id: null;
+    //     userId: string;
+    //     expiresAt?: Date;
+    //     endpoint?: string | null;
+    //     p256dh?: string | null;
+    // }[];
+    // /** //todo: */
+    // mailboxesForUser?: {}
 }
 
 export type ChangesResponseError = {
@@ -652,19 +656,19 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
                 forceIncludeMailboxes ? inArray(MailboxAlias.mailboxId, forceIncludeMailboxes) : undefined
             )
         )),
-        db.select().from(MailboxTokens).where(and(
-            inArray(MailboxTokens.mailboxId, mailboxIds),
-            or(
-                gte(MailboxTokens.updatedAt, lastSyncDate),
-                includeIds.mailboxTokens ? inArray(MailboxTokens.id, includeIds.mailboxTokens) : undefined,
-                forceIncludeMailboxes ? inArray(MailboxTokens.mailboxId, forceIncludeMailboxes) : undefined
-            )
-        )),
+        // db.select().from(MailboxTokens).where(and(
+        //     inArray(MailboxTokens.mailboxId, mailboxIds),
+        //     or(
+        //         gte(MailboxTokens.updatedAt, lastSyncDate),
+        //         includeIds.mailboxTokens ? inArray(MailboxTokens.id, includeIds.mailboxTokens) : undefined,
+        //         forceIncludeMailboxes ? inArray(MailboxTokens.mailboxId, forceIncludeMailboxes) : undefined
+        //     )
+        // )),
         db.select().from(MailboxCustomDomain).where(and(
             inArray(MailboxCustomDomain.mailboxId, mailboxIds),
             or(
                 gte(MailboxCustomDomain.updatedAt, lastSyncDate),
-                includeIds.mailboxCustomDomains ? inArray(MailboxCustomDomain.id, includeIds.mailboxCustomDomains) : undefined,
+                // includeIds.mailboxCustomDomains ? inArray(MailboxCustomDomain.id, includeIds.mailboxCustomDomains) : undefined,
                 forceIncludeMailboxes ? inArray(MailboxCustomDomain.mailboxId, forceIncludeMailboxes) : undefined
             )
         )),
@@ -682,7 +686,7 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             username: User.username,
         }).from(MailboxForUser).leftJoin(User, eq(MailboxForUser.userId, User.id)).where(and(
             inArray(MailboxForUser.mailboxId, mailboxIds),
-            not(eq(MailboxForUser.userId, currentUserid)),
+            // not(eq(MailboxForUser.userId, currentUserid)),
             or(
                 gte(MailboxForUser.updatedAt, lastSyncDate),
                 gte(User.updatedAt, lastSyncDate),
@@ -690,10 +694,10 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             )
         )),
 
-        db.select().from(DefaultDomain).where(and(/*gte(DefaultDomain.updatedAt, lastSyncDate), */eq(DefaultDomain.available, true))),
+        // db.select().from(DefaultDomain).where(and(/*gte(DefaultDomain.updatedAt, lastSyncDate), */eq(DefaultDomain.available, true))),
 
-        db.select().from(PasskeyCredentials).where(and(eq(PasskeyCredentials.userId, currentUserid), gte(PasskeyCredentials.updatedAt, lastSyncDate))),
-        db.select().from(UserNotification).where(and(eq(UserNotification.userId, currentUserid), gte(UserNotification.createdAt, lastSyncDate))),
+        // db.select().from(PasskeyCredentials).where(and(eq(PasskeyCredentials.userId, currentUserid), gte(PasskeyCredentials.updatedAt, lastSyncDate))),
+        // db.select().from(UserNotification).where(and(eq(UserNotification.userId, currentUserid), gte(UserNotification.createdAt, lastSyncDate))),
     ] as const)
 
     const [
@@ -703,13 +707,13 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
         mailboxes,
         mailboxCategories,
         mailboxAliases,
-        mailboxTokens,
+        // mailboxTokens,
         mailboxCustomDomains,
         draftEmails,
         mailboxesForUser2,
-        defaultDomains,
-        passkeyCredentials,
-        userNotifications,
+        // defaultDomains,
+        // passkeyCredentials,
+        // userNotifications,
     ] = b;
 
     let getMoreEmails = emails.length >= 500;
@@ -756,10 +760,10 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
             password: undefined as never,
         } as Omit<Partial<typeof currentUser>, "password">,
         mailboxesForUser: [
-            ...mailboxesForUser.map((m) => ({
-                ...m,
-                username: currentUser.username,
-            })),
+            // ...mailboxesForUser.map((m) => ({
+            //     ...m,
+            //     username: currentUser.username,
+            // })),
             ...mailboxesForUser2,
         ],
         emails: emails.map((e) => ({
@@ -772,32 +776,25 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
         mailboxCategories,
         draftEmails,
         mailboxAliases,
-        mailboxTokens: mailboxTokens.map((t) => ({
-            ...t,
-            token: hideToken(t.token),
-        })),
+        // mailboxTokens: mailboxTokens.map((t) => ({
+        //     ...t,
+        //     token: hideToken(t.token),
+        // })),
         mailboxCustomDomains,
-        defaultDomains: defaultDomains.map((d) => ({
-            ...d,
-            authKey: undefined as never,
-        })),
-        passkeyCredentials: passkeyCredentials.map((p) => ({
-            ...p,
-            publicKey: undefined as never,
-        })),
-        userNotifications: userNotifications.map((u) => ({
-            ...u,
-            endpoint: undefined as never,
-            p256dh: undefined as never,
-            auth: undefined as never,
-        })),
+        // defaultDomains: defaultDomains.map((d) => ({
+        //     ...d,
+        //     authKey: undefined as never,
+        // })),
+        // passkeyCredentials: passkeyCredentials.map((p) => ({
+        //     ...p,
+        //     publicKey: undefined as never,
+        // })),
+        // userNotifications: userNotifications.map((u) => ({
+        //     ...u,
+        //     endpoint: undefined as never,
+        //     p256dh: undefined as never,
+        //     auth: undefined as never,
+        // })),
     }
 }
 
-
-function hideToken(token: string) {
-    const newToken = "et_";
-    if (!token.startsWith(newToken)) return `${token.slice(0, 4)}......${token.slice(-4)}`;
-    // show first 4 and last 4 characters
-    return `${token.slice(0, newToken.length + 4)}......${token.slice(-4)}`;
-}

@@ -128,7 +128,7 @@ export default function Categories() {
                                                             <SmartDrawerTitle>Delete Category</SmartDrawerTitle>
                                                             <SmartDrawerDescription>
                                                                 Are you sure you want to delete{" "}
-                                                                <strong>{row.name}</strong>. This will NOT delete
+                                                                <strong>{row.name}</strong>? This will NOT delete
                                                                 any emails in this category.
                                                             </SmartDrawerDescription>
                                                         </SmartDrawerHeader>

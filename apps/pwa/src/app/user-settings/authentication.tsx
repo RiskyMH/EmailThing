@@ -19,22 +19,25 @@ import {
     SmartDrawerTrigger,
 } from "@/components/ui/smart-drawer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MoreHorizontalIcon, Trash2Icon } from "lucide-react";
+import { MoreHorizontalIcon, Trash2Icon, Loader2Icon, XIcon } from "lucide-react";
 import { CardForm, ClientInput } from "./components";
 import { getMe, getPasskeys } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { DeleteButton } from "../compose/editor.client";
 import changeUserSettings from "./api";
+import useSWR from "swr";
+import type { InferSelectModel } from "drizzle-orm";
+import type { PasskeyCredentials, UserSession } from "@emailthing/db";
+import { DeleteButton } from "../mailbox-config/components.client";
 
-const changePassword =  (_: any, formData: FormData) => {
+const changePassword = (_: any, formData: FormData) => {
     return changeUserSettings("change-password", {
         oldPassword: formData.get("password") as string,
         newPassword: formData.get("new-password") as string,
     })
 }
 
-const changeBackupEmail =  (_: any, formData: FormData) => {
+const changeBackupEmail = (_: any, formData: FormData) => {
     return changeUserSettings("change-backup-email", {
         email: formData.get("email") as string,
     })
@@ -48,16 +51,48 @@ const addPasskey = async (cred: any, name: string) => {
     toast.info("todo")
 }
 
+const revokeSession = async (id: string) => {
+    toast.info("todo")
+}
+
 
 export default function UserSettingsAuthentication() {
-    const data = useLiveQuery(async () => {
-        return Promise.all([
-            getMe(),
-            getPasskeys(),
-        ])
+    const user = useLiveQuery(getMe)
+
+    const { data: passkeys } = useSWR("/api/internal/auth-query?type=passkeys", async () => {
+        const sync = (await db.localSyncData.toArray())[0]
+
+        const response = await fetch(`${sync?.apiUrl || ""}/api/internal/auth-query?type=passkeys`, {
+            method: "GET",
+            headers: {
+                "Authorization": `session ${sync?.token}`
+            }
+        })
+        if (!response.ok) {
+            return []
+        }
+        return response.json() as Promise<Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey" | "credentialId">[]>
     })
 
-    const [user, passkeys] = data ?? []
+    const { data: sessions } = useSWR("/api/internal/auth-query?type=sessions", async () => {
+        const sync = (await db.localSyncData.toArray())[0]
+
+        const response = await fetch(`${sync?.apiUrl || ""}/api/internal/auth-query?type=sessions`, {
+            method: "GET",
+            headers: {
+                "Authorization": `session ${sync?.token}`
+            }
+        })
+        if (!response.ok) {
+            return []
+        }
+        const sessions = await response.json() as Promise<(Omit<InferSelectModel<typeof UserSession>, "token" | "refreshToken" | "lastUsed"> & {
+            browser?: string
+            location?: string
+            lastUsedDate?: string // of date
+        })[]>
+        return sessions.sort((a, b) => new Date(b.lastUsedDate || 0).getTime() - new Date(a.lastUsedDate || 0).getTime())
+    })
 
     return (
         <>
@@ -73,6 +108,7 @@ export default function UserSettingsAuthentication() {
                         <CardDescription>Used to login and access your mailboxes.</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-2">
+                        <input type="hidden" name="username" value={user?.username || ""} />
                         <Label htmlFor="password">Current password</Label>
                         <ClientInput
                             name="password"
@@ -118,7 +154,7 @@ export default function UserSettingsAuthentication() {
                                         <TableCell>{p.name}</TableCell>
                                         <TableCell className="float-end ms-auto flex gap-2 text-end">
                                             <LocalTime
-                                                time={p.createdAt}
+                                                time={new Date(p.createdAt)}
                                                 className="self-center text-muted-foreground"
                                                 type="ago"
                                             />
@@ -143,7 +179,7 @@ export default function UserSettingsAuthentication() {
                                                                 <SmartDrawerTitle>Delete Passkey</SmartDrawerTitle>
                                                                 <SmartDrawerDescription>
                                                                     Are you sure you want to delete the passkey{" "}
-                                                                    <strong>{p.name}</strong>.
+                                                                    <strong>{p.name}</strong>?
                                                                 </SmartDrawerDescription>
                                                             </SmartDrawerHeader>
                                                             <SmartDrawerFooter className="flex pt-2">
@@ -163,10 +199,101 @@ export default function UserSettingsAuthentication() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
+                                {passkeys === undefined && <TableRow>
+                                    <TableCell colSpan={2}>
+                                        <Loader2Icon className="size-4 animate-spin" />
+                                    </TableCell>
+                                </TableRow>}
                             </TableBody>
                         </Table>
                     </div>
                     <PasskeysSetup userId={user?.id || ''} username={user?.username || ''} />
+                </CardContent>
+                <CardFooter className="border-muted-foreground/30 border-t px-6 py-4">
+                    <span className="text-muted-foreground text-sm">Something something passkeys!</span>
+
+                    {/* <Button type="submit" className="ms-auto" size="sm">Create new</Button> */}
+                </CardFooter>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Sessions</CardTitle>
+                    <CardDescription>The sessions you have logged in to.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                    <div className="rounded-md border border-muted-foreground/30 bg-background">
+                        <Table>
+                            <TableHeader className="sr-only">
+                                <TableRow>
+                                    <TableHead>
+                                        <p>Device</p>
+                                    </TableHead>
+                                    <TableHead>
+                                        <p>Location</p>
+                                    </TableHead>
+                                    <TableHead>
+                                        <p>Last used</p>
+                                    </TableHead>
+                                    <TableHead className="w-1" />
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {sessions?.map((p) => (
+                                    <TableRow key={p.id} className="border-muted-foreground/30">
+                                        <TableCell className="font-medium">{p.browser || "Unknown device"}</TableCell>
+                                        <TableCell>{p.location || "Unknown location"}</TableCell>
+                                        <TableCell className="float-end ms-auto flex gap-2 text-end">
+                                            {p.lastUsedDate && <LocalTime
+                                                time={new Date(p.lastUsedDate)}
+                                                className="self-center text-muted-foreground"
+                                                type="ago"
+                                            />}
+
+                                            <SmartDrawer>
+                                                <SmartDrawerTrigger asChild>
+                                                    <Button variant="ghost" className="size-8 p-0 text-foreground/80 hover:text-destructive">
+                                                        <span className="sr-only">Revoke session</span>
+                                                        <XIcon className="size-4" />
+                                                    </Button>
+                                                </SmartDrawerTrigger>
+
+                                                <SmartDrawerContent className="sm:max-w-[425px]">
+                                                    <SmartDrawerHeader>
+                                                        <SmartDrawerTitle>Revoke Session</SmartDrawerTitle>
+                                                        <SmartDrawerDescription>
+                                                            Are you sure you want to revoke the session for {" "}
+                                                            <strong>{p.browser} ({p.location})</strong>?
+                                                        </SmartDrawerDescription>
+                                                    </SmartDrawerHeader>
+                                                    <SmartDrawerFooter className="flex pt-2">
+                                                        <SmartDrawerClose
+                                                            className={buttonVariants({
+                                                                variant: "secondary",
+                                                            })}
+                                                        >
+                                                            Cancel
+                                                        </SmartDrawerClose>
+                                                        <DeleteButton delAction={revokeSession.bind(null, p.id)} />
+                                                    </SmartDrawerFooter>
+                                                </SmartDrawerContent>
+                                            </SmartDrawer>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {sessions === undefined && <TableRow>
+                                    <TableCell colSpan={4}>
+                                        <Loader2Icon className="size-4 animate-spin" />
+                                    </TableCell>
+                                </TableRow>}
+                            </TableBody>
+                        </Table>
+                    </div>
+                    <Button variant="outline" className="border-0 w-min text-destructive hover:text-destructive" onClick={() => {
+                        toast.info("Not implemented")
+                    }}>
+                        Log out all known devices
+                    </Button>
                 </CardContent>
                 <CardFooter className="border-muted-foreground/30 border-t px-6 py-4">
                     <span className="text-muted-foreground text-sm">Something something passkeys!</span>
@@ -206,9 +333,10 @@ export default function UserSettingsAuthentication() {
 "use client";
 
 import { create, parseCreationOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
-import { KeyRoundIcon, Loader2Icon } from "lucide-react";
+import { KeyRoundIcon } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 // import { UAParser } from "ua-parser-js";
+import { db } from "@/utils/data/db";
 
 export function PasskeysSetup({ userId, username }: { userId: string; username: string }) {
     const [isPending, startTransition] = useTransition();

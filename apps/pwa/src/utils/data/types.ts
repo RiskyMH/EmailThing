@@ -29,12 +29,12 @@ export type DBMailboxAlias = T<InferSelectModel<typeof MailboxAlias>>;
 export type DBMailboxCategory = Updatable<T<InferSelectModel<typeof MailboxCategory>>> & { isNew?: boolean };
 export type DBMailboxCustomDomain = T<InferSelectModel<typeof MailboxCustomDomain>>;
 export type DBTempAlias = T<InferSelectModel<typeof TempAlias>>;
-export type DBMailboxTokens = T<InferSelectModel<typeof MailboxTokens>>; // token anonymized - et__abc......wxyZ
+// export type DBMailboxTokens = T<InferSelectModel<typeof MailboxTokens>>; // token anonymized - et__abc......wxyZ
 export type DBMailboxForUser = T<InferSelectModel<typeof MailboxForUser>> & { username: string };
-export type DBDefaultDomain = Omit<T<InferSelectModel<typeof DefaultDomain>>, "authKey">; // readonly but to power some dropdowns
+// export type DBDefaultDomain = Omit<T<InferSelectModel<typeof DefaultDomain>>, "authKey">; // readonly but to power some dropdowns
 export type DBUser = T<Omit<InferSelectModel<typeof User>, "password">>;
-export type DBPasskeyCredentials = T<Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">>;
-export type DBUserNotification = T<Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">>;
+// export type DBPasskeyCredentials = T<Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">>;
+// export type DBUserNotification = T<Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">>;
 
 
 export type LocalSyncData = {
