@@ -238,7 +238,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
                     ) : (
                         // null
                         <Avatar className="size-7 -ms-1 sm:max-lg:ms-auto sm:max-lg:-me-1">
-                            <AvatarImage className="rounded-full" src={gravatarImg} />
+                            <AvatarImage className="rounded-full" src={gravatarImg} crossOrigin="anonymous" />
                             <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
                                 {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
                             </AvatarFallback>

@@ -274,7 +274,7 @@ export default function UserSettingsAuthentication() {
                                                         >
                                                             Cancel
                                                         </SmartDrawerClose>
-                                                        <DeleteButton delAction={revokeSession.bind(null, p.id)} />
+                                                        <DeleteButton action={revokeSession.bind(null, p.id)} />
                                                     </SmartDrawerFooter>
                                                 </SmartDrawerContent>
                                             </SmartDrawer>

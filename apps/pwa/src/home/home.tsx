@@ -43,12 +43,13 @@ export default function Home() {
                         </span>{" "}
                         where you can receive and send emails!
                     </h1>
-                    <img src="/logo.svg" loading="lazy" className="hidden" alt="EmailThing logo" />
+                    <img src="/logo.svg" loading="lazy" className="hidden" alt="EmailThing logo" crossOrigin="anonymous" />
                     <img
                         src="/emailthing-kawaii.svg"
                         loading="lazy"
                         className="hidden self-center sm:h-[20rem] [.kawaii_&]:flex"
                         alt="EmailThing kawaii logo by Alfonsusac"
+                        crossOrigin="anonymous"
                     />
                     <p className="max-w-[42rem] text-balance text-muted-foreground leading-normal sm:text-xl sm:leading-8">
                         I didn&apos;t like options for custom domains and email, so I decided to build an email app and

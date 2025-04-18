@@ -60,7 +60,7 @@ export default function UserSettingsMailboxes() {
                             <TableRow key={p.id} className="border-muted-foreground/30">
                                 <TableCell className="me-0 w-0">
                                     <Avatar className="size-8 rounded-full">
-                                        <AvatarImage src={mailboxesIcons?.[i] || ""} alt={p.name || undefined} />
+                                        <AvatarImage src={mailboxesIcons?.[i] || ""} alt={p.name || undefined} crossOrigin="anonymous" />
                                         <AvatarFallback className="bg-background transition-all dark:text-foreground">
                                             {(p.name || "AB")?.slice(0, 2).toUpperCase()}
                                         </AvatarFallback>
