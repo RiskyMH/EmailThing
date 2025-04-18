@@ -7,11 +7,11 @@ import { Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { cn } from "@/utils/tw";
 import { ExternalLinkIcon } from "lucide-react"
 import { lazy } from "react";
-import { UserNavLogin } from "@/components/user-navbar";
+import { UserNavLogin, DemoLinkButton } from "@/components/user-navbar.static";
 
-// const UserNav = lazy(() => import("@/components/user-navbar"))
-// const DemoLink = lazy(() => import("@/components/user-navbar").then(mod => ({ default: mod.DemoLink })))
-import UserNav, { DemoLink } from "@/components/user-navbar";
+const UserNav = lazy(() => import("@/components/user-navbar"))
+const DemoLink = lazy(() => import("@/components/user-navbar").then(mod => ({ default: mod.DemoLink })))
+// import UserNav, { DemoLink } from "@/components/user-navbar";
 
 export default function HomeLayout({ children }: PropsWithChildren) {
     return (
@@ -28,10 +28,20 @@ export default function HomeLayout({ children }: PropsWithChildren) {
                     </div>
                 </div>
                 <nav className="flex items-center gap-4">
-                    {/* <Suspense fallback={<UserNavLogin />}> */}
-                        <DemoLink />
-                        <UserNav fallbackLogin={true} />
-                    {/* </Suspense> */}
+                    {typeof document === "undefined"
+                        ? <UserNavLogin />
+                        : document.cookie.includes("mailboxId") ? (
+                            <Suspense fallback={<UserNavLogin />}>
+                                <DemoLink />
+                                <UserNav fallbackLogin={true} />
+                            </Suspense>
+                        ) : (
+                            <>
+                                <DemoLinkButton />
+                                <UserNavLogin />
+                            </>
+                        )
+                    }
                 </nav>
             </Header>
             <main className="flex-1 bg-background">{children}</main>

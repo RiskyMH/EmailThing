@@ -4,10 +4,12 @@ import { SiteFooter } from "@/components/site-footer";
 import { MenuIcon } from "lucide-react";
 import Link from "@/components/link";
 import { lazy, Suspense } from "react";
-import { UserNavLogin } from "@/components/user-navbar";
+import { UserNavLogin, DemoLinkButton } from "@/components/user-navbar.static";
 
-// const UserNav = lazy(() => import("@/components/user-navbar"))
-import UserNav from "@/components/user-navbar";
+const UserNav = lazy(() => import("@/components/user-navbar"))
+const DemoLink = lazy(() => import("@/components/user-navbar").then(mod => ({ default: mod.DemoLink })))
+
+// import UserNav from "@/components/user-navbar";
 
 interface DocsLayoutProps {
     children: React.ReactNode;
@@ -32,9 +34,20 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
                             {/* user icon/login */}
                             {/* <div className="size-8 rounded-full bg-secondary animate-pulse" /> */}
                             <div className="hidden px-4 sm:flex">
-                                {/* <Suspense fallback={<UserNavLogin />}> */}
-                                    <UserNav fallbackLogin={true} />
-                                {/* </Suspense> */}
+                                {typeof document === "undefined"
+                                    ? <UserNavLogin />
+                                    : document.cookie.includes("mailboxId") ? (
+                                        <Suspense fallback={<UserNavLogin />}>
+                                            {/* <DemoLink /> */}
+                                            <UserNav fallbackLogin={true} />
+                                        </Suspense>
+                                    ) : (
+                                        <>
+                                            {/* <DemoLinkButton /> */}
+                                            <UserNavLogin />
+                                        </>
+                                    )
+                                }
                             </div>
 
                             <MenuIcon className="sm:hidden" />

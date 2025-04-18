@@ -96,7 +96,7 @@ export default function Home() {
                     <h2 className="font-heading text-3xl #leading-[1.1] sm:text-3xl md:text-6xl">Features</h2>
                     <p className="max-w-[85%] text-muted-foreground leading-normal sm:text-lg sm:leading-7">
                         This project is an experiment to see how to even go about making an email client. It tries to
-                        make uses of the latest features of Next.js 14 and the web.
+                        make uses of the latest features of PWA's, Bun, React, and the web.
                     </p>
                 </div>
                 <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">

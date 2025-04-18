@@ -33,7 +33,7 @@ export async function DELETE(request: Request) {
                 "Access-Control-Allow-Credentials": "true",
             }
         })
-    } else if (!authHeader.startsWith('refresh ')) {
+    } else if (authHeader.startsWith('refresh ')) {
         await db.delete(UserSession).where(eq(UserSession.refreshToken, authHeader.slice('refresh '.length)))
         return Response.json({ error: 'Removed refresh token if it was found' }, {
             status: 200, headers: {

@@ -235,12 +235,17 @@ let isSyncing = false;
 export const db = new EmailDB();
 
 // Initialize database
+const forceIndexDBKey = "indexdb-test-version"
+const forceIndexDBVersion = "v1.1b"
+
 export async function initializeDB() {
-  const v = localStorage.getItem("indexdb-test-version")
-  if (v !== "v1.1b") {
-    // delete the indexdb
+  const v = localStorage.getItem(forceIndexDBKey)
+  if (v === undefined) {
+    localStorage.setItem(forceIndexDBKey, forceIndexDBVersion);
+  } else if (v !== forceIndexDBVersion) {
+    console.log("resetting indexdb [outdated version]")
     await asyncDeleteIndexDB("EmailDB");
-    localStorage.setItem("indexdb-test-version", "v1.1b");
+    localStorage.setItem(forceIndexDBKey, forceIndexDBVersion);
   }
 
 

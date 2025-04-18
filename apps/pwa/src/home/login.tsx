@@ -9,6 +9,8 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
+    const searchParams = useSearchParams()[0];
+    const username = searchParams.get("username");
     return (
         <div className="container flex h-screen min-h-screen w-screen flex-col items-center justify-center bg-background">
             <Link
@@ -23,8 +25,12 @@ export default function LoginPage() {
                 <div className="flex flex-col gap-2 text-center">
                     <Logo className="mx-auto size-10" />
                     {/* <MailIcon className="mx-auto size-6" /> */}
-                    <h1 className="font-semibold text-2xl tracking-tight">Welcome back</h1>
-                    <p className="text-muted-foreground text-sm">Enter your username to sign in to your email</p>
+                    <h1 className="font-semibold text-2xl tracking-tight">
+                        {username ? "Welcome back" : "Welcome back"}
+                    </h1>
+                    <p className="text-muted-foreground text-sm">
+                        {username ? `Enter your password to sign back into your email` : "Enter your username to sign in to your email"}
+                    </p>
                 </div>
 
                 {/* the actual login part */}
@@ -61,7 +67,7 @@ import {
     SmartDrawerTrigger,
 } from "@/components/ui/smart-drawer";
 import { Loader2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -74,9 +80,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isPending, startTransition] = useTransition();
     const [hadAnError, setHadAnError] = useState<false | string>(false);
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
+    const navigate = useNavigate();
 
-    const searchParams = useSearchParams();
+    const searchParams = useSearchParams()[0];
     const username = searchParams.get("username");
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -123,18 +129,40 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             // document.cookie = `token=${token}; path=/;`;
             // localStorage.setItem("token", token);
             // localStorage.removeItem("lastSynced");
-            const { db } = await import("@/utils/data/db")
-            await db.open()
-            await db.localSyncData.put({
+            const { db, initializeDB } = await import("@/utils/data/db")
+            // await db.open()
+            await initializeDB()
+
+            const saveSyncData = (userId: string) => db.localSyncData.put({
                 token,
                 refreshToken,
                 tokenExpiresAt,
                 refreshTokenExpiresAt,
                 lastSync: 0,
                 isSyncing: true,
-                userId: data.userId,
+                userId,
                 apiUrl
-            }, data.userId)
+            }, userId)
+
+            if (username) {
+                const existing = await db.localSyncData.get(data.userId)
+                if (existing) {
+                    await db.localSyncData.update(data.userId, {
+                        token,
+                        refreshToken,
+                        tokenExpiresAt,
+                        refreshTokenExpiresAt,
+                        // lastSync: 0,
+                        isSyncing: true,
+                        // userId: ,
+                        apiUrl
+                    })
+                } else {
+                    await saveSyncData(data.userId)
+                }
+            } else {
+                await saveSyncData(data.userId)
+            }
 
             // Get mailboxId from cookie if it exists and is valid, otherwise use first mailbox
             const mailboxId = document.cookie.includes('mailboxId=')
@@ -146,7 +174,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 : mailboxes[0];
 
             document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-            router.push(`/mail/${selectedMailbox}`);
+            navigate(`/mail/${selectedMailbox}`);
 
             toast.success("Welcome back!");
 

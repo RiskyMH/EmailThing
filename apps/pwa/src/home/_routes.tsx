@@ -2,7 +2,7 @@ import { type RouteObject, Outlet } from "react-router-dom";
 import Home from "./home";
 import Pricing from "./pricing";
 import { lazy, Suspense } from 'react';
-import AuthPage from "./auth";
+import RegisterPage from "./register";
 import HomeLayout from "./layout";
 import LoginPage from "./login";
 export const routes = [
@@ -30,7 +30,7 @@ export const routes = [
     },
     {
         path: "/register",
-        element: <AuthPage />,
+        element: <RegisterPage />,
     },
 
 ] satisfies RouteObject[]
