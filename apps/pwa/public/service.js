@@ -69,7 +69,7 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
     if (event.request.mode === 'navigate') {
       if (navigator.onLine) {
         event.respondWith(
-          fetch(Object.assign(event.request, { signal: AbortSignal.timeout(5_000) }))
+          fetch(new Request(event.request, { signal: AbortSignal.timeout(5_000) }))
             .catch(() => caches.match(OFFLINE_URL))
             .then(e => e || fetch(event.request))
         );
