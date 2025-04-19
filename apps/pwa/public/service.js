@@ -68,11 +68,23 @@ if (CACHE_NAME !== 'emailthing-offline-v1') {
 
     if (event.request.mode === 'navigate') {
       if (navigator.onLine) {
-        event.respondWith(
-          fetch(new Request(event.request, { signal: AbortSignal.timeout(5_000) }))
-            .catch(() => caches.match(OFFLINE_URL))
-            .then(e => e || fetch(event.request))
-        );
+        event.respondWith((async () => {
+          try {
+            if (event.request.url === "https://pwa.emailthing.app/") {
+              if (await this?.cookieStore?.get("mailboxId")) {
+                return Response.redirect("https://pwa.emailthing.app/mail")
+              }
+            }
+            event.request.signal = AbortSignal.timeout(3_000)
+            return await fetch(event.request)
+          } catch (error) {
+            console.error(error)
+          }
+          return caches.match(OFFLINE_URL).then(e => {
+            event.request.signal = null
+            return e || fetch(event.request)
+          })
+        })())
       } else {
         event.respondWith(caches.match(OFFLINE_URL));
       }
