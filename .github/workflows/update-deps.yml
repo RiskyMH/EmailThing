@@ -1,0 +1,102 @@
+name: Update Dependencies
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # Run monthly at midnight on the 1st
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    if: github.repository_owner == 'RiskyMH'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Update Dependencies
+        id: update
+        run: |
+          # Function to extract package versions and format them
+          format_deps() {
+            local dir=$1
+            echo "### ${dir} dependencies:"
+            jq -r '.dependencies + .devDependencies | to_entries | .[] | "\n- `\(.key)`: `\(.value)`"' package.json
+          }
+
+          # Store current versions
+          echo "OLD_VERSIONS<<EOF" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/web" && format_deps "Web" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/packages/db" && format_deps "DB" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          # Update dependencies in each directory
+          cd "$GITHUB_WORKSPACE/apps/web" && bun update
+          cd "$GITHUB_WORKSPACE/apps/pwa" && bun update
+          cd "$GITHUB_WORKSPACE/packages/db" && bun update
+
+          # Force a clean update
+          cd "$GITHUB_WORKSPACE" && rm -f bun.lock */bun.lock
+          cd "$GITHUB_WORKSPACE" && bun i
+
+          # Store new versions and generate diff
+          echo "NEW_VERSIONS<<EOF" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/web" && format_deps "Web" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/packages/db" && format_deps "DB" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Generate Changes Summary
+        id: changes
+        run: |
+          # Create a prettier diff using bun
+          bun -e '
+            const old = process.env.OLD_VERSIONS.split("\n");
+            const new_ = process.env.NEW_VERSIONS.split("\n");
+            let changes = "";
+            
+            for (let i = 0; i < new_.length; i++) {
+              if (old[i]?.startsWith("###")) {
+                changes += "\n" + old[i] + "\n";
+                continue;
+              }
+              if (!old[i] || !new_[i]) continue;
+              
+              const oldVer = old[i].match(/`([^`]+)`$/)?.[1];
+              const newVer = new_[i].match(/`([^`]+)`$/)?.[1];
+              const pkg = old[i].match(/`([^`]+)`:/)?.[1];
+              
+              if (oldVer && newVer && oldVer !== newVer) {
+                changes += `\n- \`${pkg}\`: \`${oldVer}\` → **\`${newVer}\`**`;
+              }
+            }
+            console.log("CHANGES_SUMMARY<<EOF");
+            console.log(changes || "No dependency updates found");
+            console.log("EOF");
+          ' >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update dependencies"
+          title: "chore: update dependencies"
+          body: |
+            ## 📦 Dependency Updates
+
+            The following dependencies have been updated:
+
+            ${{ env.CHANGES_SUMMARY }}
+
+          branch: deps/update-dependencies
+          base: main
+          labels: dependencies
+          delete-branch: false  # Keep the branch to allow updates

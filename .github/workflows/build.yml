@@ -9,7 +9,6 @@ on:
       - packages/db/**/*
       - .github/workflows/build.yml
       - bun.lock
-      - bun.lockb
   pull_request: 
     branches:
       - main
