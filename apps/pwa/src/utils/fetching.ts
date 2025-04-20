@@ -30,7 +30,8 @@ const svgl = await getSvgl()
 const imgExists = async (url: string) => {
     try {
         const img = new Image()
-        img.crossOrigin = "anonymous"
+        // svgl doesn't like crossOrigin=anonymous
+        // img.crossOrigin = "anonymous"
         img.src = url
         return new Promise((resolve, reject) => {
             img.onload = () => resolve(true)

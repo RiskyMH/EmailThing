@@ -442,7 +442,8 @@ function EmailPicture({ email, fallback }: { email: string, fallback?: string })
 
     return (
         <Avatar className={"size-12 bg-tertiary transition-all data-[gravatar=true]:rounded-full data-[gravatar=false]:rounded-lg data-[gravatar=false]:[&>img]:p-2 data-[gravatar=false]:[&>img]:rounded-[20%]"} data-gravatar={isGravatar}>
-            <AvatarImage src={img} crossOrigin="anonymous" />
+            {/* somehow svgl doesn't like crossOrigin=anonymous */}
+            <AvatarImage src={img} crossOrigin={isGravatar ? "anonymous" : undefined} />
             <AvatarFallback className="bg-tertiary">
                 {fallback}
             </AvatarFallback>
