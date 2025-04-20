@@ -44,8 +44,8 @@ jobs:
           cd "$GITHUB_WORKSPACE/packages/db" && bun update
 
           # Force a clean update
-          cd "$GITHUB_WORKSPACE" && rm -f bun.lock */bun.lock
-          cd "$GITHUB_WORKSPACE" && bun i
+          cd "$GITHUB_WORKSPACE" && rm -f bun.lock bun.lockb
+          cd "$GITHUB_WORKSPACE" && bun i --save-text-lockfile
 
           # Store new versions and generate diff
           echo "NEW_VERSIONS<<EOF" >> $GITHUB_ENV
@@ -86,7 +86,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PR_GITHUB_TOKEN }}
           commit-message: "chore: update dependencies"
           title: "chore: update dependencies"
           body: |
@@ -100,3 +100,10 @@ jobs:
           base: main
           labels: dependencies
           delete-branch: false  # Keep the branch to allow updates
+          author: RiskyMH <git@riskymh.dev>
+          committer: RiskyMH <git@riskymh.dev>
+          signoff: false
+          add-paths: |
+            */package.json
+            package.json
+            bun.lock
