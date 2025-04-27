@@ -38,6 +38,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const lastSync = parseInt(searchParams.get("last_sync") || "0");
     const minimal = searchParams.get("minimal");
+    const d = new Date();
 
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date(0);
 
@@ -79,7 +80,10 @@ export async function GET(request: Request) {
     const newMailboxes = mailboxesForUser.filter(m => m.joinedAt > lastSyncDate).map(m => m.mailboxId)
 
     return Response.json(
-        await getChanges(lastSyncDate, currentUser, mailboxesForUser, {}, newMailboxes),
+        {
+            ...(await getChanges(lastSyncDate, currentUser, mailboxesForUser, {}, newMailboxes)),
+            time: d.toISOString(),
+        },
         {
             headers: {
                 "Access-Control-Allow-Origin": origin,
@@ -103,6 +107,7 @@ export async function POST(request: Request) {
     const lastSync = parseInt(searchParams.get("last_sync") || "0");
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date();
 
+    const d = new Date();
 
     const currentUserid = await getSession(request);
     if (!currentUserid) return new Response("Unauthorized", {
@@ -397,7 +402,7 @@ export async function POST(request: Request) {
                             error: "Mailbox category not found",
                         });
                         continue;
-                    } 
+                    }
                 }
 
                 const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
@@ -492,6 +497,7 @@ export async function POST(request: Request) {
 
     // Return both errors and latest changes
     return Response.json({
+        time: d.toISOString(),
         errors: errors.length > 0 ? errors : undefined,
         ...changesRes
     }, {

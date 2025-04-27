@@ -42,7 +42,7 @@ export const parseValuesInArray = <T extends any[]>(arr: T) => {
     return arr?.filter(item => !item.isDeleted).map(parseValues) as T;
 };
 
-export async function parseSync(data: Partial<ChangesResponse>) {
+export async function parseSync(data: Partial<ChangesResponse & { time: string }>) {
     // Get tables that have data to process
     const tablesToProcess = Object.keys(data).filter(key => key === 'user' || data[key as keyof typeof data]?.length);
     const dbMap = {

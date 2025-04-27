@@ -122,7 +122,9 @@ export class EmailDB extends Dexie {
         }
         return this.sync({ alreadyRefreshed: true });
       }
-      await this.localSyncData.update(localSyncData[0].userId, { lastSync: now, isSyncing: false });
+
+      const lastSync = new Date((res?.time ? new Date(res.time) : now).getTime() - 60000);
+      await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
       isSyncing = false;
       return
     } catch (error) {
@@ -159,7 +161,9 @@ export class EmailDB extends Dexie {
         }
         return this.fetchSync({ alreadyRefreshed: true });
       }
-      await this.localSyncData.update(localSyncData[0].userId, { lastSync: now, isSyncing: false });
+
+      const lastSync = new Date((res.time ? new Date(res.time) : now).getTime() - 60000);
+      await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
     } catch (error) {
       console.error('Failed to fetch sync', error);
     } finally {
@@ -214,18 +218,18 @@ export class EmailDB extends Dexie {
       this.mailboxes,
       this.mailboxAliases,
       this.mailboxCategories,
-      this.mailboxTokens,
+      // this.mailboxTokens,
       this.mailboxCustomDomains,
-      this.defaultDomains,
-      this.passkeyCredentials,
-      this.userNotifications,
+      // this.defaultDomains,
+      // this.passkeyCredentials,
+      // this.userNotifications,
       this.mailboxForUser,
       this.user,
       this.localSyncData,
     ] as const
-    await this.transaction('rw', tables, async () => {
-      await Promise.all(tables.map(table => table.clear()));
-    });
+    await this.transaction('rw', tables, () =>
+      Promise.all(tables.map(table => table.clear()))
+    );
     sessionStorage.removeItem('demo')
   }
 }
