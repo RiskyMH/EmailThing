@@ -63,12 +63,16 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
 
     await db.transaction('rw', dbTables, async () => {
         // Handle deletions first
-        const deletions = tablesToProcess.map((key) => {
-            const items = data[key as keyof typeof data];
+        const deletions = tablesToProcess.map((_key) => {
+            if (_key === 'time') return null
+            const key = _key as keyof Omit<typeof data, 'time'>
+            const items = data[key];
             if (!items?.length) return null;
 
-            const deletedItems = items.filter((item: any) => item.isDeleted);
-            if (!deletedItems.length) return null;
+            if (!Array.isArray(items)) return null
+
+            const deletedItems = items.filter?.((item: any) => item.isDeleted);
+            if (!deletedItems?.length) return null;
 
             switch (key) {
                 case 'mailboxesForUser':
@@ -83,7 +87,8 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
                     ] as const
                     return db.transaction('rw', mailboxTables, async () => {
                         await db.mailboxForUser?.bulkDelete(
-                            deletedItems.map((m: any) => ([m.userId, m.mailboxId]))
+                            // @ts-expect-error this *should* work
+                            deletedItems.map(m => ([m.userId, m.mailboxId]))
                         );
                         await Promise.all(
                             mailboxTables.map(table => table
@@ -95,7 +100,7 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
                     });
 
                 default:
-                    return dbMap[key as keyof typeof data]?.bulkDelete(
+                    return dbMap[key]?.bulkDelete(
                         deletedItems.map((item: any) => item.id)
                     );
             }
