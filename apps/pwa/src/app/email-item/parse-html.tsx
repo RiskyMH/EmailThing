@@ -24,7 +24,12 @@ if (typeof window !== "undefined") {
 }
 
 export function parseHTML(content: string, moreTrusted = false) {
-    const clean = DOMPurify?.sanitize(content, {
+    const _content = content.replaceAll(
+        /<!--\[EMAILTHING\]>([\s\S]*?)<-->/gm,
+        "$1"
+    )
+
+    const clean = DOMPurify?.sanitize(_content, {
         WHOLE_DOCUMENT: moreTrusted,
         ALLOWED_TAGS: [
             "a",

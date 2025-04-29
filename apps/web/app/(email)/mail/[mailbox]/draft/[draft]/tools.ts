@@ -73,8 +73,9 @@ export function makeHtml(html: string) {
   @media(prefers-color-scheme:dark){.main{background-color:rgb(51,51,51) !important;color:white !important;}}
   blockquote{border-left: 3px solid #cccccc80;padding-left:10px;}
 </style>
+<!--[EMAILTHING]><style>.main{border-radius:0px !important;}</style><-->
 </head>
-<body style="font-family: Arial, sans-serif;padding:0px;background-color:transparent">
+<body style="font-family: Arial, sans-serif;padding:0px;margin:0px;background-color:transparent">
 <div class="main" style="background-color:rgb(241,240,245);color:black;padding:20px;border-radius:0.5rem;height:100%;">
 ${html}
 </div>
