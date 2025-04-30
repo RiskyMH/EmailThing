@@ -110,7 +110,7 @@ export class EmailDB extends Dexie {
     try {
       // this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
       isSyncing = true;
-      const now = new Date();
+
       const res = await syncLocal(localSyncData[0]);
       if (res === '401') {
         if (alreadyRefreshed) {
@@ -123,7 +123,7 @@ export class EmailDB extends Dexie {
         return this.sync({ alreadyRefreshed: true });
       }
 
-      const lastSync = new Date((res?.time ? new Date(res.time) : now).getTime() - 60000);
+      const lastSync = res?.time ? new Date(new Date(res.time).getTime() - 60000) : undefined;
       await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
       isSyncing = false;
       return
@@ -147,9 +147,9 @@ export class EmailDB extends Dexie {
     };
 
     try {
-      const now = new Date();
       this.localSyncData.update(localSyncData[0].userId, { isSyncing: true });
       isSyncing = true;
+
       const res = await fetchSync(localSyncData[0]);
       if (res === '401') {
         if (alreadyRefreshed) {
@@ -162,7 +162,7 @@ export class EmailDB extends Dexie {
         return this.fetchSync({ alreadyRefreshed: true });
       }
 
-      const lastSync = new Date((res.time ? new Date(res.time) : now).getTime() - 60000);
+      const lastSync = res?.time ? new Date(new Date(res.time).getTime() - 60000) : undefined;
       await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
     } catch (error) {
       console.error('Failed to fetch sync', error);

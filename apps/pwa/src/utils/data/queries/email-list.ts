@@ -420,15 +420,10 @@ export async function updateEmailProperties(
         }
 
         if (updates.hardDelete) {
-            await db.transaction('rw',
-                [db.emails],
-                async () => {
-                    await db.emails
-                        .where('id')
-                        .equals(emailId)
-                        .modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() });
-                }
-            );
+            await db.emails
+                .where('id')
+                .equals(emailId)
+                .modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() })
         } else {
             const modify: Partial<DBEmail> = { needsSync: 1, updatedAt: new Date() }
             if (updates.isStarred !== undefined) modify.isStarred = updates.isStarred === true ? 1 : 0

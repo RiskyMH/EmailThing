@@ -40,6 +40,8 @@ export interface EmailItemProps {
             address: string;
         }>;
         attachments?: any[]
+
+        isDeleted?: boolean | 0 | 1
     };
     mailboxId: string;
     type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
@@ -110,6 +112,8 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
     const link = `/mail/${mailboxId}/${type === "drafts" ? "draft/" : ""}${email.id}`;
 
     const [ref, isInView] = useInView()
+
+    if (type !== "trash" && email.isDeleted === 1) return null
 
     const main = (
         <Link
