@@ -123,8 +123,13 @@ export class EmailDB extends Dexie {
         return this.sync({ alreadyRefreshed: true });
       }
 
-      const lastSync = res?.time ? new Date(new Date(res.time).getTime() - 60000) : undefined;
-      await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
+      if (res?.time){
+        const lastSync = new Date(new Date(res.time).getTime() - 60000);
+        await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
+      } 
+      // else {
+      //   await this.localSyncData.update(localSyncData[0].userId, { /*lastSync*/, isSyncing: false });
+      // }
       isSyncing = false;
       return
     } catch (error) {
@@ -162,8 +167,13 @@ export class EmailDB extends Dexie {
         return this.fetchSync({ alreadyRefreshed: true });
       }
 
-      const lastSync = res?.time ? new Date(new Date(res.time).getTime() - 60000) : undefined;
-      await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
+      if (res?.time){
+        const lastSync = new Date(new Date(res.time).getTime() - 60000);
+        await this.localSyncData.update(localSyncData[0].userId, { lastSync, isSyncing: false });
+      }
+      //  else {
+      //   await this.localSyncData.update(localSyncData[0].userId, { /*lastSync*/, isSyncing: false });
+      // }
     } catch (error) {
       console.error('Failed to fetch sync', error);
     } finally {
