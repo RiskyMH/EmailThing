@@ -152,9 +152,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                         refreshToken,
                         tokenExpiresAt,
                         refreshTokenExpiresAt,
-                        // lastSync: 0,
+                        lastSync: existing.lastSync,
                         isSyncing: true,
-                        // userId: ,
+                        userId: data.userId,
                         apiUrl
                     })
                 } else {
