@@ -138,7 +138,7 @@ async function getsLocalSyncData(): Promise<Partial<ChangesRequest>> {
     const mailboxCategories = await db.mailboxCategories.where('needsSync').equals(1).toArray()
 
     return {
-        emails: emails.map(e => ({
+        emails: emails.filter(e => e.mailboxId !== "demo").map(e => ({
             id: e.id,
             mailboxId: e.mailboxId,
             isStarred: e.isStarred === 1,
@@ -148,7 +148,7 @@ async function getsLocalSyncData(): Promise<Partial<ChangesRequest>> {
             hardDelete: e.isDeleted === 1,
             lastUpdated: e.updatedAt === 0 ? null : e.updatedAt.toISOString() as any,
         })),
-        draftEmails: draftEmails.map(e => ({
+        draftEmails: draftEmails.filter(e => e.mailboxId !== "demo").map(e => ({
             id: !e.isNew ? e.id : `new:${e.id}`,
             mailboxId: e.mailboxId,
             body: e.body || null,
@@ -159,7 +159,7 @@ async function getsLocalSyncData(): Promise<Partial<ChangesRequest>> {
             hardDelete: e.isDeleted === 1,
             lastUpdated: e.updatedAt.toISOString() as any,
         })),
-        mailboxCategories: mailboxCategories.map(c => ({
+        mailboxCategories: mailboxCategories.filter(e => e.mailboxId !== "demo").map(c => ({
             id: !c.isNew ? c.id : `new:${c.id}`,
             mailboxId: c.mailboxId,
             name: c.name,
