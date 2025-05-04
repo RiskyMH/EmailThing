@@ -62,8 +62,8 @@ export default function RefreshButton({ className }: { className?: string }) {
             size="auto"
             className={cn("-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground shrink-0", className)}
             onClick={() => {
-                !isPending &&
-                    online ? reload() : void toast.warning("Offline")
+                isPending ? void 0 : online
+                    ? reload() : void toast.warning("Offline")
             }}
             disabled={!online}
         >
