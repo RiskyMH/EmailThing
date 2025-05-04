@@ -75,10 +75,10 @@ export function parseHTML(content: string, moreTrusted = false) {
             "ul",
             "center",
             "em",
-            ...(moreTrusted ? ["style", "body", "head"] : []),
+            ...(moreTrusted ? ["style", "body", "head", "meta"] : []),
         ],
         ALLOWED_ATTR: [
-            ...(moreTrusted ? ["style", "class"] : []),
+            ...(moreTrusted ? ["style", "class", "name", "content", "http-equiv"] : []),
             "href",
             "align",
             "valign",
@@ -97,6 +97,13 @@ export function parseHTML(content: string, moreTrusted = false) {
             "type",
             "title",
             "hidden",
+            "aria-hidden",
+            "aria-label",
+            "aria-labelledby",
+            "aria-describedby",
+            "aria-controls",
+            "aria-expanded",
+            "aria-haspopup",
         ],
     });
 
