@@ -112,6 +112,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
         from: alias.alias,
         to: to.map((e) => e.address),
         data: email,
+        important: true,
     });
 
     if (e?.error) return e;

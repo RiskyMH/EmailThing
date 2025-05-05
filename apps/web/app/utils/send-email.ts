@@ -12,6 +12,7 @@ export async function sendEmail(data: {
     to: string[];
     data: string | MIMEMessage;
     dkim?: { domain: string; selector?: string; privateKey: string };
+    important?: boolean
 }) {
     // check if the "from" gives spf
     // use 1.1.1.1 doh api
@@ -71,7 +72,7 @@ export async function sendEmail(data: {
     }
 
     const signedData = await withDKIM(data.data, data.dkim);
-    const e = await fetch("https://vps2.riskymh.dev/api/send-email", {
+    const e = await fetch(`https://vps${data.important ? "1" : "2"}.riskymh.dev/api/send-email`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
