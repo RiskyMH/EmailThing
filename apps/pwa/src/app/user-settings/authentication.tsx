@@ -21,7 +21,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MoreHorizontalIcon, Trash2Icon, Loader2Icon, XIcon } from "lucide-react";
 import { CardForm, ClientInput } from "./components";
-import { getMe, getPasskeys } from "@/utils/data/queries/user";
+import { getMe } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import changeUserSettings from "./api";

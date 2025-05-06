@@ -12,12 +12,6 @@ export async function getMe() {
     return users
 }
 
-export async function getPasskeys() {
-    const passkeys = await db.passkeyCredentials.toArray()
-    return passkeys
-}
-
-
 
 export async function getAllAliases() {
     const user = await getMe()

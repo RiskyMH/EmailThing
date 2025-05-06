@@ -76,7 +76,7 @@ export function makeHtml(html: string) {
 <!--[EMAILTHING]><style>.main{border-radius:0px !important;}</style><-->
 </head>
 <body style="font-family: Arial, sans-serif;padding:0px;margin:0px;background-color:transparent">
-<div class="main" style="background-color:rgb(241,240,245);color:black;padding:20px;border-radius:0.5rem;height:100%;">
+<div class="main" style="background-color:rgb(241,240,245);color:black;padding:20px;padding-top:10px;padding-bottom:10px;border-radius:0.5rem;height:100%;">
 ${html}
 </div>
 </body>
