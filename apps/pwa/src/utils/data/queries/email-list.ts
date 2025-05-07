@@ -37,6 +37,7 @@ interface EmailListOptions {
     search?: string;
     take?: number;
     skip?: number;
+    direction?: "asc" | "desc";
 }
 
 interface EmailCategoriesListResult {
@@ -59,6 +60,7 @@ export async function getEmailList({
     search,
     take = 100,
     skip = 0,
+    direction = "desc",
 }: EmailListOptions) {
     // Start with base query using mailboxId+createdAt index
     let emailQuery = (type === 'drafts'
@@ -192,9 +194,12 @@ export async function getEmailList({
         }
     }
 
+    if (direction === "desc") {
+        emailQuery = emailQuery.reverse()
+    }
+
     // Apply pagination
     const emails = await emailQuery
-        .reverse()
         .offset(skip)
         .limit(take)
         .toArray();

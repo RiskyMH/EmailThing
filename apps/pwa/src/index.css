@@ -216,3 +216,16 @@ body {
 	font-display: swap;
 	src: url("../public/CalSans-SemiBold.woff2") format(woff2);
 }
+
+
+/* prose hr is 3em and uh tall */
+@layer utilities {
+	.prose {
+		& :where(hr):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+			/* border-color: var(--tw-prose-hr); */
+			/* border-top-width: 1px; */
+			margin-top: 1em;
+			margin-bottom: 1em;
+		}
+	}
+}

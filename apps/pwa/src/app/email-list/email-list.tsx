@@ -15,9 +15,10 @@ import { getEmailList, getEmailCategoriesList, getEmailCount } from "@/utils/dat
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Observable, liveQuery } from 'dexie';
 import { getCategories, getMailboxName } from "@/utils/data/queries/mailbox";
-import { Loader2 } from "lucide-react"
+import { ArrowUp, ArrowDown, Loader2 } from "lucide-react"
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { startOfToday, startOfYesterday, startOfWeek, subWeeks, subMonths, subYears, format, isAfter, isBefore, isSameMonth, isSameYear, isSameDay, isThisWeek, isYesterday, isToday, isSameWeek } from 'date-fns'
+import TooltipText from "@/components/tooltip-text"
 
 export default function EmailListSuspenced({ filter }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     if (typeof window === "undefined") return <Loading />
@@ -68,7 +69,7 @@ declare global {
 function EmailList({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
     return (
         <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 sm:px-3 pt-0">
-            <div className="overflow sticky top-0 z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 z-10 overflow-y-hidden border-b-2 bg-background px-2 sm:px-3">
+            <div className="overflow sticky top-0 z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 overflow-y-hidden border-b-2 bg-background px-2 sm:px-3">
                 <Categories filter={type} />
             </div>
 
@@ -141,9 +142,11 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
     const searchParams = useSearchParams()[0]
     const categoryId = searchParams.get("category") as string | null
     const search = searchParams.get("q") as string | null
+    const direction = (searchParams.get("direction") as "asc" | "desc" | null) || "desc"
+    const getAll = searchParams.has("all")
     const mailboxId = (params.mailboxId === "[mailboxId]" || !params.mailboxId) ? "demo" : params.mailboxId
 
-    const key = JSON.stringify({ m: mailboxId, t: type, c: categoryId, q: search })
+    const key = JSON.stringify({ m: mailboxId, t: type, c: categoryId, q: search, d: direction, a: getAll })
 
     const categories = useLiveQuery(() => getCategories(mailboxId), [mailboxId])
 
@@ -154,15 +157,16 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
                 type,
                 categoryId: categoryId ?? undefined,
                 search: search ?? undefined,
-                take: pageSize,
-                skip: pageSize * pageNo,
+                take: getAll ? Infinity : pageSize,
+                skip: getAll ? 0 : pageSize * pageNo,
+                direction: direction,
             })
-        ), [mailboxId, type, categoryId, search]);
+        ), [mailboxId, type, categoryId, search, direction, getAll]);
 
 
     const initialData = typeof window !== "undefined" ? window._tempData?.emailList?.[key] || [] : [];
     const queriesRef = useRef<Observable<Awaited<ReturnType<typeof getEmailList>>>[]>(
-        [createLiveQuery(0)]
+           [createLiveQuery(0)]
     );
     const [resultArrays, setResultArrays] = useState<Awaited<ReturnType<typeof getEmailList>>[]>(initialData);
 
@@ -260,7 +264,7 @@ function Emails({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "starr
         <InfiniteScroll
             dataLength={emails.length}
             next={fetchMoreData}
-            hasMore={resultArrays.at(-1)?.length === pageSize}
+            hasMore={resultArrays.at(-1)?.length === pageSize && !getAll}
             loader={<div className={buttonVariants({ variant: "outline", size: "lg", className: "flex gap-2" })}>
                 <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>}
@@ -474,7 +478,8 @@ function Categories({ filter: type }: { filter: "inbox" | "drafts" | "sent" | "s
                     </SmartDrawerContent>
                 </SmartDrawer>
             )}
-            <div className="ms-auto flex h-6 shrink-0 items-center justify-center">
+            <div className="ms-auto flex h-6 shrink-0 items-center justify-center gap-2">
+                {allCount > 25 && <DirectionButton />}
                 <RefreshButton />
             </div>
         </>
@@ -529,4 +534,19 @@ export function CategoryItem({
 }
 
 
+function DirectionButton() {
+    const searchParams = useSearchParams()[0]
+    const direction = searchParams.get("direction") as "asc" | "desc" | null
+    const hrefInverted = new URLSearchParams(searchParams.toString())
+    hrefInverted.set("direction", direction === "asc" ? "desc" : "asc")
 
+    return (
+        <TooltipText text={direction === "asc" ? "Oldest first" : "Newest first"}>
+            <Button variant="ghost" size="auto" asChild className="-m-2 me-0 rounded-full p-2 text-muted-foreground hover:text-foreground shrink-0">
+                <Link href={'?' + hrefInverted.toString()}>
+                    {direction === "asc" ? <ArrowUp className="size-5" /> : <ArrowDown className="size-5" />}
+                </Link>
+            </Button>
+        </TooltipText>
+    )
+}

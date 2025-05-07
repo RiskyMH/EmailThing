@@ -265,7 +265,7 @@ function MailItem() {
                         ))}
                     </div>
                 )}
-                <EmailContent body={email.body} html={email.html || null} subject={email.subject || null} />
+                <EmailContent body={email.body} html={email.html || null} subject={email.subject || null} sender={email.sender?.address || null} />
             </div>
 
             {/* // TODO: show references snippets for email */}
@@ -286,13 +286,13 @@ function Title({ subject, mailboxId }: { subject?: string | null, mailboxId: str
 }
 
 function EmailContent({
-    body, html, subject,
-}: { body: string; html?: string | null, subject?: string | null }) {
+    body, html, subject, sender,
+}: { body: string; html?: string | null, subject?: string | null, sender?: string | null }) {
     const searchParams = useSearchParams()[0]
     const lastView = (localStorage || {}).getItem('email-item:last-view')
     const view = (
         searchParams.get("view")
-        || (lastView?.startsWith("html") && !html ? "markdown" : lastView)
+        || (lastView?.startsWith("html") && !html ? "html" : lastView)
         || "markdown"
     ) as "text" | "markdown" | "html" | "html-raw"
 
@@ -340,7 +340,7 @@ function EmailContent({
                     className="w-full rounded-b-lg bg-card"
                     style={{ height: '0px', maxHeight: '100%' }}
                     sandbox="allow-popups allow-same-origin"
-                    srcDoc={parseHTML(html || body, true)}
+                    srcDoc={genericHtml(parseHTML(html || body, true), sender)}
                     title={subject || "The Email"}
                 />
                 {!htmlLoaded && <EmailContentSpinner className="h-36" />}
@@ -355,6 +355,43 @@ function EmailContent({
     return null;
 }
 
+export function genericHtml(_html: string, sender?: string | null) {
+    let html = _html.replaceAll(
+        /<!--\[EMAILTHING\]>([\s\S]*?)<-->/gm,
+        "$1"
+    )
+    if (html.startsWith("<!DOCTYPE html")) return html;
+
+    const added = new Set<string>()
+
+    if (!html.includes("color:")) {
+        // check that it isnt already dark only or light only
+        if (!html.includes('meta content="light') && !html.includes(`meta content="dark"`)) {
+            added.add(`<meta content="light dark" name="color-scheme">`)
+        }
+    };
+    if (!html.includes("font-family:")) {
+        added.add(`<style>body{font-family: Arial, sans-serif;}</style>`)
+    };
+
+    const isStyled = /<style|style=/i.test(html.replaceAll(/<img[^>]*>/g, ""))
+
+    if (sender === "notifications@github.com") {
+        added.add(`<meta content="light dark" name="color-scheme">`)
+        if (html.includes(`<pre style="color:#555"`)) {
+            added.add(`<style>@media(prefers-color-scheme:dark){pre{color:#aaa!important;}}</style>`)
+        }
+    }
+    if (sender === "notifications@github.com" || !isStyled) {
+        added.add(`<style>body > :first-child { margin-top: 0px; }</style>`)
+        added.add(`<style>body{margin:12px; margin-top:5px}</style>`)
+        html = html.replace(/<p>\s*<\/p>/, '')
+    }
+
+    return [...added, html].join("\n")
+}
+
+
 function EmailContentSpinner({ className }: { className?: string }) {
     return (
         <div className={cn("flex h-screen w-full flex-col items-center justify-center fade-in", className)}>
@@ -368,10 +405,10 @@ function ViewSelect({
 }: { htmlValid?: boolean }) {
     const navigate = useNavigate()
     const searchParams = useSearchParams()[0]
-    const view = (searchParams.get("view") || (localStorage || {}).getItem('email-item:last-view') || "markdown")
+    const view = (searchParams.get("view") || (localStorage || {}).getItem('email-item:last-view') || "html")
 
     function onValueChange(v: string) {
-        localStorage.setItem('email-item:last-view', v)
+        if (!v.endsWith("-raw")) localStorage.setItem('email-item:last-view', v)
         navigate(`?view=${v}`, { replace: true });
     }
 

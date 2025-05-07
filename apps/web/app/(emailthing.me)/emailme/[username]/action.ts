@@ -1,11 +1,13 @@
 "use server";
 
+import { makeHtml } from "@/(email)/mail/[mailbox]/draft/[draft]/tools";
 import db, { User } from "@/db";
 import { env } from "@/utils/env";
 import { sendEmail } from "@/utils/send-email";
 import { and, eq } from "drizzle-orm";
 import { Mailbox, createMimeMessage } from "mimetext";
 import { headers } from "next/headers";
+import { parse as markedParse } from "marked"
 
 const MAX_REQUESTS_PER_WINDOW = 5;
 const WINDOW_DURATION_MS = 60 * 1000;
@@ -81,15 +83,57 @@ export async function emailMeForm(
         name: `${name || email || "Someone"} (emailthing.me)`,
     });
     mail.setRecipient(user.publicEmail || user.email);
-    mail.setSubject(subject ? `${subject} - EmailThing.me` : "New message from EmailThing.me");
+    mail.setSubject(subject ? `${subject}` : "New message from your contact form");
     mail.addMessage({
         contentType: "text/plain",
         data: `${message}
 
 ---
 
-Sent from "${name || "*name not provided*"}" (${email || "*email not provided*"}) using your [EmailThing.me](https://emailthing.me/@${username}) contact form.
+Sent from "${name || "*unknown*"}"${email ? ` (${email})` : ""} using your [EmailThing.me](https://emailthing.me/@${username}) contact form.
 `,
+    });
+    mail.addMessage({
+        contentType: "text/html",
+        data: makeHtml(
+            /* html */`${markedParse(message, { breaks: true, async: false })}
+
+            
+<p class="footer">
+<hr class="hidden">
+${name ? `Sent from "${name}"` : "Sent from <em>unknown</em>"} ${email ? `(<a href="mailto:${email}">${email}</a>)` : ""} using your <a href="https://emailthing.me/@${username}">EmailThing.me</a> contact form.
+</p>
+
+<style>
+${/* css */`
+   .footer {
+      font-size: 14px;
+      color: #666;
+   }
+   .footer a {
+      color: #666;
+      font-weight: 600;
+   }
+   .footer a:hover {
+      color: #333;
+   }
+
+   @media (prefers-color-scheme: dark) {
+      .footer a {
+         color: #666;
+      }
+      .footer a:hover {
+         color: #888;
+      }
+   }
+
+   .hidden {
+      display: none;
+   }
+   `.replace(/\s+/g, " ").trim()}
+</style>
+`)
+
     });
     if (email) mail.setHeader("Reply-To", new Mailbox({ addr: email, name: name ?? undefined }));
 
