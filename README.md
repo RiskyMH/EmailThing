@@ -10,58 +10,67 @@
 
 ## Getting Started
 
-This repository contains the code for front-end app that displays and sends emails.
+There are 3 apps in this repository. It originally started with the web app, but I have since added a PWA and API to improve the user experience and replace the web app.
+<!-- table for the 3 apps (web, pwa, api) - web being default -->
+<table>
+  <tr>
+    <td align="center" width="33%" valign="top">
+      <!-- <br> -->
+      <h3>
+      <img src="https://svgl.app/library/nextjs_icon_dark.svg" alt="Next.js Logo" width="50">
+      <br>
+      <a href="./apps/web#readme"><b>Web</b></a> <em>(original)</em>
+      </h3>
+      <br>
+      The original web app that was made with Next.js. 
+      <br><br>
+      <p>This is right now whats used in production, however the others are being focused on and this soon will just be here as deprecated and historic value.</p>
+    </td>
+    <td align="center" width="33%" valign="top">
+      <!-- <br> -->
+      <h3>
+      <img src="https://react.dev/images/brand/logo_dark.svg" alt="React.js Logo" width="50">
+      <br>
+      <a href="./apps/pwa#readme"><b>PWA</b></a> <em>(in progress)</em>
+      </h3>
+      <br>
+      The PWA app that was made with React & Bun bundler. This is a complete rewrite of the web app.
+      <br><br>
+      <a href="https://pwa.emailthing.app">Try it out.</a>
+    </td>
+    <td align="center" width="33%" valign="top">
+      <!-- <br> -->
+      <h3>
+      <img src="https://bun.sh/logo.svg" alt="Next.js Logo" width="50">
+      <br>
+      <a href="./apps/api#readme"><b>API</b></a> <em>(not started)</em>
+      </h3>
+      <br>
+      The API that was made with Bun's <code>Bun.serve</code>. This is a complete rewrite of the web app (api section).
+    </td>
+  </tr>
+</table>
 
-### Installing the dependencies
+## Selfhost or contributing
 
-```sh
-bun install
-```
-
-> **Note**: This project utilizes [Bun](https://bun.sh) as its package manager.
-
-### Configuring the env vars
-
-If you are developing locally you need to create an `.env` file. Refer to the table below for all the environment variables in the project.
-
-
-| Name                                   | Description                                                                              | Required? |
-| -------------------------------------- | ---------------------------------------------------------------------------------------- | --------- |
-| `DATABASE_URL`                         | The connection string/path to connect to the Sqlite DB (can be just `file:./db.sqlite)   | ✔️        |
-| `DATABASE_TOKEN`                       | The token for DB (if using Turso)                                                        | ❌        |
-| `NEXT_PUBLIC_APP_URL`                  | The URL where the app is hosted                                                          | ❌        |
-| `NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY` | The public key for sending notifications                                                 | ✔️        |
-| `WEB_NOTIFICATIONS_PRIVATE_KEY`        | The private key for sending notifications                                                | ✔️        |
-| `EMAIL_AUTH_TOKEN`                     | The secret key for sending through cloudflare worker (more on this below)                | ✔️        |
-| `EMAIL_DKIM_PRIVATE_KEY`               | The DKIM private key                                                                     | ❌        |
-| `S3_KEY_ID`                            | The Access Key ID for S3                                                                 | ✔️        |
-| `S3_SECRET_ACCESS_KEY`                 | The Secret Access Key for S3                                                             | ✔️        |
-| `S3_URL`                               | The Client URL for S3                                                                    | ✔️        |
-
-### Running the development environment
-
-To launch the Next.js website and deploy the database schema, utilize the following commands:
-
-```sh
-bun db:push
-bun dev --turbo
-```
+Please refer the individual app README files for more information on how to selfhost or contribute to the project.
+* [`apps/web`](./apps/web/README.md)
+* [`apps/pwa`](./apps/pwa/README.md)
+* [`apps/api`](./apps/api/README.md)
 
 ## How it works
 
-EmailThing primarily handles the front-end aspect of the email management application. For sending and receiving emails, it makes use of [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/email-workers/) to incoming emails, and [MailChannels](https://blog.cloudflare.com/sending-email-from-workers-with-mailchannels) to outgoing emails (currently experimenting with custom sending though).
+<em>(what is planned for the new PWA and API)</em>
 
-To do this locally, refer to [./cloudflare-workers/README.md](./cloudflare-workers/README.md) for more information.
+**React SPA:** A simple local first React app that is hosted on Cloudflare Pages and can manage your emails. This will send api calls to the API to change the database.
+
+**API:** A Bun based API that is hosted on VPS. Will handle all the email sending and receiving as well as the syncing apis.
+
 
 ### Why did you make this?
 
 I made this because I wanted to have a way to deal with my emails from a custom domain. The options from Gmail were too expensive, and I couldn't find a good alternative, so I made my own. I tried to make it in a way that gives you the most control over your emails (ie owning the worker receiving emails).
 
-### How to set up the database and app?
-
-There was a lot of hard-coding that I have done in this. However, after setting up the database, you can run the [`create-admin.ts`](./scripts/create-admin.ts) script to make an admin user. This will allow you to create other users (through `/api/invite`) and manage the app. 
-
-Currently, there isn't a way to add default domains, so you will also need to manual add those using the `default_domain` table. I also have hard coded the url to send emails through, so you will need to change that in the appropriate files.
 
 ## Credits
 
@@ -72,7 +81,6 @@ Many individuals and organizations have contributed to the creation of this proj
 * [Turso](https://turso.tech) for providing a good pricing for database.
 * [Alfonsusac](https://github.com/alfonsusac) for designing the logo and sticker.
 * [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.
-* And one of the most important, [Dawid Jankowski](https://dribbble.com/shots/15142673-E-mail-Client-Inbox-Dark-Mode) for providing the design to base the app on.
 * *and many more that I can't possibly mention...*
 
 ## Need Help?
