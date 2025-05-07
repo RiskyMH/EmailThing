@@ -99,30 +99,30 @@ Sent from "${name || "*unknown*"}"${email ? ` (${email})` : ""} using your [Emai
             /* html */`${markedParse(message, { breaks: true, async: false })}
 
             
-<p class="footer">
+<footer>
 <hr class="hidden">
-${name ? `Sent from "${name}"` : "Sent from <em>unknown</em>"} ${email ? `(<a href="mailto:${email}">${email}</a>)` : ""} using your <a href="https://emailthing.me/@${username}">EmailThing.me</a> contact form.
-</p>
+<p>${name ? `Sent from "${name}"` : "Sent from <em>unknown</em>"} ${email ? `(<a href="mailto:${email}">${email}</a>)` : ""} using your <a href="https://emailthing.me/@${username}">EmailThing.me</a> contact form.</p>
+</footer>
 
 <style>
 ${/* css */`
-   .footer {
+   footer {
       font-size: 14px;
       color: #666;
    }
-   .footer a {
+   footer a {
       color: #666;
       font-weight: 600;
    }
-   .footer a:hover {
+   footer a:hover {
       color: #333;
    }
 
    @media (prefers-color-scheme: dark) {
-      .footer a {
+      footer a {
          color: #666;
       }
-      .footer a:hover {
+      footer a:hover {
          color: #888;
       }
    }

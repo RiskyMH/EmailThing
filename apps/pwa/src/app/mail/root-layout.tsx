@@ -53,6 +53,6 @@ function RedirectTilde() {
     const mailboxId = params.mailboxId
     if (mailboxId === "~") {
         const defaultMailboxId = document.cookie.split("; ").find(row => row.startsWith("mailboxId="))?.split("=")[1] || "demo";
-        return <Navigate to={url.pathname.replace("~", defaultMailboxId)} replace />
+        return <Navigate to={url.pathname.replace("~", defaultMailboxId) + url.search} replace />
     }
 }

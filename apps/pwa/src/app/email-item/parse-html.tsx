@@ -24,7 +24,10 @@ if (typeof window !== "undefined") {
 }
 
 export function parseHTML(content: string, moreTrusted = false) {
-    const _content = content
+    const _content = content.replaceAll(
+        /<!--\[EMAILTHING\]>([\s\S]*?)<-->/gm,
+        "$1"
+    )
 
     const clean = DOMPurify?.sanitize(_content, {
         WHOLE_DOCUMENT: moreTrusted,
@@ -72,6 +75,7 @@ export function parseHTML(content: string, moreTrusted = false) {
             "ul",
             "center",
             "em",
+            "footer",
             ...(moreTrusted ? ["style", "body", "head", "meta"] : []),
         ],
         ALLOWED_ATTR: [

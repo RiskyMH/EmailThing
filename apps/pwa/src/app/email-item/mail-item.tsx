@@ -320,7 +320,7 @@ function EmailContent({
         return <p className="overflow-auto whitespace-pre-wrap break-words leading-normal p-3 pt-0">{body}</p>;
     }
 
-    else if (view === "markdown") {
+    else if (view === "markdown" || (view === "html" && !html)) {
         return (
             <div
                 className="prose dark:prose-invert max-w-full overflow-auto break-words p-3 pt-0"
@@ -355,11 +355,7 @@ function EmailContent({
     return null;
 }
 
-export function genericHtml(_html: string, sender?: string | null) {
-    let html = _html.replaceAll(
-        /<!--\[EMAILTHING\]>([\s\S]*?)<-->/gm,
-        "$1"
-    )
+export function genericHtml(html: string, sender?: string | null) {
     if (html.startsWith("<!DOCTYPE html")) return html;
 
     const added = new Set<string>()
@@ -411,9 +407,10 @@ function ViewSelect({
         if (!v.endsWith("-raw")) localStorage.setItem('email-item:last-view', v)
         navigate(`?view=${v}`, { replace: true });
     }
+    const shownValue = (!htmlValid && view.startsWith("html")) ? "markdown" : (view === "html-raw" ? "html" : view)
 
     return (
-        <DropdownMenuRadioGroup value={view === "html-raw" ? "html" : view} onValueChange={onValueChange}>
+        <DropdownMenuRadioGroup value={shownValue} onValueChange={onValueChange}>
             <DropdownMenuRadioItem value="text">Text</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="markdown" defaultChecked>Markdown</DropdownMenuRadioItem>
             <DropdownMenuSub>
