@@ -23,7 +23,10 @@ const server = serve({
     // public files
     "/service.js": new Response(service, { headers: { "Content-Type": "text/javascript" } }),
   },
-  development: true,
+  development: {
+    console: true,
+    hmr: true,
+  },
   fetch: () => new Response("404", { status: 404 })
 });
 

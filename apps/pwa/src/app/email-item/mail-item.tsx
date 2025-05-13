@@ -293,7 +293,7 @@ function EmailContent({
     const view = (
         searchParams.get("view")
         || (lastView?.startsWith("html") && !html ? "html" : lastView)
-        || "markdown"
+        || "html"
     ) as "text" | "markdown" | "html" | "html-raw"
 
     const ref = useRef<HTMLIFrameElement>(null)
