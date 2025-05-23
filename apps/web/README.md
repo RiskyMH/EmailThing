@@ -26,18 +26,17 @@ bun install
 If you are developing locally you need to create an `.env` file. Refer to the table below for all the environment variables in the project.
 
 
-| Name                                   | Description                                                                              | Required? |
-| -------------------------------------- | ---------------------------------------------------------------------------------------- | --------- |
-| `DATABASE_URL`                         | The connection string/path to connect to the Sqlite DB (can be just `file:./db.sqlite`)   | ✔️        |
-| `DATABASE_TOKEN`                       | The token for DB (if using Turso)                                                        | ❌        |
-| `NEXT_PUBLIC_APP_URL`                  | The URL where the app is hosted                                                          | ❌        |
-| `NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY` | The public key for sending notifications                                                 | ✔️        |
-| `WEB_NOTIFICATIONS_PRIVATE_KEY`        | The private key for sending notifications                                                | ✔️        |
-| `EMAIL_AUTH_TOKEN`                     | The secret key for sending through cloudflare worker (more on this below)                | ✔️        |
-| `EMAIL_DKIM_PRIVATE_KEY`               | The DKIM private key                                                                     | ❌        |
-| `S3_KEY_ID`                            | The Access Key ID for S3                                                                 | ✔️        |
-| `S3_SECRET_ACCESS_KEY`                 | The Secret Access Key for S3                                                             | ✔️        |
-| `S3_URL`                               | The Client URL for S3                                                                    | ✔️        |
+| Name                                   | Description                                                               | Required? |
+| -------------------------------------- | ------------------------------------------------------------------------- | --------- |
+| `DATABASE_URL`                         | The connection string for the postgres DB                                 | ✔️        |
+| `NEXT_PUBLIC_APP_URL`                  | The URL where the app is hosted                                           | ❌        |
+| `NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY` | The public key for sending notifications                                  | ✔️        |
+| `WEB_NOTIFICATIONS_PRIVATE_KEY`        | The private key for sending notifications                                 | ✔️        |
+| `EMAIL_AUTH_TOKEN`                     | The secret key for sending through cloudflare worker (more on this below) | ✔️        |
+| `EMAIL_DKIM_PRIVATE_KEY`               | The DKIM private key                                                      | ❌        |
+| `S3_KEY_ID`                            | The Access Key ID for S3                                                  | ✔️        |
+| `S3_SECRET_ACCESS_KEY`                 | The Secret Access Key for S3                                              | ✔️        |
+| `S3_URL`                               | The Client URL for S3                                                     | ✔️        |
 
 ### Running the development environment
 
@@ -70,7 +69,7 @@ Many individuals and organizations have contributed to the creation of this proj
 
 * [Vercel](https://vercel.com) for hosting the application and for developing Next.js.
 * [Cloudflare](https://cloudflare.com) for providing workers and email routing.
-* [Turso](https://turso.tech) for providing a good pricing for database.
+* [Xata](https://xata.io) for providing a good pricing for database.
 * [Alfonsusac](https://github.com/alfonsusac) for designing the logo and sticker.
 * [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.
 * And one of the most important, [Dawid Jankowski](https://dribbble.com/shots/15142673-E-mail-Client-Inbox-Dark-Mode) for providing the design to base the app on.

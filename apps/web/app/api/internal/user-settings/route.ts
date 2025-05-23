@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     if ("error" in result) return Response.json({ message: result }, { status: 400, headers });
 
-    const sync = await db.batchUpdate([
+    const sync = await db.batchFetch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
             columns: {
