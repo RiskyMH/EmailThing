@@ -29,7 +29,7 @@ export default async function signIn(
 
     // find user
     const user = await db.query.User.findFirst({
-        where: eq(User.username, parsedData.data.username),
+        where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
         columns: {
             id: true,
             password: true,
