@@ -47,37 +47,37 @@ export const UserRelations = relations(User, ({ many, one }) => ({
 }));
 
 // user session
-export const UserSession = sqliteTable("user_sessions", {
-    id: text("id", { length: 24 })
-        .unique()
-        .$defaultFn(() => createId())
-        .primaryKey(),
-    userId: text("user_id", { length: 24 })
-        .notNull()
-        .references(() => User.id, { onDelete: "cascade" }),
-    createdAt: int("created_at", { mode: "timestamp" })
-        .notNull()
-        .$defaultFn(() => new Date()),
-    lastUsed: text("last_used", { mode: "json" })
-        .$type<{ date: Date, ip: string, ua: string, location: string }>()
-        .default({ date: new Date(), ip: "", ua: "", location: "" }),
-    token: text("token", { length: 24 })
-        .notNull()
-        .unique()
-        .$defaultFn(() => createId()),
-    tokenExpiresAt: int("token_expires_at", { mode: "timestamp" })
-        .notNull(),
-    refreshToken: text("refresh_token", { length: 24 })
-        .notNull()
-        .unique(),
-    refreshTokenExpiresAt: int("refresh_token_expires_at", { mode: "timestamp" })
-        .notNull(),
-    sudoExpiresAt: int("sudo_expires_at", { mode: "timestamp" }),
-    method: text("method", { length: 24, enum: ["password", "passkey"] }).notNull(),
-}, (table) => ({
-    tokenIdx: index("token_idx").on(table.token, table.tokenExpiresAt),
-    refreshTokenIdx: index("refresh_token_idx").on(table.refreshToken, table.refreshTokenExpiresAt),
-}));
+export const UserSession = sqliteTable(
+    "user_sessions",
+    {
+        id: text("id", { length: 24 })
+            .unique()
+            .$defaultFn(() => createId())
+            .primaryKey(),
+        userId: text("user_id", { length: 24 })
+            .notNull()
+            .references(() => User.id, { onDelete: "cascade" }),
+        createdAt: int("created_at", { mode: "timestamp" })
+            .notNull()
+            .$defaultFn(() => new Date()),
+        lastUsed: text("last_used", { mode: "json" })
+            .$type<{ date: Date; ip: string; ua: string; location: string }>()
+            .default({ date: new Date(), ip: "", ua: "", location: "" }),
+        token: text("token", { length: 24 })
+            .notNull()
+            .unique()
+            .$defaultFn(() => createId()),
+        tokenExpiresAt: int("token_expires_at", { mode: "timestamp" }).notNull(),
+        refreshToken: text("refresh_token", { length: 24 }).notNull().unique(),
+        refreshTokenExpiresAt: int("refresh_token_expires_at", { mode: "timestamp" }).notNull(),
+        sudoExpiresAt: int("sudo_expires_at", { mode: "timestamp" }),
+        method: text("method", { length: 24, enum: ["password", "passkey"] }).notNull(),
+    },
+    (table) => ({
+        tokenIdx: index("token_idx").on(table.token, table.tokenExpiresAt),
+        refreshTokenIdx: index("refresh_token_idx").on(table.refreshToken, table.refreshTokenExpiresAt),
+    }),
+);
 
 export const UserSessionRelations = relations(UserSession, ({ one }) => ({
     user: one(User, {
@@ -87,30 +87,32 @@ export const UserSessionRelations = relations(UserSession, ({ one }) => ({
 }));
 
 // passkeys
-export const PasskeyCredentials = sqliteTable("passkey_credentials", {
-    id: text("id", { length: 24 })
-        .unique()
-        .$defaultFn(() => createId())
-        .primaryKey(),
-    userId: text("user_id", { length: 24 })
-        .notNull()
-        .references(() => User.id, { onDelete: "cascade" }),
-    credentialId: text("credential_id").notNull().notNull(),
-    createdAt: int("created_at", { mode: "timestamp" })
-        .notNull()
-        .$defaultFn(() => new Date()),
-    updatedAt: int("updated_at", { mode: "timestamp" })
-        // .notNull()
-        .$defaultFn(() => new Date())
-        .$onUpdateFn(() => new Date()),
-    name: text("name"),
-    publicKey: text("public_key").notNull(),
-    isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
-},
-(table) => ({
-    userCreatedIdx: index("passkey_user_created_idx").on(table.userId, table.createdAt),
-    userUpdatedIdx: index("passkey_user_updated_idx").on(table.userId, table.updatedAt),
-}),
+export const PasskeyCredentials = sqliteTable(
+    "passkey_credentials",
+    {
+        id: text("id", { length: 24 })
+            .unique()
+            .$defaultFn(() => createId())
+            .primaryKey(),
+        userId: text("user_id", { length: 24 })
+            .notNull()
+            .references(() => User.id, { onDelete: "cascade" }),
+        credentialId: text("credential_id").notNull().notNull(),
+        createdAt: int("created_at", { mode: "timestamp" })
+            .notNull()
+            .$defaultFn(() => new Date()),
+        updatedAt: int("updated_at", { mode: "timestamp" })
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
+        name: text("name"),
+        publicKey: text("public_key").notNull(),
+        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+    },
+    (table) => ({
+        userCreatedIdx: index("passkey_user_created_idx").on(table.userId, table.createdAt),
+        userUpdatedIdx: index("passkey_user_updated_idx").on(table.userId, table.updatedAt),
+    }),
 );
 
 export const PasskeyCredentialsSchemaRelations = relations(PasskeyCredentials, ({ many, one }) => ({

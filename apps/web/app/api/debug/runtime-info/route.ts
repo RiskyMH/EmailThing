@@ -4,7 +4,7 @@
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-    const runtime = process.versions.bun ? 'bun' : process.versions.node ? 'node' : 'unknown';
+    const runtime = process.versions.bun ? "bun" : process.versions.node ? "node" : "unknown";
     return Response.json({
         runtime,
         runtimeVersion: process.versions[runtime],

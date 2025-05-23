@@ -1,36 +1,35 @@
 import { createRoot } from "react-dom/client";
-import {
-  createBrowserRouter,
-  RouterProvider,
-  type RouteObject,
-} from "react-router-dom";
-// import "./index.css";
-import HomeRoutes from "./home/_routes"
-import RootLayout from "./root-layout";
+import { type RouteObject, RouterProvider, createBrowserRouter } from "react-router-dom";
 import ErrorPage from "./error";
+// import "./index.css";
+import HomeRoutes from "./home/_routes";
+import RootLayout from "./root-layout";
 
-const routes = ([
-  { path: "*", element: <ErrorPage notFound /> },
-  ...HomeRoutes,
-] satisfies RouteObject[])
-  .map(e => ({ errorElement: <ErrorPage />, ...e, }))
+const routes = (
+  [{ path: "*", element: <ErrorPage notFound /> }, ...HomeRoutes] satisfies RouteObject[]
+).map((e) => ({
+  errorElement: <ErrorPage />,
+  ...e,
+}));
 
 const router = createBrowserRouter(routes, {
   patchRoutesOnNavigation: async ({ matches, patch, path, signal }) => {
     if (path.startsWith("/docs")) {
-      const { routes } = await import("./docs/_routes")
+      const { routes } = await import("./docs/_routes");
       if (routes) {
-        patch(null, routes)
+        patch(null, routes);
+      }
+    } else if (
+      path.startsWith("/mail") ||
+      path.startsWith("/settings") ||
+      path.startsWith("/admin")
+    ) {
+      const { routes } = await import("./app/_routes");
+      if (routes) {
+        patch(null, routes);
       }
     }
-
-    else if (path.startsWith("/mail") || path.startsWith("/settings") || path.startsWith("/admin")) {
-      const { routes } = await import("./app/_routes")
-      if (routes) {
-        patch(null, routes)
-      }
-    }
-  }
+  },
 });
 
 const elem = document.getElementById("root")!;

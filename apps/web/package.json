@@ -96,8 +96,8 @@
     "@types/dompurify": "^3.2.0",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^22.15.17",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.4",
     "@types/turndown": "^5.0.5",
     "@types/ua-parser-js": "^0.7.39",
     "autoprefixer": "^10.4.21",
@@ -117,8 +117,6 @@
     "@peculiar/asn1-rsa": "^2.3.8",
     "@peculiar/asn1-schema": "^2.3.8",
     "@peculiar/asn1-x509": "^2.3.8",
-    "@peculiar/asn1-x509-logotype": "^2.3.8",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+    "@peculiar/asn1-x509-logotype": "^2.3.8"
   }
 }

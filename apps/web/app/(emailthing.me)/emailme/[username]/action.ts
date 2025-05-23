@@ -7,7 +7,7 @@ import { sendEmail } from "@/utils/send-email";
 import { and, eq } from "drizzle-orm";
 import { Mailbox, createMimeMessage } from "mimetext";
 import { headers } from "next/headers";
-import { parse as markedParse } from "marked"
+import { parse as markedParse } from "marked";
 
 const MAX_REQUESTS_PER_WINDOW = 5;
 const WINDOW_DURATION_MS = 60 * 1000;
@@ -96,7 +96,7 @@ Sent from "${name || "*unknown*"}"${email ? ` (${email})` : ""} using your [Emai
     mail.addMessage({
         contentType: "text/html",
         data: makeHtml(
-            /* html */`${markedParse(message, { breaks: true, async: false })}
+            /* html */ `${markedParse(message, { breaks: true, async: false })}
 
             
 <footer>
@@ -105,7 +105,8 @@ Sent from "${name || "*unknown*"}"${email ? ` (${email})` : ""} using your [Emai
 </footer>
 
 <style>
-${/* css */`
+${
+    /* css */ `
    footer {
       font-size: 14px;
       color: #666;
@@ -130,10 +131,13 @@ ${/* css */`
    .hidden {
       display: none;
    }
-   `.replace(/\s+/g, " ").trim()}
+   `
+        .replace(/\s+/g, " ")
+        .trim()
+}
 </style>
-`)
-
+`,
+        ),
     });
     if (email) mail.setHeader("Reply-To", new Mailbox({ addr: email, name: name ?? undefined }));
 

@@ -8,7 +8,6 @@ import { createUserToken } from "@/utils/jwt";
 import { isValidOrigin } from "../tools";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
 
-
 const errorMsg = "Invalid username or password";
 
 // Rate limiting
@@ -19,7 +18,7 @@ const WINDOW_MS = 1.5 * 60 * 1000; // 1.5 minutes
 const LOCKOUT_MS = 1 * 60 * 1000; // 1 minute
 
 export async function POST(request: Request) {
-    const origin = request.headers.get("origin")
+    const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
@@ -32,9 +31,9 @@ export async function POST(request: Request) {
                 "Access-Control-Allow-Methods": "POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
-            }
+            },
         });
-    }
+    };
 
     try {
         // Get IP for rate limiting
@@ -43,15 +42,12 @@ export async function POST(request: Request) {
 
         // Check if IP is in lockout
         const lastAttempt = timestamps.get(ip) || 0;
-        if (lastAttempt && (now - lastAttempt) < LOCKOUT_MS && (attempts.get(ip) || 0) >= MAX_ATTEMPTS) {
-            return ResponseJson(
-                { error: "Too many login attempts. Please try again later." },
-                { status: 429 }
-            );
+        if (lastAttempt && now - lastAttempt < LOCKOUT_MS && (attempts.get(ip) || 0) >= MAX_ATTEMPTS) {
+            return ResponseJson({ error: "Too many login attempts. Please try again later." }, { status: 429 });
         }
 
         // Reset attempts if window expired
-        if (lastAttempt && (now - lastAttempt) > WINDOW_MS) {
+        if (lastAttempt && now - lastAttempt > WINDOW_MS) {
             attempts.delete(ip);
             timestamps.delete(ip);
         }
@@ -64,10 +60,7 @@ export async function POST(request: Request) {
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson(
-                { error: errorMsg },
-                { status: 401 }
-            );
+            return ResponseJson({ error: errorMsg }, { status: 401 });
         }
 
         const { username, password } = parsedData.data;
@@ -77,10 +70,7 @@ export async function POST(request: Request) {
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson(
-                { error: errorMsg },
-                { status: 400 }
-            );
+            return ResponseJson({ error: errorMsg }, { status: 400 });
         }
 
         // Find user
@@ -98,10 +88,7 @@ export async function POST(request: Request) {
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson(
-                { error: errorMsg },
-                { status: 401 }
-            );
+            return ResponseJson({ error: errorMsg }, { status: 401 });
         }
 
         // Verify password
@@ -111,10 +98,7 @@ export async function POST(request: Request) {
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson(
-                { error: errorMsg },
-                { status: 401 }
-            );
+            return ResponseJson({ error: errorMsg }, { status: 401 });
         }
 
         if (typeof valid === "string") {
@@ -154,21 +138,16 @@ export async function POST(request: Request) {
             tokenExpiresAt,
             refreshTokenExpiresAt,
             mailboxes: mailboxes.map(({ mailboxId }) => mailboxId),
-            userId: user.id
+            userId: user.id,
         });
-
     } catch (error) {
         console.error("Login error:", error);
-        return ResponseJson(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
+        return ResponseJson({ error: "Internal server error" }, { status: 500 });
     }
 }
 
-
 export function OPTIONS(request: Request) {
-    const origin = request.headers.get("origin")
+    const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
@@ -178,6 +157,6 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
-        }
+        },
     });
 }

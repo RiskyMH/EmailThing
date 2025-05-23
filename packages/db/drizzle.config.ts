@@ -4,10 +4,10 @@ export default {
     schema: "./packages/db/schema.ts",
     out: "./drizzle",
     // driver: 'turso',
-    dialect: 'turso',
+    dialect: "turso",
     dbCredentials: {
         url: process.env.DATABASE_URL!,
-        authToken: process.env.DATABASE_TOKEN!
+        authToken: process.env.DATABASE_TOKEN!,
     },
     verbose: true,
     // } satisfies Config;

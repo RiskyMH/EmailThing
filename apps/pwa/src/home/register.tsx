@@ -1,10 +1,9 @@
+import Link from "@/components/link";
 import Logo from "@/components/logo";
 // import Logo from "@/icons/Logo"
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { ArrowRightIcon, ChevronLeft } from "lucide-react";
-import Link from "@/components/link";
-
 
 export default function LoginPage() {
   return (
@@ -12,14 +11,23 @@ export default function LoginPage() {
       <div className="flex w-full items-center justify-between">
         <Link
           href="/home"
-          className={cn(buttonVariants({ variant: "ghost" }), "absolute top-4 left-4 md:top-8 md:left-8")}
+          className={cn(
+            buttonVariants({ variant: "ghost" }),
+            "absolute top-4 left-4 md:top-8 md:left-8",
+          )}
         >
           <ChevronLeft className="me-2 size-4" />
           Home
         </Link>
-        <Link href="/mail/demo" className={cn(buttonVariants({ variant: "ghost" }), "absolute top-4 right-4 md:top-8 md:right-8 gap-2 group ")}>
+        <Link
+          href="/mail/demo"
+          className={cn(
+            buttonVariants({ variant: "ghost" }),
+            "group absolute top-4 right-4 gap-2 md:top-8 md:right-8 ",
+          )}
+        >
           Try Demo
-          <ArrowRightIcon className="size-4 text-muted-foreground group-hover:-me-0.5 group-hover:ms-0.5 transition-all" />
+          <ArrowRightIcon className="group-hover:-me-0.5 size-4 text-muted-foreground transition-all group-hover:ms-0.5" />
         </Link>
       </div>
 
@@ -67,20 +75,20 @@ export default function LoginPage() {
   );
 }
 
-"use client";
+("use client");
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // import { cn } from "@/utils/tw";
-import { ExternalLinkIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 // import { useRouter } from "react-router-dom";
 import { type FormEvent, useTransition } from "react";
 import { toast } from "sonner";
 // import signUp from "./action";
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isPending, startTransition] = useTransition();
@@ -89,7 +97,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     startTransition(async () => {
-      return void toast.info("Not implemented", { description: "Login works. Or you can use the normal https://emailthing.app/register" });
+      return void toast.info("Not implemented", {
+        description: "Login works. Or you can use the normal https://emailthing.app/register",
+      });
       // const formData = new FormData(event.target as HTMLFormElement);
       // const signUpResult = await signUp(formData)//.catch(catchRedirectError);
 

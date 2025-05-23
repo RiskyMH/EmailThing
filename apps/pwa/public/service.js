@@ -1,158 +1,150 @@
 // @ts-nocheck
 
 // Cache name for offline content
-const CACHE_NAME = 'emailthing-offline-v1';
-const OFFLINE_URL = '/offline';
+const CACHE_NAME = "emailthing-offline-v1";
+const OFFLINE_URL = "/offline";
 
 // Assets to cache
 const STATIC_ASSETS = [
-  '/offline',
+  "/offline",
   // '/index.css',
-  '/icon.svg',
-  '/manifest.webmanifest',
-  '/_bun/static/fonts/inter-latin-400-normal.woff2',
-  '/_bun/static/fonts/inter-latin-400-normal.woff',
+  "/icon.svg",
+  "/manifest.webmanifest",
+  "/_bun/static/fonts/inter-latin-400-normal.woff2",
+  "/_bun/static/fonts/inter-latin-400-normal.woff",
 ];
 
 // cache for up to month (so mm/yy)
 const THIRD_PARTY_CACHE_NAME = `3rd-party-cache-${new Date().getMonth()}${new Date().getFullYear()}`;
-const FONTS_CACHE_NAME = `fonts-v1`;
+const FONTS_CACHE_NAME = "fonts-v1";
 
 // dont try to be smart for dev
-if (CACHE_NAME !== 'emailthing-offline-v1') {
-
+if (CACHE_NAME !== "emailthing-offline-v1") {
   // Install event - cache offline page and static assets
-  self.addEventListener('install', event => {
+  self.addEventListener("install", (event) => {
     self.skipWaiting();
 
     event.waitUntil(
       Promise.all([
-        caches.open(CACHE_NAME)
-          .then(cache =>
-            cache.addAll(STATIC_ASSETS.filter(e =>
-              !e.endsWith(".map") &&
-              !e.endsWith(".woff") &&
-              !e.endsWith(".woff2") &&
-              !e.endsWith("/") &&
-              !e.startsWith("../")
-            ))
-          ).catch(e => console.error(e)),
+        caches
+          .open(CACHE_NAME)
+          .then((cache) =>
+            cache.addAll(
+              STATIC_ASSETS.filter(
+                (e) =>
+                  !(
+                    e.endsWith(".map") ||
+                    e.endsWith(".woff") ||
+                    e.endsWith(".woff2") ||
+                    e.endsWith("/") ||
+                    e.startsWith("../")
+                  ),
+              ),
+            ),
+          )
+          .catch((e) => console.error(e)),
 
-        caches.open(FONTS_CACHE_NAME)
-          .then(cache =>
+        caches
+          .open(FONTS_CACHE_NAME)
+          .then((cache) =>
             cache.addAll([
-              '/_bun/static/fonts/inter-latin-wght-normal.woff2',
-              '/CalSans-SemiBold.woff2'
-            ])
-          ).catch(e => console.error(e)),
-      ])
+              "/_bun/static/fonts/inter-latin-wght-normal.woff2",
+              "/CalSans-SemiBold.woff2",
+            ]),
+          )
+          .catch((e) => console.error(e)),
+      ]),
     );
   });
 
-  self.addEventListener('activate', event => {
+  self.addEventListener("activate", (event) => {
     self.clients.claim();
 
     event.waitUntil(
-      caches.keys().then(cacheNames => {
+      caches.keys().then((cacheNames) => {
         return Promise.all(
-          cacheNames.filter(e => ![CACHE_NAME, THIRD_PARTY_CACHE_NAME, FONTS_CACHE_NAME].includes(e))
-            .map(cacheName => caches.delete(cacheName))
+          cacheNames
+            .filter((e) => ![CACHE_NAME, THIRD_PARTY_CACHE_NAME, FONTS_CACHE_NAME].includes(e))
+            .map((cacheName) => caches.delete(cacheName)),
         );
-      })
+      }),
     );
   });
 
   // Fetch event - handle offline fallback
-  self.addEventListener('fetch', (/** @type {FetchEvent} */ event) => {
+  self.addEventListener("fetch", (/** @type {FetchEvent} */ event) => {
     // if (navigator.onLine) return
 
-    if (event.request.mode === 'navigate') {
+    if (event.request.mode === "navigate") {
       if (navigator.onLine) {
-        event.respondWith((async () => {
-          try {
-            if (event.request.url === "https://pwa.emailthing.app/") {
-              if (await this?.cookieStore?.get("mailboxId")) {
-                return Response.redirect("https://pwa.emailthing.app/mail")
+        event.respondWith(
+          (async () => {
+            try {
+              if (event.request.url === "https://pwa.emailthing.app/") {
+                if (await this?.cookieStore?.get("mailboxId")) {
+                  return Response.redirect("https://pwa.emailthing.app/mail");
+                }
               }
+              event.request.signal = AbortSignal.timeout(3_000);
+              return await fetch(event.request);
+            } catch (error) {
+              console.error(error);
             }
-            event.request.signal = AbortSignal.timeout(3_000)
-            return await fetch(event.request)
-          } catch (error) {
-            console.error(error)
-          }
-          return caches.match(OFFLINE_URL).then(e => {
-            event.request.signal = null
-            return e || fetch(event.request)
-          })
-        })())
+            return caches.match(OFFLINE_URL).then((e) => {
+              event.request.signal = null;
+              return e || fetch(event.request);
+            });
+          })(),
+        );
       } else {
         event.respondWith(caches.match(OFFLINE_URL));
       }
     } else {
       // dont cache non-GET requests
-      if (event.request.method !== 'GET') return;
+      if (event.request.method !== "GET") return;
 
       // For non-navigation requests, try network first then cache, except for _bun assets
       const u = new URL(event.request.url);
-      if (u.pathname.includes('/_bun/') || STATIC_ASSETS.some(e => u.pathname === e && self.location.origin === u.origin)) {
-        return event.respondWith((async () => {
-          const match = (await caches.match(event.request));
-          if (match) return match;
-
-          try {
-            const response = await fetch(event.request);
-            if (response.ok) {
-              if (event.request.url.includes('/_bun/static/fonts/') || event.request.url.endsWith('.woff2')) {
-                const cache = await caches.open(FONTS_CACHE_NAME);
-                await cache.put(event.request, response.clone());
-              } else {
-                const cache = await caches.open(CACHE_NAME);
-                await cache.put(event.request, response.clone());
-              }
-            }
-            return response;
-          } catch (error) {
+      if (
+        u.pathname.includes("/_bun/") ||
+        STATIC_ASSETS.some((e) => u.pathname === e && self.location.origin === u.origin)
+      ) {
+        return event.respondWith(
+          (async () => {
             const match = await caches.match(event.request);
             if (match) return match;
-            return fetch(event.request);
-          }
-        })());
-      } else {
-        // a few domains which can be cached (but only for fallback)
-        const domains = [
-          'cloudflare-dns.com',
-          'emailthing.app',
-          'svgl.app',
-          'www.gravatar.com',
-          'riskymh.dev'
-        ];
-        // if (domains.includes(u.hostname) && !u.hostname.includes('api')) {
-        //   if (navigator.onLine) {
-        //     return event.respondWith((async () => {
-        //       try {
-        //         const response = await fetch(event.request);
-        //         if (response.ok) {
-        //           const cache = await caches.open(THIRD_PARTY_CACHE_NAME);
-        //           await cache.put(event.request, response);
-        //         }
-        //         return response.clone();
-        //       } catch (error) {
-        //         try {
-        //           return await fetch(event.request);
-        //         } catch (error) {
-        //           const m = await caches.match(event.request);
-        //           if (m) return m;
-        //           return fetch(event.request);
-        //         }
-        //       }
-        //     })());
-        //   } else {
-        //     return event.respondWith((async () =>
-        //       (await caches.match(event.request) || fetch(event.request))
-        //     )());
-        //   }
-        // }
+
+            try {
+              const response = await fetch(event.request);
+              if (response.ok) {
+                if (
+                  event.request.url.includes("/_bun/static/fonts/") ||
+                  event.request.url.endsWith(".woff2")
+                ) {
+                  const cache = await caches.open(FONTS_CACHE_NAME);
+                  await cache.put(event.request, response.clone());
+                } else {
+                  const cache = await caches.open(CACHE_NAME);
+                  await cache.put(event.request, response.clone());
+                }
+              }
+              return response;
+            } catch (error) {
+              const match = await caches.match(event.request);
+              if (match) return match;
+              return fetch(event.request);
+            }
+          })(),
+        );
       }
+      // a few domains which can be cached (but only for fallback)
+      const domains = [
+        "cloudflare-dns.com",
+        "emailthing.app",
+        "svgl.app",
+        "www.gravatar.com",
+        "riskymh.dev",
+      ];
     }
   });
 }

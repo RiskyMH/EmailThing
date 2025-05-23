@@ -12,7 +12,7 @@ export default async function Home() {
                     <h1 className="block font-heading text-3xl sm:text-5xl md:text-6xl">
                         <span className="inline-block whitespace-nowrap bg-gradient-to-br from-[#FF9797] to-[#6D6AFF] bg-clip-text text-transparent">
                             EmailThing.me
-                        </span> {" "}
+                        </span>{" "}
                         is your own contact page to make emailing easy!
                     </h1>
 

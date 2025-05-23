@@ -9,18 +9,17 @@ export const allowedOrigins = [
     "http://localhost:1234",
     "https://emailthing.pages.dev",
     "https://*.emailthing.pages.dev",
-]
-
+];
 
 export const isValidOrigin = (origin: string) => {
     if (origin.endsWith(".emailthing.pages.dev") || origin.endsWith(".emailthing.app")) {
-        return true
+        return true;
     }
-    return allowedOrigins.includes(origin)
-}
+    return allowedOrigins.includes(origin);
+};
 
 export const getSession = async (request: Request, sudo?: boolean) => {
-    const authHeader = request.headers.get("authorization")
+    const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("session ")) return null;
     const token = authHeader.split(" ")[1];
     if (!token) return null;
@@ -31,7 +30,7 @@ export const getSession = async (request: Request, sudo?: boolean) => {
         where: and(
             eq(UserSession.token, token),
             gte(UserSession.tokenExpiresAt, new Date()),
-            ...(sudo ? [gte(UserSession.sudoExpiresAt, new Date())] : [])
+            ...(sudo ? [gte(UserSession.sudoExpiresAt, new Date())] : []),
         ),
     });
 
@@ -44,14 +43,14 @@ export const getSession = async (request: Request, sudo?: boolean) => {
                     ip: sessionInfo.ip,
                     ua: sessionInfo.ua,
                     location: sessionInfo.location,
-                }
+                },
             })
             .where(eq(UserSession.token, token))
             .execute()
-            .then(() => { })
-            .catch(err => {
+            .then(() => {})
+            .catch((err) => {
                 // Silently handle any errors since this is non-critical
-                console.error('Failed to update session:', err);
+                console.error("Failed to update session:", err);
             });
 
         return sessionToken.userId;
@@ -59,7 +58,6 @@ export const getSession = async (request: Request, sudo?: boolean) => {
 
     return null;
 };
-
 
 export const extractUserInfoHeader = (request: Request) => {
     // get IP, User-Agent, and location (note, using cloudflare proxy)
@@ -74,6 +72,5 @@ export const extractUserInfoHeader = (request: Request) => {
         ip,
         ua,
         location: `${city}, ${region}, ${country}`,
-    }
-
-}
+    };
+};

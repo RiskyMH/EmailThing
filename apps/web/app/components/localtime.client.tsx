@@ -21,11 +21,12 @@ export default function LocalTimeClient({
 
     useEffect(() => setTimeZone(undefined), []);
     time ||= new Date();
-    if (!tooltip) return (
-        <time dateTime={time.toISOString()} className={className} suppressHydrationWarning>
-            {formatDate(time, type, timeZone)}
-        </time>
-    )
+    if (!tooltip)
+        return (
+            <time dateTime={time.toISOString()} className={className} suppressHydrationWarning>
+                {formatDate(time, type, timeZone)}
+            </time>
+        );
     return (
         <TooltipText
             text={time.toLocaleString([], {

@@ -54,11 +54,11 @@ export default async function EmailList({
     const mailboxPlan =
         type === "temp"
             ? await db.query.Mailbox.findFirst({
-                where: eq(Mailbox.id, mailboxId),
-                columns: {
-                    plan: true,
-                },
-            })
+                  where: eq(Mailbox.id, mailboxId),
+                  columns: {
+                      plan: true,
+                  },
+              })
             : undefined;
 
     const nextEmail = emails.length === take + 1 ? emails.pop() : null;
@@ -70,7 +70,7 @@ export default async function EmailList({
         curser?: {
             emailId: string;
             createdAt: Date;
-        }
+        },
     ) {
         "use server";
         const userId = await getCurrentUser();
@@ -80,14 +80,14 @@ export default async function EmailList({
         const emails =
             type !== "drafts"
                 ? await getJustEmailsList(
-                    mailboxId,
-                    {
-                        ..._emailFetchOptions,
-                        selectCategories: false,
-                        take: 25,
-                    },
-                    curser,
-                )
+                      mailboxId,
+                      {
+                          ..._emailFetchOptions,
+                          selectCategories: false,
+                          take: 25,
+                      },
+                      curser,
+                  )
                 : await getDraftJustEmailsList(mailboxId, { take: 25, search }, curser);
 
         if (emails.length === 0) {
@@ -104,9 +104,9 @@ export default async function EmailList({
             )),
             nextPageEmail
                 ? {
-                    emailId: nextPageEmail.id,
-                    createdAt: nextPageEmail.createdAt,
-                }
+                      emailId: nextPageEmail.id,
+                      createdAt: nextPageEmail.createdAt,
+                  }
                 : null,
         ] as const;
     }
@@ -170,7 +170,7 @@ export default async function EmailList({
                     <div className="text-center font-bold text-muted-foreground">
                         {categoryId
                             ? // @ts-expect-error types are boring
-                            `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
+                              `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
                             : "Email addresses will be automatically deleted in 24 hours after creation."}
                         {categoryId && (
                             <p className="pt-1 font-normal">
@@ -185,8 +185,8 @@ export default async function EmailList({
                         {search
                             ? `Couldn't find any emails matching "${search}"`
                             : type === "drafts"
-                                ? "No drafts"
-                                : "No emails"}
+                              ? "No drafts"
+                              : "No emails"}
                     </div>
                 )}
                 {nextEmail ? (

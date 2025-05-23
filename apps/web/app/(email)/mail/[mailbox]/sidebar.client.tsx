@@ -14,10 +14,10 @@ export function SidebarLink({
     children,
     disabled,
     alaisMatch,
-}: PropsWithChildren<{ href: string; className: string; disabled?: boolean, alaisMatch?: string }>) {
+}: PropsWithChildren<{ href: string; className: string; disabled?: boolean; alaisMatch?: string }>) {
     const pathName = usePathname();
 
-    const isActive = pathName === href || (alaisMatch && pathName === alaisMatch)
+    const isActive = pathName === href || (alaisMatch && pathName === alaisMatch);
 
     if (disabled) {
         return (

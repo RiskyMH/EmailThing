@@ -208,7 +208,13 @@ export async function deletePasskey(passkeyId: string) {
 
     await db
         .delete(PasskeyCredentials)
-        .where(and(eq(PasskeyCredentials.id, passkeyId), eq(PasskeyCredentials.userId, userId), eq(PasskeyCredentials.isDeleted, false)))
+        .where(
+            and(
+                eq(PasskeyCredentials.id, passkeyId),
+                eq(PasskeyCredentials.userId, userId),
+                eq(PasskeyCredentials.isDeleted, false),
+            ),
+        )
         .execute();
 
     revalidatePath("/settings");

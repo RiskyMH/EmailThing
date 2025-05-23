@@ -11,7 +11,11 @@ export const userMailboxAccess = cache((mailboxId: string, userId: string | null
     return unstable_cache(
         async () => {
             const mailbox = await db.query.MailboxForUser.findFirst({
-                where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)),
+                where: and(
+                    eq(MailboxForUser.mailboxId, mailboxId),
+                    eq(MailboxForUser.userId, userId),
+                    eq(MailboxForUser.isDeleted, false),
+                ),
             });
 
             return !!mailbox;

@@ -32,9 +32,7 @@ const nextConfig = {
         "/mail/[mailbox]/config": ["./public/cloudflare-worker.js"],
     },
     // transpilePackages: ["shiki"],
-    transpilePackages: [
-        "@emailthing/db"
-    ],
+    transpilePackages: ["@emailthing/db"],
     eslint: {
         ignoreDuringBuilds: true,
     },
@@ -44,7 +42,7 @@ const nextConfig = {
         },
     },
     images: {
-        unoptimized: true
+        unoptimized: true,
     },
     compress: !process.env.STANDALONE,
     productionBrowserSourceMaps: process.env.GITHUB_ACTIONS === "true",

@@ -1,27 +1,27 @@
 {
-    "name": "@emailthing/db",
-    "private": true,
-    "dependencies": {
-        "drizzle-kit": "^0.31.1",
-        "drizzle-orm": "^0.43.1",
-        "@paralleldrive/cuid2": "^2.2.2"
+  "name": "@emailthing/db",
+  "private": true,
+  "dependencies": {
+    "drizzle-kit": "^0.31.1",
+    "drizzle-orm": "^0.43.1",
+    "@paralleldrive/cuid2": "^2.2.2"
+  },
+  "main": "index.ts",
+  "typings": "index.ts",
+  "exports": {
+    ".": {
+      "require": "./index.ts",
+      "import": "./index.ts",
+      "types": "./index.ts",
+      "bun": "./index.ts",
+      "default": "./index.ts"
     },
-    "main": "index.ts",
-    "typings": "index.ts",
-    "exports": {
-        ".": {
-            "require": "./index.ts",
-            "import": "./index.ts",
-            "types": "./index.ts",
-            "bun": "./index.ts",
-            "default": "./index.ts"
-        },
-        "./connect": {
-            "require": "./db.ts",
-            "import": "./db.ts",
-            "types": "./db.ts",
-            "bun": "./db.ts",
-            "default": "./db.ts"
-        }
+    "./connect": {
+      "require": "./db.ts",
+      "import": "./db.ts",
+      "types": "./db.ts",
+      "bun": "./db.ts",
+      "default": "./db.ts"
     }
+  }
 }

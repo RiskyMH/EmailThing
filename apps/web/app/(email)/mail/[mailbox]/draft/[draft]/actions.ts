@@ -58,7 +58,11 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
 
     // verify alias is valid (and user has access to it)
     const alias = await db.query.MailboxAlias.findFirst({
-        where: and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.alias, from!), eq(MailboxAlias.isDeleted, false)),
+        where: and(
+            eq(MailboxAlias.mailboxId, mailboxId),
+            eq(MailboxAlias.alias, from!),
+            eq(MailboxAlias.isDeleted, false),
+        ),
         columns: {
             name: true,
             alias: true,

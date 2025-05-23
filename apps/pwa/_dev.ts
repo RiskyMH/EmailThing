@@ -19,15 +19,17 @@ const nextPatchdata = `
         "../pwa/src/*",
         "./app/*"
       ],
-`
+`;
 
-const nextUnpatchdata = `"@/*": ["./app/*"],`
+const nextUnpatchdata = `"@/*": ["./app/*"],`;
 
-const tsconfig = Bun.file("../web/tsconfig.json")
-const fileText = await tsconfig.text()
+const tsconfig = Bun.file("../web/tsconfig.json");
+const fileText = await tsconfig.text();
 
-if (process.argv[2] === 'patch')
-  await tsconfig.write(fileText.replace(nextUnpatchdata, nextPatchdata))
-else if (process.argv[2] === 'revert')
-  await tsconfig.write(fileText.replace(nextPatchdata, nextUnpatchdata))
-else throw "??"
+if (process.argv[2] === "patch")
+  await tsconfig.write(fileText.replace(nextUnpatchdata, nextPatchdata));
+else if (process.argv[2] === "revert")
+  await tsconfig.write(fileText.replace(nextPatchdata, nextUnpatchdata));
+else throw "??";
+
+export {};

@@ -15,10 +15,7 @@ export default function Loading() {
             </div>
 
             {Array.from({ length: 25 }).map((_, i) => (
-                <div
-                    key={i}
-                    className="//bg-card flex h-12 w-full animate-pulse gap-3 rounded-md px-4 py-1.5"
-                >
+                <div key={i} className="//bg-card flex h-12 w-full animate-pulse gap-3 rounded-md px-4 py-1.5">
                     <span
                         className="m-2 mx-auto inline-block size-4 shrink-0 self-center rounded-full"
                         style={{ backgroundColor: "grey" }}
