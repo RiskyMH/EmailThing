@@ -1,31 +1,31 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, int, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, pgTable, text, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
 import { nocaseText } from "./custom-drizzle";
 
 // Default Domains
-export const DefaultDomain = sqliteTable(
+export const DefaultDomain = pgTable(
     "default_domains",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        createdAt: integer("created_at", { mode: "timestamp" })
+        createdAt: timestamp("created_at")
             .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
-            // .notNull()
-            .$defaultFn(() => new Date())
+            .defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .notNull()
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
         domain: nocaseText("domain").notNull().unique(),
-        authKey: text("auth_key", { length: 24 })
+        authKey: varchar("auth_key", { length: 250 })
             .notNull()
             .$defaultFn(() => createId()),
-        available: int("available", { mode: "boolean" }).default(false),
-        tempDomain: int("temp_domain", { mode: "boolean" }).default(false),
+        available: boolean("available").default(false),
+        tempDomain: boolean("temp_domain").default(false),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+        isDeleted: boolean("is_deleted").default(false),
     },
     (table) => {
         return {
@@ -36,12 +36,12 @@ export const DefaultDomain = sqliteTable(
 );
 
 // Stats
-export const Stats = sqliteTable(
+export const Stats = pgTable(
     "stats",
     {
-        time: text("time").notNull().$type<`${number}-${number}-${number}`>(), // 2025-12-31
-        type: text("type", { enum: ["receive-email", "send-email"] }).notNull(),
-        value: int("value").notNull(),
+        time: varchar("time").notNull().$type<`${number}-${number}-${number}`>(), // 2025-12-31
+        type: varchar("type", { enum: ["receive-email", "send-email"] }).notNull(),
+        value: integer("value").notNull(),
     },
     (table) => {
         return {
