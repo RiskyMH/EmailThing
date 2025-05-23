@@ -22,106 +22,109 @@ import { Strike } from "@tiptap/extension-strike";
 import { Text } from "@tiptap/extension-text";
 import TextStyle from "@tiptap/extension-text-style";
 import { Underline } from "@tiptap/extension-underline";
-import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import { Loader2 } from "lucide-react";
-import { useDebouncedCallback } from "use-debounce";
+import { parse as markedParse } from "marked";
 import { BodyHeader } from "./tiptap-header";
-import { parse as markedParse } from "marked"
-import { use } from "react";
 
-export default function EditorContent2({ savedBody, onSave }: { savedBody?: string, onSave: (e?: any) => void }) {
-    // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
-    const debounced = onSave
-    
-    if (savedBody && !(savedBody.startsWith("<") && savedBody.endsWith(">"))) {
-        savedBody = markedParse(savedBody, { breaks: true, async: false })
-    }
+export default function EditorContent2({
+  savedBody,
+  onSave,
+}: { savedBody?: string; onSave: (e?: any) => void }) {
+  // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
+  const debounced = onSave;
 
-    const editor = useEditor({
-        extensions: [
-            // StarterKit,
-            Blockquote.configure(),
-            Bold.configure(),
-            BulletList.configure(),
-            Code.configure(),
-            CodeBlock.configure(),
-            Document.configure(),
-            Dropcursor.configure(),
-            Gapcursor.configure(),
-            HardBreak.configure(),
-            Heading.configure(),
-            History.configure(),
-            HorizontalRule.configure(),
-            Italic.configure(),
-            ListItem.configure(),
-            OrderedList.configure(),
-            Paragraph.configure(),
-            Strike.configure(),
-            Text.configure(),
-            Underline.configure(),
-            Placeholder.configure({
-                placeholder: "Write your email body here …",
-            }),
-            TextStyle.configure(),
-            FontFamily.configure(),
-            TipTapLink.configure({
-                // openOnClick: 'whenNotEditable'
-                openOnClick: false,
-                defaultProtocol: "https",
-            }),
-            ListKeymap.configure(),
-        ],
-        // content: '<p>Hello World! 🌎️</p>',
-        content: getJSON(savedBody),
-        editorProps: {
-            attributes: {
-                class: "prose dark:prose-invert prose-md prose-sm=sm:prose=lg:prose-lg=xl:prose-2xl focus:outline-none overflow-auto px-3 pb-2 size-full max-w-full  min-h-28 focus-visible:outline-none bg-transparent border-none",
-            },
-        },
-        onUpdate: (e) => setTimeout(debounced, 0),
-        onBlur: (e) => setTimeout(debounced, 0),
-    });
+  if (savedBody && !(savedBody.startsWith("<") && savedBody.endsWith(">"))) {
+    savedBody = markedParse(savedBody, { breaks: true, async: false });
+  }
 
-    return (
-        <EditorContent
-            editor={editor}
-            data-placeholder="Write your email body here..."
-            className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none bg-secondary text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ fontFamily: "Arial, sans-serif" }}
-        >
-            <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
-                <BodyHeader editor={editor} />
-                <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
-            </div>
+  const editor = useEditor({
+    extensions: [
+      // StarterKit,
+      Blockquote.configure(),
+      Bold.configure(),
+      BulletList.configure(),
+      Code.configure(),
+      CodeBlock.configure(),
+      Document.configure(),
+      Dropcursor.configure(),
+      Gapcursor.configure(),
+      HardBreak.configure(),
+      Heading.configure(),
+      History.configure(),
+      HorizontalRule.configure(),
+      Italic.configure(),
+      ListItem.configure(),
+      OrderedList.configure(),
+      Paragraph.configure(),
+      Strike.configure(),
+      Text.configure(),
+      Underline.configure(),
+      Placeholder.configure({
+        placeholder: "Write your email body here …",
+      }),
+      TextStyle.configure(),
+      FontFamily.configure(),
+      TipTapLink.configure({
+        // openOnClick: 'whenNotEditable'
+        openOnClick: false,
+        defaultProtocol: "https",
+      }),
+      ListKeymap.configure(),
+    ],
+    // content: '<p>Hello World! 🌎️</p>',
+    content: getJSON(savedBody),
+    editorProps: {
+      attributes: {
+        class:
+          "prose dark:prose-invert prose-md prose-sm=sm:prose=lg:prose-lg=xl:prose-2xl focus:outline-none overflow-auto px-3 pb-2 size-full max-w-full  min-h-28 focus-visible:outline-none bg-transparent border-none",
+      },
+    },
+    onUpdate: (e) => setTimeout(debounced, 0),
+    onBlur: (e) => setTimeout(debounced, 0),
+  });
 
-            {!editor && (
-                <div className="flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto fade-in">
-                    <Loader2 className="size-12 animate-spin text-muted-foreground" />
-                </div>
-            )}
+  return (
+    <EditorContent
+      editor={editor}
+      data-placeholder="Write your email body here..."
+      className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none bg-secondary text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      style={{ fontFamily: "Arial, sans-serif" }}
+    >
+      <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
+        <BodyHeader editor={editor} />
+        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
+      </div>
 
-            {/* //todo: maybe use json instead of html */}
-            {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
-            <input hidden value={(editor?.getHTML() + "<!--tiptap-->") || savedBody} name="body" readOnly />
-            <input
-                hidden
-                value={editor?.getHTML()?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")}
-                name="html"
-                readOnly
-            />
-            <input hidden value={editor?.getText()?.slice(0, 250)} name="preview" readOnly />
-            {/* </div > */}
-        </EditorContent>
-    );
+      {!editor && (
+        <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
+          <Loader2 className="size-12 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {/* //todo: maybe use json instead of html */}
+      {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
+      <input hidden value={`${editor?.getHTML()}<!--tiptap-->` || savedBody} name="body" readOnly />
+      <input
+        hidden
+        value={editor
+          ?.getHTML()
+          ?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")}
+        name="html"
+        readOnly
+      />
+      <input hidden value={editor?.getText()?.slice(0, 250)} name="preview" readOnly />
+      {/* </div > */}
+    </EditorContent>
+  );
 }
 
-
 function getJSON(data?: string) {
-    if (!data) return;
+  if (!data) return;
 
-    try {
-        return JSON.parse(data);
-    } catch {
-        return data;
-    }
+  try {
+    return JSON.parse(data);
+  } catch {
+    return data;
+  }
 }

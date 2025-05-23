@@ -174,7 +174,11 @@ export async function getDraftEmailList(mailboxId: string, options?: { take?: nu
 
 export async function getTempAliases(mailboxId: string) {
     const temps = await db.query.TempAlias.findMany({
-        where: and(eq(TempAlias.mailboxId, mailboxId), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
+        where: and(
+            eq(TempAlias.mailboxId, mailboxId),
+            gt(TempAlias.expiresAt, new Date()),
+            eq(TempAlias.isDeleted, false),
+        ),
         columns: {
             id: true,
             alias: true,

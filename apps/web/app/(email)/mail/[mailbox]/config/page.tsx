@@ -528,8 +528,8 @@ export default async function EmailConfig(props: {
                                                                                 alias.alias.endsWith(`@${row.domain}`),
                                                                             ).length
                                                                         }
-                                                                    </strong>
-                                                                    {" "}aliases.
+                                                                    </strong>{" "}
+                                                                    aliases.
                                                                 </SmartDrawerDescription>
                                                             </SmartDrawerHeader>
                                                             <SmartDrawerFooter className="flex pt-2">

@@ -1,12 +1,41 @@
-import db, { DefaultDomain, DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, MailboxAlias, MailboxCategory, MailboxCustomDomain, MailboxForUser, MailboxTokens, PasskeyCredentials, User, UserNotification } from "@/db";
-import { inArray, desc, and, gte, eq, type InferSelectModel, not, isNull, getTableColumns, sql, lte, or } from "drizzle-orm";
+import db, {
+    DefaultDomain,
+    DraftEmail,
+    Email,
+    EmailAttachments,
+    EmailRecipient,
+    EmailSender,
+    Mailbox,
+    MailboxAlias,
+    MailboxCategory,
+    MailboxCustomDomain,
+    MailboxForUser,
+    MailboxTokens,
+    PasskeyCredentials,
+    User,
+    UserNotification,
+} from "@/db";
+import {
+    inArray,
+    desc,
+    and,
+    gte,
+    eq,
+    type InferSelectModel,
+    not,
+    isNull,
+    getTableColumns,
+    sql,
+    lte,
+    or,
+} from "drizzle-orm";
 // import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import type { BatchItem } from "drizzle-orm/batch";
 import { getSession, isValidOrigin } from "../tools";
 import { deleteFile } from "@/utils/s3";
 
 export function OPTIONS(request: Request) {
-    const origin = request.headers.get("origin")
+    const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
@@ -16,13 +45,12 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
-        }
+        },
     });
 }
 
-
 export async function GET(request: Request) {
-    const origin = request.headers.get("origin")
+    const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
@@ -30,7 +58,6 @@ export async function GET(request: Request) {
     // a user can request a sync of their data to be storred in apps\pwa\src\utils\data\types.ts
     // this should give a list of objects that have been changed since the last sync
     // or if first time, give a reduced dataset - ie less emails and only a few tables
-
 
     // /api/internal/sync?last_sync=1715728000000
     // /api/internal/sync?minimal=true
@@ -43,14 +70,16 @@ export async function GET(request: Request) {
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date(0);
 
     const currentUserid = await getSession(request);
-    if (!currentUserid) return new Response("Unauthorized", {
-        status: 401, headers: {
-            "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "authorization",
-            "Access-Control-Allow-Credentials": "true",
-        }
-    });
+    if (!currentUserid)
+        return new Response("Unauthorized", {
+            status: 401,
+            headers: {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "authorization",
+                "Access-Control-Allow-Credentials": "true",
+            },
+        });
 
     const [currentUser, mailboxesForUser] = await db.batch([
         db.query.User.findFirst({
@@ -59,25 +88,22 @@ export async function GET(request: Request) {
         db.query.MailboxForUser.findMany({
             where: and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
         }),
-    ])
+    ]);
 
     if (!currentUser) return new Response("User not found", { status: 404 });
 
     if (minimal) {
-        return Response.json(
-            await getMinimalChanges(currentUser, mailboxesForUser),
-            {
-                headers: {
-                    "Access-Control-Allow-Origin": origin,
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Allow-Headers": "authorization",
-                    "Access-Control-Allow-Credentials": "true",
-                }
-            }
-        );
+        return Response.json(await getMinimalChanges(currentUser, mailboxesForUser), {
+            headers: {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "authorization",
+                "Access-Control-Allow-Credentials": "true",
+            },
+        });
     }
 
-    const newMailboxes = mailboxesForUser.filter(m => m.joinedAt > lastSyncDate).map(m => m.mailboxId)
+    const newMailboxes = mailboxesForUser.filter((m) => m.joinedAt > lastSyncDate).map((m) => m.mailboxId);
 
     return Response.json(
         {
@@ -90,15 +116,13 @@ export async function GET(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
-            }
-        }
+            },
+        },
     );
 }
 
-
-
 export async function POST(request: Request) {
-    const origin = request.headers.get("origin")
+    const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
@@ -110,14 +134,16 @@ export async function POST(request: Request) {
     const d = new Date();
 
     const currentUserid = await getSession(request);
-    if (!currentUserid) return new Response("Unauthorized", {
-        status: 401, headers: {
-            "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "authorization",
-            "Access-Control-Allow-Credentials": "true",
-        }
-    });
+    if (!currentUserid)
+        return new Response("Unauthorized", {
+            status: 401,
+            headers: {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "authorization",
+                "Access-Control-Allow-Credentials": "true",
+            },
+        });
 
     const [currentUser, mailboxesForUser] = await db.batch([
         db.query.User.findFirst({
@@ -126,12 +152,12 @@ export async function POST(request: Request) {
         db.query.MailboxForUser.findMany({
             where: and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
         }),
-    ])
+    ]);
 
     if (!currentUser) return new Response("User not found", { status: 404 });
 
     // body is partial of ChangesResponse
-    const body = await request.json() as ChangesRequest;
+    const body = (await request.json()) as ChangesRequest;
     // use the provided id (or null for create)
     // do some validations to ensure its safe
     // after that, update the database and return lastsynced object
@@ -166,7 +192,10 @@ export async function POST(request: Request) {
                     continue;
                 }
                 // check that the emailid exists and is owned by the user
-                const e = await db.select({ id: Email.id, size: Email.size }).from(Email).where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)))
+                const e = await db
+                    .select({ id: Email.id, size: Email.size })
+                    .from(Email)
+                    .where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)));
                 if (!e.length) {
                     errors.push({
                         key: "emails",
@@ -196,29 +225,34 @@ export async function POST(request: Request) {
 
                     // still not actually delete, but anonimise it
                     changes.push(
-                        db.update(Email).set({
-                            isDeleted: true,
-                            updatedAt: new Date(),
-                            body: "<deleted>",
-                            subject: "<deleted>",
-                            binnedAt: null,
-                            categoryId: null,
-                            givenId: null,
-                            givenReferences: null,
-                            html: null,
-                            isRead: true,
-                            isSender: false,
-                            replyTo: null,
-                            snippet: null,
-                            size: 0,
-                            isStarred: false,
-                            // tempId: null,
-                            createdAt: new Date(),
-                        }).where(and(
-                            eq(Email.id, email.id),
-                            eq(Email.mailboxId, email.mailboxId),
-                            email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined)
-                        ),
+                        db
+                            .update(Email)
+                            .set({
+                                isDeleted: true,
+                                updatedAt: new Date(),
+                                body: "<deleted>",
+                                subject: "<deleted>",
+                                binnedAt: null,
+                                categoryId: null,
+                                givenId: null,
+                                givenReferences: null,
+                                html: null,
+                                isRead: true,
+                                isSender: false,
+                                replyTo: null,
+                                snippet: null,
+                                size: 0,
+                                isStarred: false,
+                                // tempId: null,
+                                createdAt: new Date(),
+                            })
+                            .where(
+                                and(
+                                    eq(Email.id, email.id),
+                                    eq(Email.mailboxId, email.mailboxId),
+                                    email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined,
+                                ),
+                            ),
 
                         db.delete(EmailSender).where(eq(EmailSender.emailId, email.id)),
                         db.delete(EmailRecipient).where(eq(EmailRecipient.emailId, email.id)),
@@ -230,19 +264,26 @@ export async function POST(request: Request) {
                                 storageUsed: sql`${Mailbox.storageUsed} - ${e[0].size}`,
                             })
                             .where(eq(Mailbox.id, email.mailboxId)),
-                    )
+                    );
                 } else {
                     // update the email
-                    changes.push(db.update(Email).set({
-                        isStarred: email.isStarred,
-                        isRead: email.isRead,
-                        categoryId: email.categoryId,
-                        binnedAt: email.binnedAt ? new Date() : email.binnedAt === null ? null : undefined,
-                    }).where(and(
-                        eq(Email.id, email.id),
-                        eq(Email.mailboxId, email.mailboxId),
-                        email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined)
-                    ))
+                    changes.push(
+                        db
+                            .update(Email)
+                            .set({
+                                isStarred: email.isStarred,
+                                isRead: email.isRead,
+                                categoryId: email.categoryId,
+                                binnedAt: email.binnedAt ? new Date() : email.binnedAt === null ? null : undefined,
+                            })
+                            .where(
+                                and(
+                                    eq(Email.id, email.id),
+                                    eq(Email.mailboxId, email.mailboxId),
+                                    email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined,
+                                ),
+                            ),
+                    );
                 }
             }
         } else if (key === "draftEmails") {
@@ -281,8 +322,10 @@ export async function POST(request: Request) {
                         continue;
                     }
                     // verify that there is no draft with this id
-                    const e = await db.select({ id: DraftEmail.id, mailboxId: DraftEmail.mailboxId }).from(DraftEmail)
-                        .where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")))
+                    const e = await db
+                        .select({ id: DraftEmail.id, mailboxId: DraftEmail.mailboxId })
+                        .from(DraftEmail)
+                        .where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")));
                     if (e.length) {
                         if (e.length > 0 && !e.some((e) => e.mailboxId === draftEmail.mailboxId)) {
                             errors.push({
@@ -297,7 +340,10 @@ export async function POST(request: Request) {
                     }
                 } else {
                     // check that the draftemailid exists and is owned by the user
-                    const e = await db.select({ id: DraftEmail.id }).from(DraftEmail).where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId)))
+                    const e = await db
+                        .select({ id: DraftEmail.id })
+                        .from(DraftEmail)
+                        .where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId)));
                     if (!e.length) {
                         errors.push({
                             key: "draftEmails",
@@ -310,54 +356,76 @@ export async function POST(request: Request) {
 
                 if (draftEmail.hardDelete) {
                     // still not actually delete, but anonimise it
-                    changes.push(db.update(DraftEmail).set({
-                        isDeleted: true,
-                        updatedAt: new Date(),
-                        body: "<deleted>",
-                        subject: "<deleted>",
-                        from: null,
-                        to: null,
-                        headers: null,
-                        createdAt: new Date(),
-                    }).where(and(
-                        eq(DraftEmail.id, draftEmail.id!),
-                        eq(DraftEmail.mailboxId, draftEmail.mailboxId),
-                        draftEmail.lastUpdated ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated)) : undefined)
-                    ))
+                    changes.push(
+                        db
+                            .update(DraftEmail)
+                            .set({
+                                isDeleted: true,
+                                updatedAt: new Date(),
+                                body: "<deleted>",
+                                subject: "<deleted>",
+                                from: null,
+                                to: null,
+                                headers: null,
+                                createdAt: new Date(),
+                            })
+                            .where(
+                                and(
+                                    eq(DraftEmail.id, draftEmail.id!),
+                                    eq(DraftEmail.mailboxId, draftEmail.mailboxId),
+                                    draftEmail.lastUpdated
+                                        ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated))
+                                        : undefined,
+                                ),
+                            ),
+                    );
                 } else {
                     if (draftEmail.id == null) {
-                        changes.push(db.insert(DraftEmail).values({
-                            // id: draftEmail.id,
-                            mailboxId: draftEmail.mailboxId,
-                            body: draftEmail.body,
-                            subject: draftEmail.subject,
-                            from: draftEmail.from,
-                            to: draftEmail.to,
-                            headers: draftEmail.headers,
-                        }))
+                        changes.push(
+                            db.insert(DraftEmail).values({
+                                // id: draftEmail.id,
+                                mailboxId: draftEmail.mailboxId,
+                                body: draftEmail.body,
+                                subject: draftEmail.subject,
+                                from: draftEmail.from,
+                                to: draftEmail.to,
+                                headers: draftEmail.headers,
+                            }),
+                        );
                     } else if (draftEmail.id.startsWith("new:")) {
-                        changes.push(db.insert(DraftEmail).values({
-                            id: draftEmail.id.replace("new:", ""),
-                            mailboxId: draftEmail.mailboxId,
-                            body: draftEmail.body,
-                            subject: draftEmail.subject,
-                            from: draftEmail.from,
-                            to: draftEmail.to,
-                            headers: draftEmail.headers,
-                        }))
+                        changes.push(
+                            db.insert(DraftEmail).values({
+                                id: draftEmail.id.replace("new:", ""),
+                                mailboxId: draftEmail.mailboxId,
+                                body: draftEmail.body,
+                                subject: draftEmail.subject,
+                                from: draftEmail.from,
+                                to: draftEmail.to,
+                                headers: draftEmail.headers,
+                            }),
+                        );
                     } else {
                         // update the draft email
-                        changes.push(db.update(DraftEmail).set({
-                            body: draftEmail.body,
-                            subject: draftEmail.subject,
-                            from: draftEmail.from,
-                            to: draftEmail.to,
-                            headers: draftEmail.headers,
-                        }).where(and(
-                            eq(DraftEmail.id, draftEmail.id),
-                            eq(DraftEmail.mailboxId, draftEmail.mailboxId),
-                            draftEmail.lastUpdated ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated)) : undefined)
-                        ))
+                        changes.push(
+                            db
+                                .update(DraftEmail)
+                                .set({
+                                    body: draftEmail.body,
+                                    subject: draftEmail.subject,
+                                    from: draftEmail.from,
+                                    to: draftEmail.to,
+                                    headers: draftEmail.headers,
+                                })
+                                .where(
+                                    and(
+                                        eq(DraftEmail.id, draftEmail.id),
+                                        eq(DraftEmail.mailboxId, draftEmail.mailboxId),
+                                        draftEmail.lastUpdated
+                                            ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated))
+                                            : undefined,
+                                    ),
+                                ),
+                        );
                     }
                 }
             }
@@ -369,7 +437,10 @@ export async function POST(request: Request) {
 
             for (const mailboxCategory of body.mailboxCategories || []) {
                 if (!mailboxCategory) continue;
-                if (!mailboxCategory.mailboxId || !mailboxesForUser.some((m) => m.mailboxId === mailboxCategory.mailboxId)) {
+                if (
+                    !mailboxCategory.mailboxId ||
+                    !mailboxesForUser.some((m) => m.mailboxId === mailboxCategory.mailboxId)
+                ) {
                     errors.push({
                         key: "mailboxCategories",
                         id: mailboxCategory.id,
@@ -379,7 +450,17 @@ export async function POST(request: Request) {
                 }
 
                 if (mailboxCategory.id?.startsWith("new:")) {
-                    const e = await db.select({ id: MailboxCategory.id, mailboxId: MailboxCategory.mailboxId }).from(MailboxCategory).where(and(eq(MailboxCategory.id, mailboxCategory.id.replace("new:", "")), /*eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)*/))
+                    const e = await db
+                        .select({ id: MailboxCategory.id, mailboxId: MailboxCategory.mailboxId })
+                        .from(MailboxCategory)
+                        .where(
+                            and(
+                                eq(
+                                    MailboxCategory.id,
+                                    mailboxCategory.id.replace("new:", ""),
+                                ) /*eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)*/,
+                            ),
+                        );
                     if (e.length) {
                         if (e.length > 0 && !e.some((e) => e.mailboxId === mailboxCategory.mailboxId)) {
                             errors.push({
@@ -392,9 +473,16 @@ export async function POST(request: Request) {
                             mailboxCategory.id = mailboxCategory.id.replace("new:", "");
                         }
                     }
-                }
-                else if (mailboxCategory.id !== null) {
-                    const e = await db.select({ id: MailboxCategory.id }).from(MailboxCategory).where(and(eq(MailboxCategory.id, mailboxCategory.id), eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)))
+                } else if (mailboxCategory.id !== null) {
+                    const e = await db
+                        .select({ id: MailboxCategory.id })
+                        .from(MailboxCategory)
+                        .where(
+                            and(
+                                eq(MailboxCategory.id, mailboxCategory.id),
+                                eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
+                            ),
+                        );
                     if (!e.length) {
                         errors.push({
                             key: "mailboxCategories",
@@ -425,46 +513,66 @@ export async function POST(request: Request) {
                         });
                         continue;
                     }
-                    changes.push(db.update(MailboxCategory).set({
-                        isDeleted: true,
-                        name: "<deleted>",
-                        color: "<deleted>",
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                    }).where(and(
-                        eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
-                        eq(MailboxCategory.id, mailboxCategory.id),
-                        mailboxCategory.lastUpdated ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated)) : undefined
-                    )))
+                    changes.push(
+                        db
+                            .update(MailboxCategory)
+                            .set({
+                                isDeleted: true,
+                                name: "<deleted>",
+                                color: "<deleted>",
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                            })
+                            .where(
+                                and(
+                                    eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
+                                    eq(MailboxCategory.id, mailboxCategory.id),
+                                    mailboxCategory.lastUpdated
+                                        ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated))
+                                        : undefined,
+                                ),
+                            ),
+                    );
                 } else {
                     if (mailboxCategory.id == null) {
-                        changes.push(db.insert(MailboxCategory).values({
-                            mailboxId: mailboxCategory.mailboxId,
-                            name: mailboxCategory.name,
-                            color: mailboxCategory.color,
-                        }))
+                        changes.push(
+                            db.insert(MailboxCategory).values({
+                                mailboxId: mailboxCategory.mailboxId,
+                                name: mailboxCategory.name,
+                                color: mailboxCategory.color,
+                            }),
+                        );
                     } else if (mailboxCategory.id.startsWith("new:")) {
-                        changes.push(db.insert(MailboxCategory).values({
-                            id: mailboxCategory.id.replace("new:", ""),
-                            mailboxId: mailboxCategory.mailboxId,
-                            name: mailboxCategory.name,
-                            color: mailboxCategory.color,
-                        }))
+                        changes.push(
+                            db.insert(MailboxCategory).values({
+                                id: mailboxCategory.id.replace("new:", ""),
+                                mailboxId: mailboxCategory.mailboxId,
+                                name: mailboxCategory.name,
+                                color: mailboxCategory.color,
+                            }),
+                        );
                     } else {
-                        changes.push(db.update(MailboxCategory).set({
-                            name: mailboxCategory.name,
-                            color: mailboxCategory.color,
-                        }).where(and(
-                            eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
-                            eq(MailboxCategory.id, mailboxCategory.id),
-                            mailboxCategory.lastUpdated ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated)) : undefined
-                        )))
+                        changes.push(
+                            db
+                                .update(MailboxCategory)
+                                .set({
+                                    name: mailboxCategory.name,
+                                    color: mailboxCategory.color,
+                                })
+                                .where(
+                                    and(
+                                        eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
+                                        eq(MailboxCategory.id, mailboxCategory.id),
+                                        mailboxCategory.lastUpdated
+                                            ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated))
+                                            : undefined,
+                                    ),
+                                ),
+                        );
                     }
                 }
             }
-        }
-
-        else {
+        } else {
             errors.push({
                 key: key,
                 error: "Invalid key: " + key,
@@ -482,7 +590,7 @@ export async function POST(request: Request) {
         }
     }
 
-    const changesRes = await getChanges(lastSyncDate, currentUser, mailboxesForUser, failedIds)
+    const changesRes = await getChanges(lastSyncDate, currentUser, mailboxesForUser, failedIds);
 
     // if its a new and failed, add it to the changes as deleted
     for (const error of errors) {
@@ -496,22 +604,24 @@ export async function POST(request: Request) {
     }
 
     // Return both errors and latest changes
-    return Response.json({
-        time: d.toISOString(),
-        errors: errors.length > 0 ? errors : undefined,
-        ...changesRes
-    }, {
-        headers: {
-            "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "authorization",
-            "Access-Control-Allow-Credentials": "true",
-        }
-    });
+    return Response.json(
+        {
+            time: d.toISOString(),
+            errors: errors.length > 0 ? errors : undefined,
+            ...changesRes,
+        },
+        {
+            headers: {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "authorization",
+                "Access-Control-Allow-Credentials": "true",
+            },
+        },
+    );
 }
 
-
-type DateString = `${number}-${number}-${number}T${number}:${number}:${number}.${number}Z`
+type DateString = `${number}-${number}-${number}T${number}:${number}:${number}.${number}Z`;
 export type ChangesRequest = {
     emails?: {
         id: string;
@@ -530,11 +640,13 @@ export type ChangesRequest = {
         body?: string | null;
         subject?: string | null;
         from?: string | null;
-        to?: {
-            name: string | null;
-            address: string;
-            cc?: "cc" | "bcc" | null;
-        }[] | null;
+        to?:
+            | {
+                  name: string | null;
+                  address: string;
+                  cc?: "cc" | "bcc" | null;
+              }[]
+            | null;
         headers?: { key: string; value: string }[];
         hardDelete?: boolean;
         lastUpdated?: DateString;
@@ -549,7 +661,7 @@ export type ChangesRequest = {
         lastUpdated?: DateString;
     }[];
     /** //todo: */
-    mailboxAliases?: {}
+    mailboxAliases?: {};
     // /** //todo: */
     // mailboxTokens?: {}
     // /** //todo: */
@@ -566,42 +678,53 @@ export type ChangesRequest = {
     // }[];
     // /** //todo: */
     // mailboxesForUser?: {}
-}
+};
 
 export type ChangesResponseError = {
     error: string;
     moreInfo?: string;
-}
+};
 
-
-
-
-async function getMinimalChanges(currentUser: InferSelectModel<typeof User>, mailboxesForUser: InferSelectModel<typeof MailboxForUser>[]) {
+async function getMinimalChanges(
+    currentUser: InferSelectModel<typeof User>,
+    mailboxesForUser: InferSelectModel<typeof MailboxForUser>[],
+) {
     const mailboxIds = mailboxesForUser.map((m) => m.mailboxId);
     const currentUserid = currentUser.id;
 
-    const emails = await db.select({
-        ...getTableColumns(Email),
-        html: sql`NULL`,
-    }).from(Email)
+    const emails = await db
+        .select({
+            ...getTableColumns(Email),
+            html: sql`NULL`,
+        })
+        .from(Email)
         .where(inArray(Email.mailboxId, mailboxIds))
-        .orderBy(desc(Email.createdAt)).limit(50);
+        .orderBy(desc(Email.createdAt))
+        .limit(50);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
     const b = await db.batch([
         // get the email metadata
-        db.select().from(EmailSender).where(inArray(EmailSender.emailId, emailIds)),
+        db
+            .select()
+            .from(EmailSender)
+            .where(inArray(EmailSender.emailId, emailIds)),
         db.select().from(EmailRecipient).where(inArray(EmailRecipient.emailId, emailIds)),
         db.select().from(EmailAttachments).where(inArray(EmailAttachments.emailId, emailIds)),
 
         db.select().from(Mailbox).where(inArray(Mailbox.id, mailboxIds)),
         db.select().from(MailboxCategory).where(inArray(MailboxCategory.mailboxId, mailboxIds)),
         db.select().from(MailboxAlias).where(inArray(MailboxAlias.mailboxId, mailboxIds)),
-        db.select().from(DraftEmail).where(inArray(DraftEmail.mailboxId, mailboxIds))
-            .orderBy(desc(DraftEmail.createdAt)).limit(50),
-    ] as const)
+        db
+            .select()
+            .from(DraftEmail)
+            .where(inArray(DraftEmail.mailboxId, mailboxIds))
+            .orderBy(desc(DraftEmail.createdAt))
+            .limit(50),
+    ] as const);
 
-    const [emailSenders, emailRecipients, emailAttachments, mailboxes, mailboxCategories, mailboxAliases, draftEmails] = b;
+    const [emailSenders, emailRecipients, emailAttachments, mailboxes, mailboxCategories, mailboxAliases, draftEmails] =
+        b;
 
     return {
         user: {
@@ -619,49 +742,76 @@ async function getMinimalChanges(currentUser: InferSelectModel<typeof User>, mai
         mailboxCategories,
         draftEmails,
         mailboxAliases,
-    }
+    };
 }
 
-export type MinimalChangesResponse = Awaited<ReturnType<typeof getMinimalChanges>>
-export type ChangesResponse = Awaited<ReturnType<typeof getChanges>>
+export type MinimalChangesResponse = Awaited<ReturnType<typeof getMinimalChanges>>;
+export type ChangesResponse = Awaited<ReturnType<typeof getChanges>>;
 
-async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<typeof User>, mailboxesForUser: InferSelectModel<typeof MailboxForUser>[], includeIds: Partial<Record<keyof ChangesRequest, string[]>> = {}, forceIncludeMailboxes: string[] = []) {
+async function getChanges(
+    lastSyncDate: Date,
+    currentUser: InferSelectModel<typeof User>,
+    mailboxesForUser: InferSelectModel<typeof MailboxForUser>[],
+    includeIds: Partial<Record<keyof ChangesRequest, string[]>> = {},
+    forceIncludeMailboxes: string[] = [],
+) {
     const mailboxIds = mailboxesForUser.map((m) => m.mailboxId);
     const currentUserid = currentUser.id;
 
-    const emails = await db.select().from(Email).where(and(
-        inArray(Email.mailboxId, mailboxIds),
-        or(
-            gte(Email.updatedAt, lastSyncDate),
-            includeIds.emails ? inArray(Email.id, includeIds.emails) : undefined,
-            forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined
+    const emails = await db
+        .select()
+        .from(Email)
+        .where(
+            and(
+                inArray(Email.mailboxId, mailboxIds),
+                or(
+                    gte(Email.updatedAt, lastSyncDate),
+                    includeIds.emails ? inArray(Email.id, includeIds.emails) : undefined,
+                    forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined,
+                ),
+            ),
         )
-    )).limit(500)
+        .limit(500);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
     const b = await db.batch([
         // get the email metadata
-        db.select().from(EmailSender).where(inArray(EmailSender.emailId, emailIds)),
+        db
+            .select()
+            .from(EmailSender)
+            .where(inArray(EmailSender.emailId, emailIds)),
         db.select().from(EmailRecipient).where(inArray(EmailRecipient.emailId, emailIds)),
         db.select().from(EmailAttachments).where(inArray(EmailAttachments.emailId, emailIds)),
 
         db.select().from(Mailbox).where(inArray(Mailbox.id, mailboxIds)),
-        db.select().from(MailboxCategory).where(and(
-            inArray(MailboxCategory.mailboxId, mailboxIds),
-            or(
-                gte(MailboxCategory.updatedAt, lastSyncDate),
-                includeIds.mailboxCategories ? inArray(MailboxCategory.id, includeIds.mailboxCategories) : undefined,
-                forceIncludeMailboxes ? inArray(MailboxCategory.mailboxId, forceIncludeMailboxes) : undefined
-            )
-        )),
-        db.select().from(MailboxAlias).where(and(
-            inArray(MailboxAlias.mailboxId, mailboxIds),
-            or(
-                gte(MailboxAlias.updatedAt, lastSyncDate),
-                includeIds.mailboxAliases ? inArray(MailboxAlias.id, includeIds.mailboxAliases) : undefined,
-                forceIncludeMailboxes ? inArray(MailboxAlias.mailboxId, forceIncludeMailboxes) : undefined
-            )
-        )),
+        db
+            .select()
+            .from(MailboxCategory)
+            .where(
+                and(
+                    inArray(MailboxCategory.mailboxId, mailboxIds),
+                    or(
+                        gte(MailboxCategory.updatedAt, lastSyncDate),
+                        includeIds.mailboxCategories
+                            ? inArray(MailboxCategory.id, includeIds.mailboxCategories)
+                            : undefined,
+                        forceIncludeMailboxes ? inArray(MailboxCategory.mailboxId, forceIncludeMailboxes) : undefined,
+                    ),
+                ),
+            ),
+        db
+            .select()
+            .from(MailboxAlias)
+            .where(
+                and(
+                    inArray(MailboxAlias.mailboxId, mailboxIds),
+                    or(
+                        gte(MailboxAlias.updatedAt, lastSyncDate),
+                        includeIds.mailboxAliases ? inArray(MailboxAlias.id, includeIds.mailboxAliases) : undefined,
+                        forceIncludeMailboxes ? inArray(MailboxAlias.mailboxId, forceIncludeMailboxes) : undefined,
+                    ),
+                ),
+            ),
         // db.select().from(MailboxTokens).where(and(
         //     inArray(MailboxTokens.mailboxId, mailboxIds),
         //     or(
@@ -670,41 +820,60 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
         //         forceIncludeMailboxes ? inArray(MailboxTokens.mailboxId, forceIncludeMailboxes) : undefined
         //     )
         // )),
-        db.select().from(MailboxCustomDomain).where(and(
-            inArray(MailboxCustomDomain.mailboxId, mailboxIds),
-            or(
-                gte(MailboxCustomDomain.updatedAt, lastSyncDate),
-                // includeIds.mailboxCustomDomains ? inArray(MailboxCustomDomain.id, includeIds.mailboxCustomDomains) : undefined,
-                forceIncludeMailboxes ? inArray(MailboxCustomDomain.mailboxId, forceIncludeMailboxes) : undefined
+        db
+            .select()
+            .from(MailboxCustomDomain)
+            .where(
+                and(
+                    inArray(MailboxCustomDomain.mailboxId, mailboxIds),
+                    or(
+                        gte(MailboxCustomDomain.updatedAt, lastSyncDate),
+                        // includeIds.mailboxCustomDomains ? inArray(MailboxCustomDomain.id, includeIds.mailboxCustomDomains) : undefined,
+                        forceIncludeMailboxes
+                            ? inArray(MailboxCustomDomain.mailboxId, forceIncludeMailboxes)
+                            : undefined,
+                    ),
+                ),
+            ),
+        db
+            .select()
+            .from(DraftEmail)
+            .where(
+                and(
+                    inArray(DraftEmail.mailboxId, mailboxIds),
+                    or(
+                        gte(DraftEmail.updatedAt, lastSyncDate),
+                        includeIds.draftEmails ? inArray(DraftEmail.id, includeIds.draftEmails) : undefined,
+                        forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined,
+                    ),
+                ),
             )
-        )),
-        db.select().from(DraftEmail).where(and(
-            inArray(DraftEmail.mailboxId, mailboxIds),
-            or(
-                gte(DraftEmail.updatedAt, lastSyncDate),
-                includeIds.draftEmails ? inArray(DraftEmail.id, includeIds.draftEmails) : undefined,
-                forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined
-            )
-        )).limit(500),
+            .limit(500),
 
-        db.select({
-            ...getTableColumns(MailboxForUser),
-            username: User.username,
-        }).from(MailboxForUser).leftJoin(User, eq(MailboxForUser.userId, User.id)).where(and(
-            inArray(MailboxForUser.mailboxId, mailboxIds),
-            // not(eq(MailboxForUser.userId, currentUserid)),
-            or(
-                gte(MailboxForUser.updatedAt, lastSyncDate),
-                gte(User.updatedAt, lastSyncDate),
-                forceIncludeMailboxes ? inArray(MailboxForUser.mailboxId, forceIncludeMailboxes) : undefined,
-            )
-        )),
+        db
+            .select({
+                ...getTableColumns(MailboxForUser),
+                username: User.username,
+            })
+            .from(MailboxForUser)
+            .leftJoin(User, eq(MailboxForUser.userId, User.id))
+            .where(
+                and(
+                    inArray(MailboxForUser.mailboxId, mailboxIds),
+                    // not(eq(MailboxForUser.userId, currentUserid)),
+                    or(
+                        gte(MailboxForUser.updatedAt, lastSyncDate),
+                        gte(User.updatedAt, lastSyncDate),
+                        forceIncludeMailboxes ? inArray(MailboxForUser.mailboxId, forceIncludeMailboxes) : undefined,
+                    ),
+                ),
+            ),
 
         // db.select().from(DefaultDomain).where(and(/*gte(DefaultDomain.updatedAt, lastSyncDate), */eq(DefaultDomain.available, true))),
 
         // db.select().from(PasskeyCredentials).where(and(eq(PasskeyCredentials.userId, currentUserid), gte(PasskeyCredentials.updatedAt, lastSyncDate))),
         // db.select().from(UserNotification).where(and(eq(UserNotification.userId, currentUserid), gte(UserNotification.createdAt, lastSyncDate))),
-    ] as const)
+    ] as const);
 
     const [
         emailSenders,
@@ -725,16 +894,47 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
     let getMoreEmails = emails.length >= 500;
     while (getMoreEmails) {
         // get the rest of emails - just in 500 chunks
-        const restOfEmails = await db.select().from(Email).where(and(
-            inArray(Email.mailboxId, mailboxIds),
-            gte(Email.updatedAt, lastSyncDate),
-            forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined
-        )).limit(500).offset(emails.length)
+        const restOfEmails = await db
+            .select()
+            .from(Email)
+            .where(
+                and(
+                    inArray(Email.mailboxId, mailboxIds),
+                    gte(Email.updatedAt, lastSyncDate),
+                    forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined,
+                ),
+            )
+            .limit(500)
+            .offset(emails.length);
         const [emailSenders2, emailRecipients2, emailAttachments2] = await db.batch([
-            db.select().from(EmailSender).where(inArray(EmailSender.emailId, restOfEmails.map((e) => e.id))),
-            db.select().from(EmailRecipient).where(inArray(EmailRecipient.emailId, restOfEmails.map((e) => e.id))),
-            db.select().from(EmailAttachments).where(inArray(EmailAttachments.emailId, restOfEmails.map((e) => e.id))),
-        ])
+            db
+                .select()
+                .from(EmailSender)
+                .where(
+                    inArray(
+                        EmailSender.emailId,
+                        restOfEmails.map((e) => e.id),
+                    ),
+                ),
+            db
+                .select()
+                .from(EmailRecipient)
+                .where(
+                    inArray(
+                        EmailRecipient.emailId,
+                        restOfEmails.map((e) => e.id),
+                    ),
+                ),
+            db
+                .select()
+                .from(EmailAttachments)
+                .where(
+                    inArray(
+                        EmailAttachments.emailId,
+                        restOfEmails.map((e) => e.id),
+                    ),
+                ),
+        ]);
         emailSenders.push.apply(emailSenders, emailSenders2);
         emailRecipients.push.apply(emailRecipients, emailRecipients2);
         emailAttachments.push.apply(emailAttachments, emailAttachments2);
@@ -747,11 +947,18 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
 
     let getMoreDraftEmails = draftEmails.length >= 500;
     while (getMoreDraftEmails) {
-        const restOfDraftEmails = await db.select().from(DraftEmail).where(and(
-            inArray(DraftEmail.mailboxId, mailboxIds),
-            gte(DraftEmail.updatedAt, lastSyncDate),
-            forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined
-        )).limit(500).offset(draftEmails.length)
+        const restOfDraftEmails = await db
+            .select()
+            .from(DraftEmail)
+            .where(
+                and(
+                    inArray(DraftEmail.mailboxId, mailboxIds),
+                    gte(DraftEmail.updatedAt, lastSyncDate),
+                    forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined,
+                ),
+            )
+            .limit(500)
+            .offset(draftEmails.length);
         draftEmails.push.apply(draftEmails, restOfDraftEmails);
         if (restOfDraftEmails.length < 500) {
             getMoreDraftEmails = false;
@@ -801,6 +1008,5 @@ async function getChanges(lastSyncDate: Date, currentUser: InferSelectModel<type
         //     p256dh: undefined as never,
         //     auth: undefined as never,
         // })),
-    }
+    };
 }
-

@@ -63,7 +63,11 @@ export async function POST(request: Request) {
 
     // verify alias is valid (and user has access to it)
     const alias = await db.query.MailboxAlias.findFirst({
-        where: and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.alias, fromObj.email), eq(MailboxAlias.isDeleted, false)),
+        where: and(
+            eq(MailboxAlias.mailboxId, mailboxId),
+            eq(MailboxAlias.alias, fromObj.email),
+            eq(MailboxAlias.isDeleted, false),
+        ),
         columns: {
             name: true,
             alias: true,

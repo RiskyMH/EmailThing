@@ -80,7 +80,6 @@ export function generateRefreshToken() {
     return `${prefix}_${random}${checksum}`;
 }
 
-
 /** Function to verify last 6 digit checksum (works on emailthing and github tokens) */
 export function verifyTokenChecksum(token: string) {
     // const regex = (?<prefix>et_)_(?<random>[A-Za-z0-9]{30})(?<checksum>[A-Za-z0-9]{6})

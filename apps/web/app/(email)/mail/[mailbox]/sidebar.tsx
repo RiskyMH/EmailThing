@@ -174,7 +174,13 @@ const getCounts = cache(async (mailboxId: string) => {
         .select({ count: count() })
         .from(Email)
         .where(
-            and(eq(Email.mailboxId, mailboxId), eq(Email.isRead, false), isNull(Email.binnedAt), isNull(Email.tempId), eq(Email.isDeleted, false)),
+            and(
+                eq(Email.mailboxId, mailboxId),
+                eq(Email.isRead, false),
+                isNull(Email.binnedAt),
+                isNull(Email.tempId),
+                eq(Email.isDeleted, false),
+            ),
         )
         .execute();
 
@@ -193,7 +199,14 @@ const getCounts = cache(async (mailboxId: string) => {
     const tempEmails = await db
         .select({ count: count() })
         .from(Email)
-        .where(and(eq(Email.mailboxId, mailboxId), eq(Email.isRead, false), isNotNull(Email.tempId), eq(Email.isDeleted, false)))
+        .where(
+            and(
+                eq(Email.mailboxId, mailboxId),
+                eq(Email.isRead, false),
+                isNotNull(Email.tempId),
+                eq(Email.isDeleted, false),
+            ),
+        )
         .execute();
 
     return {

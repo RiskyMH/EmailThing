@@ -69,7 +69,6 @@ export async function POST(request: Request) {
         }
     }
 
-
     // get storage used and see if over limit
     const mailbox = await db.query.Mailbox.findFirst({
         where: and(eq(Mailbox.id, mailboxId), eq(Mailbox.isDeleted, false)),
@@ -224,19 +223,19 @@ async function getMailbox({ internal, zone, auth, to }: { internal: boolean; zon
 
     const alias = defaultDomain.tempDomain
         ? await db.query.TempAlias.findFirst({
-            where: and(eq(TempAlias.alias, to), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
-            columns: {
-                mailboxId: true,
-                id: true,
-            },
-        })
+              where: and(eq(TempAlias.alias, to), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
+              columns: {
+                  mailboxId: true,
+                  id: true,
+              },
+          })
         : await db.query.MailboxAlias.findFirst({
-            where: and(eq(MailboxAlias.alias, to), eq(MailboxAlias.isDeleted, false)),
-            columns: {
-                mailboxId: true,
-                id: true,
-            },
-        });
+              where: and(eq(MailboxAlias.alias, to), eq(MailboxAlias.isDeleted, false)),
+              columns: {
+                  mailboxId: true,
+                  id: true,
+              },
+          });
 
     if (defaultDomain.tempDomain) {
         return { mailboxId: alias?.mailboxId, tempId: alias?.id };

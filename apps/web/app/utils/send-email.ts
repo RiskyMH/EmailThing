@@ -12,7 +12,7 @@ export async function sendEmail(data: {
     to: string[];
     data: string | MIMEMessage;
     dkim?: { domain: string; selector?: string; privateKey: string };
-    important?: boolean
+    important?: boolean;
 }) {
     // check if the "from" gives spf
     // use 1.1.1.1 doh api
@@ -59,15 +59,14 @@ export async function sendEmail(data: {
                 domain: "emailthing.app", // d=
                 selector: "rsa", // s=
                 privateKey: env.EMAIL_DKIM_PRIVATE_KEY,
-            }
+            };
         } else if (domain === "emailthing.xyz" && env.EMAIL_DKIM_PRIVATE_KEY) {
             data.dkim = {
                 domain: "emailthing.xyz", // d=
                 selector: "emailthing.rsa", // s=
                 privateKey: env.EMAIL_DKIM_PRIVATE_KEY,
-            }
+            };
         } else {
-
         }
     }
 

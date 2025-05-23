@@ -23,4 +23,3 @@ db.batch = batch;
 export default db;
 export { schema, db };
 export * from "./schema";
-

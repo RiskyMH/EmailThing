@@ -166,7 +166,9 @@ export function RefreshButton({ className }: { className?: string }) {
             }}
             className={cn(className, "-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground ")}
         >
-            <RotateCcwIcon className={cn(isPending && "animate-spin animate-direction-reverse", "size-5 text-muted-foreground")} />
+            <RotateCcwIcon
+                className={cn(isPending && "animate-spin animate-direction-reverse", "size-5 text-muted-foreground")}
+            />
         </Button>
     );
 }

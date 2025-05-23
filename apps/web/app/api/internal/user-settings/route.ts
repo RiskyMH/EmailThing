@@ -13,9 +13,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { marked } from "marked";
 import { Mailbox as MimeMailbox, createMimeMessage } from "mimetext";
 
-
 export async function POST(request: Request) {
-    const origin = request.headers.get("origin")
+    const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
@@ -25,12 +24,11 @@ export async function POST(request: Request) {
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "authorization",
         "Access-Control-Allow-Credentials": "true",
-    }
-
+    };
 
     // type is search param
-    const type = new URL(request.url).searchParams.get("type")!
-    const date = new Date()
+    const type = new URL(request.url).searchParams.get("type")!;
+    const date = new Date();
 
     const currentUserid = await getSession(request);
     if (!currentUserid) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
@@ -40,7 +38,7 @@ export async function POST(request: Request) {
     });
     if (!currentUser) return Response.json({ message: { error: "User not found" } }, { status: 404, headers });
 
-    const data = await request.json()
+    const data = await request.json();
 
     const results = {
         "change-username": changeUsername,
@@ -52,8 +50,8 @@ export async function POST(request: Request) {
         "change-email": changeEmail,
         "change-public-email-status": changePublicEmailStatus,
         "leave-mailbox": leaveMailbox,
-    }
-    const result = await results[type as keyof typeof results](currentUserid, data)
+    };
+    const result = await results[type as keyof typeof results](currentUserid, data);
     if (!result) return new Response("Not allowed", { status: 403 });
 
     if ("error" in result) return Response.json({ message: result }, { status: 400, headers });
@@ -116,20 +114,22 @@ export async function POST(request: Request) {
 
     if (!sync[0]) return Response.json({ message: { error: "User not found?" } }, { status: 404, headers });
 
-    return Response.json({
-        message: result,
-        sync: {
-            user: sync[0],
-            passkeyCredentials: sync[1],
-            userNotifications: sync[2],
-            mailboxesForUser: sync[3],
-        }
-    } satisfies MappedPossibleDataResponse, { status: 200, headers })
+    return Response.json(
+        {
+            message: result,
+            sync: {
+                user: sync[0],
+                passkeyCredentials: sync[1],
+                userNotifications: sync[2],
+                mailboxesForUser: sync[3],
+            },
+        } satisfies MappedPossibleDataResponse,
+        { status: 200, headers },
+    );
 }
 
-
 export function OPTIONS(request: Request) {
-    const origin = request.headers.get("origin")
+    const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
@@ -139,43 +139,53 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
-        }
+        },
     });
 }
 
-export type PossibleData = ChangeUsernameData | ChangePasswordData | ChangeBackupEmailData | ChangePublicEmailData | AddPasskeyData | DeletePasskeyData | ChangeEmailData | ChangePublicEmailStatusData | LeaveMailboxData
+export type PossibleData =
+    | ChangeUsernameData
+    | ChangePasswordData
+    | ChangeBackupEmailData
+    | ChangePublicEmailData
+    | AddPasskeyData
+    | DeletePasskeyData
+    | ChangeEmailData
+    | ChangePublicEmailStatusData
+    | LeaveMailboxData;
 export type MappedPossibleData = {
-    "change-username": ChangeUsernameData,
-    "change-password": ChangePasswordData,
-    "change-backup-email": ChangeBackupEmailData,
-    "change-public-email": ChangePublicEmailData,
-    "add-passkey": AddPasskeyData,
-    "delete-passkey": DeletePasskeyData,
-    "change-email": ChangeEmailData,
-    "change-public-email-status": ChangePublicEmailStatusData,
-    "leave-mailbox": LeaveMailboxData,
-}
+    "change-username": ChangeUsernameData;
+    "change-password": ChangePasswordData;
+    "change-backup-email": ChangeBackupEmailData;
+    "change-public-email": ChangePublicEmailData;
+    "add-passkey": AddPasskeyData;
+    "delete-passkey": DeletePasskeyData;
+    "change-email": ChangeEmailData;
+    "change-public-email-status": ChangePublicEmailStatusData;
+    "leave-mailbox": LeaveMailboxData;
+};
 
-export type MappedPossibleDataResponse = {
-    message: {
-        success: string,
-        description?: string,
-    },
-    sync: {
-        user: Omit<InferSelectModel<typeof User>, "password">,
-        passkeyCredentials: Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">[],
-        userNotifications: Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">[],
-        mailboxesForUser: InferSelectModel<typeof MailboxForUser>[],
-    }
-} | {
-    message: {
-        error: string,
-    },
-}
-
+export type MappedPossibleDataResponse =
+    | {
+          message: {
+              success: string;
+              description?: string;
+          };
+          sync: {
+              user: Omit<InferSelectModel<typeof User>, "password">;
+              passkeyCredentials: Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">[];
+              userNotifications: Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">[];
+              mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
+          };
+      }
+    | {
+          message: {
+              error: string;
+          };
+      };
 
 export interface ChangeUsernameData {
-    newName: string
+    newName: string;
 }
 async function changeUsername(userId: string, data: ChangeUsernameData) {
     const username = data.newName;
@@ -214,8 +224,8 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
 }
 
 export interface ChangePasswordData {
-    oldPassword: string
-    newPassword: string
+    oldPassword: string;
+    newPassword: string;
 }
 // TODO: require sudo perms
 async function changePassword(session: string, userId: string, data: ChangePasswordData) {
@@ -239,23 +249,25 @@ async function changePassword(session: string, userId: string, data: ChangePassw
 
     // update password
     await db.batch([
-        db.update(User)
+        db
+            .update(User)
             .set({
                 password: await createPasswordHash(newPassword),
             })
             .where(eq(User.id, userId)),
 
         // invalidate sessions, but maybe the current one is fine to keep
-        db.delete(UserSession).where(and(eq(UserSession.userId, userId), not(eq(UserSession.token, session)))),
-    ])
+        db
+            .delete(UserSession)
+            .where(and(eq(UserSession.userId, userId), not(eq(UserSession.token, session)))),
+    ]);
 
     revalidatePath("/settings");
     return { success: "Your password has been updated." };
 }
 
-
 export interface ChangeBackupEmailData {
-    email: string
+    email: string;
 }
 async function changeBackupEmail(userId: string, data: ChangeBackupEmailData) {
     const email = data.email;
@@ -336,8 +348,8 @@ If you did not expect this email or have any questions, please contact us at con
 }
 
 export interface AddPasskeyData {
-    credential: Credential
-    name: string
+    credential: Credential;
+    name: string;
 }
 async function addPasskey(userId: string, data: AddPasskeyData) {
     const { credential, name } = data;
@@ -362,37 +374,39 @@ async function addPasskey(userId: string, data: AddPasskeyData) {
 }
 
 export interface DeletePasskeyData {
-    passkeyId: string
+    passkeyId: string;
 }
 async function deletePasskey(userId: string, data: DeletePasskeyData) {
     const { passkeyId } = data;
 
     await db
         .delete(PasskeyCredentials)
-        .where(and(eq(PasskeyCredentials.id, passkeyId), eq(PasskeyCredentials.userId, userId), eq(PasskeyCredentials.isDeleted, false)))
+        .where(
+            and(
+                eq(PasskeyCredentials.id, passkeyId),
+                eq(PasskeyCredentials.userId, userId),
+                eq(PasskeyCredentials.isDeleted, false),
+            ),
+        )
         .execute();
 
     return { success: "Passkey deleted" };
 }
 
 export interface ChangeEmailData {
-    email: string
+    email: string;
 }
 async function changeEmail(userId: string, data: ChangeEmailData) {
     const { email } = data;
 
-    await db
-        .update(User)
-        .set({ email })
-        .where(eq(User.id, userId))
-        .execute();
+    await db.update(User).set({ email }).where(eq(User.id, userId)).execute();
 
     revalidateTag(`user-${userId}`);
     return { success: "Your email has been updated." };
 }
 
 export interface ChangePublicEmailStatusData {
-    enabled: boolean
+    enabled: boolean;
 }
 async function changePublicEmailStatus(userId: string, data: ChangePublicEmailStatusData) {
     const { enabled } = data;
@@ -411,7 +425,7 @@ async function changePublicEmailStatus(userId: string, data: ChangePublicEmailSt
 }
 
 export interface ChangePublicEmailData {
-    email: string
+    email: string;
 }
 async function changePublicEmail(userId: string, data: ChangePublicEmailData) {
     const { email } = data;
@@ -429,9 +443,8 @@ async function changePublicEmail(userId: string, data: ChangePublicEmailData) {
     return { success: "Your public email has been updated." };
 }
 
-
 interface LeaveMailboxData {
-    mailboxId: string
+    mailboxId: string;
 }
 async function leaveMailbox(userId: string, data: LeaveMailboxData) {
     const { mailboxId } = data;
@@ -439,7 +452,11 @@ async function leaveMailbox(userId: string, data: LeaveMailboxData) {
 
     // check if they are owner
     const userRole = await db.query.MailboxForUser.findFirst({
-        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),
+        where: and(
+            eq(MailboxForUser.mailboxId, mailboxId),
+            eq(MailboxForUser.userId, currentUserId),
+            eq(MailboxForUser.isDeleted, false),
+        ),
         columns: {
             role: true,
         },
@@ -451,12 +468,14 @@ async function leaveMailbox(userId: string, data: LeaveMailboxData) {
 
     // remove user from mailbox
     await db
-        .update(MailboxForUser).set({
+        .update(MailboxForUser)
+        .set({
             isDeleted: true,
             joinedAt: new Date(),
             updatedAt: new Date(),
             role: "NONE",
-        }).where(
+        })
+        .where(
             and(
                 eq(MailboxForUser.mailboxId, mailboxId),
                 eq(MailboxForUser.userId, currentUserId),

@@ -21,7 +21,9 @@ export function UserAuthForm({ className, username, token, ...props }: UserAuthF
 
     async function onSubmit(data: FormData) {
         startTransition(async () => {
-            const signInResult = await resetPasswordWithToken(token, data.get("password") as string).catch(catchRedirectError);
+            const signInResult = await resetPasswordWithToken(token, data.get("password") as string).catch(
+                catchRedirectError,
+            );
 
             if (signInResult?.error) {
                 return void toast.error(signInResult.error);

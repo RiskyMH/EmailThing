@@ -1,3 +1,3 @@
-import { Form } from "react-router-dom"
+import { Form } from "react-router-dom";
 
-export default Form
+export default Form;

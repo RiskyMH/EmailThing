@@ -18,7 +18,11 @@ export function Form({ publicEmail, username }: { className?: string; publicEmai
             (window as any)?.turnstile?.reset();
 
             if (!document.querySelector(".cf-turnstile > div")) {
-                toast.error("Oh no, cloudflare is having issues displaying the verification to you :(", { description: () => <p className="text-foreground! italic">May need to refresh page to reset and try again</p>})
+                toast.error("Oh no, cloudflare is having issues displaying the verification to you :(", {
+                    description: () => (
+                        <p className="text-foreground! italic">May need to refresh page to reset and try again</p>
+                    ),
+                });
             }
         }
     }, [state]);

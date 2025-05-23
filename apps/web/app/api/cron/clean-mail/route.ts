@@ -30,9 +30,9 @@ export async function GET(request: NextRequest) {
             // or if its part of a expired temp alias
             tempAliases.length
                 ? inArray(
-                    Email.tempId,
-                    tempAliases.map((temp) => temp.id),
-                )
+                      Email.tempId,
+                      tempAliases.map((temp) => temp.id),
+                  )
                 : undefined,
         ),
         columns: {
@@ -84,55 +84,58 @@ export async function GET(request: NextRequest) {
                 isStarred: false,
                 // tempId: null,
                 createdAt: new Date(),
-            }).where(
+            })
+            .where(
                 emails.length
                     ? inArray(
-                        Email.id,
-                        emails.map((email) => email.id),
-                    )
+                          Email.id,
+                          emails.map((email) => email.id),
+                      )
                     : sql`1 = 0`,
-
             ),
 
         db.delete(EmailSender).where(
             emails.length
                 ? inArray(
-                    EmailSender.emailId,
-                    emails.map((email) => email.id),
-                )
+                      EmailSender.emailId,
+                      emails.map((email) => email.id),
+                  )
                 : sql`1 = 0`,
         ),
         db.delete(EmailRecipient).where(
             emails.length
                 ? inArray(
-                    EmailRecipient.emailId,
-                    emails.map((email) => email.id),
-                )
+                      EmailRecipient.emailId,
+                      emails.map((email) => email.id),
+                  )
                 : sql`1 = 0`,
         ),
         db.delete(EmailAttachments).where(
             emails.length
                 ? inArray(
-                    EmailAttachments.emailId,
-                    emails.map((email) => email.id),
-                )
+                      EmailAttachments.emailId,
+                      emails.map((email) => email.id),
+                  )
                 : sql`1 = 0`,
         ),
 
-        db.update(TempAlias).set({
-            isDeleted: true,
-            createdAt: new Date(),
-            name: "<deleted>",
-            updatedAt: new Date(),
-            // alias: "<deleted>",
-        }).where(
-            tempAliases.length
-                ? inArray(
-                    TempAlias.id,
-                    tempAliases.map((temp) => temp.id),
-                )
-                : sql`1 = 0`,
-        ),
+        db
+            .update(TempAlias)
+            .set({
+                isDeleted: true,
+                createdAt: new Date(),
+                name: "<deleted>",
+                updatedAt: new Date(),
+                // alias: "<deleted>",
+            })
+            .where(
+                tempAliases.length
+                    ? inArray(
+                          TempAlias.id,
+                          tempAliases.map((temp) => temp.id),
+                      )
+                    : sql`1 = 0`,
+            ),
 
         ...emails.map((email) =>
             db

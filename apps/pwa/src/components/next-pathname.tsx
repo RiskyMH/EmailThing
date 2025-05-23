@@ -1,32 +1,31 @@
-import { useHref, useNavigate, useSearchParams as useSearchParamsReact, } from "react-router-dom";
+import { useHref, useNavigate, useSearchParams as useSearchParamsReact } from "react-router-dom";
 
 export const usePathname = () => {
-    const pathname = useHref({})
-    return pathname
-}
+  const pathname = useHref({});
+  return pathname;
+};
 
 export const useRouter = () => {
-    const navigate = useNavigate()
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
+  const navigate = useNavigate();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-    return {
-        navigate,
-        pathname,
-        searchParams,
-        push: (path: string) => navigate(path),
-        replace: (path: string) => navigate(path, { replace: true }),
-        refresh: async () => new Promise((resolve) => setTimeout(resolve, 100)),
-        back: () => navigate(-1),
-    }
-}
+  return {
+    navigate,
+    pathname,
+    searchParams,
+    push: (path: string) => navigate(path),
+    replace: (path: string) => navigate(path, { replace: true }),
+    refresh: async () => new Promise((resolve) => setTimeout(resolve, 100)),
+    back: () => navigate(-1),
+  };
+};
 
 export const useSearchParams = () => {
-    // const searchParams = useSearchParamsReact()
-    // return searchParams
+  // const searchParams = useSearchParamsReact()
+  // return searchParams
 
-    // returns an object with .get
-    const searchParams = useSearchParamsReact()
-    return searchParams[0]
-}
-
+  // returns an object with .get
+  const searchParams = useSearchParamsReact();
+  return searchParams[0];
+};
