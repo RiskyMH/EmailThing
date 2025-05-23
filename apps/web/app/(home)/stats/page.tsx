@@ -68,7 +68,7 @@ export default async function StatsPage(props: { searchParams?: Promise<{ view: 
 
     const [githubStars, [stats, statsPrev]] = await Promise.all([
         fetchAllStars(),
-        db.batchUpdate([
+        db.batchFetch([
             db.query.Stats.findMany({
                 where: inArray(Stats.time, last30DaysDates as any[]),
             }),
