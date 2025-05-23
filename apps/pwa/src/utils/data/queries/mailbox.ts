@@ -51,11 +51,6 @@ export async function getMailboxCustomDomains(mailboxId: string) {
   return customDomains;
 }
 
-export async function getMailboxTokens(mailboxId: string) {
-  const tokens = await db.mailboxTokens.where("mailboxId").equals(mailboxId).toArray();
-  return tokens;
-}
-
 export async function getMailboxUsers(mailboxId: string) {
   const users = await db.mailboxForUser.where("mailboxId").equals(mailboxId).toArray();
   return users;

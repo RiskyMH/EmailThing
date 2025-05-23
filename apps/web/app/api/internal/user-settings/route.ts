@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     if ("error" in result) return Response.json({ message: result }, { status: 400, headers });
 
-    const sync = await db.batch([
+    const sync = await db.batchUpdate([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
             columns: {
@@ -250,7 +250,7 @@ async function changePassword(session: string, userId: string, data: ChangePassw
     if (newPassword.length < 8) return { error: "Password needs to be at least 8 characters" };
 
     // update password
-    await db.batch([
+    await db.batchUpdate([
         db
             .update(User)
             .set({

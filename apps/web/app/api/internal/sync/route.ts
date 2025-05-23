@@ -83,7 +83,7 @@ export async function GET(request: Request) {
             },
         });
 
-    const [currentUser, mailboxesForUser] = await db.batch([
+    const [currentUser, mailboxesForUser] = await db.batchFetch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
         }),
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
             },
         });
 
-    const [currentUser, mailboxesForUser] = await db.batch([
+    const [currentUser, mailboxesForUser] = await db.batchFetch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
         }),
@@ -585,7 +585,7 @@ export async function POST(request: Request) {
         }
     }
 
-    await db.batch(changes as any);
+    await db.batchUpdate(changes as any);
 
     const failedIds: Record<string, string[]> = {};
     for (const error of errors) {
@@ -709,7 +709,7 @@ async function getMinimalChanges(
         .limit(50);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
-    const b = await db.batch([
+    const b = await db.batchFetch([
         // get the email metadata
         db
             .select()
@@ -780,7 +780,7 @@ async function getChanges(
         .limit(500);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
-    const b = await db.batch([
+    const b = await db.batchFetch([
         // get the email metadata
         db
             .select()
@@ -912,7 +912,7 @@ async function getChanges(
             )
             .limit(500)
             .offset(emails.length);
-        const [emailSenders2, emailRecipients2, emailAttachments2] = await db.batch([
+        const [emailSenders2, emailRecipients2, emailAttachments2] = await db.batchFetch([
             db
                 .select()
                 .from(EmailSender)

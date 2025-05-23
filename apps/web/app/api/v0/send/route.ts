@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     const size = (data.html || "").length + (data.text || "").length;
 
     // add to sent folder
-    await db.batch([
+    await db.batchUpdate([
         db.insert(Email).values({
             id: emailId,
             body: data.text || "",

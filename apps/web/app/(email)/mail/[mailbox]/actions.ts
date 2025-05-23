@@ -96,7 +96,7 @@ export async function deleteEmail(mailboxId: string, emailId: string, type: Emai
         ),
     ]);
 
-    await db.batch([
+    await db.batchUpdate([
         // db.delete(Email).where(and(eq(Email.id, emailId), eq(Email.mailboxId, mailboxId))),
         db
             .update(Email)

@@ -26,7 +26,7 @@ import { userAdminCheck } from "./tools";
 export default async function AdminPage() {
     const user = await userAdminCheck();
 
-    const [users, usersCount, aliases, aliasesCount, defaultDomains] = await db.batch([
+    const [users, usersCount, aliases, aliasesCount, defaultDomains] = await db.batchFetch([
         db.query.User.findMany({
             orderBy: desc(User.createdAt),
             // limit: 5

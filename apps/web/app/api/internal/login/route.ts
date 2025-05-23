@@ -118,7 +118,7 @@ export async function POST(request: Request) {
         const tokenExpiresAt = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
         const refreshTokenExpiresAt = new Date(Date.now() + 1 * 365 * 24 * 60 * 60 * 1000);
 
-        const [mailboxes, _] = await db.batch([
+        const [mailboxes, _] = await db.batchFetch([
             db.query.MailboxForUser.findMany({
                 where: eq(MailboxForUser.userId, user.id),
                 columns: { mailboxId: true },

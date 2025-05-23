@@ -30,7 +30,7 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
     }
 
     // check if mailbox plan allows for more than 1 custom domain
-    const [mailbox, customDomains, exists] = await db.batch([
+    const [mailbox, customDomains, exists] = await db.batchFetch([
         db.query.Mailbox.findFirst({
             where: eq(Mailbox.id, mailboxId),
             columns: {
@@ -140,7 +140,7 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
     }
 
     // check if domain is a custom domain (and they have access to it) or just a default domain
-    const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batch([
+    const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batchFetch([
         db.query.DefaultDomain.findFirst({
             where: and(
                 eq(DefaultDomain.domain, alias.split("@")[1]),
@@ -257,7 +257,7 @@ export async function changeDefaultAlias(mailboxId: string, defaultAliasId: stri
     }
 
     // edit alias
-    await db.batch([
+    await db.batchUpdate([
         db
             .update(MailboxAlias)
             .set({
@@ -365,7 +365,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
     }
 
     // also delete all aliases with that domain
-    await db.batch([
+    await db.batchUpdate([
         db
             .update(MailboxCustomDomain)
             .set({
@@ -550,7 +550,7 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
     }
 
     // check how many users are in the mailbox
-    const [mailboxUsers, mailbox] = await db.batch([
+    const [mailboxUsers, mailbox] = await db.batchFetch([
         db
             .select({ count: count() })
             .from(MailboxForUser)

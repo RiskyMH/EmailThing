@@ -78,7 +78,7 @@ export async function POST(request: Request) {
         }
 
         // get default mailbox alias and send email
-        const [alias] = await db.batch([
+        const [alias] = await db.batchFetch([
             db.query.MailboxAlias.findFirst({
                 where: eq(MailboxAlias.mailboxId, token.mailboxId),
                 columns: {

@@ -125,7 +125,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     const emailId = draftId; // could also make new id here
 
     // add to sent folder
-    await db.batch([
+    await db.batchUpdate([
         db.insert(Email).values({
             id: emailId,
             body: text || "",

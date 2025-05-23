@@ -212,7 +212,7 @@ export async function resetPasswordWithToken(token: string, password: string) {
         return { error: "Invalid token" };
     }
 
-    await db.batch([
+    await db.batchUpdate([
         db
             .update(User)
             .set({

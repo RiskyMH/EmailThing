@@ -72,7 +72,7 @@ export default async function signUp(
     const userId = createId();
     const mailboxId = createId();
 
-    await db.batch([
+    await db.batchUpdate([
         db.insert(User).values({
             id: userId,
             username: parsedData.data.username,

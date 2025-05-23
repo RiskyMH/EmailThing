@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     for (const id of email.references?.split(" ") ?? []) references.add(id);
 
     const emailId = createId();
-    await db.batch([
+    await db.batchUpdate([
         db.insert(Email).values({
             id: emailId,
             raw: "s3",
