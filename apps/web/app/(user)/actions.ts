@@ -9,7 +9,7 @@ import { sendEmail } from "@/utils/send-email";
 import { userAuthSchema } from "@/validations/auth";
 import { impersonatingEmails } from "@/validations/invalid-emails";
 import { createId } from "@paralleldrive/cuid2";
-import { and, eq, not } from "drizzle-orm";
+import { and, eq, not, sql } from "drizzle-orm";
 import { marked } from "marked";
 import { Mailbox as MimeMailbox, createMimeMessage } from "mimetext";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -23,7 +23,7 @@ export async function changeUsername(_prevState: any, data: FormData) {
 
     // check if taken (but not by the user)
     const existingUser = await db.query.User.findFirst({
-        where: and(eq(User.username, username), not(eq(User.id, userId))),
+        where: and(eq(sql`lower(${User.username})`, sql`lower(${username})`), not(eq(User.id, userId))),
     });
 
     if (existingUser) return { error: "Username already taken" };

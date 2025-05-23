@@ -5,7 +5,7 @@ import { createPasswordHash } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth";
 import { impersonatingEmails } from "@/validations/invalid-emails";
 import { createId } from "@paralleldrive/cuid2";
-import { and, eq, gte, isNull } from "drizzle-orm";
+import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -16,7 +16,7 @@ const noInvite = {
 
 export default async function signUp(
     data: FormData,
-): Promise<{ error?: string | null; link?: { m: string; l: string } }> {
+): Promise<{ error?: string | null; link?: { m: string; l: string } } | void> {
     const parsedData = userAuthSchema.safeParse({
         username: data.get("username"),
         password: data.get("password"),
@@ -52,7 +52,7 @@ export default async function signUp(
     }
 
     const existingUser = await db.query.User.findFirst({
-        where: eq(User.username, parsedData.data.username),
+        where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
     });
 
     if (existingUser) {
@@ -61,7 +61,7 @@ export default async function signUp(
 
     // check email alaises to
     const existingEmail = await db.query.MailboxAlias.findFirst({
-        where: eq(MailboxAlias.alias, `${parsedData.data.username}@emailthing.xyz`),
+        where: eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${parsedData.data.username}@emailthing.xyz)`),
     });
 
     if (existingEmail) {

@@ -213,7 +213,7 @@ async function getMailbox({ internal, zone, auth, to }: { internal: boolean; zon
 
     // check if its a default domain (and if so, check the alias and get the mailbox id)
     const defaultDomain = await db.query.DefaultDomain.findFirst({
-        where: and(eq(DefaultDomain.domain, zone), eq(DefaultDomain.authKey, auth), eq(DefaultDomain.isDeleted, false)),
+        where: and(eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${zone})`), eq(DefaultDomain.authKey, auth), eq(DefaultDomain.isDeleted, false)),
         columns: {
             id: true,
             tempDomain: true,
@@ -223,14 +223,14 @@ async function getMailbox({ internal, zone, auth, to }: { internal: boolean; zon
 
     const alias = defaultDomain.tempDomain
         ? await db.query.TempAlias.findFirst({
-              where: and(eq(TempAlias.alias, to), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
+              where: and(eq(sql`lower(${TempAlias.alias})`, sql`lower(${to})`), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
               columns: {
                   mailboxId: true,
                   id: true,
               },
           })
         : await db.query.MailboxAlias.findFirst({
-              where: and(eq(MailboxAlias.alias, to), eq(MailboxAlias.isDeleted, false)),
+              where: and(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${to})`), eq(MailboxAlias.isDeleted, false)),
               columns: {
                   mailboxId: true,
                   id: true,

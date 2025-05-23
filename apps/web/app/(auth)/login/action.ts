@@ -6,7 +6,7 @@ import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { sendEmail } from "@/utils/send-email";
 import { userAuthSchema } from "@/validations/auth";
 import { createId } from "@paralleldrive/cuid2";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { createMimeMessage } from "mimetext";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -150,7 +150,7 @@ async function handleUserRedirection(
 
 export async function resetPassword(username: string) {
     const user = await db.query.User.findFirst({
-        where: eq(User.username, username),
+        where: eq(sql`lower(${User.username})`, sql`lower(${username})`),
         columns: {
             id: true,
             backupEmail: true,

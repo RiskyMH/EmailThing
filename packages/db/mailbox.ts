@@ -1,7 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
-import { index, integer, primaryKey, pgTable, text, unique, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
-import { nocaseText, sensitiveText } from "./custom-drizzle";
+import { relations, sql,  } from "drizzle-orm";
+import { index, integer, primaryKey, pgTable, text, unique, varchar, timestamp, boolean, uniqueIndex } from "drizzle-orm/pg-core";
+import { caseSensitiveText, nocaseText } from "./custom-drizzle";
 import { Email } from "./email";
 import { User } from "./user";
 
@@ -67,6 +67,8 @@ export const MailboxAlias = pgTable(
             unique: unique("mailbox_aliases_unique").on(table.alias, table.mailboxId),
             alias: unique("mailbox_aliases_alias").on(table.alias),
             updatedMailboxIdx: index("mailbox_alias_updated_idx").on(table.updatedAt, table.mailboxId),
+            aliasLower: index("mailbox_alias_alias_lower_idx").on(sql`lower(${table.alias})`),
+            uniqueAlias: uniqueIndex("mailbox_alias_alias_unique").on(sql`lower(${table.alias})`),
         };
     },
 );
@@ -107,6 +109,8 @@ export const TempAlias = pgTable(
         return {
             idx: index("temp_aliases_idx").on(table.mailboxId, table.alias),
             unique: unique("temp_aliases_unique").on(table.alias, table.mailboxId),
+            aliasLower: index("temp_aliases_alias_lower_idx").on(sql`lower(${table.alias})`),
+            uniqueAlias: uniqueIndex("temp_aliases_alias_unique").on(sql`lower(${table.alias})`),
         };
     },
 );
@@ -146,6 +150,8 @@ export const MailboxCustomDomain = pgTable(
         return {
             unique: unique("mailbox_custom_domain_unique").on(table.domain, table.mailboxId),
             updatedMailboxIdx: index("mailbox_domain_updated_idx").on(table.updatedAt, table.mailboxId),
+            domainLower: index("mailbox_domain_domain_lower_idx").on(sql`lower(${table.domain})`),
+            uniqueDomain: uniqueIndex("mailbox_domain_domain_unique").on(sql`lower(${table.domain})`),
         };
     },
 );
@@ -165,7 +171,7 @@ export const MailboxTokens = pgTable(
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        token: sensitiveText("token", { length: 50 }).unique().notNull(),
+        token: caseSensitiveText("token", { length: 50 }).unique().notNull(),
         mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),

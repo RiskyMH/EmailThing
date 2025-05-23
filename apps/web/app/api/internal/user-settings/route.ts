@@ -1,7 +1,7 @@
 import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { db, MailboxForUser, PasskeyCredentials, UserNotification, UserSession } from "@/db";
 import { User } from "@/db";
-import { and, eq, gte, not, type InferSelectModel } from "drizzle-orm";
+import { and, eq, gte, not, sql, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { isValidOrigin, getSession } from "../tools";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -194,7 +194,7 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
 
     // check if taken (but not by the user)
     const existingUser = await db.query.User.findFirst({
-        where: and(eq(User.username, username), not(eq(User.id, userId))),
+        where: and(eq(sql`lower(${User.username})`, sql`lower(${username})`), not(eq(User.id, userId))),
     });
 
     if (existingUser) return { error: "Username already taken" };

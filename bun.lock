@@ -55,7 +55,6 @@
         "@block65/webcrypto-web-push": "^1.0.2",
         "@emailthing/db": "workspace:^",
         "@github/webauthn-json": "^2.1.1",
-        "@libsql/client": "0.15.2",
         "@paralleldrive/cuid2": "^2.2.2",
         "@radix-ui/react-avatar": "1.1.2",
         "@radix-ui/react-checkbox": "1.1.3",
@@ -165,6 +164,7 @@
     "packages/db2": {
       "name": "@emailthing/db2",
       "dependencies": {
+        "@libsql/client": "0.15.2",
         "@paralleldrive/cuid2": "^2.2.2",
         "drizzle-kit": "^0.30.6",
         "drizzle-orm": "^0.41.0",

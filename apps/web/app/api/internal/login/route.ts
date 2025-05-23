@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyPassword } from "@/utils/password";
 import { db, MailboxForUser, UserSession } from "@/db";
 import { User } from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { createUserToken } from "@/utils/jwt";
 import { isValidOrigin } from "../tools";
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 
         // Find user
         const user = await db.query.User.findFirst({
-            where: eq(User.username, parsedData.data.username),
+            where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
             columns: {
                 id: true,
                 password: true,

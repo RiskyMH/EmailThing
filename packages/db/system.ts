@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, integer, primaryKey, pgTable, text, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
+import { index, integer, primaryKey, pgTable, text, varchar, timestamp, boolean, uniqueIndex } from "drizzle-orm/pg-core";
 import { nocaseText } from "./custom-drizzle";
+import { sql } from "drizzle-orm";
 
 // Default Domains
 export const DefaultDomain = pgTable(
@@ -31,6 +32,8 @@ export const DefaultDomain = pgTable(
         return {
             availableIdx: index("default_domain_available").on(table.available),
             idx: index("default_domains_idx").on(table.domain, table.authKey),
+            domainLower: index("default_domains_domain_lower_idx").on(sql`lower(${table.domain})`),
+            uniqueDomain: uniqueIndex("default_domains_domain_unique_").on(sql`lower(${table.domain})`),
         };
     },
 );

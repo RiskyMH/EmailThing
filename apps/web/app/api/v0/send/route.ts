@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     const alias = await db.query.MailboxAlias.findFirst({
         where: and(
             eq(MailboxAlias.mailboxId, mailboxId),
-            eq(MailboxAlias.alias, fromObj.email),
+            eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${fromObj.email})`),
             eq(MailboxAlias.isDeleted, false),
         ),
         columns: {

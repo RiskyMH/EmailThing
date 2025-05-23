@@ -4,7 +4,7 @@ import { makeHtml } from "@/(email)/mail/[mailbox]/draft/[draft]/tools";
 import db, { User } from "@/db";
 import { env } from "@/utils/env";
 import { sendEmail } from "@/utils/send-email";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Mailbox, createMimeMessage } from "mimetext";
 import { headers } from "next/headers";
 import { parse as markedParse } from "marked";
@@ -20,7 +20,7 @@ export async function emailMeForm(
 ): Promise<{ error?: string; success?: string } | undefined> {
     const username = data.get("username") as string;
     const user = await db.query.User.findFirst({
-        where: and(eq(User.username, username), eq(User.publicContactPage, true)),
+        where: and(eq(sql`lower(${User.username})`, sql`lower(${username})`), eq(User.publicContactPage, true)),
         columns: {
             username: true,
             email: true,

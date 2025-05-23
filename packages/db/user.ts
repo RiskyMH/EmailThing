@@ -1,7 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
-import { index, integer, pgTable, text, varchar, timestamp, boolean, json } from "drizzle-orm/pg-core";
-import { nocaseText, sensitiveText } from "./custom-drizzle";
+import { relations, sql } from "drizzle-orm";
+import { index, integer, pgTable, text, varchar, timestamp, boolean, json, uniqueIndex } from "drizzle-orm/pg-core";
+import { nocaseText, caseSensitiveText } from "./custom-drizzle";
 import { MailboxForUser } from "./mailbox";
 
 // The User
@@ -33,6 +33,8 @@ export const User = pgTable(
     (table) => ({
         usernameIdx: index("user_username").on(table.username),
         updatedAtIdx: index("user_updated_at_idx").on(table.updatedAt),
+        usernameLower: index("user_username_lower_idx").on(sql`lower(${table.username})`),
+        uniqueUsername: uniqueIndex("user_username_unique").on(sql`lower(${table.username})`),
     }),
 );
 
@@ -59,13 +61,13 @@ export const UserSession = pgTable("user_sessions", {
     lastUsed: json("last_used")
         .$type<{ date: Date, ip: string, ua: string, location: string }>()
         .$defaultFn(() => ({ date: new Date(), ip: "", ua: "", location: "" })),
-    token: varchar("token", { length: 100 })
+    token: caseSensitiveText("token", { length: 100 })
         .notNull()
         .unique()
         .$defaultFn(() => createId()),
     tokenExpiresAt: timestamp("token_expires_at")
         .notNull(),
-    refreshToken: varchar("refresh_token", { length: 100 })
+    refreshToken: caseSensitiveText("refresh_token", { length: 100 })
         .notNull()
         .unique(),
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at")
@@ -157,7 +159,7 @@ export const UserNotificationRelations = relations(UserNotification, ({ many, on
 export const ResetPasswordToken = pgTable(
     "reset_password_tokens",
     {
-        token: sensitiveText("token", { length: 25 })
+        token: caseSensitiveText("token", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
