@@ -109,8 +109,8 @@ export const EmailSender = pgTable("email_senders", {
         .notNull()
         .primaryKey()
         .references(() => Email.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 20_55 }),
-    address: varchar("address", { length: 20_55 }).notNull(),
+    name: varchar("name", { length: 20_055 }),
+    address: varchar("address", { length: 20_055 }).notNull(),
 });
 
 export const EmailSenderRelations = relations(EmailSender, ({ one }) => ({
