@@ -163,7 +163,7 @@ export async function POST(request: Request) {
     // after that, update the database and return lastsynced object
 
     const errors: { key: string; id?: string | null; error: string; moreInfo?: string }[] = [];
-    const changes = [] as BatchItem<"sqlite">[];
+    const changes = [] as BatchItem<"pg">[];
 
     for (const key in body) {
         if (key === "emails") {
