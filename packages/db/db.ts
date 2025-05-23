@@ -12,17 +12,17 @@ import type { BatchItem, BatchResponse } from "drizzle-orm/batch"
 async function batch<U extends BatchItem<'pg'>, T extends Readonly<[U, ...U[]]>>(
     queries: T,
 ): Promise<BatchResponse<T>> {
-    const results: any[] = [];
+    const results: BatchResponse<T> = [] as BatchResponse<T>;
     await db.transaction(async (tx) => {
-        // test it works
         for (const query of queries) {
-            console.log(query);
-            // tx.setTransaction
+            // @ts-ignore
             const res = await tx.execute(query);
-            console.log(res);
+            // @ts-ignore
             if (query.mode === "first") {
+                // @ts-ignore
                 results.push(res.rows[0]);
             } else {
+                // @ts-ignore
                 results.push(res.rows);
             }
         }
