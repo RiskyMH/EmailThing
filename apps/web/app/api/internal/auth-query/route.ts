@@ -14,6 +14,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "GET, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "authorization",
         "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Max-Age": "3600",
     };
 
     const currentUserid = await getSession(request);

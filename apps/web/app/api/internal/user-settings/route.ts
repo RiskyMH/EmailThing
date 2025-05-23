@@ -24,6 +24,7 @@ export async function POST(request: Request) {
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "authorization",
         "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Max-Age": "3600",
     };
 
     // type is search param
@@ -139,6 +140,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }
@@ -167,22 +169,22 @@ export type MappedPossibleData = {
 
 export type MappedPossibleDataResponse =
     | {
-          message: {
-              success: string;
-              description?: string;
-          };
-          sync: {
-              user: Omit<InferSelectModel<typeof User>, "password">;
-              passkeyCredentials: Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">[];
-              userNotifications: Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">[];
-              mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
-          };
-      }
+        message: {
+            success: string;
+            description?: string;
+        };
+        sync: {
+            user: Omit<InferSelectModel<typeof User>, "password">;
+            passkeyCredentials: Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">[];
+            userNotifications: Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">[];
+            mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
+        };
+    }
     | {
-          message: {
-              error: string;
-          };
-      };
+        message: {
+            error: string;
+        };
+    };
 
 export interface ChangeUsernameData {
     newName: string;

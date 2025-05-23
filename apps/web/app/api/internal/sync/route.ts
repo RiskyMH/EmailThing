@@ -45,6 +45,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }
@@ -78,6 +79,7 @@ export async function GET(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         });
 
@@ -99,6 +101,7 @@ export async function GET(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         });
     }
@@ -116,6 +119,7 @@ export async function GET(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         },
     );
@@ -142,6 +146,7 @@ export async function POST(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         });
 
@@ -616,6 +621,7 @@ export async function POST(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         },
     );
@@ -641,12 +647,12 @@ export type ChangesRequest = {
         subject?: string | null;
         from?: string | null;
         to?:
-            | {
-                  name: string | null;
-                  address: string;
-                  cc?: "cc" | "bcc" | null;
-              }[]
-            | null;
+        | {
+            name: string | null;
+            address: string;
+            cc?: "cc" | "bcc" | null;
+        }[]
+        | null;
         headers?: { key: string; value: string }[];
         hardDelete?: boolean;
         lastUpdated?: DateString;

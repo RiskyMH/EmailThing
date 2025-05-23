@@ -13,6 +13,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }
@@ -34,6 +35,7 @@ export async function DELETE(request: Request) {
                     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
                     "Access-Control-Allow-Headers": "authorization",
                     "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
                 },
             },
         );
@@ -48,6 +50,7 @@ export async function DELETE(request: Request) {
                     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
                     "Access-Control-Allow-Headers": "authorization",
                     "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
                 },
             },
         );
@@ -62,6 +65,7 @@ export async function DELETE(request: Request) {
                     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
                     "Access-Control-Allow-Headers": "authorization",
                     "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
                 },
             },
         );
@@ -76,6 +80,7 @@ export async function DELETE(request: Request) {
                 "Access-Control-Allow-Methods": "DELETE, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         },
     );

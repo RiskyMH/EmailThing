@@ -14,6 +14,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
                     "Access-Control-Allow-Methods": "POST, OPTIONS",
                     "Access-Control-Allow-Headers": "authorization",
                     "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
                 },
             },
         );
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
                     "Access-Control-Allow-Methods": "POST, OPTIONS",
                     "Access-Control-Allow-Headers": "authorization",
                     "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
                 },
             },
         );
@@ -76,6 +79,7 @@ export async function POST(request: Request) {
                         "Access-Control-Allow-Methods": "POST, OPTIONS",
                         "Access-Control-Allow-Headers": "authorization",
                         "Access-Control-Allow-Credentials": "true",
+                        "Access-Control-Max-Age": "3600",
                     },
                 },
             );
@@ -118,6 +122,7 @@ export async function POST(request: Request) {
                     "Access-Control-Allow-Methods": "POST, OPTIONS",
                     "Access-Control-Allow-Headers": "authorization",
                     "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
                 },
             },
         );
@@ -132,6 +137,7 @@ export async function POST(request: Request) {
                     "Access-Control-Allow-Methods": "POST, OPTIONS",
                     "Access-Control-Allow-Headers": "authorization",
                     "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Max-Age": "3600",
                 },
             },
         );
