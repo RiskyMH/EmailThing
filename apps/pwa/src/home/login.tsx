@@ -135,8 +135,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       // await db.open()
       await initializeDB();
 
-      const saveSyncData = (userId: string) =>
-        db.localSyncData.put(
+      const saveSyncData = async (userId: string) => {
+        await db.localSyncData.clear();
+        await db.localSyncData.put(
           {
             token,
             refreshToken,
@@ -149,6 +150,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           },
           userId,
         );
+      }
 
       if (username) {
         const existing = await db.localSyncData.get(data.userId);

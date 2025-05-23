@@ -9,6 +9,7 @@ const _db = process.versions.bun
 
 import type { BatchItem, BatchResponse } from "drizzle-orm/batch"
 
+
 async function batch<U extends BatchItem<'pg'>, T extends Readonly<[U, ...U[]]>>(
     queries: T,
 ): Promise<BatchResponse<T>> {
@@ -17,14 +18,31 @@ async function batch<U extends BatchItem<'pg'>, T extends Readonly<[U, ...U[]]>>
         for (const query of queries) {
             // @ts-ignore
             const res = await tx.execute(query);
+
+            // if its a builded query, we need to map the columns to the JS names (from db ones)
             // @ts-ignore
-            if (query.mode === "first") {
+            if (query.table) {
                 // @ts-ignore
-                results.push(res.rows[0]);
-            } else {
-                // @ts-ignore
-                results.push(res.rows);
+                const table = Object.keys(query.table).reduce((acc, k) => {
+                    // @ts-ignore
+                    acc[query.table[k].name] = k;
+                    return acc;
+                }, {} as Record<string, any>);
+                
+                for (const row of res.rows) {
+                    for (const [column, value] of Object.entries(row)) {
+                        const maybe = table[column];
+                        if (maybe) {
+                            row[maybe] = value;
+                            delete row[column];
+                        }
+                    }
+                }
             }
+            
+            // if its a build query with findFirst, we need to return the first row
+            // @ts-ignore
+            results.push(query.mode === "first" ? res.rows[0] : res.rows);
         }
     });
     return results;
