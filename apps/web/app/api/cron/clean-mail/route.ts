@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         }),
     );
 
-    await db.batch([
+    await db.batchUpdate([
         // delete from db
         db
             .update(Email)

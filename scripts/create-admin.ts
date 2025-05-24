@@ -13,7 +13,7 @@ if (!(username && password)) {
 const userId = createId();
 const mailboxId = createId();
 
-await db.batch([
+await db.batchUpdate([
     db.insert(User).values({
         id: userId,
         username,

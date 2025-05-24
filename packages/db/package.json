@@ -2,9 +2,11 @@
   "name": "@emailthing/db",
   "private": true,
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@types/pg": "^8.15.2",
     "drizzle-kit": "^0.31.1",
     "drizzle-orm": "^0.43.1",
-    "@paralleldrive/cuid2": "^2.2.2"
+    "pg": "^8.16.0"
   },
   "main": "index.ts",
   "typings": "index.ts",

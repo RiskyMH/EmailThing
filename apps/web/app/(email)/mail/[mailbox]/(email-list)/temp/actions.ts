@@ -3,7 +3,7 @@
 import db, { DefaultDomain, TempAlias } from "@/db";
 import { getCurrentUser } from "@/utils/jwt";
 import { createId, init } from "@paralleldrive/cuid2";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { userMailboxAccess } from "../../tools";
 
@@ -18,7 +18,7 @@ export async function makeTempEmail(mailboxId: string, aliasDomain: string, name
     // check that aliasDomain is public and available
     const defaultDomain = await db.query.DefaultDomain.findFirst({
         where: and(
-            eq(DefaultDomain.domain, aliasDomain),
+            eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${aliasDomain})`),
             eq(DefaultDomain.available, true),
             eq(DefaultDomain.tempDomain, true),
             eq(DefaultDomain.isDeleted, false),

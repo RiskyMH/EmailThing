@@ -60,7 +60,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     const alias = await db.query.MailboxAlias.findFirst({
         where: and(
             eq(MailboxAlias.mailboxId, mailboxId),
-            eq(MailboxAlias.alias, from!),
+            eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${from})`),
             eq(MailboxAlias.isDeleted, false),
         ),
         columns: {
@@ -125,7 +125,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     const emailId = draftId; // could also make new id here
 
     // add to sent folder
-    await db.batch([
+    await db.batchUpdate([
         db.insert(Email).values({
             id: emailId,
             body: text || "",

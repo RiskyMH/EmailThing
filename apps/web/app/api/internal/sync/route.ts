@@ -45,6 +45,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }
@@ -78,10 +79,11 @@ export async function GET(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         });
 
-    const [currentUser, mailboxesForUser] = await db.batch([
+    const [currentUser, mailboxesForUser] = await db.batchFetch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
         }),
@@ -99,6 +101,7 @@ export async function GET(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         });
     }
@@ -116,6 +119,7 @@ export async function GET(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         },
     );
@@ -142,10 +146,11 @@ export async function POST(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         });
 
-    const [currentUser, mailboxesForUser] = await db.batch([
+    const [currentUser, mailboxesForUser] = await db.batchFetch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
         }),
@@ -163,7 +168,7 @@ export async function POST(request: Request) {
     // after that, update the database and return lastsynced object
 
     const errors: { key: string; id?: string | null; error: string; moreInfo?: string }[] = [];
-    const changes = [] as BatchItem<"sqlite">[];
+    const changes = [] as BatchItem<"pg">[];
 
     for (const key in body) {
         if (key === "emails") {
@@ -580,7 +585,7 @@ export async function POST(request: Request) {
         }
     }
 
-    await db.batch(changes as any);
+    await db.batchUpdate(changes as any);
 
     const failedIds: Record<string, string[]> = {};
     for (const error of errors) {
@@ -616,6 +621,7 @@ export async function POST(request: Request) {
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         },
     );
@@ -641,12 +647,12 @@ export type ChangesRequest = {
         subject?: string | null;
         from?: string | null;
         to?:
-            | {
-                  name: string | null;
-                  address: string;
-                  cc?: "cc" | "bcc" | null;
-              }[]
-            | null;
+        | {
+            name: string | null;
+            address: string;
+            cc?: "cc" | "bcc" | null;
+        }[]
+        | null;
         headers?: { key: string; value: string }[];
         hardDelete?: boolean;
         lastUpdated?: DateString;
@@ -703,7 +709,7 @@ async function getMinimalChanges(
         .limit(50);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
-    const b = await db.batch([
+    const b = await db.batchFetch([
         // get the email metadata
         db
             .select()
@@ -774,7 +780,7 @@ async function getChanges(
         .limit(500);
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
-    const b = await db.batch([
+    const b = await db.batchFetch([
         // get the email metadata
         db
             .select()
@@ -906,7 +912,7 @@ async function getChanges(
             )
             .limit(500)
             .offset(emails.length);
-        const [emailSenders2, emailRecipients2, emailAttachments2] = await db.batch([
+        const [emailSenders2, emailRecipients2, emailAttachments2] = await db.batchFetch([
             db
                 .select()
                 .from(EmailSender)

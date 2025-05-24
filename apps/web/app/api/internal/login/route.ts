@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyPassword } from "@/utils/password";
 import { db, MailboxForUser, UserSession } from "@/db";
 import { User } from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { createUserToken } from "@/utils/jwt";
 import { isValidOrigin } from "../tools";
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
                 "Access-Control-Allow-Methods": "POST, OPTIONS",
                 "Access-Control-Allow-Headers": "authorization",
                 "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
             },
         });
     };
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
 
         // Find user
         const user = await db.query.User.findFirst({
-            where: eq(User.username, parsedData.data.username),
+            where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
             columns: {
                 id: true,
                 password: true,
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
         const tokenExpiresAt = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
         const refreshTokenExpiresAt = new Date(Date.now() + 1 * 365 * 24 * 60 * 60 * 1000);
 
-        const [mailboxes, _] = await db.batch([
+        const [mailboxes, _] = await db.batchFetch([
             db.query.MailboxForUser.findMany({
                 where: eq(MailboxForUser.userId, user.id),
                 columns: { mailboxId: true },
@@ -157,6 +158,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }

@@ -1,5 +1,5 @@
 import db, { User } from "@/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
@@ -38,7 +38,7 @@ export async function generateMetadata(props: { params: Promise<{ username: stri
 
 const fetchUser = cache((username: string) => {
     return db.query.User.findFirst({
-        where: and(eq(User.username, username), eq(User.publicContactPage, true)),
+        where: and(eq(sql`lower(${User.username})`, sql`lower(${username})`), eq(User.publicContactPage, true)),
         columns: {
             username: true,
             email: true,

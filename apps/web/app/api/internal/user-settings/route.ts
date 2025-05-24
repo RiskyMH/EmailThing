@@ -1,7 +1,7 @@
 import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { db, MailboxForUser, PasskeyCredentials, UserNotification, UserSession } from "@/db";
 import { User } from "@/db";
-import { and, eq, gte, not, type InferSelectModel } from "drizzle-orm";
+import { and, eq, gte, not, sql, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { isValidOrigin, getSession } from "../tools";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -24,6 +24,7 @@ export async function POST(request: Request) {
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "authorization",
         "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Max-Age": "3600",
     };
 
     // type is search param
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
 
     if ("error" in result) return Response.json({ message: result }, { status: 400, headers });
 
-    const sync = await db.batch([
+    const sync = await db.batchFetch([
         db.query.User.findFirst({
             where: eq(User.id, currentUserid),
             columns: {
@@ -139,6 +140,7 @@ export function OPTIONS(request: Request) {
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "authorization",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     });
 }
@@ -167,22 +169,22 @@ export type MappedPossibleData = {
 
 export type MappedPossibleDataResponse =
     | {
-          message: {
-              success: string;
-              description?: string;
-          };
-          sync: {
-              user: Omit<InferSelectModel<typeof User>, "password">;
-              passkeyCredentials: Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">[];
-              userNotifications: Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">[];
-              mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
-          };
-      }
+        message: {
+            success: string;
+            description?: string;
+        };
+        sync: {
+            user: Omit<InferSelectModel<typeof User>, "password">;
+            passkeyCredentials: Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">[];
+            userNotifications: Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">[];
+            mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
+        };
+    }
     | {
-          message: {
-              error: string;
-          };
-      };
+        message: {
+            error: string;
+        };
+    };
 
 export interface ChangeUsernameData {
     newName: string;
@@ -192,7 +194,7 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
 
     // check if taken (but not by the user)
     const existingUser = await db.query.User.findFirst({
-        where: and(eq(User.username, username), not(eq(User.id, userId))),
+        where: and(eq(sql`lower(${User.username})`, sql`lower(${username})`), not(eq(User.id, userId))),
     });
 
     if (existingUser) return { error: "Username already taken" };
@@ -248,7 +250,7 @@ async function changePassword(session: string, userId: string, data: ChangePassw
     if (newPassword.length < 8) return { error: "Password needs to be at least 8 characters" };
 
     // update password
-    await db.batch([
+    await db.batchUpdate([
         db
             .update(User)
             .set({

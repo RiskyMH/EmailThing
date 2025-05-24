@@ -16,7 +16,7 @@ import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@/utils/limits
 import { generateToken } from "@/utils/token";
 import { emailSchema } from "@/validations/auth";
 import { impersonatingEmails } from "@/validations/invalid-emails";
-import { and, count, eq, like, not } from "drizzle-orm";
+import { and, count, eq, like, not, sql } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -30,7 +30,7 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
     }
 
     // check if mailbox plan allows for more than 1 custom domain
-    const [mailbox, customDomains, exists] = await db.batch([
+    const [mailbox, customDomains, exists] = await db.batchFetch([
         db.query.Mailbox.findFirst({
             where: eq(Mailbox.id, mailboxId),
             columns: {
@@ -45,7 +45,7 @@ export async function verifyDomain(mailboxId: string, customDomain: string) {
 
         db.query.MailboxCustomDomain.findFirst({
             where: and(
-                eq(MailboxCustomDomain.domain, customDomain),
+                eq(sql`lower(${MailboxCustomDomain.domain})`, sql`lower(${customDomain})`),
                 eq(MailboxCustomDomain.mailboxId, mailboxId),
                 eq(MailboxCustomDomain.isDeleted, false),
             ),
@@ -129,7 +129,7 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
     // check if alias exists
     const existingAlias = await db.query.MailboxAlias.findFirst({
         // intentionally not checking if it's deleted, as we don't want people to get already used aliases
-        where: eq(MailboxAlias.alias, alias),
+        where: eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${alias})`),
         columns: {
             id: true,
         },
@@ -140,10 +140,10 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
     }
 
     // check if domain is a custom domain (and they have access to it) or just a default domain
-    const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batch([
+    const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batchFetch([
         db.query.DefaultDomain.findFirst({
             where: and(
-                eq(DefaultDomain.domain, alias.split("@")[1]),
+                eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${alias.split("@")[1]})`),
                 not(eq(DefaultDomain.tempDomain, true)),
                 eq(DefaultDomain.isDeleted, false),
             ),
@@ -152,7 +152,7 @@ export async function addAlias(mailboxId: string, alias: string, name: string | 
         db.query.MailboxCustomDomain.findFirst({
             where: and(
                 eq(MailboxCustomDomain.mailboxId, mailboxId),
-                eq(MailboxCustomDomain.domain, alias.split("@")[1]),
+                eq(sql`lower(${MailboxCustomDomain.domain})`, sql`lower(${alias.split("@")[1]})`),
                 eq(MailboxCustomDomain.isDeleted, false),
             ),
         }),
@@ -257,7 +257,7 @@ export async function changeDefaultAlias(mailboxId: string, defaultAliasId: stri
     }
 
     // edit alias
-    await db.batch([
+    await db.batchUpdate([
         db
             .update(MailboxAlias)
             .set({
@@ -352,7 +352,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
         where: and(
             eq(MailboxAlias.mailboxId, mailboxId),
             eq(MailboxAlias.default, true),
-            like(MailboxAlias.alias, `%@${domain?.domain}`),
+            like(sql`lower(${MailboxAlias.alias})`, sql`lower(${`%@${domain?.domain}`})`),
             eq(MailboxAlias.isDeleted, false),
         ),
     });
@@ -365,7 +365,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
     }
 
     // also delete all aliases with that domain
-    await db.batch([
+    await db.batchUpdate([
         db
             .update(MailboxCustomDomain)
             .set({
@@ -389,7 +389,7 @@ export async function deleteCustomDomain(mailboxId: string, customDomainId: stri
             .where(
                 and(
                     eq(MailboxAlias.mailboxId, mailboxId),
-                    like(MailboxAlias.alias, `%@${domain.domain}`),
+                    like(sql`lower(${MailboxAlias.alias})`, sql`lower(${`%@${domain.domain}`})`),
                     not(eq(MailboxAlias.default, true)),
                 ),
             ),
@@ -550,7 +550,7 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
     }
 
     // check how many users are in the mailbox
-    const [mailboxUsers, mailbox] = await db.batch([
+    const [mailboxUsers, mailbox] = await db.batchFetch([
         db
             .select({ count: count() })
             .from(MailboxForUser)
@@ -569,7 +569,7 @@ export async function addUserToMailbox(mailboxId: string, username: string, role
 
     // check if user exists
     const proposedUser = await db.query.User.findFirst({
-        where: eq(User.username, username),
+        where: eq(sql`lower(${User.username})`, sql`lower(${username})`),
         columns: {
             id: true,
         },

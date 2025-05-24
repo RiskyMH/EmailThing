@@ -1,50 +1,50 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { index, int, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, pgTable, varchar, boolean, timestamp, json, text } from "drizzle-orm/pg-core";
 import { Mailbox, MailboxCategory, TempAlias } from "./mailbox";
 
 // The Email
-export const Email = sqliteTable(
+export const Email = pgTable(
     "emails",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        mailboxId: text("mailbox_id", { length: 24 })
+        mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        createdAt: integer("created_at", { mode: "timestamp" })
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
             .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
-            // .notNull()
-            .$defaultFn(() => new Date())
             .$onUpdateFn(() => new Date()),
 
-        subject: text("subject", { length: 255 }),
-        snippet: text("snippet", { length: 255 }),
-        body: text("text_body", { length: 65_535 }).notNull(),
-        html: text("html", { length: 16_777_215 }),
-        raw: text("raw", { length: 10, enum: ["s3", "draft"] }),
-        size: int("size").default(0),
+        subject: text("subject", {}),
+        snippet: varchar("snippet", { length: 255 }),
+        body: text("text_body", {}).notNull(),
+        html: text("html", {}),
+        raw: varchar("raw", { length: 10, enum: ["s3", "draft"] }),
+        size: integer("size").default(0),
 
-        replyTo: text("reply_to"),
-        givenId: text("given_message_id"),
-        givenReferences: text("given_references", { mode: "json" }).$type<string[]>(),
-        categoryId: text("category_id", { length: 24 }).references(() => MailboxCategory.id, { onDelete: "set null" }),
-        tempId: text("temp_id", { length: 24 }).references(() => TempAlias.id, {
+        replyTo: varchar("reply_to"),
+        givenId: varchar("given_message_id"),
+        givenReferences: json("given_references").$type<string[]>(),
+        categoryId: varchar("category_id", { length: 25 }).references(() => MailboxCategory.id, {
+            onDelete: "set null",
+        }),
+        tempId: varchar("temp_id", { length: 25 }).references(() => TempAlias.id, {
             onDelete: "cascade",
         }),
 
-        isSender: int("is_sender", { mode: "boolean" }).default(false).notNull(),
-        isRead: int("is_read", { mode: "boolean" }).default(false).notNull(),
-        isStarred: int("is_starred", { mode: "boolean" }).default(false).notNull(),
+        isSender: boolean("is_sender").default(false).notNull(),
+        isRead: boolean("is_read").default(false).notNull(),
+        isStarred: boolean("is_starred").default(false).notNull(),
 
-        binnedAt: int("binned_at", { mode: "timestamp" }),
+        binnedAt: timestamp("binned_at"),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false).notNull(),
+        isDeleted: boolean("is_deleted").default(false).notNull(),
     },
     (table) => {
         return {
@@ -104,13 +104,13 @@ export const EmailRelations = relations(Email, ({ many, one }) => ({
 }));
 
 // Email sender
-export const EmailSender = sqliteTable("email_senders", {
-    emailId: text("email_id", { length: 24 })
+export const EmailSender = pgTable("email_senders", {
+    emailId: varchar("email_id", { length: 25 })
         .notNull()
         .primaryKey()
         .references(() => Email.id, { onDelete: "cascade" }),
-    name: text("name", { length: 255 }),
-    address: text("address", { length: 255 }).notNull(),
+    name: varchar("name", { length: 20_055 }),
+    address: varchar("address", { length: 20_055 }).notNull(),
 });
 
 export const EmailSenderRelations = relations(EmailSender, ({ one }) => ({
@@ -121,19 +121,19 @@ export const EmailSenderRelations = relations(EmailSender, ({ one }) => ({
 }));
 
 // Email Recipients
-export const EmailRecipient = sqliteTable(
+export const EmailRecipient = pgTable(
     "email_recipients",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        emailId: text("email_id", { length: 24 })
+        emailId: varchar("email_id", { length: 25 })
             .notNull()
             .references(() => Email.id, { onDelete: "cascade" }),
-        name: text("name", { length: 255 }),
-        address: text("address", { length: 255 }).notNull(),
-        cc: int("cc", { mode: "boolean" }).default(false).notNull(),
+        name: varchar("name", { length: 20_255 }),
+        address: varchar("address", { length: 20_255 }).notNull(),
+        cc: boolean("cc").default(false).notNull(),
     },
     (table) => {
         return {
@@ -150,20 +150,20 @@ export const EmailRecipientRelations = relations(EmailRecipient, ({ one }) => ({
 }));
 
 // Email Attachments
-export const EmailAttachments = sqliteTable(
+export const EmailAttachments = pgTable(
     "email_attachments",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        emailId: text("email_id", { length: 24 })
+        emailId: varchar("email_id", { length: 25 })
             .notNull()
             .references(() => Email.id, { onDelete: "cascade" }),
-        filename: text("filename", { length: 255 }).notNull(),
-        mimeType: text("mime_type", { length: 25 }).notNull(),
-        size: int("size").default(0).notNull(),
-        title: text("title", { length: 255 }),
+        filename: varchar("filename", { length: 20_255 }).notNull(),
+        mimeType: varchar("mime_type", { length: 25 }).notNull(),
+        size: integer("size").default(0).notNull(),
+        title: varchar("title", { length: 20_255 }),
     },
     (table) => {
         return {
@@ -180,31 +180,29 @@ export const EmailAttachmentsRelations = relations(EmailAttachments, ({ one }) =
 }));
 
 // Draft email
-export const DraftEmail = sqliteTable(
+export const DraftEmail = pgTable(
     "draft_emails",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        mailboxId: text("mailbox_id", { length: 24 })
+        mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        createdAt: integer("created_at", { mode: "timestamp" })
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
             .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
-            .notNull()
-            .$defaultFn(() => new Date())
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
-        subject: text("subject", { length: 255 }),
-        body: text("text_body", { length: 65_535 }),
-        from: text("from", { length: 255 }),
-        to: text("to", { mode: "json" }).$type<{ address: string; name: string | null; cc?: "cc" | "bcc" | null }[]>(),
-        headers: text("headers", { mode: "json" }).$type<{ key: string; value: string }[]>(),
+        subject: varchar("subject", { length: 255 }),
+        body: varchar("text_body", { length: 65_535 }),
+        from: varchar("from", { length: 255 }),
+        to: json("to").$type<{ address: string; name: string | null; cc?: "cc" | "bcc" | null }[]>(),
+        headers: json("headers").$type<{ key: string; value: string }[]>(),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false).notNull(),
+        isDeleted: boolean("is_deleted").default(false).notNull(),
     },
     (table) => {
         return {

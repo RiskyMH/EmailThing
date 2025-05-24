@@ -1,30 +1,38 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
-import { index, int, integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
-import { nocaseText } from "./custom-drizzle";
+import { relations, sql } from "drizzle-orm";
+import {
+    index,
+    integer,
+    primaryKey,
+    pgTable,
+    unique,
+    varchar,
+    timestamp,
+    boolean,
+    uniqueIndex,
+} from "drizzle-orm/pg-core";
+import { caseSensitiveText, nocaseText } from "./custom-drizzle";
 import { Email } from "./email";
 import { User } from "./user";
 
 // The mailbox
-export const Mailbox = sqliteTable("mailboxes", {
-    id: text("mailbox_id", { length: 24 })
+export const Mailbox = pgTable("mailboxes", {
+    id: varchar("mailbox_id", { length: 25 })
         .primaryKey()
         .unique()
         .$defaultFn(() => createId()),
-    createdAt: integer("created_at", { mode: "timestamp" })
-        .notNull()
-        .$defaultFn(() => new Date()),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
         // .notNull()
-        .$defaultFn(() => new Date())
+        .defaultNow()
         .$onUpdateFn(() => new Date()),
-    storageUsed: int("storage_used").default(0).notNull(),
-    plan: text("plan", { enum: ["FREE", "UNLIMITED", "DEMO"] })
+    storageUsed: integer("storage_used").default(0).notNull(),
+    plan: varchar("plan", { enum: ["FREE", "UNLIMITED", "DEMO"] })
         .default("FREE")
         .notNull(),
 
     // anonymous data - but here for syncing
-    isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+    isDeleted: boolean("is_deleted").default(false),
 });
 
 export const MailboxRelations = relations(Mailbox, ({ many, one }) => ({
@@ -37,29 +45,27 @@ export const MailboxRelations = relations(Mailbox, ({ many, one }) => ({
 }));
 
 // Aliases
-export const MailboxAlias = sqliteTable(
+export const MailboxAlias = pgTable(
     "mailbox_aliases",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        mailboxId: text("mailbox_id", { length: 24 })
+        mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
         alias: nocaseText("alias").notNull(),
-        name: text("name"),
-        createdAt: integer("created_at", { mode: "timestamp" })
-            .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
+        name: varchar("name"),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
             // .notNull()
-            .$defaultFn(() => new Date())
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
-        default: int("default", { mode: "boolean" }).default(false).notNull(),
+        default: boolean("default").default(false).notNull(),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+        isDeleted: boolean("is_deleted").default(false),
     },
     (table) => {
         return {
@@ -67,6 +73,8 @@ export const MailboxAlias = sqliteTable(
             unique: unique("mailbox_aliases_unique").on(table.alias, table.mailboxId),
             alias: unique("mailbox_aliases_alias").on(table.alias),
             updatedMailboxIdx: index("mailbox_alias_updated_idx").on(table.updatedAt, table.mailboxId),
+            aliasLower: index("mailbox_alias_alias_lower_idx").on(sql`lower(${table.alias})`),
+            uniqueAlias: uniqueIndex("mailbox_alias_alias_unique").on(sql`lower(${table.alias})`),
         };
     },
 );
@@ -79,34 +87,34 @@ export const MailboxAliasRelations = relations(MailboxAlias, ({ many, one }) => 
 }));
 
 // Temp Alias (for short lived email)
-export const TempAlias = sqliteTable(
+export const TempAlias = pgTable(
     "temp_aliases",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        mailboxId: text("mailbox_id", { length: 24 })
+        mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
         alias: nocaseText("alias").notNull(),
-        name: text("name"),
-        createdAt: integer("created_at", { mode: "timestamp" })
-            .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
+        name: varchar("name"),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
             // .notNull()
-            .$defaultFn(() => new Date())
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
-        expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+        expiresAt: timestamp("expires_at").notNull(),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+        isDeleted: boolean("is_deleted").default(false),
     },
     (table) => {
         return {
             idx: index("temp_aliases_idx").on(table.mailboxId, table.alias),
             unique: unique("temp_aliases_unique").on(table.alias, table.mailboxId),
+            aliasLower: index("temp_aliases_alias_lower_idx").on(sql`lower(${table.alias})`),
+            uniqueAlias: uniqueIndex("temp_aliases_alias_unique").on(sql`lower(${table.alias})`),
         };
     },
 );
@@ -120,32 +128,32 @@ export const TempAliasRelations = relations(TempAlias, ({ many, one }) => ({
 }));
 
 // Custom Domains
-export const MailboxCustomDomain = sqliteTable(
+export const MailboxCustomDomain = pgTable(
     "mailbox_custom_domain",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        mailboxId: text("mailbox_id", { length: 24 })
+        mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        addedAt: integer("created_at", { mode: "timestamp" })
-            .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
+        addedAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
             // .notNull()
-            .$defaultFn(() => new Date())
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
         domain: nocaseText("domain").notNull(),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+        isDeleted: boolean("is_deleted").default(false),
     },
     (table) => {
         return {
             unique: unique("mailbox_custom_domain_unique").on(table.domain, table.mailboxId),
             updatedMailboxIdx: index("mailbox_domain_updated_idx").on(table.updatedAt, table.mailboxId),
+            domainLower: index("mailbox_domain_domain_lower_idx").on(sql`lower(${table.domain})`),
+            uniqueDomain: uniqueIndex("mailbox_domain_domain_unique").on(sql`lower(${table.domain})`),
         };
     },
 );
@@ -158,26 +166,24 @@ export const MailboxCustomDomainRelations = relations(MailboxCustomDomain, ({ ma
 }));
 
 // API Tokens
-export const MailboxTokens = sqliteTable(
+export const MailboxTokens = pgTable(
     "mailbox_token",
     {
-        id: text("id", { length: 50 })
+        id: varchar("id", { length: 50 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        token: text("token", { length: 50 }).unique().notNull(),
-        mailboxId: text("mailbox_id", { length: 24 })
+        token: caseSensitiveText("token", { length: 50 }).unique().notNull(),
+        mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        createdAt: integer("created_at", { mode: "timestamp" })
-            .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
-            .$defaultFn(() => new Date())
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
-        expiresAt: integer("expires_at", { mode: "timestamp" }),
-        name: text("name"),
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+        expiresAt: timestamp("expires_at"),
+        name: varchar("name"),
+        isDeleted: boolean("is_deleted").default(false),
     },
     (table) => ({
         updatedMailboxIdx: index("mailbox_token_updated_idx").on(table.updatedAt, table.mailboxId),
@@ -192,28 +198,26 @@ export const MailboxTokensRelations = relations(MailboxTokens, ({ many, one }) =
 }));
 
 // Categories
-export const MailboxCategory = sqliteTable(
+export const MailboxCategory = pgTable(
     "mailbox_categories",
     {
-        id: text("id", { length: 24 })
+        id: varchar("id", { length: 25 })
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        mailboxId: text("mailbox_id", { length: 24 })
+        mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        name: text("name").notNull(),
-        color: text("color"),
-        createdAt: integer("created_at", { mode: "timestamp" })
-            .notNull()
-            .$defaultFn(() => new Date()),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
+        name: varchar("name").notNull(),
+        color: varchar("color"),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
             // .notNull()
-            .$defaultFn(() => new Date())
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+        isDeleted: boolean("is_deleted").default(false),
     },
     (table) => {
         return {
@@ -232,26 +236,24 @@ export const MailboxCategoryRelations = relations(MailboxCategory, ({ many, one 
 }));
 
 // User mapping
-export const MailboxForUser = sqliteTable(
+export const MailboxForUser = pgTable(
     "mailbox_for_user",
     {
-        mailboxId: text("mailbox_id", { length: 24 }).notNull(),
+        mailboxId: varchar("mailbox_id", { length: 25 }).notNull(),
         // .references(() => Mailbox.id, { onDelete: 'cascade' }),
-        userId: text("user_id", { length: 24 }).notNull(),
+        userId: varchar("user_id", { length: 25 }).notNull(),
         // .references(() => User.id, { onDelete: 'cascade' }),
-        joinedAt: integer("joined_at", { mode: "timestamp" })
-            .notNull()
-            .$defaultFn(() => new Date()),
-        role: text("role", { enum: ["OWNER", "ADMIN", "NONE"] })
+        joinedAt: timestamp("joined_at").notNull().defaultNow(),
+        role: varchar("role", { enum: ["OWNER", "ADMIN", "NONE"] })
             .default("ADMIN")
             .notNull(),
-        updatedAt: integer("updated_at", { mode: "timestamp" })
+        updatedAt: timestamp("updated_at")
             // .notNull()
-            .$defaultFn(() => new Date())
+            .defaultNow()
             .$onUpdateFn(() => new Date()),
 
         // anonymous data - but here for syncing
-        isDeleted: int("is_deleted", { mode: "boolean" }).default(false),
+        isDeleted: boolean("is_deleted").default(false),
     },
     (table) => {
         return {
