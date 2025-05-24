@@ -1,7 +1,8 @@
 import type { Config } from "drizzle-kit";
+import path from "node:path";
 
 export default {
-    schema: "./schema.ts",
+    schema: path.join(__dirname, "./schema.ts"),
     out: "./drizzle",
     dialect: "postgresql",
     dbCredentials: {
