@@ -7,7 +7,6 @@ export const nocaseText = (name: string, options?: { length?: number }) =>
         dataType() {
             return `text`;
         },
-
     })(name);
 
 // For case-sensitive text in Postgres

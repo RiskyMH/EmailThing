@@ -1,6 +1,16 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations, sql,  } from "drizzle-orm";
-import { index, integer, primaryKey, pgTable, text, unique, varchar, timestamp, boolean, uniqueIndex } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import {
+    index,
+    integer,
+    primaryKey,
+    pgTable,
+    unique,
+    varchar,
+    timestamp,
+    boolean,
+    uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { caseSensitiveText, nocaseText } from "./custom-drizzle";
 import { Email } from "./email";
 import { User } from "./user";
@@ -11,9 +21,7 @@ export const Mailbox = pgTable("mailboxes", {
         .primaryKey()
         .unique()
         .$defaultFn(() => createId()),
-    createdAt: timestamp("created_at")
-        .notNull()
-        .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
         // .notNull()
         .defaultNow()
@@ -49,9 +57,7 @@ export const MailboxAlias = pgTable(
             .references(() => Mailbox.id, { onDelete: "cascade" }),
         alias: nocaseText("alias").notNull(),
         name: varchar("name"),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             // .notNull()
             .defaultNow()
@@ -93,9 +99,7 @@ export const TempAlias = pgTable(
             .references(() => Mailbox.id, { onDelete: "cascade" }),
         alias: nocaseText("alias").notNull(),
         name: varchar("name"),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             // .notNull()
             .defaultNow()
@@ -134,9 +138,7 @@ export const MailboxCustomDomain = pgTable(
         mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        addedAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        addedAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             // .notNull()
             .defaultNow()
@@ -175,9 +177,7 @@ export const MailboxTokens = pgTable(
         mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .defaultNow()
             .$onUpdateFn(() => new Date()),
@@ -210,9 +210,7 @@ export const MailboxCategory = pgTable(
             .references(() => Mailbox.id, { onDelete: "cascade" }),
         name: varchar("name").notNull(),
         color: varchar("color"),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             // .notNull()
             .defaultNow()
@@ -245,9 +243,7 @@ export const MailboxForUser = pgTable(
         // .references(() => Mailbox.id, { onDelete: 'cascade' }),
         userId: varchar("user_id", { length: 25 }).notNull(),
         // .references(() => User.id, { onDelete: 'cascade' }),
-        joinedAt: timestamp("joined_at")
-            .notNull()
-            .defaultNow(),
+        joinedAt: timestamp("joined_at").notNull().defaultNow(),
         role: varchar("role", { enum: ["OWNER", "ADMIN", "NONE"] })
             .default("ADMIN")
             .notNull(),

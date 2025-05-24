@@ -1,6 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
-import { index, integer, pgTable, text, varchar, timestamp, boolean, json, uniqueIndex } from "drizzle-orm/pg-core";
+import { index, pgTable, varchar, timestamp, boolean, json, uniqueIndex } from "drizzle-orm/pg-core";
 import { nocaseText, caseSensitiveText } from "./custom-drizzle";
 import { MailboxForUser } from "./mailbox";
 
@@ -12,9 +12,7 @@ export const User = pgTable(
             .unique()
             .$defaultFn(() => createId())
             .primaryKey(),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             // .notNull()
             .defaultNow()
@@ -23,9 +21,7 @@ export const User = pgTable(
         password: varchar("password", { length: 200 }).notNull(),
         admin: boolean("admin").default(false),
         email: varchar("email").notNull(),
-        onboardingStatus: json("onboarding_status")
-            .$type<{ initial: boolean }>()
-            .default({ initial: false }),
+        onboardingStatus: json("onboarding_status").$type<{ initial: boolean }>().default({ initial: false }),
         backupEmail: varchar("backup_email"),
         publicEmail: varchar("public_email"),
         publicContactPage: boolean("public_contact_page").default(false),
@@ -47,37 +43,37 @@ export const UserRelations = relations(User, ({ many, one }) => ({
 }));
 
 // user session
-export const UserSession = pgTable("user_sessions", {
-    id: varchar("id", { length: 25 })
-        .unique()
-        .$defaultFn(() => createId())
-        .primaryKey(),
-    userId: varchar("user_id", { length: 25 })
-        .notNull()
-        .references(() => User.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at")
-        .notNull()
-        .$defaultFn(() => new Date()),
-    lastUsed: json("last_used")
-        .$type<{ date: Date, ip: string, ua: string, location: string }>()
-        .$defaultFn(() => ({ date: new Date(), ip: "", ua: "", location: "" })),
-    token: caseSensitiveText("token", { length: 100 })
-        .notNull()
-        .unique()
-        .$defaultFn(() => createId()),
-    tokenExpiresAt: timestamp("token_expires_at")
-        .notNull(),
-    refreshToken: caseSensitiveText("refresh_token", { length: 100 })
-        .notNull()
-        .unique(),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at")
-        .notNull(),
-    sudoExpiresAt: timestamp("sudo_expires_at"),
-    method: varchar("method", { enum: ["password", "passkey"] }).notNull(),
-}, (table) => ({
-    tokenIdx: index("token_idx").on(table.token, table.tokenExpiresAt),
-    refreshTokenIdx: index("refresh_token_idx").on(table.refreshToken, table.refreshTokenExpiresAt),
-}));
+export const UserSession = pgTable(
+    "user_sessions",
+    {
+        id: varchar("id", { length: 25 })
+            .unique()
+            .$defaultFn(() => createId())
+            .primaryKey(),
+        userId: varchar("user_id", { length: 25 })
+            .notNull()
+            .references(() => User.id, { onDelete: "cascade" }),
+        createdAt: timestamp("created_at")
+            .notNull()
+            .$defaultFn(() => new Date()),
+        lastUsed: json("last_used")
+            .$type<{ date: Date; ip: string; ua: string; location: string }>()
+            .$defaultFn(() => ({ date: new Date(), ip: "", ua: "", location: "" })),
+        token: caseSensitiveText("token", { length: 100 })
+            .notNull()
+            .unique()
+            .$defaultFn(() => createId()),
+        tokenExpiresAt: timestamp("token_expires_at").notNull(),
+        refreshToken: caseSensitiveText("refresh_token", { length: 100 }).notNull().unique(),
+        refreshTokenExpiresAt: timestamp("refresh_token_expires_at").notNull(),
+        sudoExpiresAt: timestamp("sudo_expires_at"),
+        method: varchar("method", { enum: ["password", "passkey"] }).notNull(),
+    },
+    (table) => ({
+        tokenIdx: index("token_idx").on(table.token, table.tokenExpiresAt),
+        refreshTokenIdx: index("refresh_token_idx").on(table.refreshToken, table.refreshTokenExpiresAt),
+    }),
+);
 
 export const UserSessionRelations = relations(UserSession, ({ one }) => ({
     user: one(User, {
@@ -87,30 +83,32 @@ export const UserSessionRelations = relations(UserSession, ({ one }) => ({
 }));
 
 // passkeys
-export const PasskeyCredentials = pgTable("passkey_credentials", {
-    id: varchar("id", { length: 25 })
-        .unique()
-        .$defaultFn(() => createId())
-        .primaryKey(),
-    userId: varchar("user_id", { length: 25 })
-        .notNull()
-        .references(() => User.id, { onDelete: "cascade" }),
-    credentialId: varchar("credential_id").notNull().notNull(),
-    createdAt: timestamp("created_at")
-        .notNull()
-        .$defaultFn(() => new Date()),
-    updatedAt: timestamp("updated_at")
-        // .notNull()
-        .$defaultFn(() => new Date())
-        .$onUpdateFn(() => new Date()),
-    name: varchar("name"),
-    publicKey: varchar("public_key").notNull(),
-    isDeleted: boolean("is_deleted").default(false),
-},
-(table) => ({
-    userCreatedIdx: index("passkey_user_created_idx").on(table.userId, table.createdAt),
-    userUpdatedIdx: index("passkey_user_updated_idx").on(table.userId, table.updatedAt),
-}),
+export const PasskeyCredentials = pgTable(
+    "passkey_credentials",
+    {
+        id: varchar("id", { length: 25 })
+            .unique()
+            .$defaultFn(() => createId())
+            .primaryKey(),
+        userId: varchar("user_id", { length: 25 })
+            .notNull()
+            .references(() => User.id, { onDelete: "cascade" }),
+        credentialId: varchar("credential_id").notNull().notNull(),
+        createdAt: timestamp("created_at")
+            .notNull()
+            .$defaultFn(() => new Date()),
+        updatedAt: timestamp("updated_at")
+            // .notNull()
+            .$defaultFn(() => new Date())
+            .$onUpdateFn(() => new Date()),
+        name: varchar("name"),
+        publicKey: varchar("public_key").notNull(),
+        isDeleted: boolean("is_deleted").default(false),
+    },
+    (table) => ({
+        userCreatedIdx: index("passkey_user_created_idx").on(table.userId, table.createdAt),
+        userUpdatedIdx: index("passkey_user_updated_idx").on(table.userId, table.updatedAt),
+    }),
 );
 
 export const PasskeyCredentialsSchemaRelations = relations(PasskeyCredentials, ({ many, one }) => ({

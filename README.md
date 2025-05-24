@@ -77,7 +77,7 @@ I made this because I wanted to have a way to deal with my emails from a custom 
 Many individuals and organizations have contributed to the creation of this project. Special thanks to:
 
 * [Vercel](https://vercel.com) for hosting the application and for developing Next.js.
-* [Cloudflare](https://cloudflare.com) for providing workers and email routing.
+* [Cloudflare](https://cloudflare.com) for providing S3, workers, and email routing.
 * [Xata](https://xata.io) for providing a good pricing for database.
 * [Alfonsusac](https://github.com/alfonsusac) for designing the logo and sticker.
 * [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.

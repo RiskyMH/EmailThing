@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, integer, primaryKey, pgTable, text, varchar, timestamp, boolean, uniqueIndex } from "drizzle-orm/pg-core";
+import { index, integer, primaryKey, pgTable, varchar, timestamp, boolean, uniqueIndex } from "drizzle-orm/pg-core";
 import { nocaseText } from "./custom-drizzle";
 import { sql } from "drizzle-orm";
 
@@ -11,9 +11,7 @@ export const DefaultDomain = pgTable(
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
             .defaultNow()

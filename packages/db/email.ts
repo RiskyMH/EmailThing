@@ -14,25 +14,25 @@ export const Email = pgTable(
         mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .defaultNow()
             .notNull()
             .$onUpdateFn(() => new Date()),
 
-        subject: text("subject", {  }),
+        subject: text("subject", {}),
         snippet: varchar("snippet", { length: 255 }),
-        body: text("text_body", {  }).notNull(),
-        html: text("html", {  }),
+        body: text("text_body", {}).notNull(),
+        html: text("html", {}),
         raw: varchar("raw", { length: 10, enum: ["s3", "draft"] }),
         size: integer("size").default(0),
 
         replyTo: varchar("reply_to"),
         givenId: varchar("given_message_id"),
         givenReferences: json("given_references").$type<string[]>(),
-        categoryId: varchar("category_id", { length: 25 }).references(() => MailboxCategory.id, { onDelete: "set null" }),
+        categoryId: varchar("category_id", { length: 25 }).references(() => MailboxCategory.id, {
+            onDelete: "set null",
+        }),
         tempId: varchar("temp_id", { length: 25 }).references(() => TempAlias.id, {
             onDelete: "cascade",
         }),
@@ -190,9 +190,7 @@ export const DraftEmail = pgTable(
         mailboxId: varchar("mailbox_id", { length: 25 })
             .notNull()
             .references(() => Mailbox.id, { onDelete: "cascade" }),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .defaultNow(),
+        createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
             .notNull()
             .defaultNow()
