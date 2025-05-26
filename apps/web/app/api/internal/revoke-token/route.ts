@@ -11,8 +11,8 @@ export function OPTIONS(request: Request) {
         headers: {
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Methods": "DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "authorization",
-            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers": "authorization,content-type",
+            "Access-Control-Allow-Credentials": "false",
             "Access-Control-Max-Age": "3600",
         },
     });
@@ -33,8 +33,8 @@ export async function DELETE(request: Request) {
                 headers: {
                     "Access-Control-Allow-Origin": origin,
                     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
-                    "Access-Control-Allow-Headers": "authorization",
-                    "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Allow-Headers": "authorization,content-type",
+                    "Access-Control-Allow-Credentials": "false",
                     "Access-Control-Max-Age": "3600",
                 },
             },
@@ -48,8 +48,8 @@ export async function DELETE(request: Request) {
                 headers: {
                     "Access-Control-Allow-Origin": origin,
                     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
-                    "Access-Control-Allow-Headers": "authorization",
-                    "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Allow-Headers": "authorization,content-type",
+                    "Access-Control-Allow-Credentials": "false",
                     "Access-Control-Max-Age": "3600",
                 },
             },
@@ -63,8 +63,8 @@ export async function DELETE(request: Request) {
                 headers: {
                     "Access-Control-Allow-Origin": origin,
                     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
-                    "Access-Control-Allow-Headers": "authorization",
-                    "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Allow-Headers": "authorization,content-type",
+                    "Access-Control-Allow-Credentials": "false",
                     "Access-Control-Max-Age": "3600",
                 },
             },
@@ -78,8 +78,8 @@ export async function DELETE(request: Request) {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization",
-                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Headers": "authorization,content-type",
+                "Access-Control-Allow-Credentials": "false",
                 "Access-Control-Max-Age": "3600",
             },
         },

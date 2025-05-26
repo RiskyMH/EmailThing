@@ -3,7 +3,7 @@ import Logo from "@/components/logo";
 // import Logo from "@/icons/Logo"
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
-import { ArrowRightIcon, ChevronLeft } from "lucide-react";
+import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon } from "lucide-react";
 
 export default function LoginPage() {
   return (
@@ -85,43 +85,96 @@ import { Loader2 } from "lucide-react";
 // import { useRouter } from "react-router-dom";
 import { type FormEvent, useTransition } from "react";
 import { toast } from "sonner";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 // import signUp from "./action";
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
+
+const apiUrl = "https://emailthing.app";
+
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isPending, startTransition] = useTransition();
-  // const router = useRouter();
+  const navigate = useNavigate();
+  const searchParams = useSearchParams()[0];
+  const inviteCode = searchParams.get("invite");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     startTransition(async () => {
-      return void toast.info("Not implemented", {
-        description: "Login works. Or you can use the normal https://emailthing.app/register",
+
+      if (!inviteCode) {
+        return void toast.error("You need an invite code to signup. Join the Discord to get!", {
+          action: (
+            <a
+              href={"https://discord.gg/GT9Q2Yz4VS"}
+              target="blank"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
+            >
+              Get Invite <ExternalLinkIcon className="size-4 text-muted-foreground" />
+            </a>
+          ),
+        });
+      }
+
+      const res = await fetch(`${apiUrl}/api/internal/register`, {
+        method: "POST",
+        body: JSON.stringify({
+          username: (event.target as HTMLFormElement).username.value,
+          password: (event.target as HTMLFormElement).password.value,
+          invite: inviteCode,
+        }),
       });
-      // const formData = new FormData(event.target as HTMLFormElement);
-      // const signUpResult = await signUp(formData)//.catch(catchRedirectError);
 
-      // if (signUpResult?.error) {
-      //   if ("link" in signUpResult && signUpResult.link)
-      //     return void toast.error(signUpResult.error, {
-      //       action: (
-      //         <a
-      //           href={signUpResult.link.l}
-      //           target="blank"
-      //           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
-      //         >
-      //           {signUpResult.link.m} <ExternalLinkIcon className="size-4 text-muted-foreground" />
-      //         </a>
-      //       ),
-      //     });
-      //   return void toast.error(signUpResult.error);
-      // }
+      if (!res.ok) {
+        if (res.headers.get("content-type")?.includes("application/json")) {
+          const data = await res.json();
+          return void toast.error(data.error);
+        }
+        return void toast.error(await res.text());
+      }
 
-      // toast.success("Welcome!");
-      // // router.refresh();
+      const data = await res.json();
+      if (data.error) {
+        return void toast.error(data.error);
+      }
+
+      const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes } = data;
+
+      const { db, initializeDB } = await import("@/utils/data/db");
+      await initializeDB();
+
+      await db.localSyncData.clear();
+      await db.mailboxForUser.clear();
+      await db.localSyncData.put(
+        {
+          token,
+          refreshToken,
+          tokenExpiresAt,
+          refreshTokenExpiresAt,
+          lastSync: 0,
+          isSyncing: true,
+          userId: data.userId,
+          apiUrl,
+        },
+        data.userId,
+      );
+
+      const selectedMailbox = mailboxes[0];
+      document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
+      navigate(`/mail/${selectedMailbox}`);
+
+      toast.success("Welcome!");
+
+      db.initialFetchSync();
     });
+  }
+
+  if (typeof window !== "undefined") {
+    if (document.cookie.includes("mailboxId=")) {
+      return <Navigate to="/mail" />
+    }
   }
 
   return (

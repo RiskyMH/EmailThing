@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
 import { verifyPassword } from "@/utils/password";
-import { db, MailboxForUser, UserSession } from "@/db";
+import { db, MailboxForUser, PasskeyCredentials, UserSession } from "@/db";
 import { User } from "@/db";
 import { eq, sql } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
-import { createUserToken } from "@/utils/jwt";
 import { isValidOrigin } from "../tools";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
+import { verifyCredentialss } from "@/utils/passkeys";
 
 const errorMsg = "Invalid username or password";
 
 // Rate limiting
 const attempts = new Map<string, number>();
 const timestamps = new Map<string, number>();
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 10;
 const WINDOW_MS = 1.5 * 60 * 1000; // 1.5 minutes
 const LOCKOUT_MS = 1 * 60 * 1000; // 1 minute
 
@@ -29,8 +29,8 @@ export async function POST(request: Request) {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization",
-                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Headers": "authorization,content-type",
+                "Access-Control-Allow-Credentials": "false",
                 "Access-Control-Max-Age": "3600",
             },
         });
@@ -53,58 +53,130 @@ export async function POST(request: Request) {
             timestamps.delete(ip);
         }
 
+        const url = new URL(request.url);
+        const type = url.searchParams.get("type") || "password" as "password" | "passkey";
+
         const body = await request.json();
 
-        const parsedData = userAuthSchema.safeParse(body);
-        if (!parsedData.success) {
+        let userId: string | null = null;
+        if (type === "password") {
+            const parsedData = userAuthSchema.safeParse(body);
+            if (!parsedData.success) {
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: errorMsg }, { status: 401 });
+            }
+
+            const { username, password } = parsedData.data;
+
+            if (!username || !password) {
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: errorMsg }, { status: 400 });
+            }
+
+            // Find user
+            const user = await db.query.User.findFirst({
+                where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
+                columns: {
+                    id: true,
+                    password: true,
+                    onboardingStatus: true,
+                },
+            });
+
+            if (!user) {
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: errorMsg }, { status: 401 });
+            }
+
+            userId = user.id;
+
+            // Verify password
+            const valid = await verifyPassword(password, user.password);
+            if (!valid) {
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: errorMsg }, { status: 401 });
+            }
+
+            if (typeof valid === "string") {
+                // this is the new hash
+                await db.update(User).set({ password: valid }).where(eq(User.id, user.id)).execute();
+            }
+        } else if (type === "passkey") {
+            const credential = body.credential as Credential;
+            const cred = await db.query.PasskeyCredentials.findFirst({
+                where: eq(PasskeyCredentials.credentialId, credential.id),
+            });
+            if (cred == null) {
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: "Passkey not found" }, { status: 401 });
+            }
+
+            let verification: Awaited<ReturnType<typeof verifyCredentialss>>;
+            try {
+                verification = await verifyCredentialss("login", credential, cred);
+            } catch (error) {
+                console.error(error);
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: "Failed to verify passkey :(" }, { status: 401 });
+            }
+
+            if (!verification.userVerified) {
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: "Failed to verify passkey" }, { status: 401 });
+            }
+
+            const user = await db.query.User.findFirst({
+                where: eq(User.id, cred.userId),
+                columns: {
+                    id: true,
+                    onboardingStatus: true,
+                },
+            });
+
+            if (!user) {
+                // Increment failed attempts
+                attempts.set(ip, (attempts.get(ip) || 0) + 1);
+                timestamps.set(ip, now);
+
+                return ResponseJson({ error: "Can't find user" }, { status: 401 });
+            }
+
+            userId = user.id;
+        } else {
             // Increment failed attempts
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson({ error: errorMsg }, { status: 401 });
+            return ResponseJson({ error: "Invalid login type" }, { status: 400 });
         }
 
-        const { username, password } = parsedData.data;
-
-        if (!username || !password) {
+        if (!userId) {
             // Increment failed attempts
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson({ error: errorMsg }, { status: 400 });
-        }
-
-        // Find user
-        const user = await db.query.User.findFirst({
-            where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
-            columns: {
-                id: true,
-                password: true,
-                onboardingStatus: true,
-            },
-        });
-
-        if (!user) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
-            return ResponseJson({ error: errorMsg }, { status: 401 });
-        }
-
-        // Verify password
-        const valid = await verifyPassword(password, user.password);
-        if (!valid) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
-            return ResponseJson({ error: errorMsg }, { status: 401 });
-        }
-
-        if (typeof valid === "string") {
-            // this is the new hash
-            await db.update(User).set({ password: valid }).where(eq(User.id, user.id)).execute();
+            return ResponseJson({ error: "Invalid login type" }, { status: 400 });
         }
 
         // Success - reset rate limiting
@@ -120,13 +192,13 @@ export async function POST(request: Request) {
 
         const [mailboxes, _] = await db.batchFetch([
             db.query.MailboxForUser.findMany({
-                where: eq(MailboxForUser.userId, user.id),
+                where: eq(MailboxForUser.userId, userId),
                 columns: { mailboxId: true },
             }),
             db.insert(UserSession).values({
-                userId: user.id,
+                userId: userId,
                 token,
-                method: "password",
+                method: type,
                 refreshToken,
                 tokenExpiresAt,
                 refreshTokenExpiresAt,
@@ -139,7 +211,7 @@ export async function POST(request: Request) {
             tokenExpiresAt,
             refreshTokenExpiresAt,
             mailboxes: mailboxes.map(({ mailboxId }) => mailboxId),
-            userId: user.id,
+            userId: userId,
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -156,8 +228,8 @@ export function OPTIONS(request: Request) {
         headers: {
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "authorization",
-            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers": "authorization,content-type",
+            "Access-Control-Allow-Credentials": "false",
             "Access-Control-Max-Age": "3600",
         },
     });

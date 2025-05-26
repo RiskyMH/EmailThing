@@ -1,8 +1,8 @@
 import { verifyAuthenticationResponse, verifyRegistrationResponse } from "@simplewebauthn/server";
 
 const HOST_SETTINGS = {
-    expectedOrigin: [process.env.VERCEL_URL ?? "http://localhost:3000", "https://emailthing.app"],
-    expectedRPID: [process.env.RPID ?? "localhost", "emailthing.app"],
+    expectedOrigin: [process.env.VERCEL_URL, "http://localhost:3000", "https://emailthing.app", "https://pwa.emailthing.app"].filter(Boolean) as string[],
+    expectedRPID: [process.env.RPID, "localhost", "emailthing.app", "pwa.emailthing.app"].filter(Boolean) as string[],
 };
 
 export async function verifyCredentials(challenge: string, credential: Credential & any) {

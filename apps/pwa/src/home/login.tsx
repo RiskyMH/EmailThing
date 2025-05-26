@@ -4,6 +4,21 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { ChevronLeft, KeyRoundIcon } from "lucide-react";
 import Link from "next/link";
+import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
+import { useEffect, useState, type FormEvent, useTransition } from "react";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import {
+  SmartDrawer,
+  SmartDrawerClose,
+  SmartDrawerContent,
+  SmartDrawerDescription,
+  SmartDrawerFooter,
+  SmartDrawerHeader,
+  SmartDrawerTitle,
+  SmartDrawerTrigger,
+} from "@/components/ui/smart-drawer";
 
 export const dynamic = "force-dynamic";
 
@@ -59,31 +74,70 @@ export default function LoginPage() {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  SmartDrawer,
-  SmartDrawerClose,
-  SmartDrawerContent,
-  SmartDrawerDescription,
-  SmartDrawerFooter,
-  SmartDrawerHeader,
-  SmartDrawerTitle,
-  SmartDrawerTrigger,
-} from "@/components/ui/smart-drawer";
-import { Loader2 } from "lucide-react";
-import { type FormEvent, useState, useTransition } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from "sonner";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const apiUrl = "https://emailthing.app";
+
+// Shared login handler for both password and passkey
+async function handleLoginResponse({ data, navigate, username, apiUrl }: {
+  data: {
+    token: string;
+    refreshToken: string;
+    tokenExpiresAt: string;
+    refreshTokenExpiresAt: string;
+    mailboxes: string[];
+    userId: string;
+    error?: string;
+  } | { error: string };
+  navigate: ReturnType<typeof useNavigate>;
+  username?: string | null;
+  apiUrl: string;
+}) {
+  if (!data || 'error' in data && data.error) {
+    return void toast.error(data?.error || "Login failed");
+  }
+  const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes, userId } = data as {
+    token: string;
+    refreshToken: string;
+    tokenExpiresAt: string;
+    refreshTokenExpiresAt: string;
+    mailboxes: string[];
+    userId: string;
+  };
+  const { db, initializeDB } = await import("@/utils/data/db");
+  await initializeDB();
+  await db.localSyncData.clear();
+  await db.mailboxForUser.clear();
+  await db.localSyncData.put(
+    {
+      token,
+      refreshToken,
+      tokenExpiresAt: new Date(tokenExpiresAt),
+      refreshTokenExpiresAt: new Date(refreshTokenExpiresAt),
+      lastSync: 0,
+      isSyncing: true,
+      userId,
+      apiUrl,
+    },
+    userId,
+  );
+  // Get mailboxId from cookie if it exists and is valid, otherwise use first mailbox
+  const mailboxId = document.cookie.includes("mailboxId=")
+    ? document.cookie.split("mailboxId=")[1].split(";")[0]
+    : undefined;
+  const selectedMailbox = mailboxId && mailboxes.includes(mailboxId) ? mailboxId : mailboxes[0];
+  document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
+  navigate(`/mail/${selectedMailbox}`);
+  toast.success("Welcome back!");
+  db.initialFetchSync();
+}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isPending, startTransition] = useTransition();
   const [hadAnError, setHadAnError] = useState<false | string>(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
 
@@ -91,101 +145,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     event.preventDefault();
     setLoading(true);
     startTransition(async () => {
-      // const formData = new FormData(event.target as HTMLFormElement);
-      // const signInResult = await signIn(formData).catch(catchRedirectError);
-
-      // if (signInResult?.error) {
-      //     // @ts-expect-error yay types
-      //     setHadAnError(event.target?.username?.value ?? "unknown");
-      //     setLoading(false);
-      //     return void toast.error(signInResult.error);
-      // }
-
-      // toast.success("Welcome back!");
-      // router.refresh();
-      // setLoading(false);
-
-      const res = await fetch(`${apiUrl}/api/internal/login`, {
+      const res = await fetch(`${apiUrl}/api/internal/login?type=password`, {
         method: "POST",
         body: JSON.stringify({
           username: (event.target as HTMLFormElement).username.value,
           password: (event.target as HTMLFormElement).password.value,
         }),
       });
-
-      if (!res.ok) {
-        setHadAnError((event.target as HTMLFormElement).username.value ?? "unknown");
-        setLoading(false);
-        return void toast.error(await res.text());
-      }
-
       const data = await res.json();
-      if (data.error) {
+      if (!res.ok || data.error) {
         setHadAnError((event.target as HTMLFormElement).username.value ?? "unknown");
         setLoading(false);
-        return void toast.error(data.error);
+        return void toast.error(data.error || (await res.text()));
       }
-
-      const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes } = data;
-
-      // document.cookie = `token=${token}; path=/;`;
-      // localStorage.setItem("token", token);
-      // localStorage.removeItem("lastSynced");
-      const { db, initializeDB } = await import("@/utils/data/db");
-      // await db.open()
-      await initializeDB();
-
-      const saveSyncData = async (userId: string) => {
-        await db.localSyncData.clear();
-        await db.localSyncData.put(
-          {
-            token,
-            refreshToken,
-            tokenExpiresAt,
-            refreshTokenExpiresAt,
-            lastSync: 0,
-            isSyncing: true,
-            userId,
-            apiUrl,
-          },
-          userId,
-        );
-      }
-
-      if (username) {
-        const existing = await db.localSyncData.get(data.userId);
-        if (existing) {
-          await db.localSyncData.update(data.userId, {
-            token,
-            refreshToken,
-            tokenExpiresAt,
-            refreshTokenExpiresAt,
-            lastSync: existing.lastSync,
-            isSyncing: true,
-            userId: data.userId,
-            apiUrl,
-          });
-        } else {
-          await saveSyncData(data.userId);
-        }
-      } else {
-        await saveSyncData(data.userId);
-      }
-
-      // Get mailboxId from cookie if it exists and is valid, otherwise use first mailbox
-      const mailboxId = document.cookie.includes("mailboxId=")
-        ? document.cookie.split("mailboxId=")[1].split(";")[0]
-        : undefined;
-
-      const selectedMailbox = mailboxId && mailboxes.includes(mailboxId) ? mailboxId : mailboxes[0];
-
-      document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-      navigate(`/mail/${selectedMailbox}`);
-
-      toast.success("Welcome back!");
-
-      db.initialFetchSync();
+      await handleLoginResponse({ data, navigate, username, apiUrl });
+      setLoading(false);
     });
+  }
+
+  if (typeof window !== "undefined" && !username) {
+    if (document.cookie.includes("mailboxId=")) {
+      return <Navigate to="/mail" />
+    }
   }
 
   return (
@@ -300,17 +281,66 @@ function ResetPasswordDiag({ username }: { username: string }) {
   );
 }
 
-function PasskeysLogin() {
+function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionStartFunction] }) {
+  const [isPending, startTransition] = transition;
+  const [support, setSupport] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const searchParams = useSearchParams()[0];
+  const username = searchParams.get("username");
+  useEffect(() => {
+    setSupport(supported());
+  }, []);
+
+  const handleLogin = async (event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    setLoading(true);
+    startTransition(async () => {
+      try {
+        const challenge = "login";
+        const rpid = window.location.hostname === "pwa.emailthing.app" ? "emailthing.app" : window.location.hostname;
+        const credential = await get(
+          parseRequestOptionsFromJSON({
+            publicKey: {
+              challenge: btoa(challenge),
+              timeout: 60000,
+              userVerification: "required",
+              rpId: rpid,
+            },
+          })
+        );
+        if (!credential) {
+          setLoading(false);
+          return void toast.error("No passkey");
+        }
+        const res = await fetch(`${apiUrl}/api/internal/login?type=passkey`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credential: credential.toJSON() }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          setLoading(false);
+          return void toast.error(data.error || "Failed to sign in with passkey");
+        }
+        await handleLoginResponse({ data, navigate, username, apiUrl });
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to sign in with passkey");
+        setLoading(false);
+      }
+    });
+  };
+
   return (
     <button
       type="button"
       className={cn(buttonVariants({ variant: "secondary", className: "gap-2" }))}
-      // onClick={handleLogin}
-      onClick={() => toast.warning("todo")}
-      // disabled={isPending || !support}
+      onClick={handleLogin}
+      disabled={isPending || !support}
     >
-      {/* {loading ? <Loader2Icon className="mr-2 size-4 animate-spin" /> : <KeyRoundIcon className="mr-2 size-4" />} */}
-      <KeyRoundIcon className="mr-2 size-4" />
+      {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <KeyRoundIcon className="mr-2 size-4" />}
       Passkey
     </button>
   );

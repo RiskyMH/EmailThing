@@ -87,7 +87,6 @@ export async function signInPasskey(
         where: eq(User.id, cred.userId),
         columns: {
             id: true,
-            password: true,
             onboardingStatus: true,
         },
     });

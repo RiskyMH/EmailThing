@@ -21,12 +21,14 @@ async function batchUpdate<U extends BatchItem<"pg">, T extends Readonly<[U, ...
 async function batchFetch<U extends BatchItem<"pg">, T extends Readonly<[U, ...U[]]>>(
     queries: T,
 ): Promise<BatchResponse<T>> {
-    const results: BatchResponse<T> = [] as BatchResponse<T>;
-    for (const query of queries) {
-        // @ts-ignore
-        results.push(await query);
-    }
-    return results;
+    // @ts-ignore
+    return Promise.all(queries)
+    // const results: BatchResponse<T> = [] as BatchResponse<T>;
+    // for (const query of queries) {
+    //     // @ts-ignore
+    //     results.push(await query);
+    // }
+    // return results;
 }
 // SOME POLLYFILL FUNCTIONS TO MAKE SQLITE -> POSTGRES EASIER
 const db = _db as typeof _db & { batchUpdate: typeof batchUpdate; batchFetch: typeof batchFetch };
