@@ -23,7 +23,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { sha } from "../layout";
-import changeUserSettings from "./api";
+import changeUserSettings from "./_api";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/utils/data/db";
 import { getLogedInUserApi } from "@/utils/data/queries/user";

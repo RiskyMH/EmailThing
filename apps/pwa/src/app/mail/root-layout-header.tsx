@@ -41,16 +41,16 @@ export default function Header() {
         </div>
         <div className="ms-auto flex justify-end gap-3 self-center">
           {/* <Popover>
-                        <PopoverTrigger asChild>
-                            <Button variant="ghost" size="auto" className="self-center p-1.5 rounded-full hidden sm:flex">
-                                <BellIcon className="size-5 text-muted-foreground" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="text-sm w-full">
-                            //todo: indeed to
-                            not implemented yet
-                        </PopoverContent>
-                    </Popover> */}
+              <PopoverTrigger asChild>
+                  <Button variant="ghost" size="auto" className="self-center p-1.5 rounded-full hidden sm:flex">
+                      <BellIcon className="size-5 text-muted-foreground" />
+                  </Button>
+              </PopoverTrigger>
+              <PopoverContent className="text-sm w-full">
+                  //todo: indeed to
+                  not implemented yet
+              </PopoverContent>
+          </Popover> */}
 
           <UserNav />
         </div>

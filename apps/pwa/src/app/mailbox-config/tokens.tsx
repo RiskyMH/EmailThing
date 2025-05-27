@@ -26,15 +26,31 @@ import { CopyIcon, Loader2, PlusIcon, Trash2Icon } from "lucide-react";
 import { type FormEvent, useState, useTransition } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { DeleteButton } from "./components.client";
+import changeMailboxSettings from "./_api";
 
 const deleteToken = async (mailboxId: string, token: string) => {
-  toast.info("Not implemented");
+  const res = await changeMailboxSettings(mailboxId, "delete-token", { token });
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.success ?? "Token deleted");
+  }
 };
 
 const makeToken = async (mailboxId: string, name: string) => {
-  toast.info("Not implemented");
+  const res = await changeMailboxSettings(mailboxId, "make-token", { name });
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.success ?? "Token created");
+    if (!res?.token) {
+      toast.error("Failed to create token");
+    } else {
+      return { token: res?.token };
+    }
+  }
 };
 
 export default function APITokens() {
@@ -69,6 +85,8 @@ export default function APITokens() {
       return response.json() as Promise<InferSelectModel<typeof MailboxTokens>[]>;
     },
   );
+
+  const { mutate } = useSWRConfig();
 
   return (
     <div className="max-w-[40rem]">
@@ -159,7 +177,10 @@ export default function APITokens() {
                           >
                             Cancel
                           </SmartDrawerClose>
-                          <DeleteButton action={deleteToken.bind(null, mailboxId!, row.token)} />
+                          <DeleteButton action={async () => {
+                            await deleteToken(mailboxId!, row.token);
+                            mutate(`/api/internal/auth-query?type=mailbox-token:${mailboxId}`);
+                          }} />
                         </SmartDrawerFooter>
                       </SmartDrawerContent>
                     </SmartDrawer>
@@ -193,7 +214,8 @@ export default function APITokens() {
 export function CreateTokenForm({ mailboxId }: { mailboxId: string }) {
   const [isPending, startTransition] = useTransition();
   const [token, setToken] = useState<string | null>(null);
-
+  const { mutate } = useSWRConfig();
+  
   const formSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isPending) return;
@@ -201,10 +223,9 @@ export function CreateTokenForm({ mailboxId }: { mailboxId: string }) {
     startTransition(async () => {
       // @ts-expect-error
       const res = await makeToken(mailboxId, event.target.name.value);
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        setToken(res?.token!);
+      if (res?.token) {
+        setToken(res.token);
+        mutate(`/api/internal/auth-query?type=mailbox-token:${mailboxId}`);
       }
     });
   };

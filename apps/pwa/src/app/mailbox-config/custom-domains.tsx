@@ -36,17 +36,40 @@ import CopyButton from "@/components/copy-button.client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useTransition, Suspense, lazy } from "react";
+import changeMailboxSettings from "./_api";
+import { useSWRConfig } from "swr";
 
 const CfWorkerCode = lazy(() => import("./custom-domain-dyn"));
 
 const makeToken = async (mailboxId: string, name: string) => {
-  toast.info("Not implemented");
-  return { token: "1234" };
+  const res = await changeMailboxSettings(mailboxId, "make-token", { name });
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    if (!res?.token) {
+      toast.error("Failed to create token");
+    } else {
+      return { token: res?.token };
+    }
+  }
 };
 
 const verifyDomain = async (mailboxId: string, domain: string) => {
-  toast.info("Not implemented");
-  return true;
+  const res = await changeMailboxSettings(mailboxId, "verify-domain", { customDomain: domain });
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.success ?? "Domain verified");
+  }
+};
+
+const deleteCustomDomain = async (mailboxId: string, domainId: string) => {
+  const res = await changeMailboxSettings(mailboxId, "delete-custom-domain", { domainId });
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.success ?? "Domain deleted");
+  }
 };
 
 export default function CustomDomains() {
@@ -58,10 +81,6 @@ export default function CustomDomains() {
   );
 
   const [mailbox, customDomains, aliases] = data ?? [];
-
-  const deleteCustomDomain = async (mailboxId: string, domainId: string) => {
-    toast.info("Not implemented");
-  };
 
   return (
     <div className="max-w-[40rem]">
@@ -175,6 +194,7 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
   );
   const [domain, setDomain] = useState(initialDomain);
   const [token, setToken] = useState<string | null>(null);
+  const { mutate } = useSWRConfig();
 
   const verify = async () => {
     startTransition(async () => {
@@ -193,7 +213,8 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
     if (token) return;
     startTransition(async () => {
       const token = await makeToken(mailboxId, `Cloudflare Worker (${domain})`);
-      setToken(token?.token!);
+      setToken(token?.token ?? "<failed to get, try to do it manually>");
+      mutate(`/api/mailbox/${mailboxId}/settings`);
     });
   };
 

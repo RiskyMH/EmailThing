@@ -9,7 +9,7 @@ import {
 import { getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { getMe } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
-import changeUserSettings from "./api";
+import changeUserSettings from "./_api";
 import { CardForm, ClientInput, ClientSelect } from "./components";
 
 function changeEmail(_: any, formData: FormData) {

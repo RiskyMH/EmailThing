@@ -41,17 +41,34 @@ import { type FormEvent, useTransition } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { DeleteButton } from "./components.client";
+import changeMailboxSettings from "./_api";
+import changeUserSettings from "../user-settings/_api";
 
 const leaveMailbox = async (mailboxId: string) => {
-  toast.info("Not implemented");
+  const res = await changeUserSettings(mailboxId, "leave-mailbox", {});
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.success ?? "Mailbox left");
+  }
 };
 
 const removeUserFromMailbox = async (mailboxId: string, userId: string) => {
-  toast.info("Not implemented");
+  const res = await changeMailboxSettings(mailboxId, "remove-user", { userId });
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.success ?? "User removed");
+  }
 };
 
 const addUserToMailbox = async (mailboxId: string, username: string, role: string) => {
-  toast.info("Not implemented");
+  const res = await changeMailboxSettings(mailboxId, "add-user", { username, role });
+  if ("error" in res) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.success ?? "User added");
+  }
 };
 
 export default function Users() {

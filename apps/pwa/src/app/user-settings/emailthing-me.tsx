@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { getAllAliases, getMe } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
-import changeUserSettings from "./api";
+import changeUserSettings from "./_api";
 import { CardForm, ClientSelect, ClientSwitch } from "./components";
 
 const changePublicEmailStatus = (formData: FormData) => {

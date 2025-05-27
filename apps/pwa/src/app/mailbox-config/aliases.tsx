@@ -38,14 +38,44 @@ import type { FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ContextMenuAction } from "../components";
+import changeMailboxSettings from "./_api";
 
 const addAlias = async (mailboxId: string, alias: string, name: string) => {
-  toast.info("Not implemented");
+  const res = await changeMailboxSettings(mailboxId, "add-alias", { alias, name });
+  if (res?.error) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.message);
+  }
 };
 
 const editAlias = async (mailboxId: string, id: string, name: string | null) => {
-  toast.info("Not implemented");
+  const res = await changeMailboxSettings(mailboxId, "edit-alias", { id, name });
+  if (res?.error) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.message);
+  }
 };
+
+const changeDefaultAlias = async (mailboxId: string, aliasId: string) => {
+  const res = await changeMailboxSettings(mailboxId, "change-default-alias", { aliasId });
+  if (res?.error) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.message);
+  }
+};
+
+const deleteAlias = async (mailboxId: string, aliasId: string) => {
+  const res = await changeMailboxSettings(mailboxId, "delete-alias", { aliasId });
+  if (res?.error) {
+    toast.error(res.error);
+  } else {
+    toast.success(res?.message);
+  }
+};
+
 
 export default function Aliases() {
   const { mailboxId } = useParams<{ mailboxId: string }>();
@@ -57,13 +87,6 @@ export default function Aliases() {
 
   const [mailbox, aliases] = data ?? [];
 
-  const changeDefaultAlias = async (aliasId: string) => {
-    toast.info("Not implemented");
-  };
-
-  const deleteAlias = async (aliasId: string) => {
-    toast.info("Not implemented");
-  };
 
   return (
     <div className="mb-3 max-w-[40rem]">
@@ -167,7 +190,7 @@ export default function Aliases() {
                         <DropdownMenuItem disabled={!!row.default} className="flex gap-2" asChild>
                           <ContextMenuAction
                             icon="CheckIcon"
-                            action={changeDefaultAlias.bind(null, row.id)}
+                            action={changeDefaultAlias.bind(null, mailboxId!, row.id)}
                           >
                             Make default
                           </ContextMenuAction>
@@ -200,7 +223,7 @@ export default function Aliases() {
                               >
                                 Cancel
                               </SmartDrawerClose>
-                              <DeleteButton action={deleteAlias.bind(null, row.id)} />
+                              <DeleteButton action={deleteAlias.bind(null, mailboxId!, row.id)} />
                             </SmartDrawerFooter>
                           </SmartDrawerContent>
                         </SmartDrawer>

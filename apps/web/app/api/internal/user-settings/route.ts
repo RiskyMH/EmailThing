@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     };
 
     // type is search param
-    const type = new URL(request.url).searchParams.get("type")!;
+    const type = new URL(request.url).searchParams.get("type") as keyof MappedPossibleData | null;
     const date = new Date();
 
     const currentUserid = await getSession(request);

@@ -41,7 +41,7 @@ import { Loader2Icon, LogOutIcon, MoreHorizontalIcon, Trash2Icon, XIcon } from "
 import { toast } from "sonner";
 import useSWR, { useSWRConfig } from "swr";
 import { DeleteButton } from "../mailbox-config/components.client";
-import changeUserSettings from "./api";
+import changeUserSettings from "./_api";
 import { CardForm, ClientInput } from "./components";
 
 const changePassword = (_: any, formData: FormData) => {
