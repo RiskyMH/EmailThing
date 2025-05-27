@@ -13,7 +13,7 @@ export const getApiUrl = ({
   const params = new URLSearchParams();
   if (lastSync) {
     // params.append("last_sync", lastSync.getTime().toString());
-    params.set("last_sync_", "<defined>");
+    params.set("last_sync_", "");
   }
   if (minimal) {
     params.append("minimal", "true");

@@ -118,7 +118,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
                 mailboxAliases: sync[1],
                 mailboxCustomDomains: sync[2],
                 mailboxCategories: sync[3],
-                mailboxUsers: sync[4],
+                mailboxesForUser: sync[4],
             } 
         } satisfies MappedPossibleDataResponse, { status: 200, headers });
     } catch (error) {
@@ -183,7 +183,7 @@ export type MappedPossibleDataResponse =
             mailboxAliases: InferSelectModel<typeof MailboxAlias>[];
             mailboxCustomDomains: InferSelectModel<typeof MailboxCustomDomain>[];
             mailboxCategories: InferSelectModel<typeof MailboxCategory>[];
-            mailboxUsers: InferSelectModel<typeof MailboxForUser>[];
+            mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
         };
     }
     | {
@@ -730,8 +730,8 @@ async function removeUserFromMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE"
         },
     });
 
-    if (userRole?.role !== "OWNER") {
-        return { error: "Only owner can remove someone from the mailbox" };
+    if (userRole?.role === "OWNER") {
+        return { error: "User is owner, cannot remove them" };
     }
 
     // check if user exists
