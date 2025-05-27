@@ -60,7 +60,7 @@ export async function POST(request: Request) {
             },
         });
         if (existingEmail) {
-            console.log("Email already exists, no need to add!");
+            console.info("Email already exists, no need to add!");
             return Response.json({
                 success: true,
                 id: existingEmail.id,

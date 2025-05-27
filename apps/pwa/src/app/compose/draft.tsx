@@ -80,7 +80,7 @@ export default function DraftPage() {
       toast.info("You are offline - changes will be synced when you come back online");
     }
 
-    await updateDraftEmail(params.mailboxId!, params.draftId!, {
+    return await updateDraftEmail(params.mailboxId!, params.draftId!, {
       body: draft.body,
       subject: draft.subject,
       from: draft.from,
@@ -134,9 +134,9 @@ export default function DraftPage() {
     }
   }
 
-  const save = useDebouncedCallback((e?: any) => {
+  const save = useDebouncedCallback(async (e?: any) => {
     e?.preventDefault();
-    return saveDraftAction(new FormData(ref.current!));
+    return await saveDraftAction(new FormData(ref.current!));
   }, 250);
   const forceSave = () => saveDraftAction(new FormData(ref.current!));
 

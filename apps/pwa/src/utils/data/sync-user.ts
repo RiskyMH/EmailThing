@@ -12,7 +12,8 @@ export const getApiUrl = ({
 }: { lastSync?: Date | 0; minimal?: boolean; apiUrl?: string }) => {
   const params = new URLSearchParams();
   if (lastSync) {
-    params.append("last_sync", lastSync.getTime().toString());
+    // params.append("last_sync", lastSync.getTime().toString());
+    params.set("last_sync_", "<defined>");
   }
   if (minimal) {
     params.append("minimal", "true");
@@ -73,9 +74,6 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
   } as const;
   const dbTables = tablesToProcess.map((key) => dbMap[key as keyof typeof dbMap]).filter(Boolean);
   if (!dbTables.length) return data;
-
-  console.log(dbTables);
-  console.log(Object.values(dbMap).filter(Boolean));
 
   await db.transaction("rw", Object.values(dbMap).filter(Boolean), async () => {
     // Handle deletions first
@@ -210,6 +208,7 @@ export async function syncLocal({
     method: "POST",
     headers: {
       authorization: `session ${token}`,
+      "x-last-sync": lastSync ? (lastSync.getTime() + 1).toString() : undefined,
     },
     body: JSON.stringify(payload),
   });
@@ -236,6 +235,7 @@ export async function fetchSync({
     method: "GET",
     headers: {
       authorization: `session ${token}`,
+      "x-last-sync": lastSync ? (lastSync.getTime() + 1).toString() : undefined,
     },
   });
 

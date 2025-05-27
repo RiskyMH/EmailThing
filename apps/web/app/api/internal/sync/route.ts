@@ -44,7 +44,7 @@ export function OPTIONS(request: Request) {
         headers: {
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "authorization,content-type",
+            "Access-Control-Allow-Headers": "authorization,content-type,x-last-sync",
             "Access-Control-Allow-Credentials": "false",
             "Access-Control-Max-Age": "3600",
         },
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     // /api/internal/sync?minimal=true
 
     const { searchParams } = new URL(request.url);
-    const lastSync = parseInt(searchParams.get("last_sync") || "0");
+    const lastSync = Number.parseInt(searchParams.get("last_sync") || request.headers.get("x-last-sync") || "0");
     const minimal = searchParams.get("minimal");
     const d = new Date();
 
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization,content-type",
+                "Access-Control-Allow-Headers": "authorization,content-type,x-last-sync",
                 "Access-Control-Allow-Credentials": "false",
                 "Access-Control-Max-Age": "3600",
             },
@@ -109,7 +109,7 @@ export async function GET(request: Request) {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization,content-type",
+                "Access-Control-Allow-Headers": "authorization,content-type,x-last-sync",
                 "Access-Control-Allow-Credentials": "false",
                 "Access-Control-Max-Age": "3600",
             },
@@ -128,7 +128,7 @@ export async function GET(request: Request) {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization,content-type",
+                "Access-Control-Allow-Headers": "authorization,content-type,x-last-sync",
                 "Access-Control-Allow-Credentials": "false",
                 "Access-Control-Max-Age": "3600",
             },
@@ -143,7 +143,7 @@ export async function POST(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const lastSync = parseInt(searchParams.get("last_sync") || "0");
+    const lastSync = Number.parseInt(searchParams.get("last_sync") || request.headers.get("x-last-sync") || "0");
     const lastSyncDate = lastSync ? new Date(lastSync) : new Date();
 
     const d = new Date();
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization,content-type",
+                "Access-Control-Allow-Headers": "authorization,content-type,x-last-sync",
                 "Access-Control-Allow-Credentials": "false",
                 "Access-Control-Max-Age": "3600",
             },
@@ -630,7 +630,7 @@ export async function POST(request: Request) {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization,content-type",
+                "Access-Control-Allow-Headers": "authorization,content-type,x-last-sync",
                 "Access-Control-Allow-Credentials": "false",
                 "Access-Control-Max-Age": "3600",
             },

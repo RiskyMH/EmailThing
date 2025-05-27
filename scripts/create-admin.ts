@@ -6,7 +6,7 @@ const username = prompt("Enter username:");
 const password = prompt("Enter password:");
 
 if (!(username && password)) {
-    console.log("Username and password are required");
+    console.error("Username and password are required");
     process.exit(1);
 }
 
@@ -39,4 +39,4 @@ await db.batchUpdate([
     }),
 ]);
 
-console.log("User created successfully");
+console.info("User created successfully");

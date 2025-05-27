@@ -53,10 +53,6 @@ import { BodyHeader } from "./tiptap-header";
 import { makeHtml } from "./tools";
 import type { sendEmailAction } from "./draft";
 
-const catchRedirectError = () => {
-  // console.log("catchRedirectError")
-};
-
 const EditorContent2 = lazy(() => import("./tiptap.client"));
 
 export function BodyEditor({
@@ -442,14 +438,14 @@ export function RecipientInput({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        if (!onSave) return void toast.error("No save action provided");
-        const p = onSave(e);
+        if (!forceSave) return void toast.error("No save action provided");
+        const p = forceSave(e);
         if (p instanceof Promise) {
           toast.promise(p, {
             loading: "Saving...",
             success: "Saved!",
             error: "Error saving",
-            // duration: 250
+            duration: 500
           });
         } else {
           toast.info("Saving...", { duration: 500 });

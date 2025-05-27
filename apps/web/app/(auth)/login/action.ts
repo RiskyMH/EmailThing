@@ -61,7 +61,6 @@ export async function signInPasskey(
     credential: Credential,
     callback?: string | null,
 ): Promise<{ error?: string | null } | undefined> {
-    // console.log(credential)
 
     const cred = await db.query.PasskeyCredentials.findFirst({
         where: eq(PasskeyCredentials.credentialId, credential.id),
