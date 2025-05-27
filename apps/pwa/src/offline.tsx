@@ -29,5 +29,9 @@ function OfflineApp() {
   );
 }
 
+if (window.location.pathname === "/" && document.cookie.includes("mailboxId")) {
+  window.location.pathname = "/mail"
+}
+
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
 ReactDOM.createRoot(document.getElementById("root")!).render(<OfflineApp />);

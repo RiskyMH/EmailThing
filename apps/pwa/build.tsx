@@ -250,8 +250,8 @@ const generateServiceWorkerAssets = async () => {
 
   const gitsha = await Bun.$`git rev-parse HEAD`.text();
   serviceWorkerContent = serviceWorkerContent.replace(
-    "const CACHE_NAME = 'emailthing-offline-v1';",
-    `const CACHE_NAME = 'emailthing-${gitsha.trim()}';`,
+    "const CACHE_NAME = \"emailthing-offline-v1\";",
+    `const CACHE_NAME = "emailthing-${gitsha.trim()}";`,
   );
 
   await Bun.write(serviceWorkerPath, serviceWorkerContent);

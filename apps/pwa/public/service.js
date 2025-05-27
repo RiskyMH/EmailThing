@@ -75,7 +75,7 @@ if (CACHE_NAME !== "emailthing-offline-v1") {
   self.addEventListener("fetch", (/** @type {FetchEvent} */ event) => {
     // if (navigator.onLine) return
 
-    if (event.request.mode === "navigate") {
+    if (event.request.mode === "navigate" && !event.request.url.endsWith("/manifest.json")) {
       if (navigator.onLine) {
         event.respondWith(
           (async () => {
