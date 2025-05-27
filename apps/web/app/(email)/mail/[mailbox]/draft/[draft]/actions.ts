@@ -164,7 +164,17 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
 
         // delete draft
         db
-            .delete(DraftEmail)
+            .update(DraftEmail)
+            .set({
+                isDeleted: true,
+                body: "<deleted>",
+                subject: "<deleted>",
+                from: null,
+                to: null,
+                updatedAt: new Date(),
+                headers: [],
+                createdAt: new Date(),
+            })
             .where(and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId))),
     ]);
 
