@@ -64,6 +64,8 @@ export default function LoginPage() {
 
         {/* the actual form part */}
         <UserAuthForm />
+        <ApiUrlButton />
+
 
         <p className="flex flex-col gap-2 px-8 text-center text-muted-foreground text-sm">
           <Link href="/login" className="underline underline-offset-4 hover:text-brand">
@@ -83,15 +85,14 @@ import { Label } from "@/components/ui/label";
 // import { cn } from "@/utils/tw";
 import { Loader2 } from "lucide-react";
 // import { useRouter } from "react-router-dom";
-import { type FormEvent, useTransition } from "react";
+import { type FormEvent, useEffect, useTransition } from "react";
 import { toast } from "sonner";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { ApiUrlButton } from "./login";
 // import signUp from "./action";
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
-
-const apiUrl = "https://emailthing.app";
 
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
@@ -99,6 +100,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const navigate = useNavigate();
   const searchParams = useSearchParams()[0];
   const inviteCode = searchParams.get("invite");
+  const apiUrl = searchParams.get("api") || "https://emailthing.app";
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -171,11 +173,21 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     });
   }
 
-  if (typeof window !== "undefined") {
-    if (document.cookie.includes("mailboxId=")) {
-      return <Navigate to="/mail" />
+  useEffect(() => {
+    const checkMailboxId = async () => {
+      if (typeof window !== "undefined" && document.cookie.includes("mailboxId=")) {
+        const { db, initializeDB } = await import("@/utils/data/db");
+        await initializeDB();
+        const mailboxId = document.cookie.split("mailboxId=")[1].split(";")[0];
+        const mailbox = await db.mailboxes.get(mailboxId);
+        if (mailbox) {
+          navigate(`/mail/${mailboxId}`);
+        }
+      }
     }
-  }
+
+    checkMailboxId();
+  }, [navigate]);
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>

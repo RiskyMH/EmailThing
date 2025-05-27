@@ -30,8 +30,8 @@ import useSWR, { useSWRConfig } from "swr";
 import { DeleteButton } from "./components.client";
 import changeMailboxSettings from "./_api";
 
-const deleteToken = async (mailboxId: string, token: string) => {
-  const res = await changeMailboxSettings(mailboxId, "delete-token", { token });
+const deleteToken = async (mailboxId: string, tokenId: string) => {
+  const res = await changeMailboxSettings(mailboxId, "delete-token", { tokenId });
   if ("error" in res) {
     toast.error(res.error);
   } else {
@@ -178,7 +178,7 @@ export default function APITokens() {
                             Cancel
                           </SmartDrawerClose>
                           <DeleteButton action={async () => {
-                            await deleteToken(mailboxId!, row.token);
+                            await deleteToken(mailboxId!, row.id);
                             mutate(`/api/internal/auth-query?type=mailbox-token:${mailboxId}`);
                           }} />
                         </SmartDrawerFooter>

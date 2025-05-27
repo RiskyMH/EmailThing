@@ -54,7 +54,7 @@ export const parseValuesInArray = <T extends any[]>(arr: T) => {
 export async function parseSync(data: Partial<ChangesResponse & { time: string }>) {
   // Get tables that have data to process
   const tablesToProcess = Object.keys(data).filter(
-    (key) => key === "user" || data[key as keyof typeof data]?.length,
+    (key) => key === "user" || key === "apiCustomisations" || data[key as keyof typeof data]?.length,
   );
   const dbMap = {
     emails: db.emails,
@@ -72,8 +72,12 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
     apiCustomisations: db.apiCustomisations,
   } as const;
   const dbTables = tablesToProcess.map((key) => dbMap[key as keyof typeof dbMap]).filter(Boolean);
+  if (!dbTables.length) return data;
 
-  await db.transaction("rw", dbTables, async () => {
+  console.log(dbTables);
+  console.log(Object.values(dbMap).filter(Boolean));
+
+  await db.transaction("rw", Object.values(dbMap).filter(Boolean), async () => {
     // Handle deletions first
     const deletions = tablesToProcess
       .map((_key) => {
@@ -98,20 +102,19 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
               // db.mailboxTokens,
               db.mailboxCustomDomains,
             ] as const;
-            return db.transaction("rw", mailboxTables, async () => {
+            return (async () => {
               await db.mailboxForUser?.bulkDelete(
                 // @ts-expect-error this *should* work
                 deletedItems.map((m) => [m.userId, m.mailboxId]),
               );
               await Promise.all(
                 mailboxTables.map((table) =>
-                  table
-                    .where("mailboxId")
-                    .equals(deletedItems.map((m: any) => m.mailboxId))
-                    .delete(),
+                  table === db.mailboxes
+                    ? db.mailboxes.where("id").equals(deletedItems.map((m: any) => m.mailboxId)).delete()
+                    : table.where("mailboxId").equals(deletedItems.map((m: any) => m.mailboxId)).delete(),
                 ),
               );
-            });
+            })();
           }
 
           default:
@@ -129,6 +132,8 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
         switch (key) {
           case "user":
             return db.user.put(parseValues(items));
+          case "apiCustomisations":
+            return db.apiCustomisations.put(items);
           default:
             if (!items?.length) return null;
             // @ts-ignore
@@ -245,8 +250,8 @@ export async function fetchSync({
 
   return parseSync(
     (await response.json()) as typeof minimal extends true
-      ? MinimalChangesResponse
-      : ChangesResponse,
+    ? MinimalChangesResponse
+    : ChangesResponse,
   );
 }
 

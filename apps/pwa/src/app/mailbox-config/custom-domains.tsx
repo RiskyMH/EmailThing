@@ -55,21 +55,11 @@ const makeToken = async (mailboxId: string, name: string) => {
 };
 
 const verifyDomain = async (mailboxId: string, domain: string) => {
-  const res = await changeMailboxSettings(mailboxId, "verify-domain", { customDomain: domain });
-  if ("error" in res) {
-    toast.error(res.error);
-  } else {
-    toast.success(res?.success ?? "Domain verified");
-  }
+  return changeMailboxSettings(mailboxId, "verify-domain", { customDomain: domain });
 };
 
 const deleteCustomDomain = async (mailboxId: string, domainId: string) => {
-  const res = await changeMailboxSettings(mailboxId, "delete-custom-domain", { domainId });
-  if ("error" in res) {
-    toast.error(res.error);
-  } else {
-    toast.success(res?.success ?? "Domain deleted");
-  }
+  return changeMailboxSettings(mailboxId, "delete-custom-domain", { domainId });
 };
 
 export default function CustomDomains() {

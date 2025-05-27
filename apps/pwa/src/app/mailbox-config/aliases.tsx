@@ -41,39 +41,19 @@ import { ContextMenuAction } from "../components";
 import changeMailboxSettings from "./_api";
 
 const addAlias = async (mailboxId: string, alias: string, name: string) => {
-  const res = await changeMailboxSettings(mailboxId, "add-alias", { alias, name });
-  if (res?.error) {
-    toast.error(res.error);
-  } else {
-    toast.success(res?.message);
-  }
+  return changeMailboxSettings(mailboxId, "add-alias", { alias, name });
 };
 
 const editAlias = async (mailboxId: string, id: string, name: string | null) => {
-  const res = await changeMailboxSettings(mailboxId, "edit-alias", { id, name });
-  if (res?.error) {
-    toast.error(res.error);
-  } else {
-    toast.success(res?.message);
-  }
+  return changeMailboxSettings(mailboxId, "edit-alias", { id, name });
 };
 
 const changeDefaultAlias = async (mailboxId: string, aliasId: string) => {
-  const res = await changeMailboxSettings(mailboxId, "change-default-alias", { aliasId });
-  if (res?.error) {
-    toast.error(res.error);
-  } else {
-    toast.success(res?.message);
-  }
+  return changeMailboxSettings(mailboxId, "change-default-alias", { aliasId });
 };
 
 const deleteAlias = async (mailboxId: string, aliasId: string) => {
-  const res = await changeMailboxSettings(mailboxId, "delete-alias", { aliasId });
-  if (res?.error) {
-    toast.error(res.error);
-  } else {
-    toast.success(res?.message);
-  }
+  return changeMailboxSettings(mailboxId, "delete-alias", { aliasId });
 };
 
 

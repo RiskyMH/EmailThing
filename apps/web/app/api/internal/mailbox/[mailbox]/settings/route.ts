@@ -114,7 +114,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
         return Response.json({ 
             message: result, 
             sync: {
-                mailbox: sync[0],
+                mailboxes: sync[0] ? [sync[0]] : [],
                 mailboxAliases: sync[1],
                 mailboxCustomDomains: sync[2],
                 mailboxCategories: sync[3],
@@ -179,7 +179,7 @@ export type MappedPossibleDataResponse =
             token?: string;
         };
         sync: {
-            mailbox: InferSelectModel<typeof Mailbox> | null | undefined;
+            mailboxes: InferSelectModel<typeof Mailbox>[];
             mailboxAliases: InferSelectModel<typeof MailboxAlias>[];
             mailboxCustomDomains: InferSelectModel<typeof MailboxCustomDomain>[];
             mailboxCategories: InferSelectModel<typeof MailboxCategory>[];
@@ -508,14 +508,14 @@ async function deleteAlias(mailboxId: string, data: DeleteAliasData) {
 }
 
 export interface DeleteCustomDomainData {
-    customDomainId: string;
+    domainId: string;
 }
 async function deleteCustomDomain(mailboxId: string, data: DeleteCustomDomainData) {
-    const { customDomainId } = data;
+    const { domainId } = data;
 
     const domain = await db.query.MailboxCustomDomain.findFirst({
         where: and(
-            eq(MailboxCustomDomain.id, customDomainId),
+            eq(MailboxCustomDomain.id, domainId),
             eq(MailboxCustomDomain.mailboxId, mailboxId),
             eq(MailboxCustomDomain.isDeleted, false),
         ),
@@ -547,7 +547,7 @@ async function deleteCustomDomain(mailboxId: string, data: DeleteCustomDomainDat
                 addedAt: new Date(),
                 updatedAt: new Date(),
             })
-            .where(eq(MailboxCustomDomain.id, customDomainId)),
+            .where(eq(MailboxCustomDomain.id, domainId)),
 
         db
             .update(MailboxAlias)
@@ -596,10 +596,10 @@ async function makeToken(mailboxId: string, data: MakeTokenData) {
 }
 
 export interface DeleteTokenData {
-    token: string;
+    tokenId: string;
 }
 async function deleteToken(mailboxId: string, data: DeleteTokenData) {
-    const { token } = data;
+    const { tokenId } = data;
 
     await db
         .update(MailboxTokens)
@@ -610,7 +610,7 @@ async function deleteToken(mailboxId: string, data: DeleteTokenData) {
             createdAt: new Date(),
             updatedAt: new Date(),
         })
-        .where(and(eq(MailboxTokens.token, token), eq(MailboxTokens.mailboxId, mailboxId)))
+        .where(and(eq(MailboxTokens.id, tokenId), eq(MailboxTokens.mailboxId, mailboxId)))
         .execute();
 
     return { success: "Token deleted" }

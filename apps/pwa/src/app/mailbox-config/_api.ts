@@ -18,7 +18,8 @@ export default async function changeMailboxSettings<T extends keyof MappedPossib
       await db.refreshToken();
       sync = await getLogedInUserApi();
     }
-  const response = await fetch(
+
+    const response = await fetch(
       `${sync?.apiUrl}/api/internal/mailbox/${mailboxId}/settings?type=${type as string}`,
       {
         method: "POST",
@@ -29,11 +30,12 @@ export default async function changeMailboxSettings<T extends keyof MappedPossib
       },
     );
     if (!response.ok) {
-      return response.json();
+      const res = await response.json();
+      return res?.message ?? res ?? { error: "Failed to fetch" };
     }
 
     const res = (await response.json()) as MappedPossibleDataResponse;
-    if ("error" in res) return res;
+    if ("error" in res) return res.message;
 
     if ("sync" in res) {
       const { sync: data } = res;

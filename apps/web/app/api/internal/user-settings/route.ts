@@ -79,34 +79,8 @@ export async function POST(request: Request) {
                 updatedAt: true,
             },
         }),
-        // db.query.PasskeyCredentials.findMany({
-        //     where: and(eq(PasskeyCredentials.userId, currentUserid), gte(PasskeyCredentials.createdAt, date)),
-        //     columns: {
-        //         id: true,
-        //         name: true,
-        //         publicKey: false,
-        //         isDeleted: true,
-        //         updatedAt: true,
-        //         createdAt: true,
-        //         userId: true,
-        //         credentialId: true,
-        //     },
-        // }),
-        // db.query.UserNotification.findMany({
-        //     where: and(eq(UserNotification.userId, currentUserid), gte(UserNotification.createdAt, date)),
-        //     columns: {
-        //         id: true,
-        //         endpoint: false,
-        //         p256dh: false,
-        //         auth: false,
-        //         isDeleted: true,
-        //         createdAt: true,
-        //         expiresAt: true,
-        //         userId: true,
-        //     },
-        // }),
         db.query.MailboxForUser.findMany({
-            where: and(eq(MailboxForUser.userId, currentUserid), gte(MailboxForUser.joinedAt, date)),
+            where: and(eq(MailboxForUser.userId, currentUserid), gte(MailboxForUser.updatedAt, date)),
             columns: {
                 userId: true,
                 mailboxId: true,
@@ -125,11 +99,6 @@ export async function POST(request: Request) {
             message: result,
             sync: {
                 user: sync[0],
-                // passkeyCredentials: sync[1],
-                // userNotifications: sync[2],
-                // mailboxesForUser: sync[3],
-                passkeyCredentials: [],
-                userNotifications: [],
                 mailboxesForUser: sync[1],
             },
         } satisfies MappedPossibleDataResponse,
@@ -189,8 +158,6 @@ export type MappedPossibleDataResponse =
         };
         sync: {
             user: Omit<InferSelectModel<typeof User>, "password">;
-            passkeyCredentials: Omit<InferSelectModel<typeof PasskeyCredentials>, "publicKey">[];
-            userNotifications: Omit<InferSelectModel<typeof UserNotification>, "endpoint" | "p256dh" | "auth">[];
             mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
         };
     }
@@ -520,7 +487,7 @@ async function revokeSession(userId: string, data: RevokeSessionData) {
         return { success: "All sessions revoked", description: "This includes this one" };
     }
 
-    await db.delete(UserSession).where(and(eq(UserSession.userId, userId), inArray(UserSession.token, data.sessionIds))).execute();
+    await db.delete(UserSession).where(and(eq(UserSession.userId, userId), inArray(UserSession.id, data.sessionIds))).execute();
     return { success: data.sessionIds.length > 1 ? "Sessions revoked" : "Session revoked" };
 }
 

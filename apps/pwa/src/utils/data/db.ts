@@ -258,7 +258,7 @@ export const db = new EmailDB();
 
 // Initialize database
 const forceIndexDBKey = "indexdb-test-version";
-const forceIndexDBVersion = "v1.1b";
+const forceIndexDBVersion = "v1.1c";
 
 export async function initializeDB() {
   const v = localStorage.getItem(forceIndexDBKey);

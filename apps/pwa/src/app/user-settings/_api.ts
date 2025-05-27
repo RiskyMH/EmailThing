@@ -28,11 +28,12 @@ export default async function changeUserSettings<T extends keyof MappedPossibleD
       },
     );
     if (!response.ok) {
-      return response.json();
+      const res = await response.json();
+      return res?.message ?? res ?? { error: "Failed to fetch" };
     }
 
     const res = (await response.json()) as MappedPossibleDataResponse;
-    if ("error" in res) return res;
+    if ("error" in res) return res.message;
 
     if ("sync" in res) {
       const { sync: data } = res;

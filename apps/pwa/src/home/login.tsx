@@ -2,7 +2,7 @@ import Logo from "@/components/logo";
 // import Logo from "@/icons/Logo"
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
-import { ChevronLeft, KeyRoundIcon } from "lucide-react";
+import { ChevronLeft, KeyRoundIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
 import { useEffect, useState, type FormEvent, useTransition } from "react";
@@ -54,6 +54,7 @@ export default function LoginPage() {
 
         {/* the actual login part */}
         <UserAuthForm />
+        <ApiUrlButton />
       </div>
       <script
         type="application/ld+json"
@@ -76,8 +77,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
-
-const apiUrl = "https://emailthing.app";
 
 // Shared login handler for both password and passkey
 async function handleLoginResponse({ data, navigate, username, apiUrl }: {
@@ -140,6 +139,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const navigate = useNavigate();
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
+  const apiUrl = searchParams.get("api") || "https://emailthing.app";
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,11 +163,21 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     });
   }
 
-  if (typeof window !== "undefined" && !username) {
-    if (document.cookie.includes("mailboxId=")) {
-      return <Navigate to="/mail" />
+  useEffect(() => {
+    const checkMailboxId = async () => {
+      if (typeof window !== "undefined" && !username && document.cookie.includes("mailboxId=")) {
+        const { db, initializeDB } = await import("@/utils/data/db");
+        await initializeDB();
+        const mailboxId = document.cookie.split("mailboxId=")[1].split(";")[0];
+        const mailbox = await db.mailboxes.get(mailboxId);
+        if (mailbox) {
+          navigate(`/mail/${mailboxId}`);
+        }
+      }
     }
-  }
+
+    checkMailboxId();
+  }, [username, navigate]);
 
   return (
     <>
@@ -288,6 +298,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
   const navigate = useNavigate();
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
+  const apiUrl = searchParams.get("api") || "https://emailthing.app";
   useEffect(() => {
     setSupport(supported());
   }, []);
@@ -306,7 +317,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
               timeout: 60000,
               userVerification: "required",
               rpId: rpid,
-              
+
             },
           })
         );
@@ -344,5 +355,61 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
       {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <KeyRoundIcon className="mr-2 size-4" />}
       Passkey
     </button>
+  );
+}
+
+// icon button in bottom right of screen where you can change the api url (button press opens modal where its defaulted to the https://emailthing.app)
+export function ApiUrlButton() {
+  const searchParams = useSearchParams()[0];
+  const apiUrl = searchParams.get("api") || "https://emailthing.app";
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const apiUrl = formData.get("api") as string;
+    searchParams.set("api", apiUrl);
+    navigate({ search: searchParams.toString() }, { replace: true });
+    document.getElementById("smart-drawer:close")?.click();
+  };
+
+  return (
+
+    <SmartDrawer>
+      <SmartDrawerTrigger asChild>
+        <Button type="button" variant="ghost" size="icon" className="absolute bottom-4 right-4">
+          <SettingsIcon className="size-4" />
+        </Button>
+      </SmartDrawerTrigger>
+      <SmartDrawerContent className="sm:max-w-[425px]">
+
+        <SmartDrawerHeader>
+          <SmartDrawerTitle>API URL</SmartDrawerTitle>
+          <SmartDrawerDescription>
+            Change the API URL to use a different server.
+          </SmartDrawerDescription>
+        </SmartDrawerHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid items-start gap-4 px-4 sm:px-0">
+
+            <Input
+              defaultValue={apiUrl}
+              name="api"
+              id="api-url-input"
+              className="border-none bg-secondary"
+              autoFocus
+              required
+            />
+          </div>
+
+          <SmartDrawerFooter className="flex pt-4">
+            <SmartDrawerClose asChild>
+              <Button type="submit">Save</Button>
+            </SmartDrawerClose>
+          </SmartDrawerFooter>
+        </form>
+
+      </SmartDrawerContent>
+    </SmartDrawer>
   );
 }
