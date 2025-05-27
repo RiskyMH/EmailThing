@@ -31,6 +31,7 @@ export default function EditorContent2({
   savedBody,
   onSave,
 }: { savedBody?: string; onSave: (e?: any) => void }) {
+  "use no memo";
   // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
   const debounced = onSave;
 
