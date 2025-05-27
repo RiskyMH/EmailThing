@@ -276,7 +276,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
     const draft = getData(data);
 
     const text = draft.html ? new Turndown().turndown(draft.html).replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, "$1") : draft.body;
-    const actualHTML = draft.html ? makeHtml(draft.html) : undefined;
+    const html = draft.html ? makeHtml(draft.html) : undefined;
 
     if (!draft) {
       return { error: "Invalid draft data" };
@@ -298,11 +298,11 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
         body: JSON.stringify({
           draftId,
           mailboxId,
-          body: draft.body,
+          body: text,
           subject: draft.subject,
           from: draft.from,
           to: draft.to,
-          html: actualHTML,
+          html: html,
           headers: draft.headers,
         } satisfies SaveActionProps),
       }

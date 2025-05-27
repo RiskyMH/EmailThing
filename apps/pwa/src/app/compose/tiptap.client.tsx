@@ -84,6 +84,9 @@ export default function EditorContent2({
     onBlur: (e) => setTimeout(debounced, 0),
   });
 
+  const html = editor?.getHTML();
+  const text = editor?.getText();
+
   return (
     <EditorContent
       editor={editor}
@@ -104,16 +107,15 @@ export default function EditorContent2({
 
       {/* //todo: maybe use json instead of html */}
       {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
-      <input hidden value={`${editor?.getHTML()}<!--tiptap-->` || savedBody} name="body" readOnly />
+      <input hidden value={`${html}<!--tiptap-->` || savedBody} name="body" readOnly />
       <input
         hidden
-        value={editor
-          ?.getHTML()
+        value={html
           ?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")}
         name="html"
         readOnly
       />
-      <input hidden value={editor?.getText()?.slice(0, 250)} name="preview" readOnly />
+      <input hidden value={text?.slice(0, 250)} name="preview" readOnly />
       {/* </div > */}
     </EditorContent>
   );
