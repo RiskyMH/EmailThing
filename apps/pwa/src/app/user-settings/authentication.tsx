@@ -33,13 +33,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getMe } from "@/utils/data/queries/user";
+import { getLogedInUserApi, getMe } from "@/utils/data/queries/user";
 import type { PasskeyCredentials, UserSession } from "@emailthing/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { InferSelectModel } from "drizzle-orm";
-import { Loader2Icon, MoreHorizontalIcon, Trash2Icon, XIcon } from "lucide-react";
+import { Loader2Icon, LogOutIcon, MoreHorizontalIcon, Trash2Icon, XIcon } from "lucide-react";
 import { toast } from "sonner";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { DeleteButton } from "../mailbox-config/components.client";
 import changeUserSettings from "./api";
 import { CardForm, ClientInput } from "./components";
@@ -58,19 +58,34 @@ const changeBackupEmail = (_: any, formData: FormData) => {
 };
 
 const deletePasskey = async (id: string) => {
-  toast.info("todo");
+  return changeUserSettings("delete-passkey", {
+    passkeyId: id,
+  });
 };
 
-const addPasskey = async (cred: any, name: string) => {
-  toast.info("todo");
+const addPasskey = async (cred: Credential, name?: string) => {
+  return changeUserSettings("add-passkey", {
+    credential: cred,
+    name,
+  });
 };
 
 const revokeSession = async (id: string) => {
-  toast.info("todo");
+  return changeUserSettings("revoke-session", {
+    sessionIds: [id],
+  });
+};
+
+const revokeAllSessions = async () => {
+  return changeUserSettings("revoke-session", {
+    all: true,
+  });
 };
 
 export default function UserSettingsAuthentication() {
   const user = useLiveQuery(getMe);
+
+  const { mutate } = useSWRConfig()
 
   const { data: passkeys } = useSWR("/api/internal/auth-query?type=passkeys", async () => {
     const sync = (await db.localSyncData.toArray())[0];
@@ -90,7 +105,11 @@ export default function UserSettingsAuthentication() {
   });
 
   const { data: sessions } = useSWR("/api/internal/auth-query?type=sessions", async () => {
-    const sync = (await db.localSyncData.toArray())[0];
+    let sync = await getLogedInUserApi();
+    if (sync?.tokenNeedsRefresh) {
+      await db.refreshToken();
+      sync = await getLogedInUserApi();
+    }
 
     const response = await fetch(`${sync?.apiUrl || ""}/api/internal/auth-query?type=sessions`, {
       method: "GET",
@@ -209,7 +228,10 @@ export default function UserSettingsAuthentication() {
                                 >
                                   Cancel
                                 </SmartDrawerClose>
-                                <DeleteButton action={deletePasskey.bind(null, p.id)} />
+                                <DeleteButton action={async () => {
+                                  await deletePasskey(p.id);
+                                  mutate("/api/internal/auth-query?type=passkeys");
+                                }} />
                               </SmartDrawerFooter>
                             </SmartDrawerContent>
                           </SmartDrawer>
@@ -303,7 +325,10 @@ export default function UserSettingsAuthentication() {
                             >
                               Cancel
                             </SmartDrawerClose>
-                            <DeleteButton action={revokeSession.bind(null, p.id)} />
+                            <DeleteButton action={async () => {
+                              await revokeSession(p.id);
+                              mutate("/api/internal/auth-query?type=sessions");
+                            }} />
                           </SmartDrawerFooter>
                         </SmartDrawerContent>
                       </SmartDrawer>
@@ -320,18 +345,42 @@ export default function UserSettingsAuthentication() {
               </TableBody>
             </Table>
           </div>
-          <Button
-            variant="outline"
-            className="w-min border-0 text-destructive hover:text-destructive"
-            onClick={() => {
-              toast.info("Not implemented");
-            }}
-          >
-            Log out all known devices
-          </Button>
+          <SmartDrawer>
+            <SmartDrawerTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-min border-0 text-destructive hover:text-destructive flex gap-2"
+              >
+                <LogOutIcon className="size-4" />
+                Log out all known devices
+              </Button>
+            </SmartDrawerTrigger>
+
+            <SmartDrawerContent className="sm:max-w-[425px]">
+              <SmartDrawerHeader>
+                <SmartDrawerTitle>Revoke all Sessions</SmartDrawerTitle>
+                <SmartDrawerDescription>
+                  Are you sure you want to log out all known devices? <strong>This includes this device.</strong>
+                </SmartDrawerDescription>
+              </SmartDrawerHeader>
+              <SmartDrawerFooter className="flex pt-2">
+                <SmartDrawerClose
+                  className={buttonVariants({
+                    variant: "secondary",
+                  })}
+                >
+                  Cancel
+                </SmartDrawerClose>
+                <DeleteButton action={async () => {
+                  await revokeAllSessions();
+                  mutate("/api/internal/auth-query?type=sessions");
+                }} />
+              </SmartDrawerFooter>
+            </SmartDrawerContent>
+          </SmartDrawer>
         </CardContent>
         <CardFooter className="border-muted-foreground/30 border-t px-6 py-4">
-          <span className="text-muted-foreground text-sm">Something something passkeys!</span>
+          <span className="text-muted-foreground text-sm">Sessions are very important and can last up to a year</span>
 
           {/* <Button type="submit" className="ms-auto" size="sm">Create new</Button> */}
         </CardFooter>
@@ -380,6 +429,7 @@ import { useEffect, useState, useTransition } from "react";
 
 export function PasskeysSetup({ userId, username }: { userId: string; username: string }) {
   const [isPending, startTransition] = useTransition();
+  const { mutate } = useSWRConfig();
 
   const [support, setSupport] = useState(false);
   useEffect(() => {
@@ -387,12 +437,13 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
   }, []);
 
   const handleCreate = () => {
-    (async () => {
-      const { UAParser } = await import("ua-parser-js");
-    })().catch((e) => {
-      console.error(e);
-      toast.error("Failed to get user agent");
-    });
+    // todo: get user agent (but we can do this on server)
+    // (async () => {
+    //   const { UAParser } = await import("ua-parser-js");
+    // })().catch((e) => {
+    //   console.error(e);
+    //   toast.error("Failed to get user agent");
+    // });
 
     if (!(userId && username)) return toast.error("No user ID or username...?");
     startTransition(async () => {
@@ -405,7 +456,7 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
               rp: {
                 // These are seen by the authenticator when selecting which key to use
                 name: "EmailThing",
-                id: window.location.hostname,
+                id: window.location.hostname === "pwa.emailthing.app" ? "emailthing.app" : window.location.hostname,
               },
               user: {
                 // id: Buffer.from(userId).toString("base64"),
@@ -428,12 +479,13 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
           return void toast.error("Failed to create Passkey");
         }
         // const ua = new (await import("ua-parser-js")).UAParser(navigator.userAgent).getResult();
-        const ua = { browser: { name: "A Browser" }, os: { name: "An OS" } };
-        const res = await addPasskey(cred.toJSON(), `${ua.browser.name} on ${ua.os.name}`);
-        if (res?.error) {
+        // const ua = { browser: { name: "A Browser" }, os: { name: "An OS" } };
+        const res = await addPasskey(cred.toJSON());
+        if ("error" in res) {
           return void toast.error(res.error);
         }
         toast("Successfully set up passkey!");
+        mutate("/api/internal/auth-query?type=passkeys");
       } catch (err) {
         console.error(err);
         toast.error("Failed to create Passkey");
@@ -455,6 +507,39 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
         <KeyRoundIcon className="mr-2 size-4" />
       )}
       Create new
+    </Button>
+  );
+}
+
+function LogoutAllDevices() {
+  const [isPending, startTransition] = useTransition();
+  const { mutate } = useSWRConfig();
+
+  return (
+    <Button
+      variant="outline"
+      className="w-min border-0 text-destructive hover:text-destructive"
+      onClick={() => {
+        if (confirm("Are you sure you want to log out all known devices?")) {
+          startTransition(async () => {
+            const res = await revokeAllSessions();
+            if ("error" in res) {
+              toast.error(res.error);
+            } else {
+              toast.success(res.success);
+            }
+            mutate("/api/internal/auth-query?type=sessions");
+          });
+        }
+      }}
+      disabled={isPending}
+    >
+      {isPending ? (
+        <Loader2Icon className="mr-2 size-4 animate-spin" />
+      ) : (
+        <LogOutIcon className="mr-2 size-4" />
+      )}
+      Log out all known devices
     </Button>
   );
 }

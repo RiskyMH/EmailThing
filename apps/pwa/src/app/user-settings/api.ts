@@ -3,6 +3,7 @@ import type {
   MappedPossibleDataResponse,
 } from "@/../app/api/internal/user-settings/route";
 import { db } from "@/utils/data/db";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { parseSync } from "@/utils/data/sync-user";
 
 export default async function changeUserSettings<T extends keyof MappedPossibleData>(
@@ -11,9 +12,13 @@ export default async function changeUserSettings<T extends keyof MappedPossibleD
 ): Promise<MappedPossibleDataResponse["message"] | { error: string }> {
   if (!navigator.onLine) return { error: "No internet connection" };
   try {
-    const sync = (await db.localSyncData.toArray())[0];
-    const response = await fetch(
-      `${sync?.apiUrl || ""}/api/internal/user-settings?type=${type as string}`,
+    let sync = await getLogedInUserApi();
+    if (sync?.tokenNeedsRefresh) {
+      await db.refreshToken();
+      sync = await getLogedInUserApi();
+    }
+  const response = await fetch(
+      `${sync?.apiUrl}/api/internal/user-settings?type=${type as string}`,
       {
         method: "POST",
         body: JSON.stringify(data),

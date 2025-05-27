@@ -69,6 +69,7 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
     // userNotifications: db.userNotifications,
     mailboxesForUser: db.mailboxForUser,
     user: db.user,
+    apiCustomisations: db.apiCustomisations,
   } as const;
   const dbTables = tablesToProcess.map((key) => dbMap[key as keyof typeof dbMap]).filter(Boolean);
 

@@ -25,10 +25,13 @@ import { useGravatars } from "@/utils/fetching";
 import { useLiveQuery } from "dexie-react-hooks";
 import { PlusIcon, UserX2Icon } from "lucide-react";
 import { toast } from "sonner";
+import changeUserSettings from "./api";
 
 const leaveMailbox = async (mailboxId: string) => {
   // leaving and actually deleting data doesn't exist rn lol
-  toast.info("todo");
+  return changeUserSettings("leave-mailbox", {
+    mailboxId,
+  });
 };
 
 export default function UserSettingsMailboxes() {

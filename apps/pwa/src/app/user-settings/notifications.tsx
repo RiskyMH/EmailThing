@@ -1,8 +1,5 @@
 import { CardDescription, CardTitle } from "@/components/ui/card";
 
-// TODO: temp solution for being weird - fix later
-globalThis.process ||= { env: {} };
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY;
 
 export default function UserSettingsNotifications() {
   return (
@@ -13,7 +10,7 @@ export default function UserSettingsNotifications() {
       </div>
 
       {/* todo: get this from the server at login time or something - but not hardcoded here */}
-      <NotificationsButton publicKey={PUBLIC_KEY} />
+      <NotificationsButton />
     </>
   );
 }
@@ -26,13 +23,21 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { sha } from "../layout";
+import changeUserSettings from "./api";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/utils/data/db";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
 
 const deleteSubscription = async (endpoint: string) => {
-  toast.info("todo");
+  return changeUserSettings("delete-notification", {
+    endpoint,
+  });
 };
 
 const saveSubscription = async (subscription: PushSubscriptionJSON) => {
-  toast.info("todo");
+  return changeUserSettings("save-notification", {
+    subscription,
+  });
 };
 
 const notificationsSupported = () =>
@@ -43,20 +48,29 @@ export function NotificationsButton({ publicKey }: { publicKey: string }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
+  const sync = useLiveQuery(
+    (async () => {
+      let sync = await getLogedInUserApi();
+      if (sync?.tokenNeedsRefresh) {
+        await db.refreshToken();
+        sync = await getLogedInUserApi();
+      }
+      return sync;
+    }), []);
   const options: PushSubscriptionOptionsInit = {
-    applicationServerKey: publicKey,
+    applicationServerKey: sync?.notificationsPublicKey,
     userVisibleOnly: true,
   };
 
   useEffect(() => {
-    setIsLoaded(true);
+    setIsLoaded(!!sync?.notificationsPublicKey);
     if (notificationsSupported()) {
       navigator.serviceWorker.ready.then(async (swRegistration) => {
         const subscription = await swRegistration.pushManager.getSubscription();
         setIsSubscribed(!!subscription);
       });
     }
-  }, []);
+  }, [sync?.notificationsPublicKey]);
 
   const requestPermission = async () => {
     if (!notificationsSupported()) {
@@ -83,9 +97,12 @@ export function NotificationsButton({ publicKey }: { publicKey: string }) {
       if (!swRegistration?.active) return void (await subscribe(false));
       const subscription = await swRegistration.pushManager.subscribe(options);
 
-      await saveSubscription(subscription.toJSON());
+      const res = await saveSubscription(subscription.toJSON());
+      if ("error" in res) {
+        return void toast.error(res.error || "Failed to subscribe to notifications");
+      }
       setIsSubscribed(true);
-      toast("You have successfully subscribed to notifications");
+      toast(res.success, { description: res.description });
     } catch (err) {
       console.error("Error", err);
       return toast.error("Failed to subscribe to notifications");
@@ -102,9 +119,13 @@ export function NotificationsButton({ publicKey }: { publicKey: string }) {
 
         await subscription.unsubscribe();
         // await unregisterServiceWorkers();
-        await deleteSubscription(subscription.endpoint);
+        const res = await deleteSubscription(subscription.endpoint);
+        if ("error" in res) {
+          console.error({ res });
+          return void toast.error(res.error || "Failed to unsubscribe from notifications");
+        }
         setIsSubscribed(false);
-        toast("Unsubscribed from notifications");
+        toast(res.success);
       } catch (err) {
         console.error("Error", err);
         return void toast.error("Failed to unsubscribe to notifications");

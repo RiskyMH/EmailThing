@@ -26,3 +26,21 @@ export async function getAllAliases() {
   );
   return aliases.flat();
 }
+
+export async function getLogedInUserApi() {
+  // return the api url + token + customisations
+  const user = await getMe();
+  if (!user) return;
+  const session = await db.localSyncData.where("userId").equals(user.id).first();
+  if (!session) return;
+  session.apiUrl ||= "https://emailthing.app";
+  const apiUrl = await db.apiCustomisations.get(session.apiUrl);
+
+  return {
+    apiUrl: session.apiUrl,
+    token: session.token,
+    notificationsPublicKey: apiUrl?.notificationsPublicKey,
+    tokenNeedsRefresh: session.tokenExpiresAt < new Date(),
+    tokenFullyExpired: session.refreshTokenExpiresAt < new Date(),
+  };
+}

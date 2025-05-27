@@ -17,6 +17,7 @@ import {
 import { Table } from "@/components/ui/table";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/utils/data/db";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { getMailbox } from "@/utils/data/queries/mailbox";
 import type { MailboxTokens } from "@emailthing/db";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -47,7 +48,11 @@ export default function APITokens() {
       if (!mailboxId) return;
       if (mailboxId === "demo") return [];
 
-      const sync = (await db.localSyncData.toArray())[0];
+      let sync = await getLogedInUserApi();
+      if (sync?.tokenNeedsRefresh) {
+        await db.refreshToken();
+        sync = await getLogedInUserApi();
+      }
 
       const response = await fetch(
         `${sync?.apiUrl || ""}/api/internal/auth-query?type=mailbox-token:${mailboxId}`,

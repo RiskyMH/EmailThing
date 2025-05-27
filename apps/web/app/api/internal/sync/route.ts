@@ -33,6 +33,7 @@ import {
 import type { BatchItem } from "drizzle-orm/batch";
 import { getSession, isValidOrigin } from "../tools";
 import { deleteFile } from "@/utils/s3";
+import { env } from "@/utils/env";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -94,8 +95,17 @@ export async function GET(request: Request) {
 
     if (!currentUser) return new Response("User not found", { status: 404 });
 
+    const apiCustomisations = {
+        apiUrl: request.url.replace(/api\/internal\/sync\?.*$/, ""),
+        notificationsPublicKey: env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
+    }
+
     if (minimal) {
-        return Response.json(await getMinimalChanges(currentUser, mailboxesForUser), {
+        const changes = await getMinimalChanges(currentUser, mailboxesForUser)
+        return Response.json({
+            ...changes,
+            apiCustomisations,
+        }, {
             headers: {
                 "Access-Control-Allow-Origin": origin,
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -112,6 +122,7 @@ export async function GET(request: Request) {
         {
             ...(await getChanges(lastSyncDate, currentUser, mailboxesForUser, {}, newMailboxes)),
             time: d.toISOString(),
+            apiCustomisations,
         },
         {
             headers: {

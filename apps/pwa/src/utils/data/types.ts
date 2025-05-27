@@ -71,3 +71,8 @@ export type LocalSyncData = {
   isSyncing?: boolean;
   apiUrl?: string; // default is https://emailthing.app
 };
+
+export type ApiCustomisations = {
+  apiUrl?: string; //pk
+  notificationsPublicKey?: string;
+}

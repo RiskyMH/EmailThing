@@ -1,7 +1,7 @@
 import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { db, MailboxForUser, PasskeyCredentials, UserNotification, UserSession } from "@/db";
 import { User } from "@/db";
-import { and, eq, gte, not, sql, type InferSelectModel } from "drizzle-orm";
+import { and, eq, gte, inArray, not, sql, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { isValidOrigin, getSession } from "../tools";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -12,6 +12,8 @@ import { impersonatingEmails } from "@/validations/invalid-emails";
 import { createId } from "@paralleldrive/cuid2";
 import { marked } from "marked";
 import { Mailbox as MimeMailbox, createMimeMessage } from "mimetext";
+import { UAParser } from "ua-parser-js";
+import { sendNotification } from "@/utils/web-push";
 
 export async function POST(request: Request) {
     const origin = request.headers.get("origin");
@@ -46,11 +48,14 @@ export async function POST(request: Request) {
         "change-password": changePassword.bind(null, request.headers.get("authorization")?.split(" ")[1] || ""),
         "change-backup-email": changeBackupEmail,
         "change-public-email": changePublicEmail,
-        "add-passkey": addPasskey,
+        "add-passkey": addPasskey.bind(null, request.headers.get("user-agent") || ""),
         "delete-passkey": deletePasskey,
         "change-email": changeEmail,
         "change-public-email-status": changePublicEmailStatus,
         "leave-mailbox": leaveMailbox,
+        "revoke-session": revokeSession,
+        "delete-notification": deleteNotification,
+        "save-notification": saveNotification,
     };
     const result = await results[type as keyof typeof results](currentUserid, data);
     if (!result) return new Response("Not allowed", { status: 403 });
@@ -74,32 +79,32 @@ export async function POST(request: Request) {
                 updatedAt: true,
             },
         }),
-        db.query.PasskeyCredentials.findMany({
-            where: and(eq(PasskeyCredentials.userId, currentUserid), gte(PasskeyCredentials.createdAt, date)),
-            columns: {
-                id: true,
-                name: true,
-                publicKey: false,
-                isDeleted: true,
-                updatedAt: true,
-                createdAt: true,
-                userId: true,
-                credentialId: true,
-            },
-        }),
-        db.query.UserNotification.findMany({
-            where: and(eq(UserNotification.userId, currentUserid), gte(UserNotification.createdAt, date)),
-            columns: {
-                id: true,
-                endpoint: false,
-                p256dh: false,
-                auth: false,
-                isDeleted: true,
-                createdAt: true,
-                expiresAt: true,
-                userId: true,
-            },
-        }),
+        // db.query.PasskeyCredentials.findMany({
+        //     where: and(eq(PasskeyCredentials.userId, currentUserid), gte(PasskeyCredentials.createdAt, date)),
+        //     columns: {
+        //         id: true,
+        //         name: true,
+        //         publicKey: false,
+        //         isDeleted: true,
+        //         updatedAt: true,
+        //         createdAt: true,
+        //         userId: true,
+        //         credentialId: true,
+        //     },
+        // }),
+        // db.query.UserNotification.findMany({
+        //     where: and(eq(UserNotification.userId, currentUserid), gte(UserNotification.createdAt, date)),
+        //     columns: {
+        //         id: true,
+        //         endpoint: false,
+        //         p256dh: false,
+        //         auth: false,
+        //         isDeleted: true,
+        //         createdAt: true,
+        //         expiresAt: true,
+        //         userId: true,
+        //     },
+        // }),
         db.query.MailboxForUser.findMany({
             where: and(eq(MailboxForUser.userId, currentUserid), gte(MailboxForUser.joinedAt, date)),
             columns: {
@@ -120,9 +125,12 @@ export async function POST(request: Request) {
             message: result,
             sync: {
                 user: sync[0],
-                passkeyCredentials: sync[1],
-                userNotifications: sync[2],
-                mailboxesForUser: sync[3],
+                // passkeyCredentials: sync[1],
+                // userNotifications: sync[2],
+                // mailboxesForUser: sync[3],
+                passkeyCredentials: [],
+                userNotifications: [],
+                mailboxesForUser: sync[1],
             },
         } satisfies MappedPossibleDataResponse,
         { status: 200, headers },
@@ -154,7 +162,10 @@ export type PossibleData =
     | DeletePasskeyData
     | ChangeEmailData
     | ChangePublicEmailStatusData
-    | LeaveMailboxData;
+    | LeaveMailboxData
+    | RevokeSessionData
+    | DeleteNotificationData
+    | SaveNotificationData;
 export type MappedPossibleData = {
     "change-username": ChangeUsernameData;
     "change-password": ChangePasswordData;
@@ -165,6 +176,9 @@ export type MappedPossibleData = {
     "change-email": ChangeEmailData;
     "change-public-email-status": ChangePublicEmailStatusData;
     "leave-mailbox": LeaveMailboxData;
+    "revoke-session": RevokeSessionData;
+    "delete-notification": DeleteNotificationData;
+    "save-notification": SaveNotificationData;
 };
 
 export type MappedPossibleDataResponse =
@@ -351,9 +365,13 @@ If you did not expect this email or have any questions, please contact us at con
 
 export interface AddPasskeyData {
     credential: Credential;
-    name: string;
+    name?: string;
 }
-async function addPasskey(userId: string, data: AddPasskeyData) {
+async function addPasskey(userAgent: string, userId: string, data: AddPasskeyData) {
+    if (!data.name) {
+        const ua = new UAParser(userAgent).getResult();
+        data.name = `${ua.browser.name} on ${ua.os.name}`;
+    }
     const { credential, name } = data;
     try {
         const { credentialID, publicKey } = await verifyCredentials(userId, credential);
@@ -492,4 +510,52 @@ async function leaveMailbox(userId: string, data: LeaveMailboxData) {
     // (await cookies()).delete("mailboxId");
     // redirect("/mail");
     return { success: "You have left the mailbox" };
+}
+
+// todo: require sudo auth
+type RevokeSessionData = ({ sessionIds: string[] } | { all: true })
+async function revokeSession(userId: string, data: RevokeSessionData) {
+    if ("all" in data) {
+        await db.delete(UserSession).where(eq(UserSession.userId, userId)).execute();
+        return { success: "All sessions revoked", description: "This includes this one" };
+    }
+
+    await db.delete(UserSession).where(and(eq(UserSession.userId, userId), inArray(UserSession.token, data.sessionIds))).execute();
+    return { success: data.sessionIds.length > 1 ? "Sessions revoked" : "Session revoked" };
+}
+
+interface DeleteNotificationData {
+    endpoint: string;
+}
+async function deleteNotification(userId: string, data: DeleteNotificationData) {
+    const { endpoint } = data;
+
+    await db.delete(UserNotification).where(and(eq(UserNotification.userId, userId), eq(UserNotification.endpoint, endpoint))).execute();
+    return { success: "Notification deleted" };
+}
+
+interface SaveNotificationData {
+    subscription: PushSubscriptionJSON;
+}
+async function saveNotification(userId: string, data: SaveNotificationData) {
+    const { subscription } = data;
+
+    // save subscription
+    if (!subscription.keys) return { error: "Subscription keys are missing" };
+    if (!subscription.endpoint) return { error: "Subscription endpoint is missing" };
+
+    await db.insert(UserNotification).values({ userId, endpoint: subscription.endpoint, p256dh: subscription.keys.p256dh, auth: subscription.keys.auth }).execute();
+
+    // send test notification
+    const res = await sendNotification({
+        subscription: subscription as any,
+        data: JSON.stringify({
+            title: "Text Notification",
+            body: "This is a test notification!",
+        })
+    })
+
+    if (!res.ok) return { error: `Failed to send test notification: ${await res.text()}` };
+
+    return { success: "Notification saved", description: "You will receive a test notification shortly" };
 }
