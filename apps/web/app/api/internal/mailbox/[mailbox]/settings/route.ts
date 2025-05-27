@@ -46,6 +46,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
     const [mailbox, userAccess] = await db.batchFetch([
         db.query.Mailbox.findFirst({
             where: eq(Mailbox.id, mailboxId),
+            columns: {
+                id: true,
+            },
         }),
         db.query.MailboxForUser.findFirst({
             where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),

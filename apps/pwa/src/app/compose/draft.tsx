@@ -23,7 +23,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronRight, EllipsisIcon } from "lucide-react";
 import { Fragment, useEffect, useRef } from "react";
-import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { data, Navigate, NavigateFunction, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import {
@@ -37,7 +37,12 @@ import {
   UploadAttachment,
 } from "./editor.client";
 import Loading from "./loading";
-import { getData } from "./tools";
+import { getData, makeHtml } from "./tools";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { db } from "@/utils/data/db";
+import type { SaveActionProps, SendEmailResponse } from "@/../app/api/internal/send-draft/route";
+import { parseSync } from "@/utils/data/sync-user";
+import Turndown from "turndown";
 
 export default function DraftPage() {
   const params = useParams<{ mailboxId: string; draftId: string }>();
@@ -94,10 +99,6 @@ export default function DraftPage() {
     }
     await deleteDraftEmail(params.mailboxId!, params.draftId!);
     navigate(`/mail/${params.mailboxId}`);
-  }
-
-  async function sendEmailAction(data: FormData) {
-    toast.warning("Not implemented yet");
   }
 
   async function saveDraftHeadersAction(data: FormData) {
@@ -238,7 +239,7 @@ export default function DraftPage() {
           Saved at <LocalTime type="hour-min/date" time={mail.updatedAt} />
         </p>
         {/* <Button variant="ghost" size="icon" onClick={() => toast.warning("Not implemented yet")}> */}
-        <SendButton sendAction={sendEmailAction} />
+        <SendButton sendAction={sendEmailAction} mailboxId={params.mailboxId!} draftId={params.draftId!} />
       </div>
     </form>
   );
@@ -261,4 +262,70 @@ function useTitle(mailbox: string, draftSubject?: string) {
       document.title = "EmailThing";
     };
   }, [mailboxName, draftSubject]);
+}
+
+
+
+
+export async function sendEmailAction(mailboxId: string, draftId: string, data: FormData) {
+  if (!navigator.onLine) {
+    return { error: "You are offline - wait until you're back online to send this email" };
+  }
+
+  try {  
+    const draft = getData(data);
+
+    const text = draft.html ? new Turndown().turndown(draft.html).replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, "$1") : draft.body;
+    const actualHTML = draft.html ? makeHtml(draft.html) : undefined;
+
+    if (!draft) {
+      return { error: "Invalid draft data" };
+    };
+
+    let sync = await getLogedInUserApi();
+    if (sync?.tokenNeedsRefresh) {
+      await db.refreshToken();
+      sync = await getLogedInUserApi();
+    }
+
+    const response = await fetch(
+      `${sync?.apiUrl}/api/internal/send-draft`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `session ${sync?.token}`,
+        },
+        body: JSON.stringify({
+          draftId,
+          mailboxId,
+          body: draft.body,
+          subject: draft.subject,
+          from: draft.from,
+          to: draft.to,
+          html: actualHTML,
+          headers: draft.headers,
+        } satisfies SaveActionProps),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      return error;
+    }
+
+    const res = (await response.json()) as SendEmailResponse;
+    if ("error" in res) {
+      return res
+    };
+
+    if ("sync" in res) {
+      const { sync: data } = res;
+      await parseSync(data);
+    }
+
+    return { message: { success: "Email sent" } };
+  } catch (error) {
+    console.error(error);
+    return { error: "An error occurred while sending the email" };
+  }
 }

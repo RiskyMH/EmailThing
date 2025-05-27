@@ -306,6 +306,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
               timeout: 60000,
               userVerification: "required",
               rpId: rpid,
+              
             },
           })
         );

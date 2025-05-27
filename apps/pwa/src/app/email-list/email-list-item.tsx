@@ -179,7 +179,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
         )}
         title={email.from?.address ?? "uh?"}
       >
-        {email.from?.name || email.from?.address}
+        {email.from?.name || email.from?.address || ""}
       </span>
       {/* </TooltipText> */}
 

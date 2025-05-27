@@ -39,17 +39,19 @@ import {
   Suspense,
   useEffect,
   useId,
+  useRef,
   useState,
   useTransition,
 } from "react";
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 import { lazy } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import Turndown from "turndown";
 import { parseHTML } from "../email-item/parse-html";
 import { BodyHeader } from "./tiptap-header";
 import { makeHtml } from "./tools";
+import type { sendEmailAction } from "./draft";
 
 const catchRedirectError = () => {
   // console.log("catchRedirectError")
@@ -248,21 +250,31 @@ export function DeleteButton({ delAction }: { delAction: () => Promise<any> }) {
   );
 }
 
-export function SendButton({ sendAction }: { sendAction: (data: FormData) => Promise<any> }) {
+export function SendButton({ sendAction, mailboxId, draftId }: { sendAction: typeof sendEmailAction, mailboxId: string, draftId: string }) {
   const [isPending, startTransition] = useTransition();
 
-  const onClick = (e: MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault?.();
+  const ref = useRef<HTMLButtonElement>(null);
+  const navigate = useNavigate();
+
+  const onClick = (e: MouseEvent<HTMLButtonElement, MouseEvent> | null) => {
+    e?.preventDefault?.();
     if (isPending) return;
+
+    if (mailboxId === "demo") {
+      toast("This is a demo - you can't send emails in the demo", {
+        description: "But you can see how other parts would work in the real app!",
+      });
+      return;
+    }
+  
 
     startTransition(async () => {
       const t = toast.loading("Sending your email...");
-      const data = new FormData(e.currentTarget?.parentElement?.parentElement as HTMLFormElement);
-      const res = await sendAction(data).catch(catchRedirectError);
+      const data = new FormData(ref?.current?.parentElement?.parentElement as HTMLFormElement);
+      const res = await sendAction(mailboxId, draftId, data);
 
-      if (res?.error) {
-        // if (res.link) return void toast.error(res.error + "nooo", { id: t, action: { label: "Learn More 🔗", onClick: () => window.open(res.link, "_blank") } });
-        if (res.link)
+      if (res && "error" in res) {
+        if ("link" in res)
           return void toast.error(res.error, {
             id: t,
             action: (
@@ -277,7 +289,11 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
           });
         return void toast.error(res.error, { id: t });
       }
-      toast.success("Sent your email!", { id: t });
+
+      if (res && ("message" in res || "success" in res)) {
+        toast.success("Sent your email!", { id: t });
+        navigate(`/mail/${mailboxId}/${draftId}`);
+      }
     });
   };
 
@@ -286,7 +302,8 @@ export function SendButton({ sendAction }: { sendAction: (data: FormData) => Pro
       onClick={onClick as any}
       type="submit"
       id="send-button"
-      formAction={sendAction}
+      ref={ref}
+      formAction={() => onClick(null)}      
       aria-disabled={isPending}
       disabled={isPending}
       className="flex gap-2 px-7"

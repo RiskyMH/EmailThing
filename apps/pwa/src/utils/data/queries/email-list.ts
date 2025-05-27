@@ -500,7 +500,7 @@ export async function createDraftEmail(
       ]);
 
       const aliasesList = aliases.map((a) => a.alias);
-      const defaultAlias = aliases.find((a) => a.alias === options.from)?.alias;
+      const defaultAlias = aliases.find((a) => options.from ? a.alias === options.from : a.default)?.alias;
       const yourAlias =
         email.recipients.find((r) => aliasesList.includes(r.address))?.address || defaultAlias;
 
@@ -577,10 +577,13 @@ export async function createDraftEmail(
         isNew: true,
       };
     } else {
+      const aliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).toArray();
+      const defaultAlias = aliases.find((a) => a.default)?.alias;
+
       draftData = {
         id: draftId,
         mailboxId,
-        from: options?.from || 0,
+        from: options?.from || defaultAlias || 0,
         createdAt: new Date(),
         updatedAt: new Date(),
         subject: "",
