@@ -320,7 +320,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
 
     if ("sync" in res) {
       const { sync: data } = res;
-      await parseSync(data);
+      await parseSync(data, sync?.userId!);
     }
 
     return { message: { success: "Email sent" } };

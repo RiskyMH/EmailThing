@@ -37,7 +37,7 @@ export default async function changeUserSettings<T extends keyof MappedPossibleD
 
     if ("sync" in res) {
       const { sync: data } = res;
-      await parseSync(data);
+      await parseSync(data, sync?.userId!);
     }
 
     return res?.message;

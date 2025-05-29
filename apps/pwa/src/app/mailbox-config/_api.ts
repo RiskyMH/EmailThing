@@ -39,7 +39,7 @@ export default async function changeMailboxSettings<T extends keyof MappedPossib
 
     if ("sync" in res) {
       const { sync: data } = res;
-      await parseSync(data);
+      await parseSync(data, sync?.userId!);
     }
 
     return res?.message;

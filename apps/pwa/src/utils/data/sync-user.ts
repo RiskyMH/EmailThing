@@ -52,7 +52,7 @@ export const parseValuesInArray = <T extends any[]>(arr: T) => {
   return arr?.filter((item) => !item.isDeleted).map(parseValues) as T;
 };
 
-export async function parseSync(data: Partial<ChangesResponse & { time: string }>) {
+export async function parseSync(data: Partial<ChangesResponse & { time: string }>, userId: string) {
   // Get tables that have data to process
   const tablesToProcess = Object.keys(data).filter(
     (key) => key === "user" || key === "apiCustomisations" || data[key as keyof typeof data]?.length,
@@ -100,16 +100,17 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
               // db.mailboxTokens,
               db.mailboxCustomDomains,
             ] as const;
+            const mailboxIds = deletedItems.filter((m: any) => m.userId === userId).map((m: any) => m.mailboxId);
             return Promise.all([
               db.mailboxForUser?.bulkDelete(
                 // @ts-expect-error this *should* work
                 deletedItems.map((m) => [m.userId, m.mailboxId]),
               ),
-              db.mailboxForUser.where("mailboxId").anyOf(...deletedItems.map((m: any) => m.mailboxId)).delete(),
+              db.mailboxForUser.where("mailboxId").anyOf(...mailboxIds).delete(),
               ...mailboxTables.map((table) =>
                 table === db.mailboxes
-                  ? db.mailboxes.where("id").anyOf(...deletedItems.map((m: any) => m.mailboxId)).delete()
-                  : table.where("mailboxId").anyOf(...deletedItems.map((m: any) => m.mailboxId)).delete(),
+                  ? db.mailboxes.where("id").anyOf(...mailboxIds).delete()
+                  : table.where("mailboxId").anyOf(...mailboxIds).delete(),
               ),
             ]);
           }
@@ -198,7 +199,8 @@ export async function syncLocal({
   lastSync,
   token,
   apiUrl,
-}: { lastSync?: Date | 0; token?: string; apiUrl?: string }) {
+  userId,
+}: { lastSync?: Date | 0; token?: string; apiUrl?: string, userId: string }) {
   const payload = await getsLocalSyncData();
   if (!Object.keys(payload).length) return;
   if (Object.values(payload).every((v) => (Array.isArray(v) ? v.length === 0 : v === null))) return;
@@ -221,7 +223,7 @@ export async function syncLocal({
     throw new Error("Failed to sync user data");
   }
 
-  return parseSync((await response.json()) as ChangesResponse);
+  return parseSync((await response.json()) as ChangesResponse, userId);
 }
 
 export async function fetchSync({
@@ -229,7 +231,8 @@ export async function fetchSync({
   minimal,
   apiUrl,
   token,
-}: { lastSync?: Date | 0; minimal?: boolean; apiUrl?: string; token?: string }) {
+  userId,
+}: { lastSync?: Date | 0; minimal?: boolean; apiUrl?: string; token?: string, userId: string }) {
   const response = await fetch(getApiUrl({ lastSync, minimal, apiUrl }), {
     method: "GET",
     headers: {
@@ -251,6 +254,7 @@ export async function fetchSync({
     (await response.json()) as typeof minimal extends true
     ? MinimalChangesResponse
     : ChangesResponse,
+    userId,
   );
 }
 

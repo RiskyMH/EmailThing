@@ -42,5 +42,6 @@ export async function getLogedInUserApi() {
     notificationsPublicKey: apiUrl?.notificationsPublicKey,
     tokenNeedsRefresh: session.tokenExpiresAt < new Date(),
     tokenFullyExpired: session.refreshTokenExpiresAt < new Date(),
+    userId: user.id,
   };
 }
