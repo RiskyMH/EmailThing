@@ -34,22 +34,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getCurrentUserMailbox, getMailbox, getMailboxUsers } from "@/utils/data/queries/mailbox";
+import { getCurrentUserMailbox, getMailbox, getMailboxUsers, getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Loader2, MoreHorizontalIcon, PlusIcon, UserRoundXIcon } from "lucide-react";
 import { type FormEvent, useTransition } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { DeleteButton } from "./components.client";
 import changeMailboxSettings from "./_api";
 import changeUserSettings from "../user-settings/_api";
 
 const leaveMailbox = async (mailboxId: string) => {
-  const res = await changeUserSettings(mailboxId, "leave-mailbox", {});
+  const res = await changeUserSettings("leave-mailbox", {mailboxId});
   if ("error" in res) {
     toast.error(res.error);
   } else {
     toast.success(res?.success ?? "Mailbox left");
+    return true
   }
 };
 
@@ -83,6 +84,8 @@ export default function Users() {
       ]),
     [mailboxId],
   );
+
+  const navigate = useNavigate();
 
   const [mailbox, users, mailboxUser] = data ?? [];
 
@@ -198,7 +201,18 @@ export default function Users() {
                                   Cancel
                                 </SmartDrawerClose>
                                 <DeleteButton
-                                  action={leaveMailbox.bind(null, mailboxId!)}
+                                  action={async () => {
+                                    const res = await leaveMailbox(mailboxId!);
+                                    if (res === true) {
+                                      const mailboxes = await getUserMailboxes();
+                                      if (mailboxes?.length && mailboxes.length > 0) {
+                                        navigate(`/mail/${mailboxes?.[0]?.id}`);
+                                      } else {
+                                        // only issue with this is that the mailboxId cookie is proabibly going to be this one
+                                        navigate("/mail");
+                                      }
+                                    }
+                                  }}
                                   text="Leave"
                                 />
                               </SmartDrawerFooter>

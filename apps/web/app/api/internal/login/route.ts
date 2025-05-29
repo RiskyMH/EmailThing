@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyPassword } from "@/utils/password";
 import { db, MailboxForUser, PasskeyCredentials, UserSession } from "@/db";
 import { User } from "@/db";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { isValidOrigin } from "../tools";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
@@ -192,7 +192,7 @@ export async function POST(request: Request) {
 
         const [mailboxes, _] = await db.batchFetch([
             db.query.MailboxForUser.findMany({
-                where: eq(MailboxForUser.userId, userId),
+                where: and(eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)),
                 columns: { mailboxId: true },
             }),
             db.insert(UserSession).values({

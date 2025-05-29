@@ -100,19 +100,18 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
               // db.mailboxTokens,
               db.mailboxCustomDomains,
             ] as const;
-            return (async () => {
-              await db.mailboxForUser?.bulkDelete(
+            return Promise.all([
+              db.mailboxForUser?.bulkDelete(
                 // @ts-expect-error this *should* work
                 deletedItems.map((m) => [m.userId, m.mailboxId]),
-              );
-              await Promise.all(
-                mailboxTables.map((table) =>
-                  table === db.mailboxes
-                    ? db.mailboxes.where("id").equals(deletedItems.map((m: any) => m.mailboxId)).delete()
-                    : table.where("mailboxId").equals(deletedItems.map((m: any) => m.mailboxId)).delete(),
-                ),
-              );
-            })();
+              ),
+              db.mailboxForUser.where("mailboxId").anyOf(...deletedItems.map((m: any) => m.mailboxId)).delete(),
+              ...mailboxTables.map((table) =>
+                table === db.mailboxes
+                  ? db.mailboxes.where("id").anyOf(...deletedItems.map((m: any) => m.mailboxId)).delete()
+                  : table.where("mailboxId").anyOf(...deletedItems.map((m: any) => m.mailboxId)).delete(),
+              ),
+            ]);
           }
 
           default:

@@ -1,6 +1,6 @@
 import { MailboxForUser, db } from "@/db";
 import { getCurrentUser, removeToken } from "@/utils/jwt";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -24,7 +24,7 @@ export async function GET() {
         return redirect(`/mail/${mailboxId.value}`);
     }
     const firstMailbox = await db.query.MailboxForUser.findFirst({
-        where: eq(MailboxForUser.userId, userId),
+        where: and(eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)),
         columns: { mailboxId: true },
     });
     if (firstMailbox) {

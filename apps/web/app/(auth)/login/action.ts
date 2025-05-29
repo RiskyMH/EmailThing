@@ -107,7 +107,7 @@ async function handleUserRedirection(
 
     // Get the user's mailbox to possibly redirect to it
     const mailboxes = await db.query.MailboxForUser.findMany({
-        where: eq(MailboxForUser.userId, user.id),
+        where: and(eq(MailboxForUser.userId, user.id), eq(MailboxForUser.isDeleted, false)),
         columns: { mailboxId: true },
     });
 

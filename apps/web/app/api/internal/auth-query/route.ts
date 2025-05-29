@@ -87,7 +87,7 @@ export async function GET(request: Request) {
     } else if (type.startsWith("mailbox-token:")) {
         const mailboxId = type.slice("mailbox-token:".length);
         const mailbox = await db.query.MailboxForUser.findFirst({
-            where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserid)),
+            where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
         });
         if (!mailbox) return Response.json({ message: { error: "Mailbox not found" } }, { status: 404, headers });
 
