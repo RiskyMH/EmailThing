@@ -1,7 +1,7 @@
 "use client";
 import { db, initializeDB } from "@/utils/data/db";
 import { loadDemoData } from "@/utils/data/demo-data";
-import { getMe } from "@/utils/data/queries/user";
+import { getLogedInUserApi, getMe } from "@/utils/data/queries/user";
 import { registerServiceWorker } from "@/utils/service-worker";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -42,13 +42,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         const res = await db.fetchSync();
         if (res?.error) {
           if (res.error === "Token expired") {
-            const username = await getMe();
+            const user = await getLogedInUserApi();
+            const apiUrl = (!user || user?.apiUrl === "https://emailthing.app") ? "" : `&api=${user?.apiUrl}`;
             const t = toast("Session expired, please login again.", {
               description: "Please login again to get latest data.",
               duration: Number.POSITIVE_INFINITY,
               action: {
                 label: "Login",
-                onClick: () => navigate(`/login?username=${username?.username}`),
+                onClick: () => navigate(`/login?username=${user?.username}${apiUrl}`),
               },
               id: toastRef.current ?? undefined,
             });

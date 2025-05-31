@@ -32,7 +32,15 @@ export async function getLogedInUserApi() {
   const user = await getMe();
   if (!user) return;
   const session = await db.localSyncData.where("userId").equals(user.id).first();
-  if (!session) return;
+  if (!session) return {
+    apiUrl: "https://emailthing.app",
+    token: null,
+    notificationsPublicKey: null,
+    tokenNeedsRefresh: false,
+    tokenFullyExpired: false,
+    userId: user.id,
+    username: user.username,
+  };
   session.apiUrl ||= "https://emailthing.app";
   const apiUrl = await db.apiCustomisations.get(session.apiUrl);
 
@@ -43,5 +51,6 @@ export async function getLogedInUserApi() {
     tokenNeedsRefresh: session.tokenExpiresAt < new Date(),
     tokenFullyExpired: session.refreshTokenExpiresAt < new Date(),
     userId: user.id,
+    username: user.username,
   };
 }
