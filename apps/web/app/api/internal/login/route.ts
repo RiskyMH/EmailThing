@@ -59,6 +59,7 @@ export async function POST(request: Request) {
         const body = await request.json();
 
         let userId: string | null = null;
+        let userOnboarding = true;
         if (type === "password") {
             const parsedData = userAuthSchema.safeParse(body);
             if (!parsedData.success) {
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
             }
 
             userId = user.id;
+            userOnboarding = user.onboardingStatus?.initial === true;
 
             // Verify password
             const valid = await verifyPassword(password, user.password);
@@ -163,6 +165,7 @@ export async function POST(request: Request) {
             }
 
             userId = user.id;
+            userOnboarding = user.onboardingStatus?.initial === true;
         } else {
             // Increment failed attempts
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
@@ -212,6 +215,7 @@ export async function POST(request: Request) {
             refreshTokenExpiresAt,
             mailboxes: mailboxes.map(({ mailboxId }) => mailboxId),
             userId: userId,
+            userOnboarding,
         });
     } catch (error) {
         console.error("Login error:", error);

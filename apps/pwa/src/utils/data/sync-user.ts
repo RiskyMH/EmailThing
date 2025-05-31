@@ -106,6 +106,9 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
                 // @ts-expect-error this *should* work
                 deletedItems.map((m) => [m.userId, m.mailboxId]),
               ),
+              // todo: for multi user support, we should just remove the key itself (ie above code)
+              // and then check if any more users have access to that mailboxId
+              // if so, then dont delete data with that mailboxId, otherwise delete it
               db.mailboxForUser.where("mailboxId").anyOf(...mailboxIds).delete(),
               ...mailboxTables.map((table) =>
                 table === db.mailboxes

@@ -165,7 +165,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
       const selectedMailbox = mailboxes[0];
       document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-      navigate(`/mail/${selectedMailbox}`);
+      navigate(`/mail/${selectedMailbox}?onboarding`);
 
       toast.success("Welcome!");
 
@@ -199,7 +199,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </Label>
             <div
               className={cn(
-                "group flex h-10 w-full gap-2 self-center rounded bg-secondary px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+                "group flex h-10 w-full gap-2 self-center rounded-md bg-secondary px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                 isPending && "cursor-not-allowed opacity-50",
               )}
             >

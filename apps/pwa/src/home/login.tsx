@@ -96,13 +96,14 @@ async function handleLoginResponse({ data, navigate, username, apiUrl }: {
   if (!data || 'error' in data && data.error) {
     return void toast.error(data?.error || "Login failed");
   }
-  const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes, userId } = data as {
+  const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes, userId, userOnboarding } = data as {
     token: string;
     refreshToken: string;
     tokenExpiresAt: string;
     refreshTokenExpiresAt: string;
     mailboxes: string[];
     userId: string;
+    userOnboarding: boolean;
   };
   const { db, initializeDB } = await import("@/utils/data/db");
   await initializeDB();
@@ -127,7 +128,7 @@ async function handleLoginResponse({ data, navigate, username, apiUrl }: {
     : undefined;
   const selectedMailbox = mailboxId && mailboxes.includes(mailboxId) ? mailboxId : mailboxes[0];
   document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-  navigate(`/mail/${selectedMailbox}`);
+  navigate(`/mail/${selectedMailbox}${userOnboarding ? "?onboarding" : ""}`);
   toast.success("Welcome back!");
   db.initialFetchSync();
 }
@@ -317,7 +318,6 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
               timeout: 60000,
               userVerification: "required",
               rpId: rpid,
-
             },
           })
         );

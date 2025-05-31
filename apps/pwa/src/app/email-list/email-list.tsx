@@ -40,6 +40,7 @@ import Loading, {
 } from "./email-list-loading";
 import { CreateTempEmailForm } from "./email-list-temp-modal";
 import RefreshButton from "./refresh-button";
+import OnboardingWelcome from "../user-settings/onboarding-welcome";
 
 export default function EmailListSuspenced({
   filter,
@@ -110,6 +111,7 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
     params.mailboxId === "[mailboxId]" || !params.mailboxId ? "demo" : params.mailboxId;
   const searchParams = useSearchParams()[0];
   const search = searchParams.get("q") as string | null;
+  const onboarding = searchParams.has("onboarding");
 
   const key = JSON.stringify({ mailboxId, type });
   const _data = window?._tempData?.emailList?.[key];
@@ -156,6 +158,10 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
       document.title = "EmailThing";
     };
   }, [count, name, search, type]);
+
+  if (onboarding) {
+    return <OnboardingWelcome />;
+  }
 
   return null;
 }

@@ -211,9 +211,9 @@ export const metadata: Metadata = {
 import useSWR from "swr";
 import { getGithubStars } from "./fetch.macro";
 import { getGithubStars as _getGithubStars } from "./fetch.macro" with { type: "macro" };
-const defaultStars = _getGithubStars();
+export const defaultStars = _getGithubStars();
 
-function GitHubStars() {
+export function GitHubStars() {
   const { data, error, isLoading } = useSWR("/github-stars", getGithubStars, {
     suspense: true,
     revalidateOnFocus: false,
