@@ -21,8 +21,10 @@ export const routes = [
         element: <><AboutPage /><Title title="About • EmailThing Docs" /></>,
         meta: {
           title: "EmailThing Docs",
+          ogTitle: "EmailThing Documentation",
           description: "The many features that EmailThing has",
           canonical: "https://emailthing.app/docs",
+          siteName: "EmailThing",
         }
       },
       {
@@ -30,8 +32,10 @@ export const routes = [
         element: <><CustomDomainPage /><Title title="Custom Domain • EmailThing Docs" /></>,
         meta: {
           title: "Custom Domain • EmailThing Docs",
+          ogTitle: "Custom Domain",
           description: "How to add your custom domain to a mailbox",
           canonical: "https://emailthing.app/docs/custom-domain",
+          siteName: "EmailThing",
         }
       },
     ],

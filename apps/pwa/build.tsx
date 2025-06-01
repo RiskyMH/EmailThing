@@ -192,10 +192,14 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
   ${route.meta?.canonical ? `<meta name="og:url" content="${route.meta?.canonical}">` : `<meta name="og:url" content="https://emailthing.app${path}">`}
   <meta name="og:type" content="website">
   <!-- <meta name="og:site_name" content="EmailThing"> -->
+  ${route.meta?.siteName ? `<meta name="og:site_name" content="${route.meta?.siteName}">` : ""}
   <meta name="og:locale" content="en_US">
   ${route.meta?.canonical ? `<meta name="canonical" content="${route.meta?.canonical}">` : ""}
   <meta name="robots" content="${route.meta?.noIndex ? "noindex" : "index"}">
-  <meta name="theme-color" content="#292932">
+  <meta name="theme-color" content="#17171E">
+  <meta name="theme-color" content="#17171E" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#292932" media="(prefers-color-scheme: discord)">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="author" href="https://riskymh.dev">
   <meta name="author" content="RiskyMH">

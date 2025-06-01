@@ -60,12 +60,12 @@ export const Sidebar = ({ className }: { className?: string }) => {
       icon: SendIcon,
       href: `/mail/${mailboxId}/sent`,
     },
+    "---",
     {
       name: "Temporary Mail",
       icon: TimerIcon,
       href: `/mail/${mailboxId}/temp`,
     },
-    "---",
     {
       name: "Trash",
       icon: Trash2Icon,
