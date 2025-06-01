@@ -246,17 +246,29 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
 function ResetPasswordDiag({ username }: { username: string }) {
   const [isPending, startTransition] = useTransition();
+  const searchParams = useSearchParams()[0];
+  const apiUrl = searchParams.get("api") || "https://emailthing.app";
 
   const resetPasswordAction = async () => {
     startTransition(async () => {
-      toast.warning("todo");
-      // const res = await resetPassword(username).catch(catchRedirectError);
-      // if (res?.error) {
-      //     toast.error(res.error);
-      // } else {
-      //     toast.success("Check your email for the reset link.");
-      //     document.getElementById("smart-drawer:close")?.click();
-      // }
+      try {
+        const res = await fetch(`${apiUrl}/api/internal/login/reset-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username }),
+        });
+        const data = await res.json();
+        
+        if (!res.ok || data.error) {
+          return void toast.error(data.error || "Failed to request password reset");
+        }
+        
+        toast.success("If an account with this username exists, a password reset link has been sent to the backup email address.");
+        document.getElementById("smart-drawer:close")?.click();
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to request password reset");
+      }
     });
   };
 
@@ -274,7 +286,7 @@ function ResetPasswordDiag({ username }: { username: string }) {
         <SmartDrawerHeader>
           <SmartDrawerTitle>Reset your password</SmartDrawerTitle>
           <SmartDrawerDescription>
-            We will send you an email the user <strong>{username}</strong>&lsquo;s back up email to
+            We will send you an email to the user <strong>{username}</strong>&lsquo;s backup email to
             reset your password. Are you sure you want to continue?
           </SmartDrawerDescription>
         </SmartDrawerHeader>

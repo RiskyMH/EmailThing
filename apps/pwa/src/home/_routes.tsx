@@ -4,6 +4,7 @@ import HomeLayout from "./layout";
 import LoginPage from "./login";
 import Pricing from "./pricing";
 import RegisterPage from "./register";
+import ResetPasswordPage from "./reset-password";
 import { Title } from "@/components/title";
 export const routes = [
   {
@@ -61,6 +62,16 @@ export const routes = [
       title: "Register • EmailThing",
       description: "A modern email client designed for simplicity and the web.",
       canonical: "https://emailthing.app/register",
+    }
+  },
+  {
+    path: "/login/reset",
+    element: <><ResetPasswordPage /><Title title="Reset Password • EmailThing" /></>,
+    meta: {
+      title: "Reset Password • EmailThing",
+      description: "Reset your password for your EmailThing account.",
+      canonical: "https://emailthing.app/login/reset",
+      noIndex: true,
     }
   },
 ] satisfies RouteObject[];
