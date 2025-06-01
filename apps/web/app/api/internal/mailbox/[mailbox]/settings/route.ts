@@ -317,6 +317,7 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
             where: and(
                 eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${alias.split("@")[1]})`),
                 not(eq(DefaultDomain.tempDomain, true)),
+                eq(DefaultDomain.available, true),
                 eq(DefaultDomain.isDeleted, false),
             ),
         }),
