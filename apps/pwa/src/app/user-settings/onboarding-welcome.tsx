@@ -98,7 +98,7 @@ export default function OnboardingWelcome() {
                     <SmartDrawerTitle>Welcome to EmailThing! 👋 </SmartDrawerTitle>
                     <SmartDrawerDescription>
                         <p>
-                            <strong>EmailThing is a new way to manage your email.</strong>
+                            <strong>EmailThing is a new way to manage your email.</strong>{" "}
                             You can use it to send and receive emails, and even create your own email addresses.
                             We&lsquo;re excited to have you on board!
                         </p>

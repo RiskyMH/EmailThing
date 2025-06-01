@@ -128,7 +128,7 @@ async function handleLoginResponse({ data, navigate, username, apiUrl }: {
     : undefined;
   const selectedMailbox = mailboxId && mailboxes.includes(mailboxId) ? mailboxId : mailboxes[0];
   document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-  navigate(`/mail/${selectedMailbox}${userOnboarding ? "?onboarding" : ""}`);
+  navigate(`/mail/${selectedMailbox}${!userOnboarding ? "?onboarding" : ""}`);
   toast.success("Welcome back!");
   db.initialFetchSync();
 }
