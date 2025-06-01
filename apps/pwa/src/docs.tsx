@@ -14,6 +14,7 @@ const routes = (
 
 const router = createBrowserRouter(routes, {
   patchRoutesOnNavigation: async ({ matches, patch, path, signal }) => {
+    if (path === "/docs/api") return void (window.location.href = "/docs/api");
     if (["/", "/pricing", "/home", "/login", "/register"].includes(path)) {
       const { routes } = await import("./home/_routes");
       if (routes) {

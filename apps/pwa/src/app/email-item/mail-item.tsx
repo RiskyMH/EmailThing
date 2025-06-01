@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import Loading from "./loading";
 import TopButtons from "./mail-item-top-buttons";
 import { parseHTML } from "./parse-html";
+import { MailboxTitle } from "@/components/mailbox-title";
 
 export default function MailItemSuspense() {
   if (typeof window === "undefined") return <Loading />;
@@ -78,7 +79,7 @@ function MailItem() {
     return (
       <>
         <Loading />
-        <Title mailboxId={params.mailboxId} />
+        <MailboxTitle mailboxId={params.mailboxId} />
       </>
     );
 
@@ -103,7 +104,7 @@ function MailItem() {
         email={email}
         onUpdateEmail={updateEmail}
       />
-      <Title subject={email.subject} mailboxId={params.mailboxId} />
+      <MailboxTitle mailboxId={params.mailboxId} title={email.subject} />
 
       <h1 className="mt-3 break-words px-3 font-bold text-2xl sm:text-3xl">{email.subject}</h1>
       <div className="flex flex-col gap-3 rounded-md bg-card">
@@ -319,19 +320,6 @@ function MailItem() {
   );
 }
 
-function Title({ subject, mailboxId }: { subject?: string | null; mailboxId: string }) {
-  const mailboxName = useLiveQuery(async () => getMailboxName(mailboxId), [mailboxId]);
-
-  useEffect(() => {
-    if (!subject) document.title = "EmailThing";
-    else document.title = `${subject}${mailboxName ? ` - ${mailboxName}` : ""} - EmailThing`;
-    return () => {
-      document.title = "EmailThing";
-    };
-  }, [subject, mailboxName]);
-
-  return null;
-}
 
 function EmailContent({
   body,

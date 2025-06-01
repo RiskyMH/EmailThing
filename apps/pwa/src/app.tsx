@@ -23,6 +23,7 @@ const router = createBrowserRouter(routes, {
     }
 
     if (path.startsWith("/docs")) {
+      if (path === "/docs/api") return void (window.location.href = "/docs/api");
       const { routes } = await import("./docs/_routes");
       if (routes) {
         patch(null, routes);

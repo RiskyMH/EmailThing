@@ -11,6 +11,7 @@ import { getAllAliases, getMe } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
 import changeUserSettings from "./_api";
 import { CardForm, ClientSelect, ClientSwitch } from "./components";
+import { Title } from "@/components/title";
 
 const changePublicEmailStatus = (formData: FormData) => {
   return changeUserSettings("change-public-email-status", {
@@ -33,6 +34,7 @@ export default function UserSettingsEmailthingMe() {
 
   return (
     <>
+      <Title title="EmailThing.me • User Settings • EmailThing" />
       <div className="flex flex-col gap-1.5">
         <CardTitle>EmailThing.me</CardTitle>
         <CardDescription>

@@ -24,6 +24,12 @@ async function getRoutes() {
       console.error(e);
     }
   }
+  const redirects = await Bun.file("./dist/_redirects").text();
+  for (const redirect of redirects.split("\n")) {
+    const [from, to, status] = redirect.split(" ");
+    if (status === "200") continue;
+    routes[from] = Response.redirect(to, Number(status) || 301);
+  }
   return routes;
 }
 
@@ -33,14 +39,14 @@ const server = Bun.serve({
 console.info(`Server is running on ${server.url}`);
 
 watch("./dist", {}, async () => {
-    // server.reload({
-    //     routes: await getRoutes(),
-    //     fetch(request) {
-    //         return new Response("404", { status: 404 })
-    //     }
-    // })
-    // console.log(`Server is running on ${server.url} (reloaded)`);
-    console.info("may want to reload (dist changed)")
+  // server.reload({
+  //     routes: await getRoutes(),
+  //     fetch(request) {
+  //         return new Response("404", { status: 404 })
+  //     }
+  // })
+  // console.log(`Server is running on ${server.url} (reloaded)`);
+  console.info("may want to reload (dist changed)")
 })
 
-watch("./dist", {}, async () => {});
+watch("./dist", {}, async () => { });

@@ -106,10 +106,9 @@ export default function OnboardingWelcome() {
                 </SmartDrawerHeader>
 
                 <div className="flex flex-col gap-4 max-sm:p-4">
-
                     <div className="flex flex-col gap-3 ">
                         <p className="text-sm">
-                            I made this for the myself but wanted to share it with others, so your support by starring my repo would
+                            I made this for myself but wanted to share it with others, so your support by starring my repo would
                             mean lots to me.
                         </p>
                         <Link

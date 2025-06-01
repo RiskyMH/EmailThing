@@ -3,6 +3,7 @@ import DocsLayout2 from "@/(docs)/docs/layout";
 import AboutPage from "@/(docs)/docs/page";
 import { Outlet, type RouteObject } from "react-router-dom";
 import DocsLayout from "./layout";
+import { Title } from "@/components/title";
 
 export const routes = [
   {
@@ -17,11 +18,21 @@ export const routes = [
     children: [
       {
         path: "/docs",
-        element: <AboutPage />,
+        element: <><AboutPage /><Title title="About • EmailThing Docs" /></>,
+        meta: {
+          title: "EmailThing Docs",
+          description: "The many features that EmailThing has",
+          canonical: "https://emailthing.app/docs",
+        }
       },
       {
         path: "/docs/custom-domain",
-        element: <CustomDomainPage />,
+        element: <><CustomDomainPage /><Title title="Custom Domain • EmailThing Docs" /></>,
+        meta: {
+          title: "Custom Domain • EmailThing Docs",
+          description: "How to add your custom domain to a mailbox",
+          canonical: "https://emailthing.app/docs/custom-domain",
+        }
       },
     ],
   },

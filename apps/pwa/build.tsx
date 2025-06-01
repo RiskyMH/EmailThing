@@ -182,6 +182,44 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
     return;
   }
 
+  const meta = `
+  <title>${route.meta?.title || "EmailThing"}</title>
+  <meta name="description" content="${route.meta?.description || "A modern email client designed for simplicity and the web."}">
+  <meta name="title" content="${route.meta?.title || "EmailThing"}">
+  <meta name="og:title" content="${route.meta?.ogTitle || route.meta?.title || "EmailThing"}">
+  <meta name="og:description" content="${route.meta?.description || "A modern email client designed for simplicity and the web."}">
+  <meta name="og:image" content="https://emailthing.app/logo.png">
+  ${route.meta?.canonical ? `<meta name="og:url" content="${route.meta?.canonical}">` : `<meta name="og:url" content="https://emailthing.app${path}">`}
+  <meta name="og:type" content="website">
+  <!-- <meta name="og:site_name" content="EmailThing"> -->
+  <meta name="og:locale" content="en_US">
+  ${route.meta?.canonical ? `<meta name="canonical" content="${route.meta?.canonical}">` : ""}
+  <meta name="robots" content="${route.meta?.noIndex ? "noindex" : "index"}">
+  <meta name="theme-color" content="#292932">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="author" href="https://riskymh.dev">
+  <meta name="author" content="RiskyMH">
+  <meta name="creator" content="RiskyMH">
+  <meta name="generator" content="Bun">
+  <meta name="keywords" content="email,email client,open source,email thing,riskymh">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="${route.meta?.ogTitle || route.meta?.title || "EmailThing"}">
+  <meta name="twitter:description" content="${route.meta?.description || "A modern email client designed for simplicity and the web."}">
+  <meta name="twitter:image" content="https://emailthing.app/logo.png">
+  <meta name="twitter:url" content="${route.meta?.canonical || `https://emailthing.app${path}`}">
+  <meta name="twitter:site" content="@EmailThing_">
+  <meta name="twitter:creator" content="@EmailThing_">
+  <link rel="apple-touch-icon" type="image/png" href="/logo.png" sizes="256x256" />
+  <link rel="apple-touch-icon" type="image/svg+xml" href="/logo.svg" sizes="any" />
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" sizes="256x256" />
+  <link rel="shortcut icon" type="image/png" href="/icon.png" sizes="256x256" />
+  <link rel="shortcut icon" type="image/svg+xml" href="/icon.svg" sizes="any" />
+  <link rel="mask-icon" href="/icon.svg" color="#292932" sizes="any">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="256x256" />
+  <link rel="icon" type="image/png" href="/icon.png" sizes="256x256" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" sizes="any" />
+  `.replaceAll(/(\n|\s{2,})+/gm, '');
+
   const router = createStaticRouter(dataRoutes, context);
   // const newHtml =
   const prerendered = renderToStaticMarkup(
@@ -189,10 +227,11 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
   );
 
   const _html = templates[route.preferTemplate || "app.html"]
-    .replaceAll(/(\s{2,}|\n+)/gm, "")
-    // .replaceAll(/\n+/gm, '')
-    .replace(replace, prerendered)
-    .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
+  .replaceAll(/(\s{2,}|\n+)/gm, "")
+  // .replaceAll(/\n+/gm, '')
+  .replace(replace, prerendered)
+  .replace(/<!-- META -->.*?<!-- \/META -->/gm, meta)
+  .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
 
   await Bun.write(`./dist/${path === "/" ? "index" : path}.html`, _html);
   // await Bun.write(`./dist/${path}/index.html`, _html)

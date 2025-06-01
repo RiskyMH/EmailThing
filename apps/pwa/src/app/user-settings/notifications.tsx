@@ -27,6 +27,7 @@ import changeUserSettings from "./_api";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/utils/data/db";
 import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { Title } from "@/components/title";
 
 const deleteSubscription = async (endpoint: string) => {
   return changeUserSettings("delete-notification", {
@@ -134,15 +135,18 @@ export function NotificationsButton({ publicKey }: { publicKey: string }) {
   };
 
   return (
-    <Button
-      onClick={() => (isSubscribed ? unSubscribe() : requestPermission())}
-      disabled={isPending || !isLoaded}
-      className="flex w-min gap-2"
-      // variant={isSubscribed ? "destructive" : "secondary"}
-      variant="default"
-    >
-      {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
-      {isSubscribed ? "Disable notifications" : "Enable notifications"}
-    </Button>
+    <>
+      <Title title="Notifications • User Settings • EmailThing" />
+      <Button
+        onClick={() => (isSubscribed ? unSubscribe() : requestPermission())}
+        disabled={isPending || !isLoaded}
+        className="flex w-min gap-2"
+        // variant={isSubscribed ? "destructive" : "secondary"}
+        variant="default"
+      >
+        {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+        {isSubscribed ? "Disable notifications" : "Enable notifications"}
+      </Button>
+    </>
   );
 }

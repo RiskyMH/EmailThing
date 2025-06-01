@@ -11,6 +11,7 @@ import { getMe } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
 import changeUserSettings from "./_api";
 import { CardForm, ClientInput, ClientSelect } from "./components";
+import { Title } from "@/components/title";
 
 function changeEmail(_: any, formData: FormData) {
   return changeUserSettings("change-email", {
@@ -36,6 +37,7 @@ export default function UserSettingsPage() {
 
   return (
     <>
+      <Title title="General • User Settings • EmailThing" />
       <Card>
         <CardForm action={changeEmail} subtitle="Please ensure you have access to the mailbox">
           <CardHeader>

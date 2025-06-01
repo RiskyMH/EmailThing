@@ -134,6 +134,7 @@ export default function UserSettingsAuthentication() {
 
   return (
     <>
+      <Title title="Authentication • User Settings • EmailThing" />
       <div className="flex flex-col gap-1.5">
         <CardTitle>Authentication</CardTitle>
         <CardDescription>Change your password or create a passkey.</CardDescription>
@@ -426,6 +427,7 @@ import {
 } from "@github/webauthn-json/browser-ponyfill";
 import { KeyRoundIcon } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
+import { Title } from "@/components/title";
 
 export function PasskeysSetup({ userId, username }: { userId: string; username: string }) {
   const [isPending, startTransition] = useTransition();

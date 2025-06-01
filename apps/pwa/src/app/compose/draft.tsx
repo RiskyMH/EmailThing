@@ -43,6 +43,7 @@ import { db } from "@/utils/data/db";
 import type { SaveActionProps, SendEmailResponse } from "@/../app/api/internal/send-draft/route";
 import { parseSync } from "@/utils/data/sync-user";
 import Turndown from "turndown";
+import { MailboxTitle } from "@/components/mailbox-title";
 
 export default function DraftPage() {
   const params = useParams<{ mailboxId: string; draftId: string }>();
@@ -144,8 +145,6 @@ export default function DraftPage() {
     navigate(`?editor=${v}`, { replace: true });
   }
 
-  useTitle(params.mailboxId!, data?.[0]?.draft?.subject || undefined);
-
   if (!data || data[0] === undefined || !data[1]) return <Loading />;
   if (data[0] === null) {
     return <div className="flex size-full items-center justify-center">404 - Draft not found</div>;
@@ -164,6 +163,7 @@ export default function DraftPage() {
       className="flex size-full flex-col gap-4 overflow-auto p-4 md:p-6"
       suppressHydrationWarning
     >
+      <MailboxTitle mailboxId={params.mailboxId!} title={mail.subject ? `${mail.subject} (draft)` : "New Draft"} />
       <DisableFormReset formId="draft-form" />
       <div className="flex max-w-full grow flex-col break-words rounded-md border-input border-none bg-secondary text-base">
         <FromInput

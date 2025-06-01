@@ -26,6 +26,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { PlusIcon, UserX2Icon } from "lucide-react";
 import { toast } from "sonner";
 import changeUserSettings from "./_api";
+import { Title } from "@/components/title";
 
 const leaveMailbox = async (mailboxId: string) => {
   // leaving and actually deleting data doesn't exist rn lol
@@ -43,6 +44,7 @@ export default function UserSettingsMailboxes() {
 
   return (
     <>
+      <Title title="Mailboxes • User Settings • EmailThing" />
       <div className="flex">
         <div className="flex flex-col gap-1.5">
           <CardTitle>Mailboxes</CardTitle>

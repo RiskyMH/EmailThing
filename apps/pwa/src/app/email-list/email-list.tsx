@@ -147,11 +147,15 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
 
   useEffect(() => {
     if (search) {
-      document.title = "Search results | EmailThing";
+      if (count) {
+        document.title = `Search results (${count}) • EmailThing`;
+      } else {
+        document.title = "Search results • EmailThing";
+      }
     } else if (count || name) {
-      document.title = `${names[type] || "Inbox"}${count ? ` (${count})` : ""}${name ? ` | ${name}` : ""} | EmailThing`;
+      document.title = `${names[type] || "Inbox"}${count ? ` (${count})` : ""}${name ? ` • ${name}` : ""} • EmailThing`;
     } else {
-      document.title = `${names[type] || "Inbox"} | EmailThing`;
+      document.title = `${names[type] || "Inbox"} • EmailThing`;
     }
 
     return () => {
