@@ -73,7 +73,7 @@ export default function UserSettingsMailboxes() {
                     <AvatarImage
                       src={mailboxesIcons?.[i] || ""}
                       alt={p.name || undefined}
-                      crossOrigin="anonymous"
+                      // crossOrigin="anonymous"
                     />
                     <AvatarFallback className="bg-background transition-all dark:text-foreground">
                       {(p.name || "AB")?.slice(0, 2).toUpperCase()}

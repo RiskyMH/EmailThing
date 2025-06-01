@@ -249,7 +249,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
           ) : (
             // null
             <Avatar className="-ms-1 sm:max-lg:-me-1 size-7 sm:max-lg:ms-auto">
-              <AvatarImage className="rounded-full" src={gravatarImg} crossOrigin="anonymous" />
+              <AvatarImage className="rounded-full" src={gravatarImg} /*crossOrigin="anonymous"*/ />
               <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
                 {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
               </AvatarFallback>

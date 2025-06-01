@@ -53,7 +53,7 @@ export function UserDropDown({ user }: UserProps) {
       suppressHydrationWarning // i give up with sanity
     >
       <Avatar className="size-8 rounded-full">
-        <AvatarImage src={img} alt={user?.name} crossOrigin="anonymous" />
+        <AvatarImage src={img} alt={user?.name} /*crossOrigin="anonymous"*/ />
         <AvatarFallback className="bg-primary/80 text-white transition-all hover:bg-primary/70 dark:bg-secondary dark:text-foreground dark:hover:bg-secondary/80">
           {user?.name ? getInitials(user?.name) : ""}
         </AvatarFallback>

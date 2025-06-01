@@ -527,7 +527,7 @@ function EmailPicture({ email, fallback }: { email: string; fallback?: string })
       data-gravatar={isGravatar}
     >
       {/* somehow svgl doesn't like crossOrigin=anonymous */}
-      <AvatarImage src={img} crossOrigin={isGravatar ? "anonymous" : undefined} />
+      <AvatarImage src={img} /*crossOrigin={isGravatar ? "anonymous" : undefined}*/ />
       <AvatarFallback className="bg-tertiary">{fallback}</AvatarFallback>
     </Avatar>
   );
