@@ -16,7 +16,7 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <RootLayout>
-      <div className="min-h-screen bg-background" vaul-drawer-wrapper="">
+      <div className="//min-h-screen bg-background h-screen overflow-hidden" vaul-drawer-wrapper="">
         <Header />
         <div className="flex h-[calc(100vh-4.1rem)] w-screen max-w-full">
           <Sidebar className="hidden min-h-[calc(100vh-4.1rem)] sm:flex" />
