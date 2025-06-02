@@ -57,6 +57,7 @@ function MailItem() {
   const params = useParams<"mailboxId" | "mailId">();
   const mailboxId = params.mailboxId || "demo";
   const emailId = params.mailId || "";
+  const navigate = useNavigate();
 
   const email = useLiveQuery(async () => {
     if (!emailId) return;
@@ -92,6 +93,12 @@ function MailItem() {
       toast.info("You are offline - changes will be synced when you come back online");
     }
     await updateEmailProperties(mailboxId, emailId, updates);
+    if (updates.binnedAt) {
+      if (history.length > 1) {
+        return navigate(-1);
+      }
+      return navigate(`/mail/${mailboxId}`);
+    }
   };
 
   // const attachmentsPresigned = []

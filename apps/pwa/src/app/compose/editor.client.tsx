@@ -262,7 +262,7 @@ export function SendButton({ sendAction, mailboxId, draftId }: { sendAction: typ
       });
       return;
     }
-  
+
 
     startTransition(async () => {
       const t = toast.loading("Sending your email...");
@@ -288,7 +288,7 @@ export function SendButton({ sendAction, mailboxId, draftId }: { sendAction: typ
 
       if (res && ("message" in res || "success" in res)) {
         toast.success("Sent your email!", { id: t });
-        navigate(`/mail/${mailboxId}/${draftId}`);
+        navigate(`/mail/${mailboxId}/${draftId}`, { replace: true });
       }
     });
   };
@@ -299,7 +299,7 @@ export function SendButton({ sendAction, mailboxId, draftId }: { sendAction: typ
       type="submit"
       id="send-button"
       ref={ref}
-      formAction={() => onClick(null)}      
+      formAction={() => onClick(null)}
       aria-disabled={isPending}
       disabled={isPending}
       className="flex gap-2 px-7"

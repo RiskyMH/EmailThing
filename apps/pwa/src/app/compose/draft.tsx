@@ -245,27 +245,6 @@ export default function DraftPage() {
   );
 }
 
-function useTitle(mailbox: string, draftSubject?: string) {
-  const mailboxName = useLiveQuery(() => getMailboxName(mailbox), [mailbox]);
-
-  useEffect(() => {
-    if (mailboxName) {
-      if (draftSubject) {
-        document.title = `${draftSubject} (Draft) | ${mailboxName} | EmailThing`;
-      } else {
-        document.title = `New Draft | ${mailboxName} | EmailThing`;
-      }
-    } else {
-      document.title = "Compose | EmailThing";
-    }
-    return () => {
-      document.title = "EmailThing";
-    };
-  }, [mailboxName, draftSubject]);
-}
-
-
-
 
 export async function sendEmailAction(mailboxId: string, draftId: string, data: FormData) {
   if (!navigator.onLine) {
