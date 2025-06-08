@@ -18,7 +18,7 @@ export default function Header() {
     <div className="sticky top-0 z-40 flex items-center justify-between bg-sidebar-bg px-7">
       <header className="flex h-16 w-full items-center">
         <MobileNav>
-          <div className="mb-2 flex items-center gap-1 p-3">
+          <div className="-mb-2 flex items-center gap-1 p-3">
             <Logo className="size-7" />
             <h2 className="inline-block whitespace-nowrap font-bold text-xl">EmailThing</h2>
           </div>
@@ -68,7 +68,7 @@ export function MobileNav({ children }: PropsWithChildren) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className="-ms-2 me-auto inline p-2 hover:bg-transparent sm:hidden" asChild>
         <Button variant="ghost" size="icon">
-          <MenuIcon />
+          <MenuIcon className="size-6" />
         </Button>
       </SheetTrigger>
       <SheetContent

@@ -150,7 +150,7 @@ export default function CustomDomains() {
                           </SmartDrawerContent>
                         </SmartDrawer>
 
-                        <SmartDrawer disablePreventScroll>
+                        <SmartDrawer repositionInputs={false}>
                           <DropdownMenuItem asChild>
                             <SmartDrawerTrigger className="w-full">Setup again</SmartDrawerTrigger>
                           </DropdownMenuItem>
