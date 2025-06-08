@@ -63,6 +63,14 @@ export function MobileNav({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false);
   const windowSize = useWindowSize();
   useEffect(() => setOpen(false), [windowSize]);
+  useEffect(() => {
+    return () => {
+      document.body.style.pointerEvents = "auto";
+      requestAnimationFrame(() => {
+        document.body.style.pointerEvents = "auto";
+      });
+    }
+  }, [open]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

@@ -143,7 +143,7 @@ function LinkElement({
       size="sm"
       className={cn(
         disabled &&
-          "group relative flex h-9 w-full cursor-not-allowed items-center gap-4 rounded px-5 opacity-50",
+        "group relative flex h-9 w-full cursor-not-allowed items-center gap-4 rounded px-5 opacity-50",
         "flex w-full justify-normal gap-3 self-center px-3 py-2.5 text-center text-foreground/80 transition-colors lg:self-auto",
         isActive && "bg-sidebar-active-bg text-blue dark:text-foreground",
         "hover:bg-sidebar-active-bg active:bg-sidebar-active-bg",
@@ -217,7 +217,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
         name="Mailbox Config"
         icon={SettingsIcon}
         href={`/mail/${mailboxId}/config`}
-        // className="py-4"
+      // className="py-4"
       />
     </>
   );
@@ -252,7 +252,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
             <UserCircle2 className="sm:max-lg:-me-0.5 lg:-ms-1 max-sm:-ms-1 max-sm:me-0.5 lg:me-0.5 size-6 text-yellow-500 sm:max-lg:ms-auto" />
           ) : (
             // null
-            <Avatar className="lg:-ms-1.5 sm:max-lg:-me-1 size-7 sm:max-lg:ms-auto max-sm:-ms-2">
+            <Avatar className="lg:-ms-1.5 sm:max-lg:-me-1 size-7 sm:max-lg:ms-auto max-sm:-ms-1.5">
               <AvatarImage className="rounded-full" src={gravatarImg} /*crossOrigin="anonymous"*/ />
               <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
                 {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
@@ -274,7 +274,11 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
 
           <ChevronsUpDownIcon className="-me-2 ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent
+          onClick={(e) => {
+            document.body.style.pointerEvents = "auto";
+          }}
+        >
           {mailboxes?.map((m) => (
             <DropdownMenuItem key={m.id} asChild className="flex cursor-pointer gap-2">
               <MailboxLink mailboxId={m.id}>
