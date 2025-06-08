@@ -227,7 +227,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
                         <span className="line-clamp-2 break-all text-muted-foreground text-sm">{email.snippet}</span>
                     </span> */}
 
-      <div className="float-right ms-auto flex shrink-0 gap-1 self-center text-right text-muted-foreground @sm:gap-2 group-hover:@sm:hidden ">
+      <div className="float-right ms-auto flex shrink-0 gap-1 self-center text-right text-muted-foreground sm:gap-2 group-hover:sm:hidden ">
         {(email.attachments?.length ?? 0) > 0 && <PaperclipIcon className="size-4 self-center" />}
         <LocalTime
           type="smart"
@@ -236,7 +236,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
           className="w-auto self-center text-xs"
         />
       </div>
-      <div className="float-right ms-auto hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:@sm:flex">
+      <div className="float-right ms-auto hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
         {isInView ? (
           <>
             {type !== "drafts" && (
