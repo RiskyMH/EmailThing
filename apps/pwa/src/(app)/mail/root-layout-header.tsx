@@ -9,6 +9,7 @@ import { type PropsWithChildren, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useWindowSize } from "usehooks-ts";
 import Sidebar from "./root-layout-sidebar";
+import Preferences from "./preferences";
 
 export default function Header() {
   const params = useParams<"mailboxId" | "mailId">();
@@ -52,6 +53,7 @@ export default function Header() {
               </PopoverContent>
           </Popover> */}
 
+          <Preferences />
           <UserNav />
         </div>
       </header>

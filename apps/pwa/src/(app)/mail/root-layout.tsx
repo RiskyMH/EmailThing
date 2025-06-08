@@ -17,6 +17,26 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
   return (
     <RootLayout>
       <div className="//min-h-screen bg-sidebar-bg h-screen overflow-hidden emailscolumn" vaul-drawer-wrapper="" id="app:root-layout">
+      <script dangerouslySetInnerHTML={{ __html: /*js*/`
+        const fn = () => {
+        const emailView = localStorage.getItem("email-view") ?? "column";
+        const rootLayout = document.getElementById("app:root-layout");
+        if (emailView === "column") {
+          rootLayout?.classList.add("emailscolumn");
+        } else {
+            rootLayout?.classList.remove("emailscolumn");
+          }
+        }
+        fn();
+
+        // on local storage change, run fn
+        window.addEventListener("storage", fn);
+        window.addEventListener("load", fn);
+        // return () => {
+        //   window.removeEventListener("storage", fn);
+        //   window.removeEventListener("load", fn);
+        // }
+      ` }} />
         <Header />
         <div className="flex h-[calc(100vh-4.1rem)] w-screen max-w-full bg-sidebar-bg">
           <Sidebar className="hidden min-h-[calc(100vh-4.1rem)] sm:flex pt-0 sm:pt-0" />
