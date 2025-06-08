@@ -1,4 +1,4 @@
-import { Search } from "@/(email)/mail/[mailbox]/nav.search";
+import { Search } from "./nav.search";
 import Logo, { EmailThing } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -15,7 +15,7 @@ export default function Header() {
   const mailboxId = params.mailboxId || "demo";
 
   return (
-    <div className="sticky top-0 z-40 flex items-center justify-between border-b-2 bg-secondary px-7 dark:bg-tertiary">
+    <div className="sticky top-0 z-40 flex items-center justify-between bg-sidebar-bg px-7">
       <header className="flex h-16 w-full items-center">
         <MobileNav>
           <div className="mb-2 flex items-center gap-1 p-3">

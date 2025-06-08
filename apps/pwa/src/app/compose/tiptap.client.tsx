@@ -92,12 +92,12 @@ export default function EditorContent2({
     <EditorContent
       editor={editor}
       data-placeholder="Write your email body here..."
-      className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none bg-secondary text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none bg-subcard text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       style={{ fontFamily: "Arial, sans-serif" }}
     >
       <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
         <BodyHeader editor={editor} />
-        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
+        <span className="flex h-0 w-full shrink-0 grow-0 rounded-none border-card border-b-2" />
       </div>
 
       {!editor && (

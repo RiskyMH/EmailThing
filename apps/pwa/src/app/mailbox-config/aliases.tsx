@@ -45,11 +45,11 @@ const addAlias = async (mailboxId: string, alias: string, name: string) => {
 };
 
 const editAlias = async (mailboxId: string, id: string, name: string | null) => {
-  return changeMailboxSettings(mailboxId, "edit-alias", { id, name });
+  return changeMailboxSettings(mailboxId, "edit-alias", { aliasId: id, name });
 };
 
 const changeDefaultAlias = async (mailboxId: string, aliasId: string) => {
-  return changeMailboxSettings(mailboxId, "change-default-alias", { aliasId });
+  return changeMailboxSettings(mailboxId, "change-default-alias", { defaultAliasId: aliasId });
 };
 
 const deleteAlias = async (mailboxId: string, aliasId: string) => {
@@ -107,28 +107,28 @@ export default function Aliases() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="rounded-ss-md bg-tertiary">
+              <TableHead className="rounded-ss-md bg-subcard">
                 <p>Alias</p>
               </TableHead>
-              <TableHead className="bg-tertiary">
+              <TableHead className="bg-subcard">
                 <p>Name</p>
               </TableHead>
-              <TableHead className="bg-tertiary text-center">
+              <TableHead className="bg-subcard text-center">
                 <p>Default</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-tertiary" />
+              <TableHead className="w-1 rounded-se-md bg-subcard" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {aliases?.length ? (
               aliases.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="py-3 font-medium">{row.alias}</TableCell>
-                  <TableCell className="py-3">{row.name || ""}</TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1 font-medium">{row.alias}</TableCell>
+                  <TableCell className="//py-1">{row.name || ""}</TableCell>
+                  <TableCell className="//py-1">
                     {row.default ? <CheckIcon className="mx-auto size-4" /> : null}
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="size-8 p-0">

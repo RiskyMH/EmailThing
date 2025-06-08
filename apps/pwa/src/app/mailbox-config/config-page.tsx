@@ -14,7 +14,7 @@ import { MailboxTitle } from "@/components/mailbox-title";
 
 export default function ConfigPage() {
   return (
-    <div className="flex min-w-0 flex-col gap-5 p-5">
+    <div className="flex min-w-0 flex-col gap-5 p-5 bg-card sm:rounded-tl-lg overflow-auto">
       <h1 className="font-semibold text-2xl">Mailbox Config</h1>
       <DemoWarning />
 
@@ -25,7 +25,7 @@ export default function ConfigPage() {
       <APITokens />
       <Users />
 
-      <br />
+      {/* <br /> */}
     </div>
   );
 }

@@ -59,7 +59,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
       >
         <TooltipText text="Change Font">
           <SelectTrigger
-            className="h-8 w-auto shrink-0 gap-2 border-none bg-transparent px-2.5 focus-within:z-20 hover:bg-background focus:z-20 sm:w-[150px]"
+            className="!h-8 w-auto shrink-0 gap-2 border-none !bg-transparent shadow-none px-2.5 focus-within:z-20 hover:bg-accent! focus:z-20 sm:w-[150px]"
             style={{
               fontFamily: editor?.getAttributes("textStyle").fontFamily || "Arial, sans-serif",
             }}
@@ -117,7 +117,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
         </SelectContent>
       </Select>
 
-      <span className="my-1 h-auto w-0 shrink-0 grow-0 rounded-sm border-background/75 border-e-2" />
+      <span className="my-1 h-auto w-0 shrink-0 grow-0 rounded-sm border-card/75 border-e-2" />
 
       <DropdownMenu>
         <TooltipText text="Change Heading Size">
@@ -125,7 +125,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+              className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
             >
               {
                 {
@@ -185,7 +185,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             aria-label="Toggle bold"
             pressed={editor?.isActive("bold")}
             onClick={() => editor?.chain().focus().toggleBold().run()}
-            className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+            className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           >
             <BoldIcon className="size-4" />
           </Toggle>
@@ -199,7 +199,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             aria-label="Toggle italic"
             pressed={editor?.isActive("italic")}
             onClick={() => editor?.chain().focus().toggleItalic().run()}
-            className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+            className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           >
             <ItalicIcon className="size-4" />
           </Toggle>
@@ -213,7 +213,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             aria-label="Toggle underline"
             pressed={editor?.isActive("underline")}
             onClick={() => editor?.chain().focus().toggleUnderline().run()}
-            className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+            className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           >
             <UnderlineIcon className="size-4" />
           </Toggle>
@@ -227,7 +227,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             aria-label="Toggle strikethrough"
             pressed={editor?.isActive("strike")}
             onClick={() => editor?.chain().focus().toggleStrike().run()}
-            className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+            className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           >
             <StrikethroughIcon className="size-4" />
           </Toggle>
@@ -243,7 +243,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             aria-label="Toggle unordered list"
             pressed={editor?.isActive("bulletList")}
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
-            className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+            className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           >
             <ListIcon className="size-4" />
           </Toggle>
@@ -257,7 +257,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             aria-label="Toggle ordered list"
             pressed={editor?.isActive("orderedList")}
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-            className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+            className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           >
             <ListOrderedIcon className="size-4" />
           </Toggle>
@@ -273,7 +273,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             aria-label="Toggle blockquote list"
             pressed={editor?.isActive("blockquote")}
             onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-            className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+            className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           >
             <QuoteIcon className="size-4" />
           </Toggle>
@@ -287,8 +287,8 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
               variant: "ghost",
               size: "icon-sm",
               className: cn(
-                "shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary",
-                editor?.getAttributes("link")?.href && "bg-tertiary",
+                "shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card",
+                editor?.getAttributes("link")?.href && "bg-background",
               ),
             })}
           >
@@ -372,7 +372,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
         <Button
           variant="ghost"
           size="icon-sm"
-          className="shrink-0 hover:bg-background focus:z-20 data-[state=on]:bg-tertiary"
+          className="shrink-0 hover:bg-accent focus:z-20 data-[state=on]:bg-card"
           onClick={() => editor?.chain().focus().unsetAllMarks().run()}
         >
           <RemoveFormattingIcon className="size-4" />

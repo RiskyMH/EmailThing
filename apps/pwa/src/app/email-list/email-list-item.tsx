@@ -28,6 +28,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ClientStar, ContextMenuAction } from "../components";
+import { useNavigate } from "react-router-dom";
 
 export interface EmailItemProps {
   email: {
@@ -127,17 +128,38 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
 
   const [ref, isInView] = useInView();
 
+  const navigate = useNavigate();
+
   if (type !== "trash" && email.isDeleted === 1) return null;
 
   const main = (
-    <Link
+    <a
       ref={ref}
       href={link}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isEmailColumn = document.getElementById("app:root-layout")?.classList.contains("emailscolumn");
+        const isDesktop = window.innerWidth > 640;
+        if (isEmailColumn && isDesktop) {
+          if (type !== "drafts") {
+            const search = new URLSearchParams(window.location.search);
+            search.set("mailId", emailId);
+            navigate({ search: search.toString() });
+          }
+          else {
+            navigate(link);
+          }
+        }
+        else {
+          navigate(link);
+        }
+      }}
       className={cn(
-        "group inline-flex h-10 gap-3 rounded-md px-2 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-4",
+        "group inline-flex h-10 gap-3 rounded-md px-2 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         email.isRead
-          ? "hover:bg-card/60"
-          : "bg-card text-card-foreground shadow-sm hover:bg-card/60",
+          ? "hover:bg-subcard/60"
+          : "bg-subcard text-subcard-foreground hover:bg-subcard/60",
       )}
     >
       {/* Category indicator */}
@@ -163,7 +185,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
       <ClientStar
         enabled={!!email.isStarred}
         action={
-          type !== "drafts" ? () => updateEmail({ isStarred: !email.isStarred }) : async () => {}
+          type !== "drafts" ? () => updateEmail({ isStarred: !email.isStarred }) : async () => { }
         }
         className="hidden shrink-0 self-center text-muted-foreground hover:text-foreground sm:inline-block"
       />
@@ -174,7 +196,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
                     > */}
       <span
         className={cn(
-          "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56",
+          "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56 sm:[.emailscolumn_&]:w-32",
           !email.isRead ? "font-bold" : "text-foreground/80",
         )}
         title={email.from?.address ?? "uh?"}
@@ -263,7 +285,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
           </>
         )}
       </div>
-    </Link>
+    </a>
   );
 
   if (!isInView) return main;

@@ -44,19 +44,20 @@ import TopButtons from "./mail-item-top-buttons";
 import { parseHTML } from "./parse-html";
 import { MailboxTitle } from "@/components/mailbox-title";
 
-export default function MailItemSuspense() {
+export default function MailItemSuspense({ mailId }: { mailId?: string }) {
   if (typeof window === "undefined") return <Loading />;
   return (
     <Suspense fallback={<Loading />}>
-      <MailItem />
+      <MailItem mailId={mailId} />
     </Suspense>
   );
 }
 
-function MailItem() {
+function MailItem({ mailId }: { mailId?: string }) {
   const params = useParams<"mailboxId" | "mailId">();
+  const searchParams = useSearchParams()[0];
   const mailboxId = params.mailboxId || "demo";
-  const emailId = params.mailId || "";
+  const emailId = mailId || params.mailId || searchParams.get("mailId") || "";
   const navigate = useNavigate();
 
   const email = useLiveQuery(async () => {
@@ -64,25 +65,6 @@ function MailItem() {
     const d = await getEmailWithDetails(mailboxId, emailId);
     return d;
   }, [mailboxId, emailId]);
-
-  const markedAsRead = useRef(false);
-  useEffect(() => {
-    if (email && !email.isRead && !markedAsRead.current) {
-      markedAsRead.current = true;
-      updateEmail({ isRead: true }, { auto: true });
-    } else if (email && !email.isRead) {
-      markedAsRead.current = true;
-    }
-  }, [email]);
-
-  if (!params.mailboxId) return <Loading />;
-  if (!(email && params.mailId))
-    return (
-      <>
-        <Loading />
-        <MailboxTitle mailboxId={params.mailboxId} />
-      </>
-    );
 
   const updateEmail = async (updates: Record<string, any>, { auto }: { auto?: boolean } = {}) => {
     if (mailboxId === "demo") {
@@ -101,93 +83,107 @@ function MailItem() {
     }
   };
 
+  const markedAsRead = useRef(false);
+  useEffect(() => {
+    if (email && !email.isRead && !markedAsRead.current) {
+      markedAsRead.current = true;
+      updateEmail({ isRead: true }, { auto: true });
+    } else if (email && !email.isRead) {
+      markedAsRead.current = true;
+    }
+  }, [email]);
+
+  if (!params.mailboxId) return <Loading />;
+
+  if (!emailId) return (
+    <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-card rounded-lg bg-card">
+      <p className="text-muted-foreground">Select an email to view</p>
+      {/* <MailboxTitle mailboxId={params.mailboxId} /> */}
+    </div>
+  )
+
+
+  if (email === null) return (
+    <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-card rounded-lg bg-card">
+      <p className="text-muted-foreground">Email not found</p>
+      <MailboxTitle mailboxId={params.mailboxId} />
+    </div>
+  )
+  if (!(email && emailId))
+    return (
+      <>
+        <Loading />
+        <MailboxTitle mailboxId={params.mailboxId} />
+      </>
+    );
+
+
   // const attachmentsPresigned = []
 
   return (
-    <div className="flex size-full min-w-0 flex-col gap-3 overflow-auto p-3 sm:p-5">
+    <div className="flex size-full min-w-0 flex-col //gap-3 [.emailslist_&]:p-0 bg-card [.emailslist_&]:rounded-lg">
       <TopButtons
         mailboxId={params.mailboxId}
-        emailId={params.mailId}
+        emailId={email.id}
         email={email}
         onUpdateEmail={updateEmail}
       />
-      <MailboxTitle mailboxId={params.mailboxId} title={email.subject} />
+      <div className="flex gap-3 flex-col overflow-y-auto rounded-lg pt-3 p-3 [.emailslist_&]:p-0 [.emailslist_&]:pt-3">
+        <MailboxTitle mailboxId={params.mailboxId} title={email.subject} />
 
-      <h1 className="mt-3 break-words px-3 font-bold text-2xl sm:text-3xl">{email.subject}</h1>
-      <div className="flex flex-col gap-3 rounded-md bg-card">
-        {/* from info and gravatar */}
-        <div className="flex gap-2 p-3 pb-0">
-          <EmailPicture
-            email={email.sender?.address || ""}
-            fallback={(email.sender?.name || email.sender?.address || "")
-              ?.slice(0, 2)
-              .toUpperCase()}
-          />
+        <h1 className="mt-3 break-words px-3 font-bold text-2xl sm:text-3xl">{email.subject}</h1>
+        <div className="flex flex-col gap-3 bg-subcard [.emailslist_&]:rounded-none rounded-md">
+          {/* from info and gravatar */}
+          <div className="flex gap-2 p-3 pb-0">
+            <EmailPicture
+              email={email.sender?.address || ""}
+              fallback={(email.sender?.name || email.sender?.address || "")
+                ?.slice(0, 2)
+                .toUpperCase()}
+            />
 
-          <div className="flex flex-col overflow-hidden">
-            <div className="flex gap-2 text-ellipsis whitespace-nowrap">
-              <b className="font-bold">{email.sender?.name || email.sender?.address}</b>
-              {email.sender?.name && (
-                <p className="text-muted-foreground text-sm">{`<${email.sender.address}>`}</p>
-              )}
-            </div>
-            <div className="flex text-muted-foreground text-sm">
-              <p className="self-center overflow-hidden break-words">
-                to {email.recipients.map((e) => e.name || e.address).join(", ")}
-              </p>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="auto"
-                    className="-my-1 ms-1 rounded-full p-1 text-muted-foreground hover:bg-background hover:text-foreground"
-                  >
-                    <ChevronDown className="size-5" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-screen sm:w-96">
-                  <div className="grid gap-2 text-sm">
-                    <div className="grid grid-cols-5 items-center gap-4">
-                      <p className="text-end text-muted-foreground">from:</p>
-                      <p className="col-span-4 flex gap-1 overflow-y-auto whitespace-nowrap ">
-                        {email.sender?.name || email.sender?.address}
-                        {email.sender?.name && (
-                          <span className="text-muted-foreground">
-                            &lt;{email.sender.address}
-                            &gt;
-                          </span>
-                        )}
-                      </p>
-                    </div>
-
-                    {/* to */}
-                    <div className="grid grid-cols-5 items-center gap-4">
-                      <p className="text-end text-muted-foreground">to:</p>
-                      <div className="col-span-4 overflow-y-auto">
-                        {email.recipients
-                          .filter((e) => !e.cc)
-                          .map((e) => (
-                            <p key={e.address} className="flex gap-1 whitespace-nowrap">
-                              {e.name || e.address}
-                              {e.name && (
-                                <span className="text-muted-foreground">
-                                  &lt;
-                                  {e.address}
-                                  &gt;
-                                </span>
-                              )}
-                            </p>
-                          ))}
-                      </div>
-                    </div>
-
-                    {/* cc */}
-                    {email.recipients.some((e) => e.cc) && (
+            <div className="flex flex-col overflow-hidden">
+              <div className="flex gap-2 text-ellipsis whitespace-nowrap">
+                <b className="font-bold">{email.sender?.name || email.sender?.address}</b>
+                {email.sender?.name && (
+                  <p className="text-muted-foreground text-sm">{`<${email.sender.address}>`}</p>
+                )}
+              </div>
+              <div className="flex text-muted-foreground text-sm">
+                <p className="self-center overflow-hidden break-words">
+                  to {email.recipients.map((e) => e.name || e.address).join(", ")}
+                </p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="auto"
+                      className="-my-1 ms-1 rounded-full p-1 text-muted-foreground hover:bg-background hover:text-foreground"
+                    >
+                      <ChevronDown className="size-5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-screen sm:w-96">
+                    <div className="grid gap-2 text-sm">
                       <div className="grid grid-cols-5 items-center gap-4">
-                        <p className="text-end text-muted-foreground">cc:</p>
+                        <p className="text-end text-muted-foreground">from:</p>
+                        <p className="col-span-4 flex gap-1 overflow-y-auto whitespace-nowrap ">
+                          {email.sender?.name || email.sender?.address}
+                          {email.sender?.name && (
+                            <span className="text-muted-foreground">
+                              &lt;{email.sender.address}
+                              &gt;
+                            </span>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* to */}
+                      <div className="grid grid-cols-5 items-center gap-4">
+                        <p className="text-end text-muted-foreground">to:</p>
                         <div className="col-span-4 overflow-y-auto">
                           {email.recipients
-                            .filter((e) => e.cc)
+                            .filter((e) => !e.cc)
                             .map((e) => (
                               <p key={e.address} className="flex gap-1 whitespace-nowrap">
                                 {e.name || e.address}
@@ -202,124 +198,148 @@ function MailItem() {
                             ))}
                         </div>
                       </div>
-                    )}
 
-                    {/* date */}
-                    <div className="grid grid-cols-5 items-center gap-4">
-                      <p className="text-end text-muted-foreground">date:</p>
-                      <p className="col-span-4 flex gap-1">
-                        {email.createdAt.toLocaleString("en-US", { timeZone: "UTC" })}
-                        <span className="text-muted-foreground">(UTC)</span>
-                      </p>
-                    </div>
+                      {/* cc */}
+                      {email.recipients.some((e) => e.cc) && (
+                        <div className="grid grid-cols-5 items-center gap-4">
+                          <p className="text-end text-muted-foreground">cc:</p>
+                          <div className="col-span-4 overflow-y-auto">
+                            {email.recipients
+                              .filter((e) => e.cc)
+                              .map((e) => (
+                                <p key={e.address} className="flex gap-1 whitespace-nowrap">
+                                  {e.name || e.address}
+                                  {e.name && (
+                                    <span className="text-muted-foreground">
+                                      &lt;
+                                      {e.address}
+                                      &gt;
+                                    </span>
+                                  )}
+                                </p>
+                              ))}
+                          </div>
+                        </div>
+                      )}
 
-                    {/* subject */}
-                    <div className="grid grid-cols-5 items-center gap-4">
-                      <p className="text-end text-muted-foreground">subject:</p>
-                      <p className="col-span-4 overflow-y-auto">{email.subject}</p>
-                    </div>
-
-                    {/* reply to */}
-                    {!!email.replyTo && (
+                      {/* date */}
                       <div className="grid grid-cols-5 items-center gap-4">
-                        <p className="text-end text-muted-foreground">reply to:</p>
-                        <p className="col-span-4 overflow-y-auto">{email.replyTo}</p>
+                        <p className="text-end text-muted-foreground">date:</p>
+                        <p className="col-span-4 flex gap-1">
+                          {email.createdAt.toLocaleString("en-US", { timeZone: "UTC" })}
+                          <span className="text-muted-foreground">(UTC)</span>
+                        </p>
                       </div>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
 
-          <LocalTime
-            className="ms-auto mt-2 hidden text-muted-foreground text-sm lg:inline"
-            time={email.createdAt}
-            type="full"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                className="ms-auto flex rounded-full p-2 hover:bg-background lg:ms-0"
-                variant="ghost"
-                size="icon"
-              >
-                <EllipsisVerticalIcon className="size-6" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="min-w-[10rem] ">
-              <ViewSelect htmlValid={!!email.html} />
-              {email.raw !== "draft" && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
-                    <a
-                      target="_blank"
-                      href={
-                        email.raw === "s3"
-                          ? // ?  getSignedUrl({
+                      {/* subject */}
+                      <div className="grid grid-cols-5 items-center gap-4">
+                        <p className="text-end text-muted-foreground">subject:</p>
+                        <p className="col-span-4 overflow-y-auto">{email.subject}</p>
+                      </div>
+
+                      {/* reply to */}
+                      {!!email.replyTo && (
+                        <div className="grid grid-cols-5 items-center gap-4">
+                          <p className="text-end text-muted-foreground">reply to:</p>
+                          <p className="col-span-4 overflow-y-auto">{email.replyTo}</p>
+                        </div>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <LocalTime
+              className="ms-auto mt-2 hidden text-muted-foreground text-sm lg:inline"
+              time={email.createdAt}
+              type="full"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="ms-auto flex rounded-full p-2 hover:bg-background lg:ms-0"
+                  variant="ghost"
+                  size="icon"
+                >
+                  <EllipsisVerticalIcon className="size-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="min-w-[10rem] ">
+                <ViewSelect htmlValid={!!email.html} />
+                {email.raw !== "draft" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+                      <a
+                        target="_blank"
+                        href={
+                          email.raw === "s3"
+                            ? // ?  getSignedUrl({
                             //     key: `${params.mailboxId}/${params.emailId}/email.eml`,
                             //     responseContentType: "text/plain",
                             // })
                             `/mail/${params.mailboxId}/${params.mailId}/raw`
-                          : `/mail/${params.mailboxId}/${params.mailId}/raw`
-                      }
-                      rel="noreferrer"
-                    >
-                      <CodeIcon className="size-5 text-muted-foreground" />
-                      View original
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
-                    <a
-                      download
-                      target="_blank" // its meant to download, but as so much redirecting is happening we give up
-                      href={
-                        email.raw === "s3"
-                          ? // ? await getSignedUrl({
+                            : `/mail/${params.mailboxId}/${params.mailId}/raw`
+                        }
+                        rel="noreferrer"
+                      >
+                        <CodeIcon className="size-5 text-muted-foreground" />
+                        View original
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+                      <a
+                        download
+                        target="_blank" // its meant to download, but as so much redirecting is happening we give up
+                        href={
+                          email.raw === "s3"
+                            ? // ? await getSignedUrl({
                             //     key: `${params.mailboxId}/${params.emailId}/email.eml`,
                             // })
                             `/mail/${params.mailboxId}/${params.mailId}/raw`
-                          : `/mail/${params.mailboxId}/${params.mailId}/raw`
-                      }
-                      rel="noreferrer"
-                    >
-                      <DownloadIcon className="size-5 text-muted-foreground" />
-                      Download message
-                    </a>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* attachments */}
-        {email.attachments.length > 0 && (
-          <div className="grid grid-cols-1 gap-2 px-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {email.attachments.map((a) => (
-              <a
-                key={a.id}
-                href={`/mail/${params.mailboxId}/${params.mailId}/attachment/${a.id}`}
-                target="_blank"
-                className="flex items-center gap-2 rounded-md bg-background p-2 hover:bg-background/80"
-                rel="noreferrer"
-              >
-                {GetAttachmentIcon(a.filename.split(".").at(-1) || "")}
-                <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                  {a.title || a.filename}
-                </p>
-                <span className="text-muted-foreground text-sm">{size(a.size)}</span>
-              </a>
-            ))}
+                            : `/mail/${params.mailboxId}/${params.mailId}/raw`
+                        }
+                        rel="noreferrer"
+                      >
+                        <DownloadIcon className="size-5 text-muted-foreground" />
+                        Download message
+                      </a>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )}
-        <EmailContent
-          body={email.body}
-          html={email.html || null}
-          subject={email.subject || null}
-          sender={email.sender?.address || null}
-        />
+
+          {/* attachments */}
+          {email.attachments.length > 0 && (
+            <div className="grid grid-cols-1 gap-2 px-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {email.attachments.map((a) => (
+                <a
+                  key={a.id}
+                  href={`/mail/${params.mailboxId}/${params.mailId}/attachment/${a.id}`}
+                  target="_blank"
+                  className="flex items-center gap-2 rounded-md bg-background p-2 hover:bg-background/80"
+                  rel="noreferrer"
+                >
+                  {GetAttachmentIcon(a.filename.split(".").at(-1) || "")}
+                  <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                    {a.title || a.filename}
+                  </p>
+                  <span className="text-muted-foreground text-sm">{size(a.size)}</span>
+                </a>
+              ))}
+            </div>
+          )}
+          <EmailContent
+            body={email.body}
+            html={email.html || null}
+            subject={email.subject || null}
+            sender={email.sender?.address || null}
+            id={email.id}
+          />
+        </div>
       </div>
 
       {/* // TODO: show references snippets for email */}
@@ -333,7 +353,8 @@ function EmailContent({
   html,
   subject,
   sender,
-}: { body: string; html?: string | null; subject?: string | null; sender?: string | null }) {
+  id,
+}: { body: string; html?: string | null; subject?: string | null; sender?: string | null; id: string }) {
   const searchParams = useSearchParams()[0];
   const lastView = localStorage?.getItem("email-item:last-view");
   const view = (searchParams.get("view") ||
@@ -341,13 +362,26 @@ function EmailContent({
     "html") as "text" | "markdown" | "html" | "html-raw";
 
   const ref = useRef<HTMLIFrameElement>(null);
-  const [htmlLoaded, setHtmlLoaded] = useState(false);
+  const [htmlLoaded, setHtmlLoaded] = useState<any>(false);
+  const heights = useRef<Record<string, number>>({});
 
   useEffect(() => {
+    if (heights.current[id]) {
+      setHtmlLoaded(true)
+      if (ref.current) {
+        ref.current.style.height = `${heights.current[id]}px`;
+      }
+    } else {
+      setHtmlLoaded(false);
+      if (ref.current) {
+        ref.current.style.height = "0px";
+      }
+    }
     const handleResize = () => {
       setHtmlLoaded(true);
       if (ref.current?.contentWindow?.document.documentElement) {
-        ref.current.style.height = `${ref.current.contentWindow.document.documentElement.scrollHeight}px`;
+        heights.current[id] = ref.current.contentWindow.document.documentElement.offsetHeight + 1;
+        ref.current.style.height = `${heights.current[id]}px`;
       } else if (ref.current) {
         ref.current.style.height = "calc(100vh - 100px)";
       }
@@ -358,7 +392,7 @@ function EmailContent({
       window.removeEventListener("resize", handleResize);
       ref.current?.removeEventListener("load", handleResize);
     };
-  }, [html, view]);
+  }, [html, view, body]);
 
   if (view === "text") {
     return (
@@ -382,19 +416,19 @@ function EmailContent({
       <>
         <iframe
           ref={ref}
-          className="w-full rounded-b-lg bg-card"
-          style={{ height: "0px", maxHeight: "100%" }}
+          className="w-full rounded-b-lg [.emailslist_&]:rounded-b-none bg-card overflow-auto"
+          style={{ height: heights.current[id] ? `${heights.current[id]}px` : "0px", maxHeight: "100%" }}
           sandbox="allow-popups allow-same-origin"
           srcDoc={genericHtml(parseHTML(html || body, true), sender)}
           title={subject || "The Email"}
         />
-        {!htmlLoaded && <EmailContentSpinner className="h-36" />}
+        {htmlLoaded !== true && <EmailContentSpinner className="h-36" />}
       </>
     );
   }
   if (view === "html-raw") {
     return (
-      <p className="h-full overflow-x-auto whitespace-pre rounded-b-lg bg-tertiary p-3 font-mono text-sm leading-normal">
+      <p className="h-full overflow-x-auto whitespace-pre rounded-b-lg [.emailslist_&]:rounded-b-none bg-tertiary p-3 font-mono text-sm leading-normal">
         {html || body}
       </p>
     );
@@ -408,7 +442,7 @@ export function genericHtml(html: string, sender?: string | null) {
 
   const added = new Set<string>();
 
-  if (!html.includes("color:")) {
+  if (!html.includes("color:") && !html.includes("background:")) {
     // check that it isnt already dark only or light only
     if (!(html.includes('meta content="light') || html.includes(`meta content="dark"`))) {
       added.add(`<meta content="light dark" name="color-scheme">`);
@@ -452,7 +486,9 @@ function ViewSelect({ htmlValid = false }: { htmlValid?: boolean }) {
 
   function onValueChange(v: string) {
     if (!v.endsWith("-raw")) localStorage.setItem("email-item:last-view", v);
-    navigate(`?view=${v}`, { replace: true });
+    const search = new URLSearchParams(window.location.search);
+    search.set("view", v);
+    navigate({ search: search.toString() });
   }
   const shownValue =
     !htmlValid && view.startsWith("html") ? "markdown" : view === "html-raw" ? "html" : view;
@@ -529,13 +565,13 @@ function EmailPicture({ email, fallback }: { email: string; fallback?: string })
   return (
     <Avatar
       className={
-        "size-12 bg-tertiary transition-all data-[gravatar=false]:rounded-lg data-[gravatar=true]:rounded-full data-[gravatar=false]:[&>img]:rounded-[20%] data-[gravatar=false]:[&>img]:p-2"
+        "size-12 bg-card transition-all data-[gravatar=false]:rounded-lg data-[gravatar=true]:rounded-full data-[gravatar=false]:[&>img]:rounded-[20%] data-[gravatar=false]:[&>img]:p-2"
       }
       data-gravatar={isGravatar}
     >
       {/* somehow svgl doesn't like crossOrigin=anonymous */}
       <AvatarImage src={img} /*crossOrigin={isGravatar ? "anonymous" : undefined}*/ />
-      <AvatarFallback className="bg-tertiary">{fallback}</AvatarFallback>
+      <AvatarFallback className="bg-card">{fallback}</AvatarFallback>
     </Avatar>
   );
 }

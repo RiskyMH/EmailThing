@@ -98,18 +98,18 @@ export default function CustomDomains() {
         <Table>
           <TableHeader>
             <TableRow className="rounded-t-lg">
-              <TableHead className="rounded-ss-md bg-tertiary">
+              <TableHead className="rounded-ss-md bg-subcard">
                 <p>Domain</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-tertiary" />
+              <TableHead className="w-1 rounded-se-md bg-subcard" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {customDomains?.length ? (
               customDomains.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="py-3 font-medium">{row.domain}</TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1 font-medium">{row.domain}</TableCell>
+                  <TableCell className="//py-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="size-8 p-0">
@@ -150,7 +150,7 @@ export default function CustomDomains() {
                           </SmartDrawerContent>
                         </SmartDrawer>
 
-                        <SmartDrawer>
+                        <SmartDrawer disablePreventScroll>
                           <DropdownMenuItem asChild>
                             <SmartDrawerTrigger className="w-full">Setup again</SmartDrawerTrigger>
                           </DropdownMenuItem>

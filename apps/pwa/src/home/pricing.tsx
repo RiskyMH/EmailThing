@@ -17,7 +17,7 @@ export default function Pricing() {
           Unlock simple features for your email needs.
         </p>
       </div>
-      <div className="grid w-full items-start gap-10 rounded-lg bg-card p-10 md:grid-cols-[1fr_200px]">
+      <div className="grid w-full items-start gap-10 rounded-lg bg-subcard dark:bg-card p-10 md:grid-cols-[1fr_200px]">
         <div className="grid gap-6">
           <h3 className="font-bold text-xl sm:text-2xl">What&apos;s included in the FREE plan</h3>
           <ul className="grid gap-3 text-muted-foreground text-sm sm:grid-cols-2">

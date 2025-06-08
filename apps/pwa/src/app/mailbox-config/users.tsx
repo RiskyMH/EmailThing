@@ -128,27 +128,27 @@ export default function Users() {
         <Table>
           <TableHeader>
             <TableRow className="rounded-t-lg">
-              <TableHead className="rounded-ss-md bg-tertiary">
+              <TableHead className="rounded-ss-md bg-subcard">
                 <p>Username</p>
               </TableHead>
-              <TableHead className="bg-tertiary">
+              <TableHead className="bg-subcard">
                 <p>Added</p>
               </TableHead>
-              <TableHead className="w-1 bg-tertiary">
+              <TableHead className="w-1 bg-subcard">
                 <p>Role</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-tertiary" />
+              <TableHead className="w-1 rounded-se-md bg-subcard" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {users?.length ? (
               users.map((row) => (
                 <TableRow key={row.userId}>
-                  <TableCell className="py-3 font-medium">{row.username}</TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1 font-medium">{row.username}</TableCell>
+                  <TableCell className="//py-1">
                     <LocalTime time={row.joinedAt} />
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1">
                     <Select
                       defaultValue={row.role || "ADMIN"}
                       disabled={mailboxUser?.role !== "OWNER" || row.role === "OWNER"}
@@ -166,7 +166,7 @@ export default function Users() {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="size-8 p-0">
@@ -304,7 +304,7 @@ export function InviteUserForm({ mailboxId }: { mailboxId: string }) {
       <div className="grid gap-2">
         <Label htmlFor="role">Role</Label>
         <Select defaultValue="ADMIN" name="role">
-          <SelectTrigger className="border-none bg-secondary">
+          <SelectTrigger className="border-none bg-secondary h-8">
             <SelectValue placeholder="Role" />
           </SelectTrigger>
           <SelectContent>

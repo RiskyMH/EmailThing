@@ -29,7 +29,7 @@ export default function Home() {
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <Link
             to="https://discord.gg/GT9Q2Yz4VS"
-            className="rounded-2xl bg-tertiary px-4 py-1.5 font-medium text-sm"
+            className="rounded-2xl bg-subcard px-4 py-1.5 font-medium text-sm"
             target="_blank"
           >
             Follow along on Discord

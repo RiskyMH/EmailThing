@@ -41,6 +41,7 @@ import Loading, {
 import { CreateTempEmailForm } from "./email-list-temp-modal";
 import RefreshButton from "./refresh-button";
 import OnboardingWelcome from "../user-settings/onboarding-welcome";
+import MailItemSuspense from "../email-item/mail-item";
 
 export default function EmailListSuspenced({
   filter,
@@ -94,13 +95,25 @@ function EmailList({
   filter: type,
 }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
   return (
-    <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0 sm:px-3">
-      <div className="overflow sticky top-0 z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 overflow-y-hidden border-b-2 bg-background px-2 sm:px-3">
-        <Categories filter={type} />
+    <div className="flex w-full min-w-0 flex-row h-full gap-2 sm:[.emailscolumn_&]:pb-2 sm:[.emailscolumn_&]:pe-2 emailslist">
+      <div className="flex w-full flex-col //p-3 sm:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto sm:[.emailscolumn_&]:rounded-lg">
+        {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
+        <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 sm:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
+          <Categories filter={type} />
+        </div>
+
+        <div className="flex h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2" id="email-list-content">
+          <Emails filter={type} />
+        </div>
+        <Title type={type} />
+        {/* </div> */}
+      </div>
+      <div className="min-w-0 flex-col h-full //p-3 sm:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto">
+        {/* <div className=" bg-card rounded-lg h-full overflow-auto">
+        </div> */}
+        <MailItemSuspense  />
       </div>
 
-      <Emails filter={type} />
-      <Title type={type} />
     </div>
   );
 }
@@ -112,6 +125,7 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
   const searchParams = useSearchParams()[0];
   const search = searchParams.get("q") as string | null;
   const onboarding = searchParams.has("onboarding");
+  const emailId = searchParams.get("mailId") as string | null;
 
   const key = JSON.stringify({ mailboxId, type });
   const _data = window?._tempData?.emailList?.[key];
@@ -161,7 +175,7 @@ function Title({ type }: { type: "inbox" | "drafts" | "sent" | "starred" | "tras
     return () => {
       document.title = "EmailThing";
     };
-  }, [count, name, search, type]);
+  }, [count, name, search, type, emailId]);
 
   if (onboarding) {
     return <OnboardingWelcome />;
@@ -240,7 +254,7 @@ function Emails({
     } else {
       if (initial.current) {
         initial.current = false;
-        document.getElementById("mail-layout-content")?.scrollTo({ top: 0, behavior: "smooth" });
+        document.getElementById("email-list-content")?.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
       queriesRef.current = [createLiveQuery(0)];
@@ -248,18 +262,18 @@ function Emails({
     }
 
     document
-      .getElementById("mail-layout-content")
+      .getElementById("email-list-content")
       ?.scrollTo({ top: initialScrollY, behavior: "smooth" });
     setTimeout(() => {
       document
-        .getElementById("mail-layout-content")
+        .getElementById("email-list-content")
         ?.scrollTo({ top: initialScrollY, behavior: "smooth" });
     }, 0);
   }, [categoryId, search, type, mailboxId, key, createLiveQuery]);
 
   // bind pgup and pgdown to scroll
   useEffect(() => {
-    const content = document.getElementById("mail-layout-content");
+    const content = document.getElementById("email-list-content");
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "PageUp") {
         content?.scrollTo({ top: content?.scrollTop - window.innerHeight, behavior: "smooth" });
@@ -328,7 +342,7 @@ function Emails({
         </div>
       }
       className="flex w-full min-w-0 flex-col gap-2"
-      scrollableTarget="mail-layout-content"
+      scrollableTarget="email-list-content"
       scrollThreshold={0.75}
       // initialScrollY={initialScrollY || -10000}
       onScroll={(e) => {
@@ -350,7 +364,7 @@ function Emails({
             <div className="text-center font-bold text-muted-foreground">
               {categoryId
                 ? // @ts-expect-error types are boring
-                  `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
+                `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
                 : "Email addresses will be automatically deleted in 24 hours after creation."}
               {categoryId && (
                 <p className="pt-1 font-normal">
@@ -434,7 +448,7 @@ function EmailDate({
   if (dateB && dateString === dateStringB) return null;
 
   return (
-    <div className="flex h-5 px-2 font-medium text-muted-foreground text-xs sm:px-4">
+    <div className="flex h-5 px-2 font-medium text-muted-foreground text-xs">
       <p className="self-end">{dateString}</p>
     </div>
   );

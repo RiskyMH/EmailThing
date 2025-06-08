@@ -22,7 +22,7 @@ import { getMailbox } from "@/utils/data/queries/mailbox";
 import type { MailboxTokens } from "@emailthing/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { InferSelectModel } from "drizzle-orm";
-import { CopyIcon, Loader2, PlusIcon, Trash2Icon } from "lucide-react";
+import { CopyIcon, Loader2, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import { type FormEvent, useState, useTransition } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -112,24 +112,24 @@ export default function APITokens() {
         <Table>
           <TableHeader>
             <TableRow className="rounded-t-lg">
-              <TableHead className="rounded-ss-md bg-tertiary">
+              <TableHead className="rounded-ss-md bg-subcard">
                 <p>Name</p>
                 {/* also includes somewhat token */}
               </TableHead>
-              <TableHead className="bg-tertiary">
+              <TableHead className="bg-subcard">
                 <p>Created</p>
               </TableHead>
-              <TableHead className="bg-tertiary">
+              <TableHead className="bg-subcard">
                 <p>Expires</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-tertiary" />
+              <TableHead className="w-1 rounded-se-md bg-subcard" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {tokens?.length ? (
               tokens.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="py-3 font-medium">
+                  <TableCell className="//py-1 font-medium">
                     {row.name ? (
                       <div className="flex flex-col">
                         <span>{row.name}</span>
@@ -143,23 +143,24 @@ export default function APITokens() {
                       <code className="justify-center">{row.token}</code>
                     )}
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1">
                     <LocalTime time={new Date(row.createdAt)} />
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1">
                     {row.expiresAt ? <LocalTime time={new Date(row.expiresAt)} /> : "Never"}
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1">
                     <SmartDrawer>
                       <SmartDrawerTrigger
                         className={buttonVariants({
-                          variant: "outline",
+                          variant: "ghost",
                           size: "icon-sm",
                           className:
-                            "text-muted-foreground hover:border-destructive hover:text-destructive",
+                            "p-0 text-muted-foreground hover:text-destructive cursor-pointer",
                         })}
                       >
-                        <Trash2Icon className="size-5" />
+                        <span className="sr-only">Delete token</span>
+                        <XIcon className="size-4" />
                       </SmartDrawerTrigger>
 
                       <SmartDrawerContent className="sm:max-w-[425px]">

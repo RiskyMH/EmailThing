@@ -72,12 +72,12 @@ export function BodyEditor({
         // SUSPENCE FALLBACK BELOW
         // see ./tiptap.tsx for the real component
         <div
-          className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none bg-secondary text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none !bg-subcard text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           style={{ fontFamily: "Arial, sans-serif" }}
         >
           <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
             <BodyHeader />
-            <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2" />
+            <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-card border-b-2" />
           </div>
           <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
             <Loader2 className="size-12 animate-spin text-muted-foreground" />
@@ -130,7 +130,7 @@ export function HTMLEditor({
   return (
     <>
       <Textarea
-        className="h-[calc(100%-2.75rem)] h-full w-full shrink resize-none overflow-auto overflow-x-auto whitespace-pre rounded-lg border border-2 border-primary border-none bg-tertiary p-3 font-mono"
+        className="h-[calc(100%-2.75rem)] w-full shrink resize-none overflow-auto overflow-x-auto whitespace-pre rounded-lg border-2 border-primary border-none bg-tertiary p-3 font-mono"
         id="html-editor"
         name="html"
         defaultValue={savedHTML}
@@ -158,7 +158,7 @@ export function TextEditor({
 
   return (
     <Textarea
-      className="h-full w-full w-full max-w-full shrink grow resize-none whitespace-pre-wrap rounded-lg border-none bg-secondary p-3 font-mono"
+      className="h-full w-full max-w-full shrink grow resize-none whitespace-pre-wrap rounded-lg border-none !bg-subcard p-3 font-mono"
       id="text-editor"
       name="body"
       defaultValue={savedText}
@@ -197,7 +197,7 @@ export function Subject({
 
   return (
     <Input
-      className="w-full shrink-0 border-none bg-card text-lg focus:z-10"
+      className="w-full shrink-0 border-none !bg-transparent text-lg focus:z-10"
       placeholder="Subject..."
       id="subject"
       name="subject"
@@ -238,9 +238,9 @@ export function DeleteButton({ delAction }: { delAction: () => Promise<any> }) {
       type="button"
     >
       {isPending ? (
-        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        <Loader2 className="size-4 animate-spin text-muted-foreground" />
       ) : (
-        <Trash2Icon className="size-5" />
+        <Trash2Icon className="size-4" />
       )}
     </Button>
   );
@@ -277,7 +277,7 @@ export function SendButton({ sendAction, mailboxId, draftId }: { sendAction: typ
               <a
                 href={res.link}
                 target="blank"
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg !bg-subcard p-2 hover:bg-subcard/80"
               >
                 Learn More <ExternalLinkIcon className="size-4 text-muted-foreground" />
               </a>
@@ -326,7 +326,7 @@ export function FromInput({
     <>
       <input name="from" value={value} hidden readOnly />
       <Select value={value} onValueChange={setValue}>
-        <SelectTrigger className="shrink-0 border-none bg-card focus:z-10">
+        <SelectTrigger className="shrink-0 border-none !bg-transparent shadow-none w-full focus:z-10">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-sm">From</span>
             <SelectValue className="font-semibold text-sm">{value}</SelectValue>
@@ -482,7 +482,7 @@ export function RecipientInput({
           setTimeout(() => document.getElementById("to:to")?.focus(), 0);
         }}
         className={cn(
-          "flex h-10 w-full shrink-0 gap-2 self-center overflow-y-hidden text-ellipsis rounded-md bg-card px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-10 w-full shrink-0 gap-2 self-center overflow-y-hidden text-ellipsis rounded-md !bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
           showFull && "hidden",
         )}
         type="button"
@@ -626,7 +626,7 @@ export function RecipientInput({
             </div>
             <span
               className={cn(
-                "flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2",
+                "flex h-0 w-full shrink-0 grow-0 rounded-sm border-card/75 border-b-2",
                 (!types.includes(type) || i + 1 === types.length) && "hidden",
               )}
             />
@@ -651,7 +651,7 @@ function RecipientPill({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 break-all rounded bg-tertiary px-2 py-1 text-sm",
+        "flex items-center gap-1 break-all rounded bg-secondary px-2 py-1 text-sm",
         mx === null && "outline-2 outline-destructive",
       )}
     >
@@ -663,7 +663,7 @@ function RecipientPill({
       <Button
         variant="ghost"
         size="icon"
-        className="size-4 shrink-0 rounded-full bg-tertiary text-muted-foreground hover:bg-tertiary hover:text-black dark:hover:text-white"
+        className="size-4 shrink-0 rounded-full bg-primary text-muted-foreground hover:bg-secondary hover:text-black dark:hover:text-white"
         onClick={onRemove}
       >
         {/* <XIcon  /> */}
@@ -689,7 +689,7 @@ export function UploadAttachment() {
       onClick={() => toast.warning("Attachments not implemented yet")}
       type="button"
     >
-      <PaperclipIcon className="size-5" />
+      <PaperclipIcon className="size-4" />
     </Button>
   );
 }

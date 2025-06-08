@@ -14,6 +14,7 @@
 @import "@fontsource/inter/800.css";
 @import "@fontsource/inter/900.css"; */
 @import "./inter.css";
+@import "./colors.css";
 
 body {
   font-family: Inter, "Inter Variable", "Inter Fallback", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
@@ -26,35 +27,44 @@ body {
     /* light and dark mode available */
     color-scheme: light dark;
 
-    --background: #ffffff;
-    --foreground: var(--primary);
+    --background: var(--color-light-bg);
+    --foreground: var(--color-light-text);
 
-    --muted: var(--secondary);
-    --muted-foreground: #8f8ca2;
+    --sidebar-bg: var(--color-light-sidebar-bg);
+    --sidebar-active-bg: var(--color-light-sidebar-active-bg);
+    --sidebar-text: var(--color-light-sidebar-text);
+    --sidebar-category-text: var(--color-light-sidebar-category-text);
 
-    --popover: var(--tertiary);
-    --popover-foreground: var(--primary);
+    --muted: var(--color-light-secondary);
+    --muted-foreground: var(--color-light-muted-text);
 
-    --border: #eeeff0;
+    --popover: var(--background);
+    --popover-foreground: var(--color-light-text);
+
+    --border: var(--color-light-border);
     --input: var(--muted-foreground);
+    --search-bg: var(--color-light-search-bg);
 
-    --card: var(--secondary);
-    --card-foreground: var(--primary);
+    --card: var(--color-light-card-bg);
+    --card-foreground: var(--color-light-text);
 
-    --primary: #07041d;
-    --primary-foreground: var(--secondary);
+    --subcard: var(--color-light-card-element);
+    --subcard-foreground: var(--color-light-text);
 
-    --secondary: #f1f0f5;
-    --secondary-foreground: var(--primary);
+    --primary: var(--color-light-text);
+    --primary-foreground: var(--color-light-bg);
 
-    --accent: var(--secondary);
-    --accent-foreground: var(--primary);
+    --secondary: var(--color-light-secondary);
+    --secondary-foreground: var(--color-light-text);
 
-    --tertiary: #ffffff;
-    --tertiary-foreground: var(--muted-foreground);
+    --accent: var(--color-light-secondary);
+    --accent-foreground: var(--color-light-text);
+
+    --tertiary: var(--color-light-sidebar-bg);
+    --tertiary-foreground: var(--color-light-text);
 
     --red: #fc5a5a;
-    --red-foreground: var(--secondary);
+    --red-foreground: var(--color-light-text);
 
     --blue: #1e75ff;
     --blue-foreground: var(--primary-foreground);
@@ -69,38 +79,47 @@ body {
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --background: #1c1c24;
-      --foreground: var(--primary);
+      --background: var(--color-dark-bg);
+      --foreground: var(--color-dark-text);
 
-      --muted: var(--tertiary);
-      --muted-foreground: #898993;
+      --sidebar-bg: var(--color-dark-sidebar-bg);
+      --sidebar-active-bg: var(--color-dark-sidebar-active-bg);
+      --sidebar-text: var(--color-dark-sidebar-text);
+      --sidebar-category-text: var(--color-dark-sidebar-category-text);
 
-      --accent: var(--border);
-      --accent-foreground: #f1f0f5;
+      --muted: var(--color-dark-secondary);
+      --muted-foreground: var(--color-dark-muted2-text);
 
-      --popover: var(--tertiary);
-      --popover-foreground: var(--primary);
+      --accent: var(--color-dark-border);
+      --accent-foreground: var(--color-dark-text);
 
-      --border: #2c2c34;
-      --input: #4e4e56;
+      --popover: var(--color-dark-bg);
+      --popover-foreground: var(--color-dark-text);
 
-      --card: var(--secondary);
-      --card-foreground: var(--primary);
+      --border: var(--color-dark-border);
+      --input: var(--color-dark-muted-text);
+      --search-bg: var(--color-dark-search-bg);
 
-      --primary: #efeff0;
-      --primary-foreground: var(--secondary);
+      --card: var(--color-dark-card-bg);
+      --card-foreground: var(--color-dark-text);
 
-      --secondary: #292932;
-      --secondary-foreground: var(--primary);
+      --subcard: var(--color-dark-card-element);
+      --subcard-foreground: var(--color-dark-text);
 
-      --tertiary: #17171e;
-      --tertiary-foreground: var(--muted-foreground);
+      --primary: var(--color-dark-text);
+      --primary-foreground: var(--color-dark-bg);
+
+      --secondary: var(--color-dark-secondary);
+      --secondary-foreground: var(--color-dark-text);
+
+      --tertiary: var(--color-dark-sidebar-bg);
+      --tertiary-foreground: var(--color-dark-text);
 
       --red: #fc5a5a;
-      --red-foreground: var(--primary);
+      --red-foreground: var(--color-dark-text);
 
       --blue: #1e75ff;
-      --blue-foreground: var(--secondary-foreground);
+      --blue-foreground: var(--color-dark-text);
 
       --destructive: var(--red);
       --destructive-foreground: var(--red-foreground);
@@ -177,6 +196,13 @@ body {
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
 
+  --color-search-bg: var(--search-bg);
+
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-category-text: var(--sidebar-category-text);
+
   --color-tertiary: var(--tertiary);
   --color-tertiary-foreground: var(--tertiary-foreground);
 
@@ -204,6 +230,8 @@ body {
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
+  --color-subcard: var(--subcard);
+
   --font-heading: CalSans-SemiBold, _Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
   --text-6xl--line-height: 60px;
@@ -227,4 +255,9 @@ body {
       margin-bottom: 1em;
     }
   }
+}
+
+
+.infinite-scroll-component__outerdiv  {
+  width: 100%;
 }

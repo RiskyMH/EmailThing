@@ -1,23 +1,19 @@
+import type { BunFile } from "bun";
 import { watch } from "node:fs";
 
 const files = new Bun.Glob("**/*").scan({ cwd: "./dist" });
 
 async function getRoutes() {
-  const routes: Record<string, Response> = {};
+  const routes: Record<string, Response | BunFile> = {};
   for await (const filename of files) {
     try {
       const path = filename.replace(/\[([^\]]+)\]/g, ":$1").replace(/\\/g, "/");
       const file = Bun.file(`./dist/${filename}`);
-      const res = new Response(await file.arrayBuffer(), {
-        headers: {
-          "Content-Type": file.type,
-        },
-      });
-      routes[`/${path}`] = res;
+      routes[`/${path}`] = file;
       if (path.endsWith(".html")) {
-        routes[`/${path.replace(".html", "")}`] = res;
+        routes[`/${path.replace(".html", "")}`] = file;
         if (path.endsWith("index.html")) {
-          routes[`/${path.replace("index.html", "")}`] = res;
+          routes[`/${path.replace("index.html", "")}`] = file;
         }
       }
     } catch (e) {

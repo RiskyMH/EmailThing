@@ -90,10 +90,10 @@ export default function Categories() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="rounded-ss-md bg-tertiary">
+              <TableHead className="rounded-ss-md bg-subcard">
                 <p>Name</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-tertiary" />
+              <TableHead className="w-1 rounded-se-md bg-subcard" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,7 +109,7 @@ export default function Categories() {
                     />
                     {row.name}
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="//py-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="size-8 p-0">
@@ -299,7 +299,7 @@ export function CreateCategoryForm({
           />
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="secondary" className="px-3">
+              <Button variant="secondary" className="px-3" type="button">
                 <ChevronDownIcon className="size-5" />
               </Button>
             </PopoverTrigger>

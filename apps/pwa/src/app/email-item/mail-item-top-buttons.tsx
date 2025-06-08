@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getCategories } from "@/utils/data/queries/mailbox";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowLeftIcon, ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon } from "lucide-react";
+import { ArrowLeftIcon, ExternalLinkIcon, ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useNavigate } from "react-router-dom";
 import { ContextMenuAction } from "../components";
+import { cn } from "@/utils/tw";
 
 interface TopButtonsProps {
   mailboxId: string;
@@ -41,8 +42,9 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
   // const email = data ? data[0] : { isStarred: false, binnedAt: null, category: null }
 
   return (
-    <div className="sm:-mt-1 flex w-full min-w-0 flex-row gap-6 border-b-2 pb-3 text-muted-foreground">
-      <BackButton fallbackUrl={`/mail/${mailboxId}`} />
+    <div className="flex w-full min-w-0 flex-row gap-6 border-b-2 p-2.5 text-muted-foreground h-10 [.emailslist_&]:h-10">
+      <BackButton fallbackUrl={`/mail/${mailboxId}`} className="[.emailslist_&]:hidden" />
+      <XButton className="hidden [.emailslist_&]:block" />
 
       <div className="-mx-2 border-e-2" />
 
@@ -137,11 +139,24 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
           </Link>
         </Button>
       </TooltipText>
+
+      <TooltipText text="Open in new tab">
+        <Button
+          variant="ghost"
+          size="auto"
+          className="ms-auto -m-2 rounded-full p-2 text-muted-foreground hover:text-foreground [.emailslist_&]:flex hidden"
+          asChild
+        >
+          <Link href={`/mail/${mailboxId}/${emailId}`} className="ms-auto" target="_blank">
+            <ExternalLinkIcon className="size-5" />
+          </Link>
+        </Button>
+      </TooltipText>
     </div>
   );
 }
 
-export function BackButton({ fallbackUrl }: { fallbackUrl?: string }) {
+export function BackButton({ fallbackUrl, className }: { fallbackUrl?: string, className?: string }) {
   const navigate = useNavigate();
 
   return (
@@ -149,7 +164,7 @@ export function BackButton({ fallbackUrl }: { fallbackUrl?: string }) {
       <Button
         variant="ghost"
         size="auto"
-        className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground"
+        className={cn("-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground", className)}
         onClick={() => {
           if (history.length > 1) {
             return navigate(-1);
@@ -162,3 +177,25 @@ export function BackButton({ fallbackUrl }: { fallbackUrl?: string }) {
     </TooltipText>
   );
 }
+
+export function XButton({ className }: { className?: string }) {
+  const navigate = useNavigate();
+
+  return (
+    <TooltipText text="Close">
+      <Button
+        variant="ghost"
+        size="auto"
+        className={cn("-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground", className)}
+        onClick={() => {
+          const search = new URLSearchParams(window.location.search);
+          search.delete("mailId");
+          navigate({ search: search.toString() });
+        }}
+      >
+        <XIcon className="size-5" />
+      </Button>
+    </TooltipText>
+  );
+}
+

@@ -2,7 +2,7 @@ import { StarIcon } from "lucide-react";
 
 export default function Loading() {
   return (
-    <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0 sm:px-3">
+    <div className="flex w-full min-w-0 flex-col gap-2 p-5 px-3 pt-0">
       <div className="sticky top-0 z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 border-b-2 bg-background px-2 sm:px-3">
         <EmailListCategoryLoadingSkeleton />
       </div>
@@ -15,14 +15,14 @@ export default function Loading() {
 export function EmailListLoadingSkeleton() {
   return (
     <>
-      <div className="flex h-5 px-2 font-medium text-muted-foreground text-xs sm:px-4">
+      <div className="flex h-5 px-2 font-medium text-muted-foreground text-xs">
         <p className="self-end">Today</p>
       </div>
 
       {Array.from({ length: 25 }).map((_, i) => (
         <div
           key={i}
-          className="//bg-card flex h-10 w-full animate-pulse gap-3 rounded-md px-2 py-1.5 sm:px-4"
+          className="//bg-card flex h-10 w-full animate-pulse gap-3 rounded-md px-2 py-1.5"
         >
           <span
             className="m-2 mx-auto inline-block size-4 shrink-0 self-center rounded-full"

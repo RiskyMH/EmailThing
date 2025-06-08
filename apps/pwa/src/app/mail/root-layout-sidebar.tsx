@@ -90,7 +90,7 @@ export const Sidebar = ({ className }: { className?: string }) => {
         asChild
         variant="secondary"
         size="sm"
-        className="mx- gap-2 rounded-lg p-5 px-3 lg:px-6"
+        className="mx- gap-2 rounded-lg p-5 px-3 lg:px-6 bg-search-bg hover:bg-search-bg/80"
       >
         <Link href={`/mail/${mailboxId}/draft/new`}>
           <PenSquareIcon className="size-5 text-muted-foreground sm:max-lg:text-foreground/80" />
@@ -101,7 +101,7 @@ export const Sidebar = ({ className }: { className?: string }) => {
       <div className="mt-2 flex flex-col gap-1.5 py-2 text-sm">
         {items.map((item) =>
           item === "---" ? (
-            <hr className="m-2 bg-border sm:max-lg:m-0 sm:max-lg:w-full" />
+            <hr key={item} className="m-2 bg-border sm:max-lg:m-0 sm:max-lg:w-full" />
           ) : (
             <LinkElement key={item.href} {...item} />
           ),
@@ -145,8 +145,8 @@ function LinkElement({
         disabled &&
           "group relative flex h-9 w-full cursor-not-allowed items-center gap-4 rounded px-5 opacity-50",
         "flex w-full justify-normal gap-3 self-center px-3 py-2.5 text-center text-foreground/80 transition-colors lg:self-auto",
-        isActive && "bg-accent/65 text-blue dark:text-foreground",
-        "hover:bg-accent/65 active:bg-accent/80",
+        isActive && "bg-sidebar-active-bg text-blue dark:text-foreground",
+        "hover:bg-sidebar-active-bg active:bg-sidebar-active-bg",
         className,
       )}
     >
@@ -201,7 +201,7 @@ function ItemCount({
 
 function MailboxesFallback() {
   return (
-    <div className="flex h-10 w-full animate-pulse gap-3 rounded-md bg-tertiary px-3 py-2 sm:max-lg:px-1">
+    <div className="flex h-10 w-full animate-pulse gap-3 rounded-md bg-subcard px-3 py-2 sm:max-lg:px-1">
       <div className="size-7 animate-pulse rounded-full bg-secondary sm:max-lg:mx-auto" />
 
       <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />
