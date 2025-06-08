@@ -76,6 +76,12 @@ function MailItem({ mailId }: { mailId?: string }) {
     }
     await updateEmailProperties(mailboxId, emailId, updates);
     if (updates.binnedAt) {
+      if (window.location.search.includes("mailId")) {
+        const s = new URLSearchParams(window.location.search);
+        s.delete("mailId");
+        return navigate({ search: s.toString() });
+      }
+
       if (history.length > 1) {
         return navigate(-1);
       }
@@ -83,13 +89,16 @@ function MailItem({ mailId }: { mailId?: string }) {
     }
   };
 
-  const markedAsRead = useRef(false);
+  const lastEmailId = useRef<string | null>(null);
   useEffect(() => {
-    if (email && !email.isRead && !markedAsRead.current) {
-      markedAsRead.current = true;
-      updateEmail({ isRead: true }, { auto: true });
-    } else if (email && !email.isRead) {
-      markedAsRead.current = true;
+    if (!email) return;
+    if (lastEmailId.current !== email.id) {
+      lastEmailId.current = email.id;
+      console.log("lastEmailId", lastEmailId.current, email.id);
+      if (!email.isRead) {
+        console.log("marking as read", email.id);
+        updateEmail({ isRead: true }, { auto: true });
+      }
     }
   }, [email]);
 

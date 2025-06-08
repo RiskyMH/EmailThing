@@ -78,7 +78,10 @@ export function ContextMenuAction({
   const Icon: LucideIcon | null = iconMap[icon] ?? null;
 
   const onClick = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    if (tooltip) e.preventDefault();
+    if (tooltip) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     _onClick?.(e);
     return action();
   };
