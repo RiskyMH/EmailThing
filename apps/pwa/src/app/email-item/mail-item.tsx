@@ -94,9 +94,7 @@ function MailItem({ mailId }: { mailId?: string }) {
     if (!email) return;
     if (lastEmailId.current !== email.id) {
       lastEmailId.current = email.id;
-      console.log("lastEmailId", lastEmailId.current, email.id);
       if (!email.isRead) {
-        console.log("marking as read", email.id);
         updateEmail({ isRead: true }, { auto: true });
       }
     }

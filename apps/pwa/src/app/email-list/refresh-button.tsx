@@ -38,10 +38,10 @@ export default function RefreshButton({ className }: { className?: string }) {
 
     const focus = () => !document.hidden && online && fn();
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "r" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        fn();
-      }
+      // if (e.key === "r" && (e.metaKey || e.ctrlKey)) {
+      //   e.preventDefault();
+      //   fn();
+      // }
     };
 
     document.addEventListener("visibilitychange", focus);
