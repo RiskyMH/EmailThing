@@ -50,8 +50,8 @@ const forceIndividual = {
   "support@npmjs.com": "https://svgl.app/library/npm.svg",
   "postmaster@outlook.com": "https://svgl.app/library/outlook.svg",
   "mailer-daemon@googlemail.com": "https://svgl.app/library/gmail.svg",
-  "mailer@emailthing.xyz": "https://pwa.emailthing.app/icon.svg",
-  "system@emailthing.app": "https://pwa.emailthing.app/icon.svg",
+  "mailer@emailthing.xyz": "/icon.svg",
+  "system@emailthing.app": "/icon.svg",
 } as Record<string, string>;
 
 export const useEmailImage = (email: string) => {
