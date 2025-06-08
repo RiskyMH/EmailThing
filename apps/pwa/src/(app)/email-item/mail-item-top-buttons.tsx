@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getCategories } from "@/utils/data/queries/mailbox";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowLeftIcon, ExternalLinkIcon, ForwardIcon, ReplyAllIcon, ReplyIcon, TagIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, ExternalLinkIcon, ForwardIcon, MoveDiagonalIcon, ReplyAllIcon, ReplyIcon, TagIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useNavigate } from "react-router-dom";
 import { ContextMenuAction } from "../components";
@@ -147,8 +147,8 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
           className="ms-auto -m-2 rounded-full p-2 text-muted-foreground hover:text-foreground [.emailslist_&]:flex hidden"
           asChild
         >
-          <Link href={`/mail/${mailboxId}/${emailId}`} className="ms-auto" target="_blank">
-            <ExternalLinkIcon className="size-5" />
+          <Link href={`/mail/${mailboxId}/${emailId}`} className="ms-auto">
+            <MoveDiagonalIcon className="size-5" />
           </Link>
         </Button>
       </TooltipText>
