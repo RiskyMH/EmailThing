@@ -165,15 +165,15 @@ export default function DraftPage() {
     >
       <MailboxTitle mailboxId={params.mailboxId!} title={mail.subject ? `${mail.subject} (draft)` : "New Draft"} />
       <DisableFormReset formId="draft-form" />
-      <div className="flex max-w-full grow flex-col break-words rounded-md border-input border-none !bg-subcard text-base">
+      <div className="flex max-w-full grow flex-col break-words rounded-md !bg-subcard text-base">
         <FromInput
           savedAlias={mail.from || aliases.find((a) => a.default)?.alias || undefined}
           aliases={aliases}
           onSave={save}
         />
-        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-card/75 border-b-2" />
+        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card/75 border-b-2" />
         <RecipientInput savedTo={mail.to || undefined} onSave={save} forceSave={forceSave} />
-        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-card/75 border-b-2" />
+        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card/75 border-b-2" />
         <Subject savedSubject={mail.subject || undefined} onSave={save} />
       </div>
 

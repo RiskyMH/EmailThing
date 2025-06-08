@@ -197,7 +197,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 autoCapitalize="none"
                 autoComplete="username"
                 autoCorrect="off"
-                className="border-none bg-secondary"
+                className="border-none bg-search-bg"
                 disabled={isPending}
                 defaultValue={username ?? ""}
               />
@@ -213,7 +213,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 type="password"
                 autoComplete="password"
                 autoCorrect="off"
-                className="border-none bg-secondary"
+                className="border-none bg-search-bg"
                 disabled={isPending}
               />
             </div>
@@ -258,11 +258,11 @@ function ResetPasswordDiag({ username }: { username: string }) {
           body: JSON.stringify({ username }),
         });
         const data = await res.json();
-        
+
         if (!res.ok || data.error) {
           return void toast.error(data.error || "Failed to request password reset");
         }
-        
+
         toast.success("If an account with this username exists, a password reset link has been sent to the backup email address.");
         document.getElementById("smart-drawer:close")?.click();
       } catch (err) {
@@ -360,7 +360,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
   return (
     <button
       type="button"
-      className={cn(buttonVariants({ variant: "secondary", className: "gap-2" }))}
+      className={cn(buttonVariants({ variant: "secondary", className: "gap-2 bg-search-bg" }))}
       onClick={handleLogin}
       disabled={isPending || !support}
     >
@@ -408,7 +408,7 @@ export function ApiUrlButton() {
               defaultValue={apiUrl}
               name="api"
               id="api-url-input"
-              className="border-none bg-secondary"
+              className="border-none bg-search-bg"
               autoFocus
               required
             />

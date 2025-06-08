@@ -87,6 +87,7 @@ SmartDrawerFooter.displayName = "SmartDrawerFooter";
 
 const SmartDrawerClose = (props: ComponentProps<typeof DrawerClose>) => {
     const isDesktop = useMediaQuery("(min-width: 640px)");
+    document.body.style.pointerEvents = 'auto'
     if (isDesktop) {
         return <DialogClose id="smart-drawer:close" {...props} />;
     }

@@ -241,14 +241,14 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
         <DropdownMenuTrigger
           className={cn(
             buttonVariants({ variant: "ghost" }),
-            "flex h-10 w-full gap-2 px-3 text-left sm:max-lg:h-9 sm:max-lg:px-1",
+            "flex h-10 w-full gap-2 px-3! text-left sm:max-lg:h-9 sm:max-lg:px-1! has-[>svg]:px-0",
           )}
         >
           {mailboxId === "demo" ? (
-            <UserCircle2 className="sm:max-lg:-me-0.5 size-6 text-yellow-500 sm:max-lg:ms-auto" />
+            <UserCircle2 className="sm:max-lg:-me-0.5 lg:-ms-1 lg:me-0.5 size-6 text-yellow-500 sm:max-lg:ms-auto" />
           ) : (
             // null
-            <Avatar className="-ms-1 sm:max-lg:-me-1 size-7 sm:max-lg:ms-auto">
+            <Avatar className="lg:-ms-1.5 sm:max-lg:-me-1 size-7 sm:max-lg:ms-auto">
               <AvatarImage className="rounded-full" src={gravatarImg} /*crossOrigin="anonymous"*/ />
               <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
                 {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}

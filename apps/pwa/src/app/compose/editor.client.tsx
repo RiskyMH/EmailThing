@@ -77,7 +77,7 @@ export function BodyEditor({
         >
           <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
             <BodyHeader />
-            <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-card border-b-2" />
+            <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card border-b-2" />
           </div>
           <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
             <Loader2 className="size-12 animate-spin text-muted-foreground" />
@@ -540,7 +540,7 @@ export function RecipientInput({
           <Fragment key={type}>
             <div
               className={cn(
-                "group flex w-full flex-wrap gap-2 self-center rounded-md border-none bg-card px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                "group flex w-full flex-wrap gap-2 self-center rounded-md border-none bg-subcard px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                 !types.includes(type) && "hidden",
               )}
             >
@@ -626,7 +626,7 @@ export function RecipientInput({
             </div>
             <span
               className={cn(
-                "flex h-0 w-full shrink-0 grow-0 rounded-sm border-card/75 border-b-2",
+                "flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card/75 border-b-2",
                 (!types.includes(type) || i + 1 === types.length) && "hidden",
               )}
             />

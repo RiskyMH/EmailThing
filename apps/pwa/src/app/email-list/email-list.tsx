@@ -102,7 +102,7 @@ function EmailList({
           <Categories filter={type} />
         </div>
 
-        <div className="flex h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2" id="email-list-content">
+        <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2" id="email-list-content">
           <Emails filter={type} />
         </div>
         <Title type={type} />
