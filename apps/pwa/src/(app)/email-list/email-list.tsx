@@ -42,6 +42,12 @@ import { CreateTempEmailForm } from "./email-list-temp-modal";
 import RefreshButton from "./refresh-button";
 import OnboardingWelcome from "../user-settings/onboarding-welcome";
 import MailItemSuspense from "../email-item/mail-item";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+
 
 export default function EmailListSuspenced({
   filter,
@@ -94,27 +100,41 @@ declare global {
 function EmailList({
   filter: type,
 }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
+  const [isLg, setIsLg] = useState(typeof window !== "undefined" ? window.innerWidth > 1024 : false);
+  useEffect(() => {
+    setIsLg(window.innerWidth > 1024);
+    const fn = () => {
+      setIsLg(window.innerWidth > 1024);
+    }
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
   return (
-    <div className="flex w-full min-w-0 flex-row h-full gap-2 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist">
-      <div className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg">
-        {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
-        <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
-          <Categories filter={type} />
-        </div>
+    <ResizablePanelGroup direction="horizontal" className="flex w-full min-w-0 flex-row h-full gap-2 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist">
+      <ResizablePanel className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg @container" defaultSize={isLg ? 40 : 50} minSize={isLg ? 30 : 35} collapsible={false}>
+          {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
+          <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
+            <Categories filter={type} /> 
+          </div>
 
-        <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2" id="email-list-content">
-          <Emails filter={type} />
-        </div>
-        <Title type={type} />
-        {/* </div> */}
-      </div>
-      <div className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto">
-        {/* <div className=" bg-card rounded-lg h-full overflow-auto">
+          <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2" id="email-list-content">
+            <Emails filter={type} />
+          </div>
+          <Title type={type} />
+          {/* </div> */}
+        </ResizablePanel>
+
+        <ResizableHandle className="bg-transparent mx-[-0.25rem] w-0 max-sm:hidden"/>
+
+        <ResizablePanel className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto @container" minSize={isLg ? 30 : 35} collapsible={false}>
+          {/* <div className=" bg-card rounded-lg h-full overflow-auto">
         </div> */}
-        <MailItemSuspense  />
-      </div>
+          <MailItemSuspense />
+        </ResizablePanel>
 
-    </div>
+    </ResizablePanelGroup>
+
   );
 }
 

@@ -138,7 +138,7 @@ function MailItem({ mailId }: { mailId?: string }) {
       <div className="flex gap-3 flex-col overflow-y-auto rounded-lg pt-3 p-3 [.emailslist_&]:p-0 [.emailslist_&]:pt-3">
         <MailboxTitle mailboxId={params.mailboxId} title={email.subject} />
 
-        <h1 className="mt-3 break-words px-3 font-bold text-2xl sm:text-3xl">{email.subject}</h1>
+        <h1 className="mt-3 break-words px-3 font-bold text-2xl @xl:text-3xl">{email.subject}</h1>
         <div className="flex flex-col gap-3 bg-subcard [.emailslist_&]:rounded-none rounded-md">
           {/* from info and gravatar */}
           <div className="flex gap-2 p-3 pb-0">
@@ -258,14 +258,14 @@ function MailItem({ mailId }: { mailId?: string }) {
             </div>
 
             <LocalTime
-              className="ms-auto mt-2 hidden text-muted-foreground text-sm lg:inline"
+              className="ms-auto mt-2 hidden text-muted-foreground text-sm @2xl:inline"
               time={email.createdAt}
               type="full"
             />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  className="ms-auto flex rounded-full p-2 hover:bg-background lg:ms-0"
+                  className="ms-auto flex rounded-full p-2 hover:bg-background @2xl:ms-0"
                   variant="ghost"
                   size="icon"
                 >
@@ -321,7 +321,7 @@ function MailItem({ mailId }: { mailId?: string }) {
 
           {/* attachments */}
           {email.attachments.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 px-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-2 px-3 @md:grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4">
               {email.attachments.map((a) => (
                 <a
                   key={a.id}
@@ -395,9 +395,15 @@ function EmailContent({
     };
     window.addEventListener("resize", handleResize);
     ref.current?.addEventListener("load", handleResize);
+    ref.current?.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleResize);
+
+    if (ref.current) new ResizeObserver(handleResize).observe(ref.current);
     return () => {
       window.removeEventListener("resize", handleResize);
       ref.current?.removeEventListener("load", handleResize);
+      document.removeEventListener("visibilitychange", handleResize);
+      if (ref.current) new ResizeObserver(handleResize).unobserve(ref.current);
     };
   }, [html, view, body]);
 

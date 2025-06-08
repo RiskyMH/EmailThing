@@ -3,7 +3,7 @@ import { StarIcon } from "lucide-react";
 export default function Loading() {
   return (
     <div className="flex w-full min-w-0 flex-row h-full gap-2 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist">
-      <div className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg">
+      <div className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg @container">
         <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg">
           <EmailListCategoryLoadingSkeleton />
         </div>
@@ -13,7 +13,7 @@ export default function Loading() {
           </div>
         </div>
       </div>
-      <div className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto bg-card">
+      <div className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto bg-card @container">
         <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-card rounded-lg bg-card">
           <div className="">
             <p className="text-muted-foreground">Select an email to view</p>
@@ -43,7 +43,7 @@ export function EmailListLoadingSkeleton() {
               style={{ backgroundColor: "grey" }}
             />
             <StarIcon className="hidden size-4 shrink-0 self-center text-muted-foreground sm:inline-block" />
-            <div className="h-4 w-1/4 shrink-0 self-center sm:w-32 md:w-56 md:[.emailscolumn_&]:w-1/4 lg:[.emailscolumn_&]:w-32 lg:[.emailscolumn_&]:w-32">
+            <div className="h-4 w-1/4 shrink-0 self-center max-sm:block @lg:w-32 @3xl:w-56">
               <span className="me-auto block h-4 w-full max-w-20 rounded bg-muted-foreground/50" />
             </div>
             <div className="h-4 w-full self-center">

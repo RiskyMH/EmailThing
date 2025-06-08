@@ -187,7 +187,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
         action={
           type !== "drafts" ? () => updateEmail({ isStarred: !email.isStarred }) : async () => { }
         }
-        className="hidden shrink-0 self-center text-muted-foreground hover:text-foreground sm:inline-block"
+        className="hidden shrink-0 self-center text-muted-foreground hover:text-foreground @sm:inline-block"
       />
 
       {/* <TooltipText
@@ -196,7 +196,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
                     > */}
       <span
         className={cn(
-          "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56 md:[.emailscolumn_&]:w-1/4 lg:[.emailscolumn_&]:w-32",
+          "w-1/4 shrink-0 self-center truncate text-sm @max-sm:block @lg:w-32 @3xl:w-56",
           !email.isRead ? "font-bold" : "text-foreground/80",
         )}
         title={email.from?.address ?? "uh?"}
@@ -218,7 +218,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
       </span>
       {/* </TooltipText> */}
 
-      {/* <span className="hidden w-full shrink-[2] gap-4 self-center sm:inline-flex">
+      {/* <span className="hidden w-full shrink-[2] gap-4 self-center @sm:inline-flex">
                         {!email.isRead && (
                             <span className="inline h-6 select-none self-center rounded bg-red px-3 py-1 font-bold text-white text-xs">
                                 NEW
@@ -227,7 +227,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
                         <span className="line-clamp-2 break-all text-muted-foreground text-sm">{email.snippet}</span>
                     </span> */}
 
-      <div className="float-right ms-auto flex shrink-0 gap-1 self-center text-right text-muted-foreground sm:gap-2 group-hover:sm:hidden ">
+      <div className="float-right ms-auto flex shrink-0 gap-1 self-center text-right text-muted-foreground @sm:gap-2 group-hover:@sm:hidden ">
         {(email.attachments?.length ?? 0) > 0 && <PaperclipIcon className="size-4 self-center" />}
         <LocalTime
           type="smart"
@@ -236,7 +236,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
           className="w-auto self-center text-xs"
         />
       </div>
-      <div className="float-right ms-auto hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:sm:flex">
+      <div className="float-right ms-auto hidden w-auto shrink-0 gap-4 self-center text-right text-muted-foreground text-xs group-hover:@sm:flex">
         {isInView ? (
           <>
             {type !== "drafts" && (
