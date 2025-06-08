@@ -7,7 +7,7 @@ export default function Loading() {
         <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 sm:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg">
           <EmailListCategoryLoadingSkeleton />
         </div>
-        <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2" id="email-list-content">
+        <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2 min-w-0 gap-2" id="email-list-content">
           <EmailListLoadingSkeleton />
         </div>
       </div>
@@ -25,7 +25,7 @@ export default function Loading() {
 
 export function EmailListLoadingSkeleton() {
   return (
-    <>
+    <div className="infinite-scroll-component__outerdiv">
       <div className="flex h-5 px-2 font-medium text-muted-foreground text-xs">
         <p className="self-end">Today</p>
       </div>
@@ -49,7 +49,7 @@ export function EmailListLoadingSkeleton() {
           <span className="float-right h-4 w-10 shrink-0 self-center rounded bg-muted-foreground/25 text-right text-sm sm:w-16" />
         </div>
       ))}
-    </>
+    </div>
   );
 }
 
