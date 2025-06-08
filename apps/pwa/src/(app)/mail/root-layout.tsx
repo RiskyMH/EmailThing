@@ -19,7 +19,7 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
       <div className="//min-h-screen bg-sidebar-bg h-screen overflow-hidden emailscolumn" vaul-drawer-wrapper="" id="app:root-layout">
         <Header />
         <div className="flex h-[calc(100vh-4.1rem)] w-screen max-w-full bg-sidebar-bg">
-          <Sidebar className="hidden min-h-[calc(100vh-4.1rem)] sm:flex sm:pt-0" />
+          <Sidebar className="hidden min-h-[calc(100vh-4.1rem)] sm:flex pt-0" />
           <div
             className="h-[calc(100vh-4.1rem)] w-screen max-w-full overflow-y-auto sm:rounded-tl-lg"
             id="mail-layout-content"
