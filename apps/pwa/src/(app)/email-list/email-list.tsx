@@ -95,10 +95,10 @@ function EmailList({
   filter: type,
 }: { filter: "inbox" | "drafts" | "sent" | "starred" | "trash" | "temp" }) {
   return (
-    <div className="flex w-full min-w-0 flex-row h-full gap-2 sm:[.emailscolumn_&]:pb-2 sm:[.emailscolumn_&]:pe-2 emailslist">
-      <div className="flex w-full flex-col //p-3 sm:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto sm:[.emailscolumn_&]:rounded-lg">
+    <div className="flex w-full min-w-0 flex-row h-full gap-2 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist">
+      <div className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg">
         {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
-        <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 sm:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
+        <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
           <Categories filter={type} />
         </div>
 
@@ -108,7 +108,7 @@ function EmailList({
         <Title type={type} />
         {/* </div> */}
       </div>
-      <div className="min-w-0 flex-col h-full //p-3 sm:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto">
+      <div className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto">
         {/* <div className=" bg-card rounded-lg h-full overflow-auto">
         </div> */}
         <MailItemSuspense  />

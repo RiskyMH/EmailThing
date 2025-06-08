@@ -140,7 +140,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
         e.preventDefault();
         e.stopPropagation();
         const isEmailColumn = document.getElementById("app:root-layout")?.classList.contains("emailscolumn");
-        const isDesktop = window.innerWidth > 640;
+        const isDesktop = window.innerWidth > 768;
         if (isEmailColumn && isDesktop) {
           if (type !== "drafts") {
             const search = new URLSearchParams(window.location.search);
@@ -196,7 +196,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
                     > */}
       <span
         className={cn(
-          "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56 sm:[.emailscolumn_&]:w-32",
+          "w-1/4 shrink-0 self-center truncate text-sm max-sm:block sm:w-32 md:w-56 md:[.emailscolumn_&]:w-1/4 lg:[.emailscolumn_&]:w-32",
           !email.isRead ? "font-bold" : "text-foreground/80",
         )}
         title={email.from?.address ?? "uh?"}
