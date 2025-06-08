@@ -249,7 +249,7 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
           )}
         >
           {mailboxId === "demo" ? (
-            <UserCircle2 className="sm:max-lg:-me-0.5 lg:-ms-1 max-sm:-ms-1 max-sm:me-0.5 lg:me-0.5 size-6 text-yellow-500 sm:max-lg:ms-auto" />
+            <UserCircle2 className="sm:max-lg:-me-1 lg:-ms-1 max-sm:-ms-1 max-sm:me-0.5 lg:me-0.5 size-6 text-yellow-500 sm:max-lg:ms-auto" />
           ) : (
             // null
             <Avatar className="lg:-ms-1.5 sm:max-lg:-me-1 size-7 sm:max-lg:ms-auto max-sm:-ms-1.5">
