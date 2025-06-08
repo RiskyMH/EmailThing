@@ -23,7 +23,7 @@ import {
   SmartDrawerTrigger,
 } from "@/components/ui/smart-drawer";
 import { Textarea } from "@/components/ui/textarea";
-import useMX from "@/requests/dns.client";
+import useMX from "@/utils/use-dns";
 import { cn } from "@/utils/tw";
 import {
   CircleAlertIcon,
@@ -130,7 +130,7 @@ export function HTMLEditor({
   return (
     <>
       <Textarea
-        className="h-[calc(100%-2.75rem)] w-full shrink resize-none overflow-auto overflow-x-auto whitespace-pre rounded-lg border-2 border-primary border-none bg-tertiary p-3 font-mono"
+        className="h-[calc(100%-2.75rem)] w-full shrink resize-none overflow-auto overflow-x-auto whitespace-pre rounded-lg border-2 border-primary border-none bg-background p-3 font-mono"
         id="html-editor"
         name="html"
         defaultValue={savedHTML}

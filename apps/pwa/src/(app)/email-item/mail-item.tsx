@@ -435,7 +435,7 @@ function EmailContent({
   }
   if (view === "html-raw") {
     return (
-      <p className="h-full overflow-x-auto whitespace-pre rounded-b-lg [.emailslist_&]:rounded-b-none bg-tertiary p-3 font-mono text-sm leading-normal">
+      <p className="h-full overflow-x-auto whitespace-pre rounded-b-lg [.emailslist_&]:rounded-b-none bg-background p-3 font-mono text-sm leading-normal">
         {html || body}
       </p>
     );

@@ -1,4 +1,4 @@
-import { DeleteButton } from "@/app/mailbox-config/components.client";
+import { DeleteButton } from "@/(app)/mailbox-config/components.client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";

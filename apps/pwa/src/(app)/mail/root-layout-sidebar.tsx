@@ -1,4 +1,4 @@
-import { MailboxLink } from "@/(email)/mail/[mailbox]/components.client";
+import { MailboxLink } from "@/(app)/components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -82,7 +82,7 @@ export const Sidebar = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "flex min-h-screen flex-col overflow-y-auto text-tertiary-foreground sm:shrink-0 sm:bg-tertiary sm:p-2 sm:max-lg:p-2 lg:w-60",
+        "flex min-h-screen flex-col overflow-y-auto text-tertiary-foreground sm:shrink-0 sm:p-2 sm:max-lg:p-2 lg:w-60",
         className,
       )}
     >

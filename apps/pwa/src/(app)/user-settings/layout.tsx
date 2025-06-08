@@ -1,7 +1,7 @@
 import Link from "@/components/link";
 import { EmailThing } from "@/components/logo";
 import UserNav from "@/components/user-navbar";
-import { MainNavItem } from "@/home/layout";
+import { MainNavItem } from "@/(home)/layout";
 
 interface DocsLayoutProps {
   children: React.ReactNode;

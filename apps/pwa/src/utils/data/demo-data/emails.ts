@@ -1,4 +1,4 @@
-import { makeHtml } from "@/app/compose/tools";
+import { makeHtml } from "@/(app)/compose/tools";
 import type { DBEmail, DBEmailDraft } from "../types";
 import { welcomeEmail } from "./email.macro" with { type: "macro" };
 import { demoMailboxId } from "./mailbox";

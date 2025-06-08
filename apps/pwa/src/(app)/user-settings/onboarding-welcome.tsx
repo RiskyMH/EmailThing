@@ -23,7 +23,7 @@ import {
 import { useEffect, useState, useTransition } from "react";
 import changeUserSettings from "./_api";
 import { toast } from "sonner";
-import { defaultStars } from "@/home/home";
+import { defaultStars } from "@/(home)/home";
 import { Input } from "@/components/ui/input";
 import { ChevronRight, Loader2 } from "lucide-react";
 import GitHubIcon from "@/components/icons/github";

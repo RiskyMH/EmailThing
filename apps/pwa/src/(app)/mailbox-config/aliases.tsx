@@ -1,7 +1,7 @@
 import { Table } from "@/components/ui/table";
 
 // import { changeDefaultAlias, deleteAlias } from "@/(email)/mail/[mailbox]/config/actions";
-import { DeleteButton } from "@/app/mailbox-config/components.client";
+import { DeleteButton } from "@/(app)/mailbox-config/components.client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,

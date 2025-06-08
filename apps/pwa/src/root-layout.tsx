@@ -11,7 +11,7 @@
 // import "";
 
 import "./index.css";
-import "./app/compose/tiptap.css";
+import "./(app)/compose/tiptap.css";
 import React, { type PropsWithChildren } from "react";
 
 import ScrollToHashElement from "@/components/scroll-element-auto";

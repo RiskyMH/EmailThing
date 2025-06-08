@@ -1,18 +1,15 @@
-import CustomDomainPage from "@/(docs)/docs/custom-domain/page";
-import DocsLayout2 from "@/(docs)/docs/layout";
-import AboutPage from "@/(docs)/docs/page";
-import { Outlet, type RouteObject } from "react-router-dom";
-import DocsLayout from "./layout";
 import { Title } from "@/components/title";
+import DocsLayout from "./layout";
+import { Outlet, type RouteObject } from "react-router-dom";
+import AboutPage from "./1.1-introduction";
+import CustomDomainPage from "./1.2-custom-domain";
 
 export const routes = [
   {
     path: "/docs",
     element: (
       <DocsLayout>
-        <DocsLayout2>
-          <Outlet />
-        </DocsLayout2>
+        <Outlet />
       </DocsLayout>
     ),
     children: [

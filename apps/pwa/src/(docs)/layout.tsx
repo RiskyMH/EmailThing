@@ -1,10 +1,12 @@
-import { MainNavItem } from "@/(home)/components.client";
+import { MainNavItem } from "@/(home)/layout";
 import Link from "@/components/link";
 import { EmailThing } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import { UserNavLogin } from "@/components/user-navbar.static";
 import { MenuIcon } from "lucide-react";
 import { Suspense, lazy } from "react";
+import { docsNav } from "./pages";
+import { DocsSidebarNav } from "./components.client";
 
 const UserNav = lazy(() => import("@/components/user-navbar"));
 const DemoLink = lazy(() =>
@@ -56,7 +58,16 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
           </div>
         </div>
       </header>
-      <div className="container flex-1">{children}</div>
+
+      <div className="container flex-1">
+        <div className="flex-1 md:grid md:grid-cols-[220px_1fr] md:gap-6 lg:grid-cols-[240px_1fr] lg:gap-10">
+          <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto border-r py-6 pr-2 md:sticky md:block lg:py-10">
+            <DocsSidebarNav items={docsNav} />
+          </aside>
+          {children}
+        </div>
+      </div>
+
       <SiteFooter className="border-t" />
     </div>
   );
