@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
-@source "../../web/app";
 @source "../src";
 
 /* @import "@fontsource/inter/100.css";
