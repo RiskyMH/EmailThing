@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@block65/webcrypto-web-push": "^1.0.2",
+    "@emailthing/const": "workspace:^",
     "@emailthing/db": "workspace:^",
     "@github/webauthn-json": "^2.1.1",
     "@paralleldrive/cuid2": "^2.2.2",

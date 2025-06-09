@@ -13,6 +13,8 @@ import {
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { DISCORD_URL } from "@emailthing/const";
+
 
 export default function Home() {
   // const currentMailbox = (await cookies()).get("mailboxId")?.value;
@@ -28,7 +30,7 @@ export default function Home() {
       <section className="flex flex-col gap-6 pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32 sm:[.kawaii_&]:pt-10 lg:[.kawaii_&]:pb-10">
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <Link
-            to="https://discord.gg/GT9Q2Yz4VS"
+            to={DISCORD_URL}
             className="rounded-2xl bg-subcard px-4 py-1.5 font-medium text-sm"
             target="_blank"
           >

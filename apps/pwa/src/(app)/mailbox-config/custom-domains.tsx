@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/smart-drawer";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { getMailbox, getMailboxCustomDomains, getMailboxAliases } from "@/utils/data/queries/mailbox";
-import { customDomainLimit } from "@/utils/limits";
+import { customDomainLimit } from "@emailthing/const/limits";
+import { DISCORD_URL } from "@emailthing/const";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   PlusIcon,
@@ -454,7 +455,7 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
           <p>
             If you have any issues or questions, you can join our{" "}
             <a
-              href="https://discord.gg/GT9Q2Yz4VS"
+              href={DISCORD_URL}
               target="_blank"
               className="font-bold hover:underline"
               rel="noreferrer"

@@ -9,7 +9,7 @@ import {
   getEmailList,
 } from "@/utils/data/queries/email-list";
 import { getCategories, getMailboxName } from "@/utils/data/queries/mailbox";
-import { tempEmailsLimit } from "@/utils/limits";
+import { tempEmailsLimit } from "@emailthing/const/limits";
 import { formatTimeAgo } from "@/utils/tools";
 import { cn } from "@/utils/tw";
 import {

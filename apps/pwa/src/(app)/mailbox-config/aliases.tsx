@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/smart-drawer";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getMailbox, getMailboxAliases } from "@/utils/data/queries/mailbox";
-import { aliasLimit } from "@/utils/limits";
+import { aliasLimit } from "@emailthing/const/limits";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   CheckIcon,

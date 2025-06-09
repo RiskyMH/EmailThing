@@ -4,6 +4,7 @@ import Logo from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon } from "lucide-react";
+import { DISCORD_URL } from "@emailthing/const";
 
 export default function LoginPage() {
   return (
@@ -51,7 +52,7 @@ export default function LoginPage() {
             </a>{" "}
             or ask on{" "}
             <a
-              href="https://discord.gg/GT9Q2Yz4VS"
+              href={DISCORD_URL}
               className="font-bold hover:underline"
               target="_blank"
               rel="noreferrer"
@@ -110,7 +111,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         return void toast.error("You need an invite code to signup. Join the Discord to get!", {
           action: (
             <a
-              href={"https://discord.gg/GT9Q2Yz4VS"}
+              href={DISCORD_URL}
               target="blank"
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-search-bg p-2 hover:bg-search-bg/80"
             >

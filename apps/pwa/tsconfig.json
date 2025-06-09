@@ -15,7 +15,6 @@
       "@/(home)/components.client": ["./src/(home)/layout.tsx"],
       "@/*": ["./src/*"],
       // "@/components/*": ["./src/components/*", "../web/app/components/*"],
-      "@/utils/limits": ["./src/utils/limits.ts", "../web/app/utils/limits.ts"]
     }
   }
 }

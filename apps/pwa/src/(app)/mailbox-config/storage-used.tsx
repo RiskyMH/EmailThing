@@ -1,6 +1,6 @@
 import { Progress } from "@/components/ui/progress";
 import { getMailbox } from "@/utils/data/queries/mailbox";
-import { storageLimit } from "@/utils/limits";
+import { storageLimit } from "@emailthing/const/limits";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useParams } from "react-router-dom";
 

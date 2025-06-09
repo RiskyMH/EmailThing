@@ -43,7 +43,7 @@ There are 3 apps in this repository. It originally started with the web app, but
       <h3>
       <img src="https://bun.sh/logo.svg" alt="Next.js Logo" width="50">
       <br>
-      <a href="./apps/api#readme"><b>API</b></a> <em>(not started)</em>
+      <a href="./apps/api#readme"><b>API</b></a> <em>(in progress)</em>
       </h3>
       <br>
       The API that was made with Bun's <code>Bun.serve</code>. This is a complete rewrite of the web app (api section).
