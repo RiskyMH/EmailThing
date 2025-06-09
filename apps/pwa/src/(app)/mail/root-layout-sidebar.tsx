@@ -12,7 +12,7 @@ import { cn } from "@/utils/tw";
 
 import Link from "@/components/link";
 import { getEmailCount } from "@/utils/data/queries/email-list";
-import { getMailboxDefaultAlias, getUserMailboxes } from "@/utils/data/queries/mailbox";
+import { getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { useGravatar } from "@/utils/fetching";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -224,13 +224,16 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
 
   const _mailboxes = useLiveQuery(async () => getUserMailboxes(), []);
   const mailboxes = _mailboxes?.filter((m) => m.id !== "demo");
+  const mailbox = mailboxes?.find((m) => m.id === mailboxId);
 
-  const defaultAlias = useLiveQuery(async () => getMailboxDefaultAlias(mailboxId), [mailboxId]);
-  const gravatarImg = useGravatar(defaultAlias?.alias ?? "ab@c.com");
+  const gravatarImg = useGravatar(mailbox?.name ?? "ab@c.com");
 
   if (mailboxId !== "demo") {
-    if (!mailboxes) return null;
-    if (mailboxes.length < 2) return settingsLink;
+    if (!mailboxes || !mailbox) return null;
+    // there is going to be one from the demo fake user
+    if (mailboxes.length < 2) {
+      return settingsLink;
+    }
   }
 
   return (
@@ -255,20 +258,22 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
             <Avatar className="lg:-ms-1.5 sm:max-lg:-me-1 size-7 sm:max-lg:ms-auto max-sm:-ms-1.5">
               <AvatarImage className="rounded-full" src={gravatarImg} /*crossOrigin="anonymous"*/ />
               <AvatarFallback className="size-full rounded-full bg-secondary p-1 text-muted-foreground text-xs">
-                {(defaultAlias?.alias || "ab").slice(0, 2).toUpperCase()}
+                {mailbox?.name?.slice(0, 2).toUpperCase() || "404"}
               </AvatarFallback>
             </Avatar>
           )}
           <div className="flex flex-col overflow-hidden text-ellipsis">
             <span className="overflow-hidden text-ellipsis text-foreground text-sm sm:max-lg:hidden">
-              {mailboxId === "demo" ? "Demo" : defaultAlias?.alias || "Unknown Mailbox?"}
+              {mailboxId === "demo" ? "Demo" : mailbox?.name || "Unknown Mailbox?"}
             </span>
-            <span className="text-muted-foreground text-xs sm:max-lg:hidden">
+            <span className="text-muted-foreground text-xs sm:max-lg:hidden overflow-hidden text-ellipsis">
               {mailboxId === "demo"
                 ? "Test account"
-                : mailboxes?.find((m) => m.id === mailboxId)?.role === "OWNER"
+                : mailbox?.role === "OWNER"
                   ? "Personal"
-                  : "Personal (shared)"}
+                  : mailbox === undefined
+                    ? "Do you have access?"
+                    : "Personal (shared)"}
             </span>
           </div>
 
