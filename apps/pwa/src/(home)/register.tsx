@@ -4,7 +4,7 @@ import Logo from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon } from "lucide-react";
-import { DISCORD_URL } from "@emailthing/const";
+import { DISCORD_URL } from "@emailthing/const/urls";
 
 export default function LoginPage() {
   return (

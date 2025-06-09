@@ -13,7 +13,7 @@ import {
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { DISCORD_URL } from "@emailthing/const";
+import { DISCORD_URL } from "@emailthing/const/urls";
 
 
 export default function Home() {

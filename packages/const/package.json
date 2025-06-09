@@ -11,13 +11,7 @@
   "main": "index.ts",
   "typings": "index.ts",
   "exports": {
-    ".": {
-      "require": "./index.ts",
-      "import": "./index.ts",
-      "types": "./index.ts",
-      "bun": "./index.ts",
-      "default": "./index.ts"
-    },
+    ".": "./index.ts",
     "./limits": "./limits.ts",
     "./urls": "./urls.ts"
   }

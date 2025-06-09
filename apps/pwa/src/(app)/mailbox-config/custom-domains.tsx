@@ -18,7 +18,7 @@ import {
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { getMailbox, getMailboxCustomDomains, getMailboxAliases } from "@/utils/data/queries/mailbox";
 import { customDomainLimit } from "@emailthing/const/limits";
-import { DISCORD_URL } from "@emailthing/const";
+import { DISCORD_URL } from "@emailthing/const/urls";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   PlusIcon,
