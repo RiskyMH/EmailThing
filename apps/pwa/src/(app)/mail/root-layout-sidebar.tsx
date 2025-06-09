@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useParams } from "react-router-dom";
+import { db } from "@/utils/data/db";
 
 export const Sidebar = ({ className }: { className?: string }) => {
   const params = useParams<"mailboxId" | "mailId">();
@@ -222,16 +223,21 @@ const Mailboxes = ({ mailbox: mailboxId }: { mailbox: string }) => {
     </>
   );
 
-  const _mailboxes = useLiveQuery(async () => getUserMailboxes(), []);
+  const _mailboxes = useLiveQuery(getUserMailboxes, []);
   const mailboxes = _mailboxes?.filter((m) => m.id !== "demo");
   const mailbox = mailboxes?.find((m) => m.id === mailboxId);
+
+  const sync = useLiveQuery(() => db.localSyncData.toArray(), []);
 
   const gravatarImg = useGravatar(mailbox?.name ?? "ab@c.com");
 
   if (mailboxId !== "demo") {
-    if (!mailboxes || !mailbox) return null;
-    // there is going to be one from the demo fake user
-    if (mailboxes.length < 2) {
+    if (!mailboxes) return null;
+    if (!mailbox) {
+      if (sync?.some(s => !s.lastSync)) {
+        return null;
+      }
+    } else if (mailboxes.length < 2) {
       return settingsLink;
     }
   }
