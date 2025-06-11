@@ -34,7 +34,7 @@ export function ClientStar({
       onClick={onClick as any}
       className={cn(
         className,
-        "rounded-full ring-offset-5 hover:bg-transparent hover:text-amber-500",
+        "rounded-full hover:bg-transparent hover:text-amber-500",
         enabled && "text-amber-500 hover:text-foreground",
       )}
     >

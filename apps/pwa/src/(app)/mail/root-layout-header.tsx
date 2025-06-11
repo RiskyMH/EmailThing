@@ -16,7 +16,7 @@ export default function Header() {
   const mailboxId = params.mailboxId || "demo";
 
   return (
-    <div className="sticky top-0 z-40 flex items-center justify-between bg-sidebar-bg px-7">
+    <div className="sticky top-0 z-40 flex items-center justify-between bg-sidebar px-7">
       <header className="flex h-16 w-full items-center">
         <MobileNav>
           <div className="-mb-2 flex items-center gap-1 p-3">

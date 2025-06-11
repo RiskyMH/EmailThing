@@ -117,7 +117,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
         </SelectContent>
       </Select>
 
-      <span className="my-1 h-auto w-0 shrink-0 grow-0 rounded-sm //border-card/75 border-e-2" />
+      <span className="my-1 h-auto w-0 shrink-0 grow-0 rounded-sm border-card/75 border-e-2" />
 
       <DropdownMenu>
         <TooltipText text="Change Heading Size">

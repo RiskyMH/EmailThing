@@ -23,20 +23,28 @@ import type { ComponentProps } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
 const SmartDrawer = (props: ComponentProps<typeof Drawer>) => {
-    const isDesktop = useMediaQuery("(min-width: 640px)");
-    if (isDesktop) {
-        return <Dialog {...props} />;
-    }
-    return <Drawer {...props} />;
+    // const isDesktop = useMediaQuery("(min-width: 640px)");
+    // if (isDesktop) {
+    //     return <Dialog {...props} />;
+    // }
+    // return <Drawer {...props} />;
+
+    // seem to require both to be present, otherwise when changing size of window -> crash
+    return <>
+        <Dialog {...props}>
+            <Drawer {...props} />
+        </Dialog>
+    </>
 };
 SmartDrawer.displayName = "SmartDrawer";
 
 const SmartDrawerTrigger = (props: Omit<ComponentProps<typeof DrawerTrigger>, "onClick">) => {
     const isDesktop = useMediaQuery("(min-width: 640px)");
     if (isDesktop) {
-        return <DialogTrigger {...props} onClick={() => {}} />;
+        return <DialogTrigger {...props} onClick={() => { }} />
     }
-    return <DrawerTrigger {...props} onClick={() => {}} />;
+    return <DrawerTrigger {...props} onClick={() => { }} />;
+
 };
 SmartDrawerTrigger.displayName = "SmartDrawerTrigger";
 

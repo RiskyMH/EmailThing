@@ -25,106 +25,6 @@ body {
   :root {
     /* light and dark mode available */
     color-scheme: light dark;
-
-    --background: var(--color-light-bg);
-    --foreground: var(--color-light-text);
-
-    --sidebar-bg: var(--color-light-sidebar-bg);
-    --sidebar-active-bg: var(--color-light-sidebar-active-bg);
-    --sidebar-text: var(--color-light-sidebar-text);
-    --sidebar-category-text: var(--color-light-sidebar-category-text);
-
-    --muted: var(--color-light-secondary);
-    --muted-foreground: var(--color-light-muted-text);
-
-    --popover: var(--background);
-    --popover-foreground: var(--color-light-text);
-
-    --border: var(--color-light-border);
-    --input: var(--muted-foreground);
-    --search-bg: var(--color-light-search-bg);
-
-    --card: var(--color-light-card-bg);
-    --card-foreground: var(--color-light-text);
-
-    --subcard: var(--color-light-card-element);
-    --subcard-foreground: var(--color-light-text);
-
-    --primary: var(--color-light-text);
-    --primary-foreground: var(--color-light-bg);
-
-    --secondary: var(--color-light-secondary);
-    --secondary-foreground: var(--color-light-text);
-
-    --accent: var(--color-light-secondary);
-    --accent-foreground: var(--color-light-text);
-
-    --tertiary: var(--color-light-sidebar-bg);
-    --tertiary-foreground: var(--color-light-text);
-
-    --red: #fc5a5a;
-    --red-foreground: var(--color-light-text);
-
-    --blue: #1e75ff;
-    --blue-foreground: var(--primary-foreground);
-
-    --destructive: var(--red);
-    --destructive-foreground: var(--red-foreground);
-
-    --ring: var(--border);
-
-    --radius: 0.5rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: var(--color-dark-bg);
-      --foreground: var(--color-dark-text);
-
-      --sidebar-bg: var(--color-dark-sidebar-bg);
-      --sidebar-active-bg: var(--color-dark-sidebar-active-bg);
-      --sidebar-text: var(--color-dark-sidebar-text);
-      --sidebar-category-text: var(--color-dark-sidebar-category-text);
-
-      --muted: var(--color-dark-secondary);
-      --muted-foreground: var(--color-dark-muted2-text);
-
-      --accent: var(--color-dark-border);
-      --accent-foreground: var(--color-dark-text);
-
-      --popover: var(--color-dark-bg);
-      --popover-foreground: var(--color-dark-text);
-
-      --border: var(--color-dark-border);
-      --input: var(--color-dark-muted-text);
-      --search-bg: var(--color-dark-search-bg);
-
-      --card: var(--color-dark-card-bg);
-      --card-foreground: var(--color-dark-text);
-
-      --subcard: var(--color-dark-card-element);
-      --subcard-foreground: var(--color-dark-text);
-
-      --primary: var(--color-dark-text);
-      --primary-foreground: var(--color-dark-bg);
-
-      --secondary: var(--color-dark-secondary);
-      --secondary-foreground: var(--color-dark-text);
-
-      --tertiary: var(--color-dark-sidebar-bg);
-      --tertiary-foreground: var(--color-dark-text);
-
-      --red: #fc5a5a;
-      --red-foreground: var(--color-dark-text);
-
-      --blue: #1e75ff;
-      --blue-foreground: var(--color-dark-text);
-
-      --destructive: var(--red);
-      --destructive-foreground: var(--red-foreground);
-
-      --ring: var(--input);
-    }
   }
 
   * {
@@ -179,7 +79,7 @@ body {
   animation-delay: 200ms;
 }
 
-@theme {
+@theme inline{
   --border-3: 3px;
 
   --color-border: var(--border);
@@ -189,21 +89,14 @@ body {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
 
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
-  --color-search-bg: var(--search-bg);
-
-  --color-sidebar-bg: var(--sidebar-bg);
-  --color-sidebar-active-bg: var(--sidebar-active-bg);
-  --color-sidebar-text: var(--sidebar-text);
-  --color-sidebar-category-text: var(--sidebar-category-text);
-
-  --color-tertiary: var(--tertiary);
-  --color-tertiary-foreground: var(--tertiary-foreground);
 
   --color-red: var(--red);
   --color-red-foreground: var(--red-foreground);

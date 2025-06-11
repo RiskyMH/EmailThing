@@ -128,16 +128,16 @@ export default function Users() {
         <Table>
           <TableHeader>
             <TableRow className="rounded-t-lg">
-              <TableHead className="rounded-ss-md bg-subcard">
+              <TableHead className="rounded-ss-md bg-sidebar">
                 <p>Username</p>
               </TableHead>
-              <TableHead className="bg-subcard">
+              <TableHead className="bg-sidebar">
                 <p>Added</p>
               </TableHead>
-              <TableHead className="w-1 bg-subcard">
+              <TableHead className="w-1 bg-sidebar">
                 <p>Role</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-subcard" />
+              <TableHead className="w-1 rounded-se-md bg-sidebar" />
             </TableRow>
           </TableHeader>
           <TableBody>

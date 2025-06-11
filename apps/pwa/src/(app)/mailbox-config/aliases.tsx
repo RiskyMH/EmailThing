@@ -107,16 +107,16 @@ export default function Aliases() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="rounded-ss-md bg-subcard">
+              <TableHead className="rounded-ss-md bg-sidebar">
                 <p>Alias</p>
               </TableHead>
-              <TableHead className="bg-subcard">
+              <TableHead className="bg-sidebar">
                 <p>Name</p>
               </TableHead>
-              <TableHead className="bg-subcard text-center">
+              <TableHead className="bg-sidebar text-center">
                 <p>Default</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-subcard" />
+              <TableHead className="w-1 rounded-se-md bg-sidebar" />
             </TableRow>
           </TableHeader>
           <TableBody>

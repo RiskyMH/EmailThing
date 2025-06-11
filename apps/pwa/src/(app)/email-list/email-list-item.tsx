@@ -57,6 +57,7 @@ export interface EmailItemProps {
   mailboxId: string;
   type: "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
   categories?: { id: string; name: string; color?: string | 0 }[] | 0;
+  isSelected?: boolean;
 }
 
 function useInView() {
@@ -87,7 +88,7 @@ function useInView() {
   return [setRef, isInView] as const;
 }
 
-export function EmailItem({ email: _email, mailboxId, type, categories }: EmailItemProps) {
+export function EmailItem({ email: _email, mailboxId, type, categories, isSelected }: EmailItemProps) {
   const emailId = _email.id;
   const [email, setEmail] = useState(_email);
   useEffect(() => {
@@ -143,6 +144,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
         const isDesktop = window.innerWidth > 768;
         if (isEmailColumn && isDesktop) {
           if (type !== "drafts") {
+            updateEmail({ isRead: true });
             const search = new URLSearchParams(window.location.search);
             search.set("mailId", emailId);
             navigate({ search: search.toString() });
@@ -156,10 +158,11 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
         }
       }}
       className={cn(
-        "group inline-flex h-10 gap-3 rounded-md px-2 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "group inline-flex h-10 gap-3 rounded-md mx-2 px-2 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all",
         email.isRead
           ? "hover:bg-subcard/60"
-          : "bg-subcard text-subcard-foreground hover:bg-subcard/60",
+          : "bg-subcard/80 text-foreground hover:bg-subcard/60 md:[.emailscolumn_&]:px-4 md:[.emailscolumn_&]:mx-0 md:[.emailscolumn_&]:rounded-none",
+        isSelected && "md:[.emailscolumn_&]:bg-subcard md:[.emailscolumn_&]:hover:bg-subcard md:[.emailscolumn_&]:shadow-lg md:[.emailscolumn_&]:dark:drop-shadow-zinc-200 md:[.emailscolumn_&]:text-foreground md:[.emailscolumn_&]:px-2 md:[.emailscolumn_&]:mx-2 md:[.emailscolumn_&]:rounded-md",
       )}
     >
       {/* Category indicator */}
@@ -197,7 +200,8 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
       <span
         className={cn(
           "w-1/4 shrink-0 self-center truncate text-sm @max-sm:block @lg:w-32 @3xl:w-56",
-          !email.isRead ? "font-bold" : "text-foreground/80",
+          !email.isRead ? "font-semibold" : "text-foreground/80",
+          isSelected && "md:[.emailscolumn_&]:text-foreground",
         )}
         title={email.from?.address ?? "uh?"}
       >
@@ -211,6 +215,7 @@ export function EmailItem({ email: _email, mailboxId, type, categories }: EmailI
           "self-center truncate text-sm",
           !email.subject && "italic",
           !email.isRead ? "font-bold" : "text-foreground/80",
+          isSelected && "md:[.emailscolumn_&]:text-foreground",
         )}
         title={email.subject || "No subject was provided"}
       >

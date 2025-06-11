@@ -97,7 +97,7 @@ export default function EditorContent2({
     >
       <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
         <BodyHeader editor={editor} />
-        <span className="flex h-0 w-full shrink-0 grow-0 rounded-none //border-card border-b-2" />
+        <span className="flex h-0 w-full shrink-0 grow-0 rounded-none border-card border-b-2" />
       </div>
 
       {!editor && (

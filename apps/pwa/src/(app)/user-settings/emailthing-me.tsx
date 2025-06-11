@@ -43,7 +43,7 @@ export default function UserSettingsEmailthingMe() {
         </CardDescription>
       </div>
 
-      <div className="flex flex-row items-center justify-between gap-2 rounded-lg bg-secondary p-6">
+      <div className="flex flex-row items-center justify-between gap-2 rounded-lg bg-card p-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="enabled" className="font-semibold text-xl leading-none tracking-tight">
             Enable public page
@@ -51,7 +51,7 @@ export default function UserSettingsEmailthingMe() {
           <p className="text-muted-foreground text-sm">
             If you enable this, anyone will be able to send you email easier.
           </p>
-          {user?.publicContactPage && (
+          {user?.publicContactPage ? (
             <a
               href={`https://emailthing.me/@${user.username}`}
               className="text-sm underline transition-colors hover:text-blue"
@@ -60,12 +60,17 @@ export default function UserSettingsEmailthingMe() {
             >
               https://emailthing.me/@{user.username}
             </a>
-          )}
+          ) : null}
         </div>
         {/* <Switch id="enabled" defaultChecked={emailmeEnabled} /> */}
         <form action={changePublicEmailStatus as any}>
           <input name="enabled" value={user?.publicContactPage ? "false" : "true"} hidden />
-          <ClientSwitch id="enabled" checked={!!user?.publicContactPage} type="submit" />
+          <ClientSwitch
+            id="enabled"
+            checked={!!user?.publicContactPage}
+            type="submit"
+            className="data-[state=unchecked]:bg-muted-foreground dark:data-[state=unchecked]:bg-[#4e4e56]"
+          />
         </form>
       </div>
 

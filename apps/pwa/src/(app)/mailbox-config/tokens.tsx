@@ -112,17 +112,17 @@ export default function APITokens() {
         <Table>
           <TableHeader>
             <TableRow className="rounded-t-lg">
-              <TableHead className="rounded-ss-md bg-subcard">
+              <TableHead className="rounded-ss-md bg-sidebar">
                 <p>Name</p>
                 {/* also includes somewhat token */}
               </TableHead>
-              <TableHead className="bg-subcard">
+              <TableHead className="bg-sidebar">
                 <p>Created</p>
               </TableHead>
-              <TableHead className="bg-subcard">
+              <TableHead className="bg-sidebar">
                 <p>Expires</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-subcard" />
+              <TableHead className="w-1 rounded-se-md bg-sidebar" />
             </TableRow>
           </TableHeader>
           <TableBody>

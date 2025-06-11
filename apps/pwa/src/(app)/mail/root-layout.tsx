@@ -1,6 +1,6 @@
 import { db } from "@/utils/data/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import RootLayout from "../layout";
 import Header from "./root-layout-header";
@@ -16,8 +16,9 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <RootLayout>
-      <div className="//min-h-screen bg-sidebar-bg h-screen overflow-hidden emailscolumn" vaul-drawer-wrapper="" id="app:root-layout">
-      <script dangerouslySetInnerHTML={{ __html: /*js*/`
+      <div className="//min-h-screen //bg-sidebar h-screen overflow-hidden emailscolumn" vaul-drawer-wrapper="" id="app:root-layout">
+        <script dangerouslySetInnerHTML={{
+          __html: /*js*/`
         const fn = () => {
         const emailView = localStorage.getItem("email-view") ?? "column";
         const rootLayout = document.getElementById("app:root-layout");
@@ -37,8 +38,14 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
         //   window.removeEventListener("load", fn);
         // }
       ` }} />
+        <style dangerouslySetInnerHTML={{
+          __html: /*css*/`
+      body {
+        background-color: var(--sidebar) !important;
+      }
+      ` }} />
         <Header />
-        <div className="flex h-[calc(100vh-4.1rem)] w-screen max-w-full bg-sidebar-bg">
+        <div className="flex h-[calc(100vh-4.1rem)] w-screen max-w-full bg-transparent">
           <Sidebar className="hidden min-h-[calc(100vh-4.1rem)] sm:flex pt-0 sm:pt-0" />
           <div
             className="h-[calc(100vh-4.1rem)] w-screen max-w-full overflow-y-auto sm:rounded-tl-lg @container"

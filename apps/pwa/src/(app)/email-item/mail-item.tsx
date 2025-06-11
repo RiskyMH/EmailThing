@@ -92,6 +92,10 @@ function MailItem({ mailId }: { mailId?: string }) {
   const lastEmailId = useRef<string | null>(null);
   useEffect(() => {
     if (!email) return;
+
+    // the onClick will ensure for that
+    if (window.location.search.includes("mailId")) return;
+
     if (lastEmailId.current !== email.id) {
       lastEmailId.current = email.id;
       if (!email.isRead) {
@@ -103,7 +107,7 @@ function MailItem({ mailId }: { mailId?: string }) {
   if (!params.mailboxId) return <Loading />;
 
   if (!emailId) return (
-    <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-card rounded-lg bg-card">
+    <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-background rounded-lg bg-background">
       <p className="text-muted-foreground">Select an email to view</p>
       {/* <MailboxTitle mailboxId={params.mailboxId} /> */}
     </div>
@@ -111,7 +115,7 @@ function MailItem({ mailId }: { mailId?: string }) {
 
 
   if (email === null) return (
-    <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-card rounded-lg bg-card">
+    <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-background rounded-lg bg-background">
       <p className="text-muted-foreground">Email not found</p>
       <MailboxTitle mailboxId={params.mailboxId} />
     </div>
@@ -128,14 +132,14 @@ function MailItem({ mailId }: { mailId?: string }) {
   // const attachmentsPresigned = []
 
   return (
-    <div className="flex size-full min-w-0 flex-col //gap-3 [.emailslist_&]:p-0 bg-card [.emailslist_&]:rounded-lg">
+    <div className="flex size-full min-w-0 flex-col //gap-3 [.emailslist_&]:p-0 bg-background [.emailslist_&]:rounded-lg">
       <TopButtons
         mailboxId={params.mailboxId}
         emailId={email.id}
         email={email}
         onUpdateEmail={updateEmail}
       />
-      <div className="flex gap-3 flex-col overflow-y-auto rounded-lg pt-3 p-3 [.emailslist_&]:p-0 [.emailslist_&]:pt-3">
+      <div className="flex gap-3 flex-col overflow-y-auto rounded-lg pt-3 p-3 [.emailslist_&]:p-0 [.emailslist_&]:pt-3 [.emailslist_&]:rounded-none">
         <MailboxTitle mailboxId={params.mailboxId} title={email.subject} />
 
         <h1 className="mt-3 break-words px-3 font-bold text-2xl @xl:text-3xl">{email.subject}</h1>
@@ -578,13 +582,13 @@ function EmailPicture({ email, fallback }: { email: string; fallback?: string })
   return (
     <Avatar
       className={
-        "size-12 bg-card transition-all data-[gravatar=false]:rounded-lg data-[gravatar=true]:rounded-full data-[gravatar=false]:[&>img]:rounded-[20%] data-[gravatar=false]:[&>img]:p-2"
+        "size-12 bg-background transition-all data-[gravatar=false]:rounded-lg data-[gravatar=true]:rounded-full data-[gravatar=false]:[&>img]:rounded-[20%] data-[gravatar=false]:[&>img]:p-2"
       }
       data-gravatar={isGravatar}
     >
       {/* somehow svgl doesn't like crossOrigin=anonymous */}
       <AvatarImage src={img} /*crossOrigin={isGravatar ? "anonymous" : undefined}*/ />
-      <AvatarFallback className="bg-card">{fallback}</AvatarFallback>
+      <AvatarFallback className="bg-background">{fallback}</AvatarFallback>
     </Avatar>
   );
 }

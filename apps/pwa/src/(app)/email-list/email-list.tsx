@@ -111,27 +111,27 @@ function EmailList({
   }, []);
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="flex w-full min-w-0 flex-row h-full gap-2 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist">
+    <ResizablePanelGroup direction="horizontal" className="flex w-full min-w-0 flex-row h-full gap-2 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist bg-sidebar">
       <ResizablePanel className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg @container" defaultSize={isLg ? 40 : 50} minSize={isLg ? 30 : 35} collapsible={false}>
-          {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
-          <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
-            <Categories filter={type} /> 
-          </div>
+        {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
+        <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-card px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
+          <Categories filter={type} />
+        </div>
 
-          <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 px-2" id="email-list-content">
-            <Emails filter={type} />
-          </div>
-          <Title type={type} />
-          {/* </div> */}
-        </ResizablePanel>
+        <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-card pt-2 //px-2" id="email-list-content">
+          <Emails filter={type} />
+        </div>
+        <Title type={type} />
+        {/* </div> */}
+      </ResizablePanel>
 
-        <ResizableHandle className="bg-transparent mx-[-0.25rem] w-0 max-sm:hidden"/>
+      <ResizableHandle className="bg-transparent mx-[-0.25rem] w-0 max-sm:hidden" />
 
-        <ResizablePanel className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto @container" minSize={isLg ? 30 : 35} collapsible={false}>
-          {/* <div className=" bg-card rounded-lg h-full overflow-auto">
+      <ResizablePanel className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto @container" minSize={isLg ? 30 : 35} collapsible={false}>
+        {/* <div className=" bg-card rounded-lg h-full overflow-auto">
         </div> */}
-          <MailItemSuspense />
-        </ResizablePanel>
+        <MailItemSuspense />
+      </ResizablePanel>
 
     </ResizablePanelGroup>
 
@@ -217,6 +217,7 @@ function Emails({
   const getAll = searchParams.has("all");
   const mailboxId =
     params.mailboxId === "[mailboxId]" || !params.mailboxId ? "demo" : params.mailboxId;
+  const emailId = searchParams.get("mailId") as string | null;
 
   const key = JSON.stringify({
     m: mailboxId,
@@ -421,6 +422,7 @@ function Emails({
             categories={categories || undefined}
             mailboxId={mailboxId}
             type={type}
+            isSelected={emailId === email.id}
           />
         </Fragment>
       ))}
@@ -468,7 +470,7 @@ function EmailDate({
   if (dateB && dateString === dateStringB) return null;
 
   return (
-    <div className="flex h-5 px-2 font-medium text-muted-foreground text-xs">
+    <div className="flex h-5 px-4 font-medium text-muted-foreground text-xs">
       <p className="self-end">{dateString}</p>
     </div>
   );

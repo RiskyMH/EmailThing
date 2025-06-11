@@ -90,10 +90,10 @@ export default function Categories() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="rounded-ss-md bg-subcard">
+              <TableHead className="rounded-ss-md bg-sidebar">
                 <p>Name</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-subcard" />
+              <TableHead className="w-1 rounded-se-md bg-sidebar" />
             </TableRow>
           </TableHeader>
           <TableBody>

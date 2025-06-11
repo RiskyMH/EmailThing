@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/utils/tw";
 import { ChevronDownIcon, Loader2, SearchIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -41,34 +42,32 @@ export function Search({ className, mailboxId }: { className?: string; mailboxId
     };
 
     return (
-        <form
-            onSubmit={onSubmit}
-            action={`/mail/${mailboxId}`}
-            className={cn(
-                "group flex h-9 w-full gap-2 self-center rounded-lg bg-search-bg px-1 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                className,
-            )}
-        >
-            <Button
-                size="icon-sm"
-                variant="ghost"
-                className="m-0.5 shrink-0 self-center rounded-full p-1.5 text-muted-foreground focus-visible:ring-1 focus-visible:ring-offset-0"
-                type="submit"
+        <Input asChild className="bg-input px-1 border-none w-full lg:w-96">
+            <form
+                onSubmit={onSubmit}
+                action={`/mail/${mailboxId}`}
             >
-                {isPending ? (
-                    <Loader2 className="animate-spin self-center text-muted-foreground" />
-                ) : (
-                    <SearchIcon className="self-center text-muted-foreground" />
-                )}
-            </Button>
-            <input
-                ref={ref}
-                type="search"
-                name="q"
-                placeholder="Search emails..."
-                className="w-full border-none bg-transparent focus-visible:outline-none"
-            />
-            <ChevronDownIcon className="me-2 self-center text-muted-foreground" />
-        </form>
+                <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    className="m-0.5 shrink-0 self-center rounded-full p-1.5 text-muted-foreground focus-visible:ring-1 focus-visible:ring-offset-0"
+                    type="submit"
+                >
+                    {isPending ? (
+                        <Loader2 className="animate-spin self-center text-muted-foreground" />
+                    ) : (
+                        <SearchIcon className="self-center text-muted-foreground" />
+                    )}
+                </Button>
+                <input
+                    ref={ref}
+                    type="search"
+                    name="q"
+                    placeholder="Search emails..."
+                    className="w-full border-none bg-transparent focus-visible:outline-none"
+                />
+                <ChevronDownIcon className="me-2 self-center text-muted-foreground" />
+            </form>
+        </Input>
     );
 }

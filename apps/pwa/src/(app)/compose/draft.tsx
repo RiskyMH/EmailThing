@@ -171,9 +171,9 @@ export default function DraftPage() {
           aliases={aliases}
           onSave={save}
         />
-        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card/75 border-b-2" />
+        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-card/75 border-b-2" />
         <RecipientInput savedTo={mail.to || undefined} onSave={save} forceSave={forceSave} />
-        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card/75 border-b-2" />
+        <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-card/75 border-b-2" />
         <Subject savedSubject={mail.subject || undefined} onSave={save} />
       </div>
 

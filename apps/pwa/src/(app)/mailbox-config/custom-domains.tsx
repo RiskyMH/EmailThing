@@ -99,10 +99,10 @@ export default function CustomDomains() {
         <Table>
           <TableHeader>
             <TableRow className="rounded-t-lg">
-              <TableHead className="rounded-ss-md bg-subcard">
+              <TableHead className="rounded-ss-md bg-sidebar">
                 <p>Domain</p>
               </TableHead>
-              <TableHead className="w-1 rounded-se-md bg-subcard" />
+              <TableHead className="w-1 rounded-se-md bg-sidebar" />
             </TableRow>
           </TableHeader>
           <TableBody>

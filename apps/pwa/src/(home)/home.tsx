@@ -233,7 +233,7 @@ function Feature({
   icon: Icon,
 }: { title: string; description: string | ReactNode; icon: LucideIcon }) {
   return (
-    <div className="relative overflow-hidden rounded-lg bg-card p-2">
+    <div className="relative overflow-hidden rounded-lg bg-subcard p-2">
       <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
         <Icon className="size-12" />
         <div className="flex flex-col gap-2">

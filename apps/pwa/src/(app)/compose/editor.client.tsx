@@ -77,7 +77,7 @@ export function BodyEditor({
         >
           <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
             <BodyHeader />
-            <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card border-b-2" />
+            <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-card border-b-2" />
           </div>
           <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
             <Loader2 className="size-12 animate-spin text-muted-foreground" />
@@ -626,7 +626,7 @@ export function RecipientInput({
             </div>
             <span
               className={cn(
-                "flex h-0 w-full shrink-0 grow-0 rounded-sm //border-card/75 border-b-2",
+                "flex h-0 w-full shrink-0 grow-0 rounded-sm border-card/75 border-b-2",
                 (!types.includes(type) || i + 1 === types.length) && "hidden",
               )}
             />

@@ -113,7 +113,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <a
               href={DISCORD_URL}
               target="blank"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-search-bg p-2 hover:bg-search-bg/80"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-input p-2 hover:bg-input/80"
             >
               Get Invite <ExternalLinkIcon className="size-4 text-muted-foreground" />
             </a>
@@ -198,26 +198,23 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Label className="sr-only" htmlFor="email">
               Username
             </Label>
-            <div
-              className={cn(
-                "group flex h-10 w-full gap-2 self-center rounded-md bg-search-bg px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-                isPending && "cursor-not-allowed opacity-50",
-              )}
-            >
-              <input
-                id="username"
-                name="username"
-                placeholder="Username"
-                type="text"
-                autoCapitalize="none"
-                autoComplete="new-password"
-                autoCorrect="off"
-                className="w-full bg-transparent focus-visible:outline-none"
-                disabled={isPending}
-                required
-              />
-              <span>@emailthing.xyz</span>
-            </div>
+            <Input asChild disabled={isPending} className="bg-input flex gap-2">
+              <div>
+                <input
+                  id="username"
+                  name="username"
+                  placeholder="Username"
+                  type="text"
+                  autoCapitalize="none"
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  className="w-full bg-transparent focus-visible:outline-none"
+                  disabled={isPending}
+                  required
+                />
+                <span>@emailthing.xyz</span>
+              </div>
+            </Input>
           </div>
           <div className="grid gap-1">
             <Label className="sr-only" htmlFor="email">
@@ -230,7 +227,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               type="password"
               autoComplete="new-password"
               autoCorrect="off"
-              className="border-none bg-search-bg"
+              className="border-none bg-input"
               disabled={isPending}
               required
             />

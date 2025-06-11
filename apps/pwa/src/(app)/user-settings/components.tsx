@@ -3,10 +3,10 @@
 import DisableFormReset from "@/components/disable-reset.client";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
-import { Input, type InputProps } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea, type TextareaProps } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch-old";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/tw";
 import type { SelectProps } from "@radix-ui/react-select";
 import type { SwitchProps } from "@radix-ui/react-switch";
@@ -46,7 +46,7 @@ export function CardForm({
   return (
     <form action={formAction} id={id}>
       {children}
-      <CardFooter className="border-muted-foreground/30 border-t px-6 py-4">
+      <CardFooter className="border-muted-foreground/30 border-t px-4 py-2">
         {state?.error ? (
           <span className="text-red text-sm">{state.error}</span>
         ) : (
@@ -96,13 +96,13 @@ export function ClientSelect(props: SelectProps) {
   );
 }
 
-export function ClientInput(props: InputProps) {
+export function ClientInput(props: React.ComponentProps<"input">) {
   const state = useFormStatus();
 
   return <Input {...props} disabled={props.disabled || state.pending} />;
 }
 
-export function ClientTextarea(props: TextareaProps) {
+export function ClientTextarea(props: React.ComponentProps<"textarea">) {
   const state = useFormStatus();
 
   return <Textarea {...props} disabled={props.disabled || state.pending} />;

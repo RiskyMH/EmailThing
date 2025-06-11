@@ -32,7 +32,7 @@ export function DocsSidebarNav({ items }: DocsSidebarNavProps) {
                                         href={item.href}
                                         className={cn(
                                             "flex w-full items-center rounded-md p-2 hover:underline",
-                                            pathname === item.href && "bg-sidebar-active-bg",
+                                            pathname === item.href && "bg-accent/65",
                                         )}
                                         target={item.external ? "_blank" : ""}
                                     >
