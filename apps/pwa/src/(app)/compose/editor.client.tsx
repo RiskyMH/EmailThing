@@ -396,7 +396,7 @@ export function RecipientInput({
 
   function validate(element: HTMLInputElement, type: (typeof types)[number], toastOnError = true) {
     const value = element.value.trim();
-    
+
     // Split by commas or newlines
     const emails = value.split(/[\s\t,;\n]+/).map(email => email.trim()).filter(Boolean);
     let addedCount = 0;
@@ -405,7 +405,7 @@ export function RecipientInput({
 
     for (const email of emails) {
       const existingRecipients = to.filter(r => r.cc === (type === "to" ? null : type) && r.address === email);
-      
+
       if (existingRecipients.length > 0) {
         // Keep first occurrence, remove any duplicates after
         setTo(r => {
@@ -598,8 +598,9 @@ export function RecipientInput({
                     }
                   }}
                   onKeyDown={(e) => {
-                    if ((e.key === "Enter" || e.key === " ") && !e.shiftKey) {
+                    if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
+                      if (e.shiftKey) return;
                       if (!e.currentTarget.value) return toast.warning("Please add an email first");
                       validate(e.currentTarget, type);
                     } else if (e.key === "Backspace" && e.currentTarget.value === "") {
