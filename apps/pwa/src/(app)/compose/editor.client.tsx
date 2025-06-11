@@ -392,37 +392,60 @@ export function RecipientInput({
   const types = ["to", ...(showCC ? ["cc"] : []), ...(showBCC ? ["bcc"] : [])] as const;
   const allTypes = ["to", "cc", "bcc"] as const;
 
-  // const update = useDebouncedCallback(() => (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit(), 150);
   const update = onSave;
 
   function validate(element: HTMLInputElement, type: (typeof types)[number], toastOnError = true) {
-    const value = `${element.value}`;
-    if (to.find((r) => r.cc === (type === "to" ? null : type) && r.address === value)) {
-      setTo((r) =>
-        r.filter((r) => !(r.cc === (type === "to" ? null : type) && r.address === value)),
-      );
-      toast.info("Removed duplicate email");
-      element.value = "";
-      return;
-    }
+    const value = element.value.trim();
+    
+    // Split by commas or newlines
+    const emails = value.split(/[\s\t,;\n]+/).map(email => email.trim()).filter(Boolean);
+    let addedCount = 0;
+    let allDuplicate = false;
     const emailRegex = /\S+@\S+\.\S+/;
 
-    if (emailRegex.test(value)) {
-      setTo((to) => [
-        ...to,
-        {
-          name: null,
-          address: value,
-          cc: type === "to" ? null : (type as any),
-        },
-      ]);
-      element.value = "";
-      update();
-    } else if (toastOnError) {
-      toast.error("Invalid email address");
+    for (const email of emails) {
+      const existingRecipients = to.filter(r => r.cc === (type === "to" ? null : type) && r.address === email);
+      
+      if (existingRecipients.length > 0) {
+        // Keep first occurrence, remove any duplicates after
+        setTo(r => {
+          let found = false;
+          return r.filter(recipient => {
+            if (recipient.cc === (type === "to" ? null : type) && recipient.address === email) {
+              if (!found) {
+                found = true;
+                return true;
+              }
+              return false;
+            }
+            return true;
+          });
+        });
+        allDuplicate = true;
+        continue;
+      }
+
+      if (emailRegex.test(email)) {
+        setTo((to) => [
+          ...to,
+          {
+            name: null,
+            address: email,
+            cc: type === "to" ? null : (type as any),
+          },
+        ]);
+        addedCount++;
+      } else if (toastOnError) {
+        toast.error(`Invalid email address: ${email}`);
+      }
     }
-    element.value = element.value.replaceAll(" ", "");
-    // (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit();
+
+    if (addedCount > 0) {
+      update();
+      element.value = "";
+    } else if (allDuplicate) {
+      element.value = "";
+    }
   }
 
   useEffect(() => {
@@ -432,8 +455,6 @@ export function RecipientInput({
         // do nothing
       } else {
         setShowFull(false);
-        // setShowCC(to?.some(r => r.cc === "cc") ?? false);
-        // setShowBCC(to?.some(r => r.cc === "bcc") ?? false);
       }
     };
 
@@ -452,7 +473,6 @@ export function RecipientInput({
         } else {
           toast.info("Saving...", { duration: 500 });
         }
-        // (document.getElementById("draft-form") as HTMLFormElement)?.requestSubmit();
       } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         (document.getElementById("send-button") as any)?.click();
@@ -478,14 +498,13 @@ export function RecipientInput({
 
   return (
     <>
-      <Input asChild className="border-none focus-within:z-10">
+      <Input asChild className="border-none focus-visible:z-10 shrink-0 gap-2 self-center overflow-y-hidden text-ellipsis">
         <button
           onClick={() => {
             setShowFull(true);
             setTimeout(() => document.getElementById("to:to")?.focus(), 0);
           }}
           className={cn(
-            // "flex h-10 w-full shrink-0 gap-2 self-center overflow-y-hidden text-ellipsis rounded-md !bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
             showFull && "hidden",
           )}
           type="button"
@@ -542,10 +561,9 @@ export function RecipientInput({
       <div className={cn("flex flex-col divide-y-2", !showFull && "hidden")} id="recipients-full">
         {allTypes.map((type, i) => (
           <Fragment key={type}>
-            <Input asChild className="border-none focus-within:z-10 group flex gap-2 items-center">
+            <Input asChild className="border-none focus-within:z-10 group flex gap-2 items-center group w-full flex-wrap self-center h-auto px-3 py-1">
               <div
                 className={cn(
-                  // "group flex w-full flex-wrap gap-2 self-center rounded-md border-none bg-card px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                   !types.includes(type) && "hidden",
                 )}
               >
@@ -580,7 +598,7 @@ export function RecipientInput({
                     }
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                    if ((e.key === "Enter" || e.key === " ") && !e.shiftKey) {
                       e.preventDefault();
                       if (!e.currentTarget.value) return toast.warning("Please add an email first");
                       validate(e.currentTarget, type);
@@ -598,6 +616,12 @@ export function RecipientInput({
                       });
                       update();
                     }
+                  }}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const text = e.clipboardData.getData('text');
+                    e.currentTarget.value = text;
+                    validate(e.currentTarget, type);
                   }}
                 />
                 <div className="self-centre flex">
