@@ -138,6 +138,14 @@ export function EmailItem({ email: _email, mailboxId, type, categories, isSelect
       ref={ref}
       href={link}
       onClick={(e) => {
+        if (e.metaKey || e.ctrlKey) {
+          // window.open(link, "_blank");
+          return;
+        }
+        if (e.shiftKey) {
+          // window.open(link, "_parent");
+          return;
+        }
         e.preventDefault();
         e.stopPropagation();
         const isEmailColumn = document.getElementById("app:root-layout")?.classList.contains("emailscolumn");
