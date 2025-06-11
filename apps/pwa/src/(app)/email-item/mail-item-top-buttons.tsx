@@ -140,7 +140,7 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
         </Button>
       </TooltipText>
 
-      <TooltipText text="Open in new tab">
+      <TooltipText text="Open full email">
         <Button
           variant="ghost"
           size="auto"

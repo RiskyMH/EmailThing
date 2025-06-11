@@ -13,7 +13,7 @@
         --popover-foreground: var(--primary);
 
         --border: #eeeff0;
-        --input: var(--secondary);
+        --input: var(--muted-foreground);
 
         --card: var(--secondary);
         --card-foreground: var(--primary);
@@ -74,7 +74,7 @@
             --popover-foreground: var(--primary);
 
             --border: #2c2c34;
-            --input: var(--secondary);
+            --input: #4e4e56;
 
             --card: var(--secondary);
             --card-foreground: var(--primary);

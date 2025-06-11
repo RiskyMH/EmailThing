@@ -26,6 +26,8 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import { Loader2 } from "lucide-react";
 import { parse as markedParse } from "marked";
 import { BodyHeader } from "./tiptap-header";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 export default function EditorContent2({
   savedBody,
@@ -78,7 +80,7 @@ export default function EditorContent2({
     editorProps: {
       attributes: {
         class:
-          "prose dark:prose-invert prose-md prose-sm=sm:prose=lg:prose-lg=xl:prose-2xl focus:outline-none overflow-auto px-3 pb-2 size-full max-w-full  min-h-28 focus-visible:outline-none bg-transparent border-none",
+          "prose dark:prose-invert prose-md prose-sm=sm:prose=lg:prose-lg=xl:prose-2xl focus:outline-none overflow-auto px-3 pb-2 size-full max-w-full  min-h-28 focus-visible:outline-none border-none",
       },
     },
     onUpdate: (e) => setTimeout(debounced, 0),
@@ -89,36 +91,38 @@ export default function EditorContent2({
   const text = editor?.getText();
 
   return (
-    <EditorContent
-      editor={editor}
-      data-placeholder="Write your email body here..."
-      className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border-none bg-card text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-      style={{ fontFamily: "Arial, sans-serif" }}
-    >
-      <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
-        <BodyHeader editor={editor} />
-        <span className="flex h-0 w-full shrink-0 grow-0 rounded-none border-background border-b-2" />
-      </div>
-
-      {!editor && (
-        <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
-          <Loader2 className="size-12 animate-spin text-muted-foreground" />
+    <Input asChild className="border-none bg-card px-0 py-0 focus-within:border-ring focus-within:ring-ring/50 flex flex-col text-base">
+      <EditorContent
+        editor={editor}
+        data-placeholder="Write your email body here..."
+        className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md bg-card"
+        style={{ fontFamily: "Arial, sans-serif" }}
+      >
+        <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
+          <BodyHeader editor={editor} />
+          <span className="flex h-0 w-full shrink-0 grow-0 rounded-none border-background border-b-2" />
         </div>
-      )}
 
-      {/* //todo: maybe use json instead of html */}
-      {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
-      <input hidden value={`${html}<!--tiptap-->` || savedBody} name="body" readOnly />
-      <input
-        hidden
-        value={html
-          ?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")}
-        name="html"
-        readOnly
-      />
-      <input hidden value={text?.slice(0, 250)} name="preview" readOnly />
-      {/* </div > */}
-    </EditorContent>
+        {!editor && (
+          <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
+            <Loader2 className="size-12 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
+        {/* //todo: maybe use json instead of html */}
+        {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
+        <input hidden value={`${html}<!--tiptap-->` || savedBody} name="body" readOnly />
+        <input
+          hidden
+          value={html
+            ?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")}
+          name="html"
+          readOnly
+        />
+        <input hidden value={text?.slice(0, 250)} name="preview" readOnly />
+        {/* </div > */}
+      </EditorContent>
+    </Input>
   );
 }
 

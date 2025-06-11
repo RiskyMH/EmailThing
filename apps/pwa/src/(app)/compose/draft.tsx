@@ -160,7 +160,7 @@ export default function DraftPage() {
       action={saveDraftAction}
       ref={ref}
       id="draft-form"
-      className="flex size-full flex-col gap-4 overflow-auto bg-background p-4 sm:p-2 pb-2"
+      className="flex size-full flex-col gap-4 overflow-auto bg-background p-4 pb-2"
       suppressHydrationWarning
     >
       <MailboxTitle mailboxId={params.mailboxId!} title={mail.subject ? `${mail.subject} (draft)` : "New Draft"} />

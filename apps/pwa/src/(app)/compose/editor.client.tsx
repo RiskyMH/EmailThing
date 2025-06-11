@@ -71,18 +71,20 @@ export function BodyEditor({
       fallback={
         // SUSPENCE FALLBACK BELOW
         // see ./tiptap.tsx for the real component
-        <div
-          className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md border border-input border-none !bg-card text-base ring-offset-background placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ fontFamily: "Arial, sans-serif" }}
-        >
-          <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
-            <BodyHeader />
-            <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background border-b-2" />
+        <Textarea asChild className="border-none bg-card px-0 py-0 focus-within:border-ring focus-within:ring-ring/50">
+          <div
+            className="tiptap-editor group flex h-full w-full max-w-full grow resize-none flex-col overflow-auto break-words rounded-md bg-card border-none"
+            style={{ fontFamily: "Arial, sans-serif" }}
+          >
+            <div className="sticky top-0 z-10 flex h-11 shrink-0 flex-col gap-1 overflow-x-auto overflow-y-hidden py-1 outline-none">
+              <BodyHeader />
+              <span className="flex h-0 w-full shrink-0 grow-0 rounded-sm border-background border-b-2" />
+            </div>
+            <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
+              <Loader2 className="size-12 animate-spin text-muted-foreground" />
+            </div>
           </div>
-          <div className="fade-in flex h-[calc(100%-2.75rem)] w-full items-center justify-center overflow-auto">
-            <Loader2 className="size-12 animate-spin text-muted-foreground" />
-          </div>
-        </div>
+        </Textarea>
       }
     >
       <EditorContent2 savedBody={savedBody} onSave={onSave} />
@@ -476,59 +478,61 @@ export function RecipientInput({
 
   return (
     <>
-      <button
-        onClick={() => {
-          setShowFull(true);
-          setTimeout(() => document.getElementById("to:to")?.focus(), 0);
-        }}
-        className={cn(
-          "flex h-10 w-full shrink-0 gap-2 self-center overflow-y-hidden text-ellipsis rounded-md !bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          showFull && "hidden",
-        )}
-        type="button"
-      >
-        <span className="flex w-full gap-2 self-center overflow-y-hidden text-ellipsis">
-          {types.map((type) => (
-            <Fragment key={type}>
-              <span className="shrink-0 self-center text-muted-foreground text-sm">
-                {{ to: "To", cc: "CC", bcc: "BCC" }[type]}
-              </span>
-              <span className="shrink-0 self-center">
-                {to
-                  .filter((r) => r.cc === (type === "to" ? null : type))
-                  .map(({ name, address }) => name || address)
-                  .join(", ")}
-              </span>
-            </Fragment>
-          ))}
-        </span>
-        <span className="self-centre flex">
-          <Button
-            variant="ghost"
-            size="auto"
-            className="self-centre rounded px-2 text-muted-foreground hover:text-white"
-            onClick={() => {
-              setShowCC(true);
-              setTimeout(() => document.getElementById("to:cc")?.focus(), 10);
-            }}
-            asChild
-          >
-            <span>Cc</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="auto"
-            className="self-centre rounded px-2 text-muted-foreground hover:text-white"
-            onClick={() => {
-              setShowBCC(true);
-              setTimeout(() => document.getElementById("to:bcc")?.focus(), 10);
-            }}
-            asChild
-          >
-            <span>Bcc</span>
-          </Button>
-        </span>
-      </button>
+      <Input asChild className="border-none focus-within:z-10">
+        <button
+          onClick={() => {
+            setShowFull(true);
+            setTimeout(() => document.getElementById("to:to")?.focus(), 0);
+          }}
+          className={cn(
+            // "flex h-10 w-full shrink-0 gap-2 self-center overflow-y-hidden text-ellipsis rounded-md !bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            showFull && "hidden",
+          )}
+          type="button"
+        >
+          <span className="flex w-full gap-2 self-center overflow-y-hidden text-ellipsis">
+            {types.map((type) => (
+              <Fragment key={type}>
+                <span className="shrink-0 self-center text-muted-foreground text-sm">
+                  {{ to: "To", cc: "CC", bcc: "BCC" }[type]}
+                </span>
+                <span className="shrink-0 self-center">
+                  {to
+                    .filter((r) => r.cc === (type === "to" ? null : type))
+                    .map(({ name, address }) => name || address)
+                    .join(", ")}
+                </span>
+              </Fragment>
+            ))}
+          </span>
+          <span className="self-centre flex">
+            <Button
+              variant="ghost"
+              size="auto"
+              className="self-centre rounded px-2 text-muted-foreground hover:text-white"
+              onClick={() => {
+                setShowCC(true);
+                setTimeout(() => document.getElementById("to:cc")?.focus(), 10);
+              }}
+              asChild
+            >
+              <span>Cc</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="auto"
+              className="self-centre rounded px-2 text-muted-foreground hover:text-white"
+              onClick={() => {
+                setShowBCC(true);
+                setTimeout(() => document.getElementById("to:bcc")?.focus(), 10);
+              }}
+              asChild
+            >
+              <span>Bcc</span>
+            </Button>
+          </span>
+        </button>
+      </Input>
       <div className="hidden">
         {to.map((v) => (
           <ToFormData key={v.address} address={v.address} name={v.name} cc={v.cc} />
@@ -538,92 +542,94 @@ export function RecipientInput({
       <div className={cn("flex flex-col divide-y-2", !showFull && "hidden")} id="recipients-full">
         {allTypes.map((type, i) => (
           <Fragment key={type}>
-            <div
-              className={cn(
-                "group flex w-full flex-wrap gap-2 self-center rounded-md border-none bg-card px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                !types.includes(type) && "hidden",
-              )}
-            >
-              <span className="flex w-8 shrink-0 self-center text-muted-foreground text-sm">
-                {{ to: "To", cc: "CC", bcc: "BCC" }[type]}
-              </span>
-              {to
-                .filter((r) => r.cc === (type === "to" ? null : type))
-                .map(({ name, address }) => (
-                  <RecipientPill
-                    key={address}
-                    name={name}
-                    address={address}
-                    onRemove={() =>
-                      setTo((to) =>
-                        to.filter(
-                          (r) => !(r.address === address && r.cc === (type === "to" ? null : type)),
-                        ),
-                      )
-                    }
-                  />
-                ))}
-              <input
-                id={`to:${type}`}
-                className="grow bg-transparent py-1 text-sm focus-visible:outline-none sm:min-w-48"
-                placeholder="Add recipients..."
-                type="email"
-                onBlur={(e) => {
-                  validate(e.currentTarget, type, false);
-                  if (document.hasFocus()) {
-                    e.currentTarget.value = "";
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    if (!e.currentTarget.value) return toast.warning("Please add an email first");
-                    validate(e.currentTarget, type);
-                  } else if (e.key === "Backspace" && e.currentTarget.value === "") {
-                    setTo((to) => {
-                      const last = to.findLast((r) => r.cc === (type === "to" ? null : type));
-                      if (!last) return to;
-                      return to.filter(
-                        (r) =>
-                          !(
-                            r.address === last.address &&
-                            r.cc === (type === "to" ? null : (type as any))
+            <Input asChild className="border-none focus-within:z-10 group flex gap-2 items-center">
+              <div
+                className={cn(
+                  // "group flex w-full flex-wrap gap-2 self-center rounded-md border-none bg-card px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:z-10 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                  !types.includes(type) && "hidden",
+                )}
+              >
+                <span className="flex w-8 shrink-0 self-center text-muted-foreground text-sm">
+                  {{ to: "To", cc: "CC", bcc: "BCC" }[type]}
+                </span>
+                {to
+                  .filter((r) => r.cc === (type === "to" ? null : type))
+                  .map(({ name, address }) => (
+                    <RecipientPill
+                      key={address}
+                      name={name}
+                      address={address}
+                      onRemove={() =>
+                        setTo((to) =>
+                          to.filter(
+                            (r) => !(r.address === address && r.cc === (type === "to" ? null : type)),
                           ),
-                      );
-                    });
-                    update();
-                  }
-                }}
-              />
-              <div className="self-centre flex">
-                {!showCC && type === "to" && (
-                  <Button
-                    variant="ghost"
-                    size="auto"
-                    className="self-centre rounded px-2 text-muted-foreground hover:text-white"
-                    onClick={() => {
-                      setShowCC(true);
-                      setTimeout(() => document.getElementById("to:cc")?.focus(), 10);
-                    }}
-                  >
-                    Cc
-                  </Button>
-                )}
-                {!showBCC && type === "to" && (
-                  <Button
-                    variant="ghost"
-                    size="auto"
-                    className="self-centre rounded px-2 text-muted-foreground hover:text-white"
-                    onClick={() => {
-                      setShowBCC(true);
-                      setTimeout(() => document.getElementById("to:bcc")?.focus(), 10);
-                    }}
-                  >
-                    Bcc
-                  </Button>
-                )}
+                        )
+                      }
+                    />
+                  ))}
+                <input
+                  id={`to:${type}`}
+                  className="grow bg-transparent py-1 text-sm focus-visible:outline-none sm:min-w-48"
+                  placeholder="Add recipients..."
+                  type="email"
+                  onBlur={(e) => {
+                    validate(e.currentTarget, type, false);
+                    if (document.hasFocus()) {
+                      e.currentTarget.value = "";
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      if (!e.currentTarget.value) return toast.warning("Please add an email first");
+                      validate(e.currentTarget, type);
+                    } else if (e.key === "Backspace" && e.currentTarget.value === "") {
+                      setTo((to) => {
+                        const last = to.findLast((r) => r.cc === (type === "to" ? null : type));
+                        if (!last) return to;
+                        return to.filter(
+                          (r) =>
+                            !(
+                              r.address === last.address &&
+                              r.cc === (type === "to" ? null : (type as any))
+                            ),
+                        );
+                      });
+                      update();
+                    }
+                  }}
+                />
+                <div className="self-centre flex">
+                  {!showCC && type === "to" && (
+                    <Button
+                      variant="ghost"
+                      size="auto"
+                      className="self-centre rounded px-2 text-muted-foreground hover:text-white"
+                      onClick={() => {
+                        setShowCC(true);
+                        setTimeout(() => document.getElementById("to:cc")?.focus(), 10);
+                      }}
+                    >
+                      Cc
+                    </Button>
+                  )}
+                  {!showBCC && type === "to" && (
+                    <Button
+                      variant="ghost"
+                      size="auto"
+                      className="self-centre rounded px-2 text-muted-foreground hover:text-white"
+                      onClick={() => {
+                        setShowBCC(true);
+                        setTimeout(() => document.getElementById("to:bcc")?.focus(), 10);
+                      }}
+                    >
+                      Bcc
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
+            </Input>
             <span
               className={cn(
                 "flex h-0 w-full shrink-0 grow-0 rounded-sm border-background/75 border-b-2",
@@ -651,7 +657,7 @@ function RecipientPill({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 break-all rounded bg-secondary px-2 py-1 text-sm",
+        "flex items-center gap-1 break-all rounded bg-input px-2 py-1 text-sm",
         mx === null && "outline-2 outline-destructive",
       )}
     >
