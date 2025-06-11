@@ -582,7 +582,7 @@ function EmailPicture({ email, fallback }: { email: string; fallback?: string })
   return (
     <Avatar
       className={
-        "size-12 bg-background transition-all data-[gravatar=false]:rounded-lg data-[gravatar=true]:rounded-full data-[gravatar=false]:[&>img]:rounded-[20%] data-[gravatar=false]:[&>img]:p-2"
+        "size-12 bg-background data-[gravatar=false]:rounded-lg data-[gravatar=true]:rounded-full data-[gravatar=false]:[&>img]:rounded-[20%] data-[gravatar=false]:[&>img]:p-2"
       }
       data-gravatar={isGravatar}
     >
