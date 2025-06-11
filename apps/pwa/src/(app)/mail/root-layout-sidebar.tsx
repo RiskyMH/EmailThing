@@ -83,7 +83,7 @@ export const Sidebar = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "flex min-h-screen flex-col overflow-y-auto text-sidebar-foreground sm:shrink-0 sm:p-2 pt-0! sm:max-lg:p-2 lg:w-60 bg-sidebar",
+        "flex min-h-screen flex-col overflow-y-auto text-sidebar-foreground sm:shrink-0 sm:p-2 pt-0! sm:max-lg:p-2 lg:w-60 sm:bg-sidebar",
         className,
       )}
     >
