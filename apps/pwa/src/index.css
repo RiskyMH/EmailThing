@@ -51,7 +51,7 @@ body {
 }
 
 .toaster {
-  --normal-bg: var(--background) !important;
+  --normal-bg: var(--sidebar) !important;
 }
 
 @keyframes fadeIn {

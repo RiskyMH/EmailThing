@@ -58,7 +58,7 @@ export default function UserSettingsPage() {
           <CardContent>
             {user && mailboxes ? (
               <ClientSelect name="email" required defaultValue={user?.email}>
-                <SelectTrigger className="w-full border-none bg-background sm:w-[300px]">
+                <SelectTrigger className="w-full border-none bg-background hover:bg-background/80 sm:w-[300px]">
                   <SelectValue placeholder="Select an email" />
                 </SelectTrigger>
                 <SelectContent>

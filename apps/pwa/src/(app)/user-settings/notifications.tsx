@@ -5,7 +5,7 @@ export default function UserSettingsNotifications() {
   return (
     <>
       <div className="flex flex-col gap-1.5">
-        <CardTitle>Notifications</CardTitle>
+        <CardTitle className="text-2xl">Notifications</CardTitle>
         <CardDescription>Enable and configure your notifications.</CardDescription>
       </div>
 

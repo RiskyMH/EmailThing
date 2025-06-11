@@ -136,7 +136,7 @@ export default function UserSettingsAuthentication() {
     <>
       <Title title="Authentication • User Settings • EmailThing" />
       <div className="flex flex-col gap-1.5">
-        <CardTitle>Authentication</CardTitle>
+        <CardTitle className="text-2xl">Authentication</CardTitle>
         <CardDescription>Change your password or create a passkey.</CardDescription>
       </div>
 
@@ -248,14 +248,21 @@ export default function UserSettingsAuthentication() {
                     </TableCell>
                   </TableRow>
                 )}
+                {passkeys?.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={2}>
+                      <p className="text-muted-foreground text-sm">No passkeys found. Create one below to get started.</p>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
-          <PasskeysSetup userId={user?.id || ""} username={user?.username || ""} />
         </CardContent>
-        <CardFooter className="border-muted-foreground/30 border-t px-6 py-4">
+        <CardFooter className="border-muted-foreground/30 border-t px-4 py-2">
           <span className="text-muted-foreground text-sm">Something something passkeys!</span>
 
+          <PasskeysSetup userId={user?.id || ""} username={user?.username || ""} />
           {/* <Button type="submit" className="ms-auto" size="sm">Create new</Button> */}
         </CardFooter>
       </Card>
@@ -300,7 +307,7 @@ export default function UserSettingsAuthentication() {
                         <SmartDrawerTrigger asChild>
                           <Button
                             variant="ghost"
-                            className="size-8 p-0 text-foreground/80 hover:text-destructive"
+                            className="size-8 p-0 text-foreground/80 hover:text-destructive bg-background hover:bg-background/80"
                           >
                             <span className="sr-only">Revoke session</span>
                             <XIcon className="size-4" />
@@ -343,14 +350,21 @@ export default function UserSettingsAuthentication() {
                     </TableCell>
                   </TableRow>
                 )}
+                {sessions?.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <p className="text-muted-foreground text-sm">No sessions found. Not sure how this is possible...?</p>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
           <SmartDrawer>
             <SmartDrawerTrigger asChild>
               <Button
-                variant="outline"
-                className="w-min border-0 text-destructive hover:text-destructive flex gap-2"
+                variant="ghost"
+                className="w-min border-0 text-destructive hover:text-destructive flex gap-2 bg-background hover:bg-background/80"
               >
                 <LogOutIcon className="size-4" />
                 Log out all known devices
@@ -380,7 +394,7 @@ export default function UserSettingsAuthentication() {
             </SmartDrawerContent>
           </SmartDrawer>
         </CardContent>
-        <CardFooter className="border-muted-foreground/30 border-t px-6 py-4">
+        <CardFooter className="border-muted-foreground/30 border-t px-4 py-2">
           <span className="text-muted-foreground text-sm">Sessions are very important and can last up to a year</span>
 
           {/* <Button type="submit" className="ms-auto" size="sm">Create new</Button> */}
@@ -497,11 +511,14 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
 
   return (
     <Button
-      type="button"
-      variant="outline"
+      type="submit"
+      // variant="ghost"
+      variant="default"
       onClick={handleCreate}
       disabled={isPending || !support}
-      className="w-min border-0"
+      // className="w-min border-0 bg-background hover:bg-background/80"
+      className="w-min ms-auto"
+      size="sm"
     >
       {isPending ? (
         <Loader2Icon className="mr-2 size-4 animate-spin" />
@@ -509,39 +526,6 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
         <KeyRoundIcon className="mr-2 size-4" />
       )}
       Create new
-    </Button>
-  );
-}
-
-function LogoutAllDevices() {
-  const [isPending, startTransition] = useTransition();
-  const { mutate } = useSWRConfig();
-
-  return (
-    <Button
-      variant="outline"
-      className="w-min border-0 text-destructive hover:text-destructive"
-      onClick={() => {
-        if (confirm("Are you sure you want to log out all known devices?")) {
-          startTransition(async () => {
-            const res = await revokeAllSessions();
-            if ("error" in res) {
-              toast.error(res.error);
-            } else {
-              toast.success(res.success);
-            }
-            mutate("/api/internal/auth-query?type=sessions");
-          });
-        }
-      }}
-      disabled={isPending}
-    >
-      {isPending ? (
-        <Loader2Icon className="mr-2 size-4 animate-spin" />
-      ) : (
-        <LogOutIcon className="mr-2 size-4" />
-      )}
-      Log out all known devices
     </Button>
   );
 }

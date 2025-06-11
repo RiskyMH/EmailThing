@@ -36,7 +36,7 @@ export default function UserSettingsEmailthingMe() {
     <>
       <Title title="EmailThing.me • User Settings • EmailThing" />
       <div className="flex flex-col gap-1.5">
-        <CardTitle>EmailThing.me</CardTitle>
+        <CardTitle className="text-2xl">EmailThing.me</CardTitle>
         <CardDescription>
           A optional contact form you can make. This can be useful to make it easier to get messages
           from people.
@@ -94,7 +94,7 @@ export default function UserSettingsEmailthingMe() {
                 defaultValue={user?.publicEmail || undefined}
                 disabled={!user?.publicContactPage}
               >
-                <SelectTrigger className="w-full border-none bg-background sm:w-[300px]">
+                <SelectTrigger className="w-full border-none bg-background hover:bg-background/80 sm:w-[300px]">
                   <SelectValue placeholder="Select an email" />
                 </SelectTrigger>
                 <SelectContent>
@@ -112,7 +112,7 @@ export default function UserSettingsEmailthingMe() {
               // somehow the way its undefined means it needs a full remount with full correct data
               <div>
                 <ClientSelect name="email" required>
-                  <SelectTrigger className="w-full border-none bg-background sm:w-[300px]">
+                  <SelectTrigger className="w-full border-none bg-background hover:bg-background/80 sm:w-[300px]">
                     <SelectValue placeholder="" />
                   </SelectTrigger>
                 </ClientSelect>

@@ -45,21 +45,15 @@
         --radius: 0.5rem;
     }
 
-    /* :not(.bg-background) .bg-sidebar {
+    .bg-sidebar, .sm\:bg-sidebar {
         --input: white;
-        --accent: white;
-        --secondary: white;
-        --card: var(--secondary);
-    } */
+    }
 
 
     @media (prefers-color-scheme: dark) {
-        /* :not(.bg-background) .bg-sidebar> :not(.bg-card) {
+        .bg-sidebar, .sm\:bg-sidebar  {
             --input: var(--secondary);
-            --accent: var(--border);
-            --secondary: var(--secondary-backup);
-            --card: var(--background);
-        } */
+        }
 
         :root {
             --background: #1c1c24;

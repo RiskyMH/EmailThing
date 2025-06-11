@@ -47,7 +47,7 @@ export default function UserSettingsMailboxes() {
       <Title title="Mailboxes • User Settings • EmailThing" />
       <div className="flex">
         <div className="flex flex-col gap-1.5">
-          <CardTitle>Mailboxes</CardTitle>
+          <CardTitle className="text-2xl">Mailboxes</CardTitle>
           <CardDescription>Leave and configure your mailboxes.</CardDescription>
         </div>
         <Button className="ms-auto flex gap-2" size="sm" variant="secondary" disabled>
