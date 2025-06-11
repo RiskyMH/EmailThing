@@ -54,7 +54,7 @@ export default function UserSettingsMailboxes() {
           <PlusIcon className="size-4" /> Create mailbox
         </Button>
       </div>
-      <div className="rounded-md border border-muted-foreground/30 bg-secondary">
+      <div className="rounded-md border border-muted-foreground/30 bg-background">
         <Table>
           <TableHeader className="sr-only">
             <TableRow>
@@ -75,7 +75,7 @@ export default function UserSettingsMailboxes() {
                       alt={p.name || undefined}
                       // crossOrigin="anonymous"
                     />
-                    <AvatarFallback className="bg-background transition-all dark:text-foreground">
+                    <AvatarFallback className="bg-secondary transition-all dark:text-foreground">
                       {(p.name || "AB")?.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>

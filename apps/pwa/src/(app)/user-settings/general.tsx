@@ -38,7 +38,7 @@ export default function UserSettingsPage() {
   return (
     <>
       <Title title="General • User Settings • EmailThing" />
-      <Card>
+      <Card className="bg-background">
         <CardForm action={changeEmail} subtitle="Please ensure you have access to the mailbox">
           <CardHeader>
             <CardTitle>Primary Email</CardTitle>
@@ -58,7 +58,7 @@ export default function UserSettingsPage() {
           <CardContent>
             {user && mailboxes ? (
               <ClientSelect name="email" required defaultValue={user?.email}>
-                <SelectTrigger className="w-full border-none bg-background hover:bg-background/80 sm:w-[300px]">
+                <SelectTrigger className="w-full border-none bg-secondary hover:bg-secondary/80 sm:w-[300px]">
                   <SelectValue placeholder="Select an email" />
                 </SelectTrigger>
                 <SelectContent>
@@ -76,7 +76,7 @@ export default function UserSettingsPage() {
               // somehow the way its undefined means it needs a full remount with full correct data
               <div>
                 <ClientSelect name="email" required>
-                  <SelectTrigger className="w-full border-none bg-background sm:w-[300px]">
+                  <SelectTrigger className="w-full border-none bg-secondary sm:w-[300px]">
                     <SelectValue placeholder="" />
                   </SelectTrigger>
                 </ClientSelect>
@@ -85,7 +85,7 @@ export default function UserSettingsPage() {
           </CardContent>
         </CardForm>
       </Card>
-      <Card>
+      <Card className="bg-background">
         <CardForm action={changeUsername} subtitle="Please use 20 characters at maximum.">
           <CardHeader>
             <CardTitle>Username</CardTitle>
@@ -95,7 +95,7 @@ export default function UserSettingsPage() {
             <ClientInput
               name="new-name"
               id="new-name"
-              className="w-full border-none bg-background sm:w-[300px]"
+              className="w-full border-none bg-secondary sm:w-[300px]"
               defaultValue={user?.username}
               maxLength={20}
               minLength={4}

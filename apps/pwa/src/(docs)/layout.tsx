@@ -4,9 +4,10 @@ import { EmailThing } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import { UserNavLogin } from "@/components/user-navbar.static";
 import { MenuIcon } from "lucide-react";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { docsNav } from "./pages";
 import { DocsSidebarNav } from "./components.client";
+import { cn } from "@/utils/tw";
 
 const UserNav = lazy(() => import("@/components/user-navbar"));
 const DemoLink = lazy(() =>
@@ -20,9 +21,29 @@ interface DocsLayoutProps {
 }
 
 export default function DocsLayout({ children }: DocsLayoutProps) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 0;
+      setScrolled(isScrolled);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+    
   return (
-    <div className="flex min-h-screen flex-col bg-background" vaul-drawer-wrapper="">
-      <header className="sticky top-0 z-40 border-b-2 bg-background">
+    <div className="flex min-h-screen flex-col bg-sidebar" vaul-drawer-wrapper="">
+      <style>
+        {`
+          body {
+            background-color: var(--sidebar) !important;
+          }
+        `}
+      </style>
+      <header className={cn("sticky top-0 z-40 bg-sidebar max-sm:border-b-2", scrolled && "border-b-2")}>
         <div className="container flex h-16 items-center gap-6 text-clip sm:justify-between sm:gap-10">
           <Link href="/home" className="group flex items-center gap-1">
             <EmailThing />
@@ -59,16 +80,18 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
         </div>
       </header>
 
-      <div className="container flex-1">
-        <div className="flex-1 md:grid md:grid-cols-[220px_1fr] md:gap-6 lg:grid-cols-[240px_1fr] lg:gap-10">
-          <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto border-r py-6 pr-2 md:sticky md:block lg:py-10">
+      <div className="lg:container max-sm:mx-auto md:max-lg:px-5 flex-1 bg-sidebar">
+        <div className="flex-1 md:grid md:grid-cols-[200px_1fr] md:gap-4 lg:grid-cols-[240px_1fr] lg:gap-4">
+          <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto //border-r py-5 pr-2 md:sticky md:block lg:py-5 bg-sidebar">
             <DocsSidebarNav items={docsNav} />
           </aside>
-          {children}
+          {/* <div className=""> */}
+            {children}
+          {/* </div> */}
         </div>
       </div>
 
-      <SiteFooter className="border-t" />
+      <SiteFooter className="lg:border-t //max-lg:-mt-5" />
     </div>
   );
 }

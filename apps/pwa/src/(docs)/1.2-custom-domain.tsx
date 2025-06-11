@@ -1,4 +1,4 @@
-import { DocsPage } from "@/components/docs-page";
+import { DocsPage } from "@/(docs)/docs-page";
 import { Components as MD } from "@/components/docs-page-components";
 
 export default function CustomDomainPage() {
@@ -38,6 +38,19 @@ export default function CustomDomainPage() {
       {/* // TODO: DKIM */}
       <p />
       <MD.h2 id="receive-email">Receive Emails</MD.h2>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
+      <MD.p>TODO</MD.p>
       <MD.p>TODO</MD.p>
       {/* // TODO: Receive email */}
 

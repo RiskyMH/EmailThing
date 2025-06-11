@@ -1,4 +1,4 @@
-import { DocsPage } from "@/components/docs-page";
+import { DocsPage } from "@/(docs)/docs-page";
 import { Callout, Components as MD, MdxCard } from "@/components/docs-page-components";
 
 export default function AboutPage() {

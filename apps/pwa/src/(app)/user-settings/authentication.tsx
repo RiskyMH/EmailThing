@@ -140,7 +140,7 @@ export default function UserSettingsAuthentication() {
         <CardDescription>Change your password or create a passkey.</CardDescription>
       </div>
 
-      <Card>
+      <Card className="bg-background ">
         <CardForm action={changePassword} subtitle="Please set a secure password.">
           <CardHeader>
             <CardTitle>Password</CardTitle>
@@ -152,7 +152,7 @@ export default function UserSettingsAuthentication() {
             <ClientInput
               name="password"
               id="password"
-              className="w-full border-none bg-background sm:w-[300px]"
+              className="w-full border-none bg-secondary sm:w-[300px]"
               required
               type="password"
               autoComplete="password"
@@ -162,7 +162,7 @@ export default function UserSettingsAuthentication() {
             <ClientInput
               name="new-password"
               id="new-password"
-              className="w-full border-none bg-background sm:w-[300px]"
+              className="w-full border-none bg-secondary sm:w-[300px]"
               required
               type="password"
               autoComplete="new-password"
@@ -171,13 +171,13 @@ export default function UserSettingsAuthentication() {
         </CardForm>
       </Card>
 
-      <Card>
+      <Card className="bg-background max-w-[95vw]">
         <CardHeader>
           <CardTitle>Passkeys</CardTitle>
           <CardDescription>The new fancy way of signing in.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="rounded-md border border-muted-foreground/30 bg-background">
+          <div className="rounded-md border border-muted-foreground/30 bg-sidebar">
             <Table>
               <TableHeader className="sr-only">
                 <TableRow>
@@ -267,13 +267,13 @@ export default function UserSettingsAuthentication() {
         </CardFooter>
       </Card>
 
-      <Card>
+      <Card className="bg-background max-w-[95vw]">
         <CardHeader>
           <CardTitle>Sessions</CardTitle>
           <CardDescription>The sessions you have logged in to.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="rounded-md border border-muted-foreground/30 bg-background">
+          <div className="rounded-md border border-muted-foreground/30 bg-sidebar overflow-auto">
             <Table>
               <TableHeader className="sr-only">
                 <TableRow>
@@ -307,7 +307,7 @@ export default function UserSettingsAuthentication() {
                         <SmartDrawerTrigger asChild>
                           <Button
                             variant="ghost"
-                            className="size-8 p-0 text-foreground/80 hover:text-destructive bg-background hover:bg-background/80"
+                            className="size-8 p-0 text-foreground/80 hover:text-destructive bg-sidebar hover:bg-secondary/80"
                           >
                             <span className="sr-only">Revoke session</span>
                             <XIcon className="size-4" />
@@ -364,7 +364,7 @@ export default function UserSettingsAuthentication() {
             <SmartDrawerTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-min border-0 text-destructive hover:text-destructive flex gap-2 bg-background hover:bg-background/80"
+                className="w-min border-0 text-destructive hover:text-destructive flex gap-2 bg-secondary hover:bg-secondary/80"
               >
                 <LogOutIcon className="size-4" />
                 Log out all known devices
@@ -401,7 +401,7 @@ export default function UserSettingsAuthentication() {
         </CardFooter>
       </Card>
 
-      <Card>
+      <Card className="bg-background">
         <CardForm
           action={changeBackupEmail}
           subtitle="Please ensure you have access to this email."
@@ -416,7 +416,7 @@ export default function UserSettingsAuthentication() {
             <ClientInput
               name="email"
               id="email"
-              className="w-full border-none bg-background sm:w-[300px]"
+              className="w-full border-none bg-secondary sm:w-[300px]"
               defaultValue={user?.backupEmail || undefined}
               maxLength={100}
               minLength={4}

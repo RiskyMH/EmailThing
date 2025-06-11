@@ -2,8 +2,8 @@ import { cn } from "@/utils/tw";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { DashboardTableOfContents, type TOC } from "./toc.client";
-import { buttonVariants } from "./ui/button";
+import { DashboardTableOfContents, type TOC } from "../components/toc.client";
+import { buttonVariants } from "../components/ui/button";
 
 interface DocsPageProps {
     toc: TOC[];
@@ -15,8 +15,8 @@ interface DocsPageProps {
 
 export function DocsPage({ children, toc, title, description, pager }: DocsPageProps) {
     return (
-        <main className="relative py-6 lg:gap-10 lg:py-10 xl:grid xl:grid-cols-[1fr_300px]">
-            <div className="mx-auto w-full min-w-0">
+        <main className="relative lg:gap-10 lg:py-5 xl:grid xl:grid-cols-[1fr_200px] h-fit ">
+            <div className="mx-auto w-full min-w-0 bg-background max-sm:px-6 sm:px-6 md:rounded-lg py-5 mb-5">
                 <DocsPageHeader heading={title} text={description} />
                 {/* <Mdx code={doc.body.code} /> */}
                 {children}
@@ -24,7 +24,7 @@ export function DocsPage({ children, toc, title, description, pager }: DocsPageP
                 <hr className="my-4 md:my-6" />
                 <DocsPager {...pager} />
             </div>
-            <div className="hidden text-sm xl:block">
+            <div className="hidden text-sm xl:block bg-sidebar">
                 <div className="-mt-10 sticky top-16 max-h-[calc(var(--vh)-4rem)] overflow-y-auto pt-10">
                     <DashboardTableOfContents toc={toc} />
                 </div>

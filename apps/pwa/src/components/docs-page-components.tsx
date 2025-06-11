@@ -104,14 +104,16 @@ export function MdxCard({ href, className, children, disabled, ...props }: CardP
     return (
         <div
             className={cn(
-                "group relative rounded-lg border bg-card p-6 shadow-md transition-shadow hover:shadow-lg",
+                "group relative rounded-lg border bg-card p-4 shadow-md transition-shadow hover:shadow-lg",
                 disabled && "cursor-not-allowed opacity-60",
                 className,
             )}
             {...props}
         >
             <div className="flex flex-col justify-between gap-4">
-                <div className="[&>h3]:!mt-0 [&>h4]:!mt-0 space-y-2 [&>p]:text-muted-foreground">{children}</div>
+                <div className="[&>h3]:!mt-0 [&>h4]:!mt-0 [&>h3]:!text-xl [&>h4]:!text-lg [&>p]:!mt-0 space-y-2 [&>p]:text-muted-foreground">
+                    {children}
+                </div>
             </div>
             {href && (
                 <Link href={disabled ? "#" : href} className="absolute inset-0">

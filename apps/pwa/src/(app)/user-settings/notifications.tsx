@@ -9,7 +9,6 @@ export default function UserSettingsNotifications() {
         <CardDescription>Enable and configure your notifications.</CardDescription>
       </div>
 
-      {/* todo: get this from the server at login time or something - but not hardcoded here */}
       <NotificationsButton />
     </>
   );
@@ -44,7 +43,7 @@ const saveSubscription = async (subscription: PushSubscriptionJSON) => {
 const notificationsSupported = () =>
   "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
 
-export function NotificationsButton({ publicKey }: { publicKey: string }) {
+export function NotificationsButton() {
   const [isPending, startTransition] = useTransition();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);

@@ -43,7 +43,7 @@ export default function UserSettingsEmailthingMe() {
         </CardDescription>
       </div>
 
-      <div className="flex flex-row items-center justify-between gap-2 rounded-lg bg-card p-4">
+      <div className="flex flex-row items-center justify-between gap-2 rounded-lg bg-background border p-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="enabled" className="font-semibold text-xl leading-none tracking-tight">
             Enable public page
@@ -74,7 +74,7 @@ export default function UserSettingsEmailthingMe() {
         </form>
       </div>
 
-      <Card className={!user?.publicContactPage ? "cursor-not-allowed opacity-50" : undefined}>
+      <Card className={!user?.publicContactPage ? "cursor-not-allowed opacity-50 bg-background" : "bg-background"}>
         <CardForm
           action={changePublicEmail}
           subtitle="This email is public, so choose wisely."
@@ -94,7 +94,7 @@ export default function UserSettingsEmailthingMe() {
                 defaultValue={user?.publicEmail || undefined}
                 disabled={!user?.publicContactPage}
               >
-                <SelectTrigger className="w-full border-none bg-background hover:bg-background/80 sm:w-[300px]">
+                <SelectTrigger className="w-full border-none bg-secondary hover:bg-secondary/80 sm:w-[300px]">
                   <SelectValue placeholder="Select an email" />
                 </SelectTrigger>
                 <SelectContent>
@@ -112,7 +112,7 @@ export default function UserSettingsEmailthingMe() {
               // somehow the way its undefined means it needs a full remount with full correct data
               <div>
                 <ClientSelect name="email" required>
-                  <SelectTrigger className="w-full border-none bg-background hover:bg-background/80 sm:w-[300px]">
+                  <SelectTrigger className="w-full border-none bg-secondary hover:bg-secondary/80 sm:w-[300px]">
                     <SelectValue placeholder="" />
                   </SelectTrigger>
                 </ClientSelect>
