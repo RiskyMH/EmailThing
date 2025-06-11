@@ -26,24 +26,26 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
           rootLayout?.classList.add("emailscolumn");
         } else {
             rootLayout?.classList.remove("emailscolumn");
-          }
-        }
+          };
+        };
         fn();
 
         // on local storage change, run fn
         window.addEventListener("storage", fn);
         window.addEventListener("load", fn);
-        // return () => {
-        //   window.removeEventListener("storage", fn);
-        //   window.removeEventListener("load", fn);
-        // }
-      ` }} />
+        /* return () => {*/
+        /*   window.removeEventListener("storage", fn);*/
+        /*   window.removeEventListener("load", fn);*/
+        /* }*/
+      `    .replaceAll(/(\s{2,}|\n+)/gm, "")
+        }} />
         <style dangerouslySetInnerHTML={{
           __html: /*css*/`
       body {
         background-color: var(--sidebar) !important;
       }
-      ` }} />
+      `    .replaceAll(/(\s{2,}|\n+)/gm, "")
+        }} />
         <Header />
         <div className="flex h-[calc(100vh-4.1rem)] w-screen max-w-full bg-transparent">
           <Sidebar className="hidden min-h-[calc(100vh-4.1rem)] sm:flex pt-0 sm:pt-0" />

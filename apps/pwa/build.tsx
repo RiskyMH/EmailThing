@@ -234,7 +234,7 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
     .replaceAll(/(\s{2,}|\n+)/gm, "")
     // .replaceAll(/\n+/gm, '')
     .replace(replace, prerendered)
-    .replaceAll(/(\s{2,}|\n+)/gm, "")
+    // .replaceAll(/(\s{2,}|\n+)/gm, "")
     .replace(/<!-- META -->.*?<!-- \/META -->/gm, meta)
     .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
 

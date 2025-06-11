@@ -31,7 +31,7 @@ export default function SettingsLayout({ children }: DocsLayoutProps) {
           overflow-y: scroll;
           background-color: var(--sidebar) !important;
         }
-        `
+        `.replaceAll(/(\s{2,}|\n+)/gm, "")
       }} />
       <header className={cn("sticky top-0 z-40 bg-sidebar border-b-2", scrolled && "border-b-2")}>
         <div className="container flex h-16 items-center gap-6 text-clip sm:justify-between sm:gap-10">
