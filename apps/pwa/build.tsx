@@ -231,12 +231,12 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
   );
 
   const _html = templates[route.preferTemplate || "app.html"]
-  .replaceAll(/(\s{2,}|\n+)/gm, "")
-  // .replaceAll(/\n+/gm, '')
-  .replace(replace, prerendered)
-  .replaceAll(/(\s{2,}|\n+)/gm, "")
-  .replace(/<!-- META -->.*?<!-- \/META -->/gm, meta)
-  .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
+    .replaceAll(/(\s{2,}|\n+)/gm, "")
+    // .replaceAll(/\n+/gm, '')
+    .replace(replace, prerendered)
+    .replaceAll(/(\s{2,}|\n+)/gm, "")
+    .replace(/<!-- META -->.*?<!-- \/META -->/gm, meta)
+    .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
 
   await Bun.write(`./dist/${path === "/" ? "index" : path}.html`, _html);
   // await Bun.write(`./dist/${path}/index.html`, _html)
