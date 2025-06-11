@@ -156,6 +156,7 @@ export default function UserSettingsAuthentication() {
               required
               type="password"
               autoComplete="password"
+              placeholder="********"
             />
 
             <Label htmlFor="new-password">New password</Label>
@@ -166,6 +167,7 @@ export default function UserSettingsAuthentication() {
               required
               type="password"
               autoComplete="new-password"
+              placeholder="!my $ecure p@ssw0rd"
             />
           </CardContent>
         </CardForm>

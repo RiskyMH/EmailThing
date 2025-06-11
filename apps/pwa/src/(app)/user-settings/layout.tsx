@@ -25,6 +25,14 @@ export default function SettingsLayout({ children }: DocsLayoutProps) {
 
   return (
     <div className="flex flex-col bg-sidebar" vaul-drawer-wrapper="">
+      <style dangerouslySetInnerHTML={{
+        __html: /*css*/`
+        body {
+          overflow-y: scroll;
+          background-color: var(--sidebar) !important;
+        }
+        `
+      }} />
       <header className={cn("sticky top-0 z-40 bg-sidebar border-b-2", scrolled && "border-b-2")}>
         <div className="container flex h-16 items-center gap-6 text-clip sm:justify-between sm:gap-10">
           <Link href="/mail" className="group flex items-center gap-1">
