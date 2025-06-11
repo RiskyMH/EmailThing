@@ -5,6 +5,8 @@ import { Navigate, useLocation, useParams } from "react-router-dom";
 import RootLayout from "../layout";
 import Header from "./root-layout-header";
 import Sidebar from "./root-layout-sidebar";
+import { minify } from "@/utils/minify.macro" with { type: "macro" };
+
 export default function MailLayout({ children }: { children: React.ReactNode }) {
   // const params = useParams<"mailboxId" | "mailId">()
 
@@ -18,7 +20,7 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
     <RootLayout>
       <div className="//min-h-screen //bg-sidebar h-screen overflow-hidden emailscolumn" vaul-drawer-wrapper="" id="app:root-layout">
         <script dangerouslySetInnerHTML={{
-          __html: /*js*/`
+          __html: minify(/*js*/`
         const fn = () => {
         const emailView = localStorage.getItem("email-view") ?? "column";
         const rootLayout = document.getElementById("app:root-layout");
@@ -37,7 +39,7 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
         /*   window.removeEventListener("storage", fn);*/
         /*   window.removeEventListener("load", fn);*/
         /* }*/
-      `    .replaceAll(/(\s{2,}|\n+)/gm, "")
+      `)
         }} />
         <style dangerouslySetInnerHTML={{
           __html: /*css*/`

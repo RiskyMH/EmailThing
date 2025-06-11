@@ -1,6 +1,7 @@
 import { cn } from "@/utils/tw";
 import GitHubIcon from "./icons/github";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "./ui/context-menu";
+import { minify } from "@/utils/minify.macro" with { type: "macro" };
 
 export default function Logo({ className }: { className?: string }) {
     return (
@@ -40,7 +41,7 @@ export function EmailthingText({ className, text = "EmailThing" }: { className?:
     );
 }
 
-const inject = `{
+const inject = minify(`{
 const urlParams = new URLSearchParams(window.location.search);
 const kawaiiParam = urlParams.get("uwu") || urlParams.get("kawaii");
 
@@ -53,7 +54,7 @@ const item = localStorage.getItem('kawaii');
 if (item === 'true') {
     document.documentElement.classList.add("kawaii");
 };
-}`.replaceAll("\n", " ");
+}`) as string // the macro doesn't give the actual promise;
 
 export function EmailThing() {
     return (
