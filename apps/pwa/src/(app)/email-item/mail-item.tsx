@@ -143,7 +143,7 @@ function MailItem({ mailId }: { mailId?: string }) {
         <MailboxTitle mailboxId={params.mailboxId} title={email.subject} />
 
         <h1 className="mt-3 break-words px-3 font-bold text-2xl @xl:text-3xl">{email.subject}</h1>
-        <div className="flex flex-col gap-3 bg-subcard [.emailslist_&]:rounded-none rounded-md">
+        <div className="flex flex-col gap-3 bg-card [.emailslist_&]:rounded-none rounded-md">
           {/* from info and gravatar */}
           <div className="flex gap-2 p-3 pb-0">
             <EmailPicture

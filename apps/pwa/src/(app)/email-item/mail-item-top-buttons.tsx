@@ -42,7 +42,7 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
   // const email = data ? data[0] : { isStarred: false, binnedAt: null, category: null }
 
   return (
-    <div className="flex w-full min-w-0 flex-row gap-6 border-b-2 p-2.5 text-muted-foreground h-10 [.emailslist_&]:h-10 overflow-x-auto overflow-y-hidden shrink-0">
+    <div className="flex w-full min-w-0 flex-row gap-6 border-b-2 p-2.5 text-muted-foreground h-10 [.emailslist_&]:h-10 overflow-x-auto //overflow-y-hidden shrink-0">
       <BackButton fallbackUrl={`/mail/${mailboxId}`} className="[.emailslist_&]:hidden" />
       <XButton className="hidden [.emailslist_&]:block" />
 

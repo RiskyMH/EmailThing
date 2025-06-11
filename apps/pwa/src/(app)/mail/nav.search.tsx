@@ -42,7 +42,7 @@ export function Search({ className, mailboxId }: { className?: string; mailboxId
     };
 
     return (
-        <Input asChild className="bg-input px-1 border-none w-full lg:w-96">
+        <Input asChild className="bg-input px-1 border-none w-full lg:w-96 h-9 rounded-lg">
             <form
                 onSubmit={onSubmit}
                 action={`/mail/${mailboxId}`}

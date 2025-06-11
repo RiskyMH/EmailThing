@@ -31,7 +31,7 @@ export default function Home() {
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <Link
             to={DISCORD_URL}
-            className="rounded-2xl bg-subcard px-4 py-1.5 font-medium text-sm"
+            className="rounded-2xl bg-card px-4 py-1.5 font-medium text-sm"
             target="_blank"
           >
             Follow along on Discord
@@ -233,7 +233,7 @@ function Feature({
   icon: Icon,
 }: { title: string; description: string | ReactNode; icon: LucideIcon }) {
   return (
-    <div className="relative overflow-hidden rounded-lg bg-subcard p-2">
+    <div className="relative overflow-hidden rounded-lg bg-card p-2">
       <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
         <Icon className="size-12" />
         <div className="flex flex-col gap-2">

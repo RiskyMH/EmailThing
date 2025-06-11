@@ -122,8 +122,6 @@ body {
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
-  --color-subcard: var(--subcard);
-
   --font-heading: CalSans-SemiBold, _Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
   --text-6xl--line-height: 60px;

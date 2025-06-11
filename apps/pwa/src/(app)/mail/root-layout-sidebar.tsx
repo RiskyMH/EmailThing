@@ -202,7 +202,7 @@ function ItemCount({
 
 function MailboxesFallback() {
   return (
-    <div className="flex h-10 w-full animate-pulse gap-3 rounded-md bg-subcard px-3 py-2 sm:max-lg:px-1">
+    <div className="flex h-10 w-full animate-pulse gap-3 rounded-md bg-card px-3 py-2 sm:max-lg:px-1">
       <div className="size-7 animate-pulse rounded-full bg-secondary sm:max-lg:mx-auto" />
 
       <ChevronsUpDownIcon className="ms-auto size-5 self-center text-muted-foreground sm:max-lg:hidden" />

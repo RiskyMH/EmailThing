@@ -18,9 +18,6 @@
         --card: var(--secondary);
         --card-foreground: var(--primary);
 
-        --subcard: var(--secondary);
-        --subcard-foreground: var(--primary);
-
         --primary: #07041d;
         --primary-foreground: var(--secondary);
 
@@ -48,21 +45,21 @@
         --radius: 0.5rem;
     }
 
-    :not(.bg-background) .bg-sidebar {
+    /* :not(.bg-background) .bg-sidebar {
         --input: white;
         --accent: white;
         --secondary: white;
         --card: var(--secondary);
-    }
+    } */
 
 
     @media (prefers-color-scheme: dark) {
-        :not(.bg-background) .bg-sidebar> :not(.bg-card) {
+        /* :not(.bg-background) .bg-sidebar> :not(.bg-card) {
             --input: var(--secondary);
             --accent: var(--border);
             --secondary: var(--secondary-backup);
             --card: var(--background);
-        }
+        } */
 
         :root {
             --background: #1c1c24;
@@ -87,9 +84,6 @@
 
             --card: var(--secondary);
             --card-foreground: var(--primary);
-
-            --subcard: #2c2c34;
-            --subcard-foreground: #efeff0;
 
             --primary: #efeff0;
             --primary-foreground: var(--secondary);

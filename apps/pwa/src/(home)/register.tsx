@@ -166,7 +166,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
       const selectedMailbox = mailboxes[0];
       document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-      navigate(`/mail/${selectedMailbox}?`);
+      navigate(`/mail/${selectedMailbox}?onboarding`);
 
       toast.success("Welcome!");
 

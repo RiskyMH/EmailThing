@@ -160,9 +160,9 @@ export function EmailItem({ email: _email, mailboxId, type, categories, isSelect
       className={cn(
         "group inline-flex h-10 gap-3 rounded-md mx-2 px-2 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all",
         email.isRead
-          ? "hover:bg-subcard/60"
-          : "bg-subcard/80 text-foreground hover:bg-subcard/60 md:[.emailscolumn_&]:px-4 md:[.emailscolumn_&]:mx-0 md:[.emailscolumn_&]:rounded-none",
-        isSelected && "md:[.emailscolumn_&]:bg-subcard md:[.emailscolumn_&]:hover:bg-subcard md:[.emailscolumn_&]:shadow-lg md:[.emailscolumn_&]:dark:drop-shadow-zinc-200 md:[.emailscolumn_&]:text-foreground md:[.emailscolumn_&]:px-2 md:[.emailscolumn_&]:mx-2 md:[.emailscolumn_&]:rounded-md",
+          ? "hover:bg-card/60"
+          : "bg-card/80 text-foreground hover:bg-card/60 md:[.emailscolumn_&]:px-4 md:[.emailscolumn_&]:mx-0 md:[.emailscolumn_&]:rounded-none",
+        isSelected && "md:[.emailscolumn_&]:bg-card md:[.emailscolumn_&]:hover:bg-card md:[.emailscolumn_&]:shadow-lg md:[.emailscolumn_&]:dark:drop-shadow-zinc-200 md:[.emailscolumn_&]:text-foreground md:[.emailscolumn_&]:px-2 md:[.emailscolumn_&]:mx-2 md:[.emailscolumn_&]:rounded-md",
       )}
     >
       {/* Category indicator */}
