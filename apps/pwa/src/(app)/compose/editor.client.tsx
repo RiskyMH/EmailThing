@@ -401,7 +401,7 @@ export function RecipientInput({
     const emails = value.split(/[\s\t,;\n]+/).map(email => email.trim()).filter(Boolean);
     let addedCount = 0;
     let allDuplicate = false;
-    const emailRegex = /\S+@\S+\.\S+/;
+    const emailRegex = /^[^@]+@[^@.]+(?:\.[^@.]+)*\.[^@.]+$/; // Single @ and no consecutive dots
 
     for (const email of emails) {
       const existingRecipients = to.filter(r => r.cc === (type === "to" ? null : type) && r.address === email);
@@ -592,7 +592,7 @@ export function RecipientInput({
                   placeholder="Add recipients..."
                   type="email"
                   onBlur={(e) => {
-                    validate(e.currentTarget, type, false);
+                    validate(e.currentTarget, type, true);
                     if (document.hasFocus()) {
                       e.currentTarget.value = "";
                     }
