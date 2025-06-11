@@ -197,7 +197,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 autoCapitalize="none"
                 autoComplete="username"
                 autoCorrect="off"
-                className="border-none bg-input"
+                className="border-none bg-secondary"
                 disabled={isPending}
                 defaultValue={username ?? ""}
               />
@@ -213,7 +213,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 type="password"
                 autoComplete="password"
                 autoCorrect="off"
-                className="border-none bg-input"
+                className="border-none bg-secondary"
                 disabled={isPending}
               />
             </div>
@@ -360,7 +360,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
   return (
     <button
       type="button"
-      className={cn(buttonVariants({ variant: "secondary", className: "gap-2 bg-input" }))}
+      className={cn(buttonVariants({ variant: "secondary", className: "gap-2 bg-secondary" }))}
       onClick={handleLogin}
       disabled={isPending || !support}
     >
@@ -408,7 +408,7 @@ export function ApiUrlButton() {
               defaultValue={apiUrl}
               name="api"
               id="api-url-input"
-              className="border-none bg-input"
+              className="border-none bg-secondary"
               autoFocus
               required
             />

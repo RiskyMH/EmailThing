@@ -113,7 +113,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <a
               href={DISCORD_URL}
               target="blank"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-input p-2 hover:bg-input/80"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
             >
               Get Invite <ExternalLinkIcon className="size-4 text-muted-foreground" />
             </a>
@@ -198,7 +198,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Label className="sr-only" htmlFor="email">
               Username
             </Label>
-            <Input asChild disabled={isPending} className="bg-input flex gap-2">
+            <Input asChild disabled={isPending} className="bg-secondary flex gap-2">
               <div>
                 <input
                   id="username"
@@ -227,7 +227,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               type="password"
               autoComplete="new-password"
               autoCorrect="off"
-              className="border-none bg-input"
+              className="border-none bg-secondary"
               disabled={isPending}
               required
             />
