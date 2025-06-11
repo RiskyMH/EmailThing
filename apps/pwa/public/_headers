@@ -25,6 +25,10 @@
     Link: </CalSans-SemiBold.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
 /home
     Link: </CalSans-SemiBold.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+/docs
+    Link: </CalSans-SemiBold.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+/docs/*
+    Link: </CalSans-SemiBold.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
 
 /service.js
     Content-Type: application/javascript; charset=utf-8
