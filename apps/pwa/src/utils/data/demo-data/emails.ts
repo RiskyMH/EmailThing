@@ -5,7 +5,8 @@ import { demoMailboxId } from "./mailbox";
 
 const welcome = welcomeEmail({ mailboxId: "demo", username: "User" });
 const welcomeBody = welcome.body;
-const welcomeHtml = makeHtml(welcome.html);
+const _welcomeHtml = welcome.html;
+const welcomeHtml = makeHtml(_welcomeHtml);
 
 export const demoEmails: DBEmail[] = [
   {
@@ -417,7 +418,7 @@ export const demoDrafts: DBEmailDraft[] = [
     id: "1",
     mailboxId: demoMailboxId,
     subject: "Welcome to EmailThing!",
-    body: `${welcome.html}<!--tiptap-->`,
+    body: `${_welcomeHtml}<!--tiptap-->`,
     createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
     updatedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
     to: [],
