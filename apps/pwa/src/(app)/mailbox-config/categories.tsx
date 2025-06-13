@@ -60,7 +60,7 @@ export default function Categories() {
 
   return (
     <div className="mb-3 max-w-[40rem]">
-      <div className="flex pb-2">
+      <div className="flex pb-2 gap-2">
         <h2 className="font-semibold text-lg">Categories</h2>
         <SmartDrawer>
           <SmartDrawerTrigger asChild>
@@ -110,7 +110,7 @@ export default function Categories() {
                     {row.name}
                   </TableCell>
                   <TableCell className="//py-1">
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="size-8 p-0">
                           <span className="sr-only">Open menu</span>
@@ -119,7 +119,7 @@ export default function Categories() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <SmartDrawer>
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild onClick={() => { }}>
                             <SmartDrawerTrigger className="w-full gap-2">
                               <PencilIcon className="size-5 text-muted-foreground" />
                               Edit name
@@ -149,7 +149,7 @@ export default function Categories() {
                         </SmartDrawer>
 
                         <SmartDrawer>
-                          <DropdownMenuItem className="flex w-full gap-2" asChild>
+                          <DropdownMenuItem className="flex w-full gap-2" asChild onClick={() => { }}>
                             <SmartDrawerTrigger>
                               <Trash2Icon className="size-5 text-muted-foreground" />
                               Delete category
@@ -286,7 +286,7 @@ export function CreateCategoryForm({
           defaultValue={name}
         />
 
-        <Label htmlFor="name">Color</Label>
+        <Label htmlFor="color">Color</Label>
         <div className="flex items-center gap-2">
           <Input
             className="border-none bg-secondary"

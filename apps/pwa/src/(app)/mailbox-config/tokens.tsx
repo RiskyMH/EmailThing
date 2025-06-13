@@ -90,7 +90,7 @@ export default function APITokens() {
 
   return (
     <div className="max-w-[40rem]">
-      <div className="flex pb-2">
+      <div className="flex pb-2 gap-2">
         <h2 className="font-semibold text-lg">API Tokens</h2>
         <SmartDrawer>
           <SmartDrawerTrigger asChild>
@@ -216,7 +216,7 @@ export function CreateTokenForm({ mailboxId }: { mailboxId: string }) {
   const [isPending, startTransition] = useTransition();
   const [token, setToken] = useState<string | null>(null);
   const { mutate } = useSWRConfig();
-  
+
   const formSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isPending) return;

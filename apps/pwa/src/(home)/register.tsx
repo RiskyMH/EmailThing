@@ -198,7 +198,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Label className="sr-only" htmlFor="email">
               Username
             </Label>
-            <Input asChild disabled={isPending} className="bg-secondary flex gap-2">
+            <Input asChild disabled={isPending} className="bg-secondary flex gap-2 border-none">
               <div>
                 <input
                   id="username"

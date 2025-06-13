@@ -23,7 +23,7 @@ export default function CustomDomainDyn() {
       </Button>
 
       <div
-        className="max-h-52 overflow-auto rounded-md bg-[#17171e] p-2 text-sm"
+        className="max-h-52 overflow-auto rounded-md bg-[#17171e] p-2 text-xs"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: It's generated server side (with static content)
         dangerouslySetInnerHTML={{
           __html: cfWorkerCode,

@@ -3,7 +3,7 @@ import { StarIcon } from "lucide-react";
 export default function Loading() {
   return (
     <div className="flex w-full min-w-0 flex-row h-full gap-2 2xl:gap-3 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist bg-sidebar">
-      <div className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 lg:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg @container">
+      <div className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 xl:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg @container">
         <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-background px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg">
           <EmailListCategoryLoadingSkeleton />
         </div>
@@ -13,7 +13,7 @@ export default function Loading() {
           </div>
         </div>
       </div>
-      <div className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 lg:w-3/5 rounded-lg overflow-auto bg-background @container">
+      <div className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 xl:w-3/5 rounded-lg overflow-auto bg-background @container">
         <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-background rounded-lg bg-background">
           <div className="">
             <p className="text-muted-foreground">Select an email to view</p>

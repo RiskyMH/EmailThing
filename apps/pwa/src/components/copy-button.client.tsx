@@ -10,7 +10,7 @@ export default function CopyButton({ text, children, ...props }: PropsWithChildr
     };
 
     return (
-        <button onClick={onClick} {...props}>
+        <button type="button" onClick={onClick} {...props}>
             {children}
         </button>
     );

@@ -71,18 +71,29 @@ export default function CustomDomains() {
     [mailboxId],
   );
 
+  if (data) data[1] = [
+    {
+      addedAt: new Date(),
+      domain: "example.com",
+      id: "1",
+      isDeleted: 0,
+      mailboxId: "1",
+      updatedAt: new Date(),
+    }
+  ]
+
   const [mailbox, customDomains, aliases] = data ?? [];
 
   return (
     <div className="max-w-[40rem]">
-      <div className="flex pb-2">
+      <div className="flex pb-2 gap-2">
         <h2 className="font-semibold text-lg">
           Custom domains <span className="text-muted-foreground text-sm">({customDomains?.length ?? 0}/3)</span>
         </h2>
         <SmartDrawer>
           <SmartDrawerTrigger asChild>
             <Button
-              disabled={(customDomains?.length ?? 0) >= customDomainLimit[mailbox?.plan ?? "FREE"]}
+              // disabled={(customDomains?.length ?? 0) >= customDomainLimit[mailbox?.plan ?? "FREE"]}
               className="ms-auto flex gap-2"
               size="sm"
               variant="secondary"
@@ -111,7 +122,7 @@ export default function CustomDomains() {
                 <TableRow key={row.id}>
                   <TableCell className="//py-1 font-medium">{row.domain}</TableCell>
                   <TableCell className="//py-1">
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="size-8 p-0">
                           <span className="sr-only">Open menu</span>
@@ -120,7 +131,7 @@ export default function CustomDomains() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <SmartDrawer>
-                          <DropdownMenuItem className="flex w-full gap-2" asChild>
+                          <DropdownMenuItem className="flex w-full gap-2" asChild onClick={() => { }}>
                             <SmartDrawerTrigger>
                               <Trash2Icon className="size-5 text-muted-foreground" />
                               Delete domain
@@ -152,7 +163,7 @@ export default function CustomDomains() {
                         </SmartDrawer>
 
                         <SmartDrawer repositionInputs={false}>
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild onClick={() => { }}>
                             <SmartDrawerTrigger className="w-full">Setup again</SmartDrawerTrigger>
                           </DropdownMenuItem>
                           <SmartDrawerContent className="sm:max-w-[425px]">
@@ -222,25 +233,28 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
 
         <form
           className="grid items-start gap-4 px-4 sm:px-0"
-          onSubmit={(event: any) => {
-            setDomain(event.target.domain.value);
+          onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault()
+            event.stopPropagation()
+            setDomain((event.target as HTMLFormElement).domain.value);
             setPage("verify");
           }}
           autoComplete="off"
         >
+          <label htmlFor="domain" className="sr-only">Domain</label>
           <Input
             className="border-none bg-secondary"
             name="domain"
             placeholder="example.com"
             defaultValue={domain}
             id="domain"
-            autoFocus
+            autoFocus={window.innerWidth > 640}
             disabled={isPending}
             required
           />
-          <Button type="submit" disabled={isPending} className="gap-2" autoFocus>
+          <Button type="submit" disabled={isPending} className="gap-2">
             {/* {isPending && <Loader2 className="size-5 text-muted-foreground animate-spin" />} */}
-            Next <ChevronRightIcon className="size-4" />
+            Next <ChevronRightIcon className="size-4 shrink-0" />
           </Button>
         </form>
 
@@ -257,7 +271,9 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
           <SmartDrawerDescription>Now create a new DNS record</SmartDrawerDescription>
         </SmartDrawerHeader>
 
-        <div className="grid items-start gap-4 px-4 sm:px-0">
+        <div
+          className="grid items-start gap-4 px-4 sm:px-0 max-sm:overflow-auto "
+        >
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input className="border-none bg-secondary" value={`_emailthing.${domain}`} id="name" readOnly />
@@ -267,7 +283,7 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
 
             <Label htmlFor="value">Value</Label>
             <div className="flex items-center gap-2">
-              <Input className="border-none bg-secondary" value={`mailbox=${mailboxId}`} id="value" readOnly />
+              <Input className="border-none bg-secondary" value={`mailbox=${mailboxId}`} id="value" readOnly autoFocus />
               <Button size="sm" className="px-3" asChild>
                 <CopyButton text={`mailbox=${mailboxId}`}>
                   <span className="sr-only">Copy</span>
@@ -277,22 +293,26 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
             </div>
           </div>
 
-          <div className="flex gap-2 sm:gap-4">
+          <div className="flex gap-2 sm:gap-3">
             {/* <Button onClick={() => setPage("form")} className="gap-2" variant="secondary">
                             Back
                         </Button> */}
-            <Button onClick={verify} disabled={isPending} className="w-full gap-2">
-              {isPending && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+            <Button type="submit" onClick={verify} disabled={isPending} className="w-full gap-2 shrink">
+              {isPending && <Loader2 className="size-4 animate-spin text-muted-foreground shrink" />}
               Verify domain
             </Button>
           </div>
+
+          <SmartDrawerClose asChild className="w-full sm:hidden mb-2">
+            <Button variant="secondary">Cancel</Button>
+          </SmartDrawerClose>
         </div>
 
-        <SmartDrawerFooter className="flex pt-2 sm:hidden">
+        {/* <SmartDrawerFooter className="flex pt-2 sm:hidden">
           <SmartDrawerClose asChild>
             <Button variant="secondary">Cancel</Button>
           </SmartDrawerClose>
-        </SmartDrawerFooter>
+        </SmartDrawerFooter> */}
       </>
     ) : page === "spf" ? (
       <>
@@ -315,7 +335,7 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
                 id="spf"
                 readOnly
               />
-              <Button size="sm" className="px-3" asChild>
+              <Button size="sm" className="px-3" asChild autoFocus>
                 <CopyButton text="v=spf1 include:_spf.mx.emailthing.app include:_spf.mx.cloudflare.net -all">
                   <span className="sr-only">Copy</span>
                   <CopyIcon className="size-4" />
@@ -325,8 +345,10 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
 
             <Label htmlFor="verification">
               <code className="font-semibold text-muted-foreground">TXT</code>
-              <span className="text-muted-foreground">_emailthing.</span>
-              {domain}
+              <span className="flex items-center gap-0">
+                <span className="text-muted-foreground">_emailthing.</span>
+                {domain}
+              </span>
             </Label>
             <div className="flex items-center gap-2">
               <Input className="border-none bg-secondary" value={`mailbox=${mailboxId}`} id="verification" readOnly />
@@ -339,11 +361,11 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
             </div>
           </div>
 
-          <div className="flex gap-2 sm:gap-4">
-            <Button onClick={() => setPage("verify")} className="gap-2" variant="secondary" disabled>
+          <div className="flex gap-2 sm:gap-3">
+            <Button onClick={() => setPage("verify")} className="gap-2 shrink" variant="secondary" disabled>
               <ChevronLeftIcon className="size-4" />
             </Button>
-            <Button onClick={() => setPage("cf-worker-code")} className="w-full gap-2">
+            <Button onClick={() => setPage("cf-worker-code")} className="w-full gap-2 shrink">
               Continue
             </Button>
           </div>
@@ -373,7 +395,7 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
         <div className="grid items-start gap-4 px-4 sm:px-0">
           <Suspense
             fallback={
-              <code className="font-mono h-52 overflow-auto rounded-md bg-[#17171e] p-2 text-sm w-full text-[#6A737D]">
+              <code className="font-mono h-52 text-xs overflow-auto rounded-md bg-[#17171e] p-2 w-full text-[#6A737D]">
                 // Loading code...
               </code>
             }
@@ -381,8 +403,8 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
             <CfWorkerCode />
           </Suspense>
 
-          <div className="flex gap-2 sm:gap-4">
-            <Button onClick={() => setPage("spf")} className="gap-2" variant="secondary">
+          <div className="flex gap-2 sm:gap-3">
+            <Button onClick={() => setPage("spf")} className="gap-2 shrink" variant="secondary">
               <ChevronLeftIcon className="size-4" />
             </Button>
             <Button
@@ -390,7 +412,7 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
                 setPage("token");
                 cToken();
               }}
-              className="w-full gap-2"
+              className="w-full gap-2 shrink"
             >
               Continue
             </Button>
@@ -429,11 +451,11 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
             )}
           </div>
 
-          <div className="flex gap-2 sm:gap-4">
-            <Button onClick={() => setPage("cf-worker-code")} className="gap-2" variant="secondary">
+          <div className="flex gap-2 sm:gap-3">
+            <Button onClick={() => setPage("cf-worker-code")} className="gap-2 shrink" variant="secondary">
               <ChevronLeftIcon className="size-4" />
             </Button>
-            <Button onClick={() => setPage("finish")} className="w-full gap-2">
+            <Button onClick={() => setPage("finish")} className="w-full gap-2 shrink">
               Continue
             </Button>
           </div>
@@ -465,13 +487,13 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
             .
           </p>
 
-          <div className="flex gap-2 sm:gap-4">
-            <Button onClick={() => setPage("token")} className="gap-2" variant="secondary">
+          <div className="flex gap-2 sm:gap-3">
+            <Button onClick={() => setPage("token")} className="gap-2 shrink" variant="secondary">
               <ChevronLeftIcon className="size-4" />
             </Button>
 
             <SmartDrawerClose asChild>
-              <Button className="w-full">Close</Button>
+              <Button className="w-full shrink">Close</Button>
             </SmartDrawerClose>
           </div>
         </div>

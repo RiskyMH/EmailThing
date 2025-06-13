@@ -38,12 +38,12 @@ const SmartDrawer = (props: ComponentProps<typeof Drawer>) => {
 };
 SmartDrawer.displayName = "SmartDrawer";
 
-const SmartDrawerTrigger = (props: Omit<ComponentProps<typeof DrawerTrigger>, "onClick">) => {
+const SmartDrawerTrigger = (props: ComponentProps<typeof DrawerTrigger>) => {
     const isDesktop = useMediaQuery("(min-width: 640px)");
     if (isDesktop) {
         return <DialogTrigger {...props} onClick={() => { }} />
     }
-    return <DrawerTrigger {...props} onClick={() => { }} />;
+    return <DrawerTrigger {...props} />;
 
 };
 SmartDrawerTrigger.displayName = "SmartDrawerTrigger";
@@ -95,7 +95,6 @@ SmartDrawerFooter.displayName = "SmartDrawerFooter";
 
 const SmartDrawerClose = (props: ComponentProps<typeof DrawerClose>) => {
     const isDesktop = useMediaQuery("(min-width: 640px)");
-    document.body.style.pointerEvents = 'auto'
     if (isDesktop) {
         return <DialogClose id="smart-drawer:close" {...props} />;
     }

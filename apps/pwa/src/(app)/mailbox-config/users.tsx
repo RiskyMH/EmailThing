@@ -91,7 +91,7 @@ export default function Users() {
 
   return (
     <div className="max-w-[40rem]">
-      <div className="flex pb-2">
+      <div className="flex pb-2 gap-2">
         <h2 className="font-semibold text-lg">
           Users <span className="text-muted-foreground text-sm">({users?.length ?? 0}/5)</span>
         </h2>
@@ -167,7 +167,7 @@ export default function Users() {
                     </Select>
                   </TableCell>
                   <TableCell className="//py-1">
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="size-8 p-0">
                           <span className="sr-only">Open menu</span>
@@ -177,7 +177,7 @@ export default function Users() {
                       <DropdownMenuContent align="end">
                         {row.userId === mailboxUser?.userId ? (
                           <SmartDrawer>
-                            <DropdownMenuItem asChild disabled={row.role === "OWNER"}>
+                            <DropdownMenuItem asChild disabled={row.role === "OWNER"} onClick={() => { }}>
                               <SmartDrawerTrigger className="w-full gap-2">
                                 <UserRoundXIcon className="size-5" />
                                 Leave mailbox
@@ -223,6 +223,7 @@ export default function Users() {
                             <DropdownMenuItem
                               asChild
                               disabled={row.role === "OWNER" || mailboxUser?.role !== "OWNER"}
+                              onClick={() => { }}
                             >
                               <SmartDrawerTrigger className="w-full gap-2">
                                 <UserRoundXIcon className="size-5" />
