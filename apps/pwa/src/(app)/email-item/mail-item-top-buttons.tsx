@@ -42,11 +42,11 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
   // const email = data ? data[0] : { isStarred: false, binnedAt: null, category: null }
 
   return (
-    <div className="flex w-full min-w-0 flex-row gap-6 border-b-2 p-2.5 text-muted-foreground h-10 [.emailslist_&]:h-10 overflow-x-auto //overflow-y-hidden shrink-0">
+    <div className="flex w-full min-w-0 flex-row gap-6 border-b-2 p-2.5 text-muted-foreground h-10 [.emailslist_&]:h-10 overflow-x-auto //overflow-y-hidden shrink-0 px-4">
       <BackButton fallbackUrl={`/mail/${mailboxId}`} className="[.emailslist_&]:hidden" />
       <XButton className="hidden [.emailslist_&]:block" />
 
-      <div className="-mx-2 border-e-2" />
+      <div className="-mx-2 -ms-3 border-e-2" />
 
       <ContextMenuAction
         icon="StarIcon"
@@ -140,18 +140,21 @@ export default function TopButtons({ mailboxId, emailId, email, onUpdateEmail }:
         </Button>
       </TooltipText>
 
-      <TooltipText text="Open full email">
-        <Button
-          variant="ghost"
-          size="auto"
-          className="ms-auto -m-2 rounded-full p-2 text-muted-foreground hover:text-foreground [.emailslist_&]:flex hidden"
-          asChild
-        >
-          <Link href={`/mail/${mailboxId}/${emailId}`} className="ms-auto">
-            <MoveDiagonalIcon className="size-5" />
-          </Link>
-        </Button>
-      </TooltipText>
+      <div className="ms-auto [.emailslist_&]:flex hidden">
+        <TooltipText text="Open full email">
+          <Button
+            variant="ghost"
+            size="auto"
+            className="-m-2 rounded-full p-2 text-muted-foreground hover:text-foreground"
+            asChild
+          >
+            <Link href={`/mail/${mailboxId}/${emailId}`} className="ms-auto">
+              <MoveDiagonalIcon className="size-5" />
+            </Link>
+          </Button>
+        </TooltipText>
+      </div>
+
     </div>
   );
 }
