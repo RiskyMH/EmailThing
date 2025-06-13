@@ -119,7 +119,7 @@ export default function Categories() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <SmartDrawer>
-                          <DropdownMenuItem asChild onClick={() => { }}>
+                          <DropdownMenuItem asChild>
                             <SmartDrawerTrigger className="w-full gap-2">
                               <PencilIcon className="size-5 text-muted-foreground" />
                               Edit name
@@ -149,7 +149,7 @@ export default function Categories() {
                         </SmartDrawer>
 
                         <SmartDrawer>
-                          <DropdownMenuItem className="flex w-full gap-2" asChild onClick={() => { }}>
+                          <DropdownMenuItem className="flex w-full gap-2" asChild>
                             <SmartDrawerTrigger>
                               <Trash2Icon className="size-5 text-muted-foreground" />
                               Delete category

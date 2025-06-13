@@ -177,7 +177,7 @@ export default function Users() {
                       <DropdownMenuContent align="end">
                         {row.userId === mailboxUser?.userId ? (
                           <SmartDrawer>
-                            <DropdownMenuItem asChild disabled={row.role === "OWNER"} onClick={() => { }}>
+                            <DropdownMenuItem asChild disabled={row.role === "OWNER"}>
                               <SmartDrawerTrigger className="w-full gap-2">
                                 <UserRoundXIcon className="size-5" />
                                 Leave mailbox
@@ -223,7 +223,7 @@ export default function Users() {
                             <DropdownMenuItem
                               asChild
                               disabled={row.role === "OWNER" || mailboxUser?.role !== "OWNER"}
-                              onClick={() => { }}
+                             
                             >
                               <SmartDrawerTrigger className="w-full gap-2">
                                 <UserRoundXIcon className="size-5" />

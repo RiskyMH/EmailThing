@@ -138,95 +138,95 @@ export default function Aliases() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <SmartDrawer>
-                          <DropdownMenuItem asChild onClick={() => { }}>
+                          <DropdownMenuItem asChild>
                             <SmartDrawerTrigger className="w-full gap-2">
-                            <PencilIcon className="size-5 text-muted-foreground" />
-                            Edit name
-                          </SmartDrawerTrigger>
-                        </DropdownMenuItem>
-                        <SmartDrawerContent className="sm:max-w-[425px]">
-                          <SmartDrawerHeader>
-                            <SmartDrawerTitle>Edit Alias</SmartDrawerTitle>
-                            <SmartDrawerDescription>
-                              Enter your chosen name to update alias
-                            </SmartDrawerDescription>
-                          </SmartDrawerHeader>
+                              <PencilIcon className="size-5 text-muted-foreground" />
+                              Edit name
+                            </SmartDrawerTrigger>
+                          </DropdownMenuItem>
+                          <SmartDrawerContent className="sm:max-w-[425px]">
+                            <SmartDrawerHeader>
+                              <SmartDrawerTitle>Edit Alias</SmartDrawerTitle>
+                              <SmartDrawerDescription>
+                                Enter your chosen name to update alias
+                              </SmartDrawerDescription>
+                            </SmartDrawerHeader>
 
-                          <EditAliasForm
-                            mailboxId={mailboxId!}
-                            alias={row.alias}
-                            id={row.id}
-                            name={row.name || null}
-                          />
+                            <EditAliasForm
+                              mailboxId={mailboxId!}
+                              alias={row.alias}
+                              id={row.id}
+                              name={row.name || null}
+                            />
 
-                          <SmartDrawerFooter className="flex pt-2 sm:hidden">
-                            <SmartDrawerClose asChild>
-                              <Button variant="secondary">Cancel</Button>
-                            </SmartDrawerClose>
-                          </SmartDrawerFooter>
-                        </SmartDrawerContent>
-                      </SmartDrawer>
+                            <SmartDrawerFooter className="flex pt-2 sm:hidden">
+                              <SmartDrawerClose asChild>
+                                <Button variant="secondary">Cancel</Button>
+                              </SmartDrawerClose>
+                            </SmartDrawerFooter>
+                          </SmartDrawerContent>
+                        </SmartDrawer>
 
-                      <DropdownMenuItem disabled={!!row.default} className="flex gap-2" asChild onClick={() => { }}>
-                        <ContextMenuAction
-                          icon="CheckIcon"
-                          action={changeDefaultAlias.bind(null, mailboxId!, row.id)}
-                        >
-                          Make default
-                        </ContextMenuAction>
-                      </DropdownMenuItem>
-
-                      <SmartDrawer>
-                        <DropdownMenuItem
-                          className="flex w-full gap-2"
-                          disabled={!!row.default || aliases?.length <= 1}
-                          asChild
-                          onClick={() => { }}
-                        >
-                          <SmartDrawerTrigger>
-                            <Trash2Icon className="size-5 text-muted-foreground" />
-                            Delete alias
-                          </SmartDrawerTrigger>
+                        <DropdownMenuItem disabled={!!row.default} className="flex gap-2" asChild>
+                          <ContextMenuAction
+                            icon="CheckIcon"
+                            action={changeDefaultAlias.bind(null, mailboxId!, row.id)}
+                          >
+                            Make default
+                          </ContextMenuAction>
                         </DropdownMenuItem>
 
-                        <SmartDrawerContent className="sm:max-w-[425px]">
-                          <SmartDrawerHeader>
-                            <SmartDrawerTitle>Delete Alias</SmartDrawerTitle>
-                            <SmartDrawerDescription>
-                              Are you sure you want to delete <strong>{row.alias}</strong>?
-                            </SmartDrawerDescription>
-                          </SmartDrawerHeader>
-                          <SmartDrawerFooter className="flex pt-2">
-                            <SmartDrawerClose
-                              className={buttonVariants({
-                                variant: "secondary",
-                              })}
-                            >
-                              Cancel
-                            </SmartDrawerClose>
-                            <DeleteButton action={deleteAlias.bind(null, mailboxId!, row.id)} />
-                          </SmartDrawerFooter>
-                        </SmartDrawerContent>
-                      </SmartDrawer>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                        <SmartDrawer>
+                          <DropdownMenuItem
+                            className="flex w-full gap-2"
+                            disabled={!!row.default || aliases?.length <= 1}
+                            asChild
+                           
+                          >
+                            <SmartDrawerTrigger>
+                              <Trash2Icon className="size-5 text-muted-foreground" />
+                              Delete alias
+                            </SmartDrawerTrigger>
+                          </DropdownMenuItem>
+
+                          <SmartDrawerContent className="sm:max-w-[425px]">
+                            <SmartDrawerHeader>
+                              <SmartDrawerTitle>Delete Alias</SmartDrawerTitle>
+                              <SmartDrawerDescription>
+                                Are you sure you want to delete <strong>{row.alias}</strong>?
+                              </SmartDrawerDescription>
+                            </SmartDrawerHeader>
+                            <SmartDrawerFooter className="flex pt-2">
+                              <SmartDrawerClose
+                                className={buttonVariants({
+                                  variant: "secondary",
+                                })}
+                              >
+                                Cancel
+                              </SmartDrawerClose>
+                              <DeleteButton action={deleteAlias.bind(null, mailboxId!, row.id)} />
+                            </SmartDrawerFooter>
+                          </SmartDrawerContent>
+                        </SmartDrawer>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
-          ))
-          ) : (
-          <TableRow>
-            <TableCell className={`h-24 text-center ${!data ? "fade-in" : ""}`} colSpan={4}>
-              {data ? (
-                "No aliases yet??"
-              ) : (
-                <Loader2 className="mx-auto size-8 animate-spin text-muted-foreground" />
-              )}
-            </TableCell>
-          </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell className={`h-24 text-center ${!data ? "fade-in" : ""}`} colSpan={4}>
+                  {data ? (
+                    "No aliases yet??"
+                  ) : (
+                    <Loader2 className="mx-auto size-8 animate-spin text-muted-foreground" />
+                  )}
+                </TableCell>
+              </TableRow>
             )}
-        </TableBody>
-      </Table>
-    </div>
+          </TableBody>
+        </Table>
+      </div>
     </div >
   );
 }

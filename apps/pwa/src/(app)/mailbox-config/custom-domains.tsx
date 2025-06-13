@@ -131,7 +131,7 @@ export default function CustomDomains() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <SmartDrawer>
-                          <DropdownMenuItem className="flex w-full gap-2" asChild onClick={() => { }}>
+                          <DropdownMenuItem className="flex w-full gap-2" asChild>
                             <SmartDrawerTrigger>
                               <Trash2Icon className="size-5 text-muted-foreground" />
                               Delete domain
@@ -163,7 +163,7 @@ export default function CustomDomains() {
                         </SmartDrawer>
 
                         <SmartDrawer repositionInputs={false}>
-                          <DropdownMenuItem asChild onClick={() => { }}>
+                          <DropdownMenuItem asChild>
                             <SmartDrawerTrigger className="w-full">Setup again</SmartDrawerTrigger>
                           </DropdownMenuItem>
                           <SmartDrawerContent className="sm:max-w-[425px]">
