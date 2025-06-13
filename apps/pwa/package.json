@@ -74,8 +74,8 @@
     "react-router-dom": "^7.6.2",
     "sonner": "^2.0.5",
     "swr": "^2.3.3",
-    "tailwind-merge": "^3.3.0",
-    "tailwindcss": "^4.1.8",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.10",
     "tailwindcss-animate": "^1.0.7",
     "turndown": "^7.2.0",
     "ua-parser-js": "^2.0.3",
@@ -86,8 +86,8 @@
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@types/babel__core": "^7.20.5",
-    "@types/bun": "^1.2.15",
-    "@types/react": "^19.1.6",
+    "@types/bun": "^1.2.16",
+    "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/turndown": "^5.0.5",
     "@types/ua-parser-js": "^0.7.39",
@@ -97,6 +97,6 @@
     "globals": "^15.15.0",
     "shiki": "^3.6.0",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.33.1"
+    "typescript-eslint": "^8.34.0"
   }
 }
