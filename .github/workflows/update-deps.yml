@@ -83,12 +83,21 @@ jobs:
             console.log("EOF");
           ' >> $GITHUB_ENV
 
+      - uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - run: echo "The actual lockfile is in ./bun.lock - this file is just here so tools know I use bun..."> bun.lockb
+
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           # token: ${{ secrets.GITHUB_TOKEN }}
-          token: ${{ secrets.PR_GITHUB_TOKEN }}
-          git-token: ${{ secrets.PR_GITHUB_TOKEN }}
+          # token: ${{ secrets.PR_GITHUB_TOKEN }}
+          # branch-token: ${{ secrets.PR_GITHUB_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
           commit-message: "chore: update dependencies"
           title: "chore: update dependencies"
           body: |
