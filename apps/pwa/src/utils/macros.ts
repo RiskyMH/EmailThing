@@ -1,5 +1,5 @@
 const defaultSvgl = {
-  "emailthing.app": "https://pwa.emailthing.app/icon.svg",
+  "emailthing.app": "/icon.svg",
   "gmail.com": null,
   "googlemail.com": null,
   "outlook.com": null,

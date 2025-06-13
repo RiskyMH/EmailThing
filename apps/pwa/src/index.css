@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
-@source "../../web/app";
 @source "../src";
 
 /* @import "@fontsource/inter/100.css";
@@ -14,6 +13,7 @@
 @import "@fontsource/inter/800.css";
 @import "@fontsource/inter/900.css"; */
 @import "./inter.css";
+@import "./colors.css";
 
 body {
   font-family: Inter, "Inter Variable", "Inter Fallback", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
@@ -25,88 +25,6 @@ body {
   :root {
     /* light and dark mode available */
     color-scheme: light dark;
-
-    --background: #ffffff;
-    --foreground: var(--primary);
-
-    --muted: var(--secondary);
-    --muted-foreground: #8f8ca2;
-
-    --popover: var(--tertiary);
-    --popover-foreground: var(--primary);
-
-    --border: #eeeff0;
-    --input: var(--muted-foreground);
-
-    --card: var(--secondary);
-    --card-foreground: var(--primary);
-
-    --primary: #07041d;
-    --primary-foreground: var(--secondary);
-
-    --secondary: #f1f0f5;
-    --secondary-foreground: var(--primary);
-
-    --accent: var(--secondary);
-    --accent-foreground: var(--primary);
-
-    --tertiary: #ffffff;
-    --tertiary-foreground: var(--muted-foreground);
-
-    --red: #fc5a5a;
-    --red-foreground: var(--secondary);
-
-    --blue: #1e75ff;
-    --blue-foreground: var(--primary-foreground);
-
-    --destructive: var(--red);
-    --destructive-foreground: var(--red-foreground);
-
-    --ring: var(--border);
-
-    --radius: 0.5rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: #1c1c24;
-      --foreground: var(--primary);
-
-      --muted: var(--tertiary);
-      --muted-foreground: #898993;
-
-      --accent: var(--border);
-      --accent-foreground: #f1f0f5;
-
-      --popover: var(--tertiary);
-      --popover-foreground: var(--primary);
-
-      --border: #2c2c34;
-      --input: #4e4e56;
-
-      --card: var(--secondary);
-      --card-foreground: var(--primary);
-
-      --primary: #efeff0;
-      --primary-foreground: var(--secondary);
-
-      --secondary: #292932;
-      --secondary-foreground: var(--primary);
-
-      --tertiary: #17171e;
-      --tertiary-foreground: var(--muted-foreground);
-
-      --red: #fc5a5a;
-      --red-foreground: var(--primary);
-
-      --blue: #1e75ff;
-      --blue-foreground: var(--secondary-foreground);
-
-      --destructive: var(--red);
-      --destructive-foreground: var(--red-foreground);
-
-      --ring: var(--input);
-    }
   }
 
   * {
@@ -133,7 +51,7 @@ body {
 }
 
 .toaster {
-  --normal-bg: var(--tertiary) !important;
+  --normal-bg: var(--sidebar) !important;
 }
 
 @keyframes fadeIn {
@@ -161,7 +79,7 @@ body {
   animation-delay: 200ms;
 }
 
-@theme {
+@theme inline{
   --border-3: 3px;
 
   --color-border: var(--border);
@@ -171,14 +89,14 @@ body {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
 
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
-  --color-tertiary: var(--tertiary);
-  --color-tertiary-foreground: var(--tertiary-foreground);
 
   --color-red: var(--red);
   --color-red-foreground: var(--red-foreground);
@@ -227,4 +145,9 @@ body {
       margin-bottom: 1em;
     }
   }
+}
+
+
+.infinite-scroll-component__outerdiv  {
+  width: 100%;
 }

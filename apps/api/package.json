@@ -1,0 +1,36 @@
+{
+  "name": "@emailthing/api",
+  "module": "src/main.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run --conditions=react-server src/main.ts",
+    "dev": "bun run --hot --conditions=react-server src/main.ts"
+  },
+  "dependencies": {
+    "@block65/webcrypto-web-push": "^1.0.2",
+    "@emailthing/const": "workspace:^",
+    "@emailthing/db": "workspace:^",
+    "@github/webauthn-json": "^2.1.1",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@riskymh/aws": "^0.0.9",
+    "@simplewebauthn/server": "13.1.0",
+    "aws4fetch": "^1.0.20",
+    "drizzle-orm": "^0.43.1",
+    "jose": "^6.0.11",
+    "mailauth": "^4.8.6",
+    "mimetext": "^3.0.27",
+    "postal-mime": "^2.4.3",
+    "ua-parser-js": "^2.0.3",
+    "zod": "^3.25.56"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@emailthing/web": "workspace:*",
+    "@types/ua-parser-js": "^0.7.39",
+    "drizzle-kit": "^0.31.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

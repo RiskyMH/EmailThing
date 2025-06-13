@@ -27,7 +27,7 @@ const WINDOW_DURATION_MS = 60 * 1000;
 const ratelimit = new Map<string, { count: number; resetAt: Date }>();
 
 export async function POST(request: Request) {
-    const mailboxId = await getTokenMailbox();
+    const mailboxId = await getTokenMailbox(request.headers);
     if (!mailboxId) {
         return new Response("Unauthorized", { status: 401 });
     }

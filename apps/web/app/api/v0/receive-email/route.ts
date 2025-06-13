@@ -40,6 +40,7 @@ export async function POST(request: Request) {
         zone: searchParams.get("zone") as string,
         auth: request.headers.get("x-auth") as string,
         to,
+        headers: request.headers,
     });
     if (!mailboxResult) {
         return new Response("Unauthorized", { status: 401 });
@@ -201,12 +202,12 @@ export async function POST(request: Request) {
     });
 }
 
-async function getMailbox({ internal, zone, auth, to }: { internal: boolean; zone: string; auth: string; to: string }) {
+async function getMailbox({ internal, zone, auth, to, headers }: { internal: boolean; zone: string; auth: string; to: string; headers: Headers }) {
     // work out which mailbox to put it in
 
     if (!internal) {
         // it must be custom domain (so check the token)
-        const mailboxId = await getTokenMailbox();
+        const mailboxId = await getTokenMailbox(headers);
         if (!mailboxId) return null;
         return { mailboxId };
     }
@@ -223,19 +224,19 @@ async function getMailbox({ internal, zone, auth, to }: { internal: boolean; zon
 
     const alias = defaultDomain.tempDomain
         ? await db.query.TempAlias.findFirst({
-              where: and(eq(sql`lower(${TempAlias.alias})`, sql`lower(${to})`), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
-              columns: {
-                  mailboxId: true,
-                  id: true,
-              },
-          })
+            where: and(eq(sql`lower(${TempAlias.alias})`, sql`lower(${to})`), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
+            columns: {
+                mailboxId: true,
+                id: true,
+            },
+        })
         : await db.query.MailboxAlias.findFirst({
-              where: and(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${to})`), eq(MailboxAlias.isDeleted, false)),
-              columns: {
-                  mailboxId: true,
-                  id: true,
-              },
-          });
+            where: and(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${to})`), eq(MailboxAlias.isDeleted, false)),
+            columns: {
+                mailboxId: true,
+                id: true,
+            },
+        });
 
     if (defaultDomain.tempDomain) {
         return { mailboxId: alias?.mailboxId, tempId: alias?.id };

@@ -1,4 +1,4 @@
-import { makeHtml } from "@/app/compose/tools";
+import { makeHtml } from "@/(app)/compose/tools";
 import type { DBEmail, DBEmailDraft } from "../types";
 import { welcomeEmail } from "./email.macro" with { type: "macro" };
 import { demoMailboxId } from "./mailbox";
@@ -119,14 +119,14 @@ export const demoEmails: DBEmail[] = [
     id: "4",
     mailboxId: demoMailboxId,
     subject: "Your Windows subscription",
-    snippet: "We're so hapy to see you again!",
-    body: "We're so hapy to see you again! We've missed you!",
+    snippet: "We're so happy to see you again!",
+    body: "We're so happy to see you again! We've missed you!",
     createdAt: new Date("2025-01-12T16:45:00"),
     updatedAt: new Date("2025-01-12T16:45:00"),
     isRead: 0,
     isStarred: 0,
     isSender: 0,
-    html: makeHtml("<p>We're so hapy to see you again! We've missed you!</p>"),
+    html: makeHtml("<p>We're so happy to see you again! We've missed you!</p>"),
     size: 456,
     raw: "s3",
     replyTo: 0,

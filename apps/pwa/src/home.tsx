@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { type RouteObject, RouterProvider, createBrowserRouter } from "react-router-dom";
 import ErrorPage from "./error";
 // import "./index.css";
-import HomeRoutes from "./home/_routes";
+import HomeRoutes from "./(home)/_routes";
 import RootLayout from "./root-layout";
 
 const routes = (
@@ -16,7 +16,7 @@ const router = createBrowserRouter(routes, {
   patchRoutesOnNavigation: async ({ matches, patch, path, signal }) => {
     if (path.startsWith("/docs")) {
       if (path === "/docs/api") return void (window.location.href = "/docs/api");
-      const { routes } = await import("./docs/_routes");
+      const { routes } = await import("./(docs)/_routes");
       if (routes) {
         patch(null, routes);
       }
@@ -25,7 +25,7 @@ const router = createBrowserRouter(routes, {
       path.startsWith("/settings") ||
       path.startsWith("/admin")
     ) {
-      const { routes } = await import("./app/_routes");
+      const { routes } = await import("./(app)/_routes");
       if (routes) {
         patch(null, routes);
       }

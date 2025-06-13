@@ -1,4 +1,4 @@
-import { parseHTML } from "@/app/email-item/parse-html";
+import { parseHTML } from "@/(app)/email-item/parse-html";
 import { createId } from "@paralleldrive/cuid2";
 import Dexie from "dexie";
 import { parse as markedParse } from "marked";

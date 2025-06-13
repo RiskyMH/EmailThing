@@ -12,8 +12,9 @@
     "paths": {
       "next/link": ["./src/components/next-link.tsx"],
       "next/navigation": ["./src/components/next-pathname.tsx"],
-      "@/(home)/components.client": ["./src/home/layout.tsx"],
-      "@/*": ["./src/*", "../web/app/*"]
+      "@/(home)/components.client": ["./src/(home)/layout.tsx"],
+      "@/*": ["./src/*"],
+      // "@/components/*": ["./src/components/*", "../web/app/components/*"],
     }
   }
 }

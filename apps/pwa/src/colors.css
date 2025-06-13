@@ -1,0 +1,105 @@
+@layer base {
+    :root {
+        --background: #ffffff;
+        --foreground: var(--primary);
+
+        --sidebar: var(--border);
+        --sidebar-foreground: var(--primary);
+
+        --muted: var(--secondary);
+        --muted-foreground: #8f8ca2;
+
+        --popover: var(--tertiary);
+        --popover-foreground: var(--primary);
+
+        --border: #eeeff0;
+        --input: var(--muted-foreground);
+
+        --card: var(--secondary);
+        --card-foreground: var(--primary);
+
+        --primary: #07041d;
+        --primary-foreground: var(--secondary);
+
+        --secondary: #f1f0f5;
+        --secondary-backup: #f1f0f5;
+        --secondary-foreground: var(--primary);
+
+        --accent: var(--secondary);
+        --accent-foreground: var(--primary);
+
+        --tertiary: #ffffff;
+        --tertiary-foreground: var(--muted-foreground);
+
+        --red: #fc5a5a;
+        --red-foreground: var(--secondary);
+
+        --blue: #1e75ff;
+        --blue-foreground: var(--primary-foreground);
+
+        --destructive: var(--red);
+        --destructive-foreground: var(--red-foreground);
+
+        --ring: var(--border);
+
+        --radius: 0.5rem;
+    }
+
+    .bg-sidebar, .sm\:bg-sidebar {
+        --input: white;
+    }
+
+
+    @media (prefers-color-scheme: dark) {
+        .bg-sidebar, .sm\:bg-sidebar  {
+            --input: var(--secondary);
+        }
+
+        :root {
+            --background: #1c1c24;
+            --foreground: var(--primary);
+
+            --sidebar: #17171e;
+            --sidebar-foreground: #efeff0;
+
+            --primary: #efeff0;
+
+            --muted: var(--tertiary);
+            --muted-foreground: #898993;
+
+            --accent: var(--border);
+            --accent-foreground: #f1f0f5;
+
+            --popover: var(--tertiary);
+            --popover-foreground: var(--primary);
+
+            --border: #2c2c34;
+            --input: #4e4e56;
+
+            --card: var(--secondary);
+            --card-foreground: var(--primary);
+
+            --primary: #efeff0;
+            --primary-foreground: var(--secondary);
+
+            --secondary: #292932;
+            --secondary-backup: #292932;
+            --secondary-foreground: var(--primary);
+
+            --tertiary: #17171e;
+            --tertiary-foreground: var(--muted-foreground);
+
+            --red: #fc5a5a;
+            --red-foreground: var(--primary);
+
+            --blue: #1e75ff;
+            --blue-foreground: var(--secondary-foreground);
+
+            --destructive: var(--red);
+            --destructive-foreground: var(--red-foreground);
+
+            --ring: var(--input);
+        }
+    }
+
+}

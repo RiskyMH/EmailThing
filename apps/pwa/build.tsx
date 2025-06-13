@@ -57,9 +57,9 @@ const result = await build({
   },
 });
 
-await cp(path.join(import.meta.dir, "../web/public"), path.join(import.meta.dir, "./dist"), {
-  recursive: true,
-});
+// await cp(path.join(import.meta.dir, "../web/public"), path.join(import.meta.dir, "./dist"), {
+//   recursive: true,
+// });
 await cp(path.join(import.meta.dir, "./public"), path.join(import.meta.dir, "./dist"), {
   recursive: true,
 });
@@ -103,7 +103,7 @@ for (const file of result.outputs) {
 
 const publicFiles = [
   ...(await readdir(path.join(import.meta.dir, "./public"), { recursive: true })),
-  ...(await readdir(path.join(import.meta.dir, "../web/public"), { recursive: true })),
+  // ...(await readdir(path.join(import.meta.dir, "../web/public"), { recursive: true })),
   // ...await readdir(require.resolve("@fontsource/inter") + "/../files", {recursive: true}),
 ];
 // Print the results
@@ -231,11 +231,12 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
   );
 
   const _html = templates[route.preferTemplate || "app.html"]
-  .replaceAll(/(\s{2,}|\n+)/gm, "")
-  // .replaceAll(/\n+/gm, '')
-  .replace(replace, prerendered)
-  .replace(/<!-- META -->.*?<!-- \/META -->/gm, meta)
-  .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
+    .replaceAll(/(\s{2,}|\n+)/gm, "")
+    // .replaceAll(/\n+/gm, '')
+    .replace(replace, prerendered)
+    // .replaceAll(/(\s{2,}|\n+)/gm, "")
+    .replace(/<!-- META -->.*?<!-- \/META -->/gm, meta)
+    .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
 
   await Bun.write(`./dist/${path === "/" ? "index" : path}.html`, _html);
   // await Bun.write(`./dist/${path}/index.html`, _html)
