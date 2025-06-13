@@ -86,7 +86,8 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PR_GITHUB_TOKEN }}
           git-token: ${{ secrets.PR_GITHUB_TOKEN }}
           commit-message: "chore: update dependencies"
           title: "chore: update dependencies"
