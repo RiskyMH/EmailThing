@@ -71,17 +71,6 @@ export default function CustomDomains() {
     [mailboxId],
   );
 
-  if (data) data[1] = [
-    {
-      addedAt: new Date(),
-      domain: "example.com",
-      id: "1",
-      isDeleted: 0,
-      mailboxId: "1",
-      updatedAt: new Date(),
-    }
-  ]
-
   const [mailbox, customDomains, aliases] = data ?? [];
 
   return (
@@ -93,7 +82,7 @@ export default function CustomDomains() {
         <SmartDrawer>
           <SmartDrawerTrigger asChild>
             <Button
-              // disabled={(customDomains?.length ?? 0) >= customDomainLimit[mailbox?.plan ?? "FREE"]}
+              disabled={(customDomains?.length ?? 0) >= customDomainLimit[mailbox?.plan ?? "FREE"]}
               className="ms-auto flex gap-2"
               size="sm"
               variant="secondary"
