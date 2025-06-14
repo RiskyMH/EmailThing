@@ -152,7 +152,9 @@ export function EmailItem({ email: _email, mailboxId, type, categories, isSelect
         const isDesktop = window.innerWidth > 768;
         if (isEmailColumn && isDesktop) {
           if (type !== "drafts") {
-            updateEmail({ isRead: true });
+            if (!email.isRead) {
+              updateEmail({ isRead: true });
+            }
             const search = new URLSearchParams(window.location.search);
             search.set("mailId", emailId);
             navigate({ search: search.toString() });
