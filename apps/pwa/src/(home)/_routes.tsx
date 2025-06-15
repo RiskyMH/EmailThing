@@ -19,7 +19,7 @@ export const routes = [
         path: "/",
         element: <><Home /><Title title="EmailThing: A new way to manage your email!" /></>,
         meta: {
-          title: "EmailThing - A new way to manage your email!",
+          title: "EmailThing: A new way to manage your email!",
           ogTitle: "EmailThing",
           description: "A modern email client designed for simplicity and the web.",
           canonical: "https://emailthing.app/home",
@@ -29,7 +29,7 @@ export const routes = [
         path: "/home",
         element: <><Home /><Title title="EmailThing: A new way to manage your email!" /></>,
         meta: {
-          title: "EmailThing - A new way to manage your email!",
+          title: "EmailThing: A new way to manage your email!",
           ogTitle: "EmailThing",
           description: "A modern email client designed for simplicity and the web.",
           canonical: "https://emailthing.app/home",
