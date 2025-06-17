@@ -7,6 +7,7 @@ import { userAuthSchema } from "@/validations/auth";
 import { isValidOrigin } from "../tools";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
 import { verifyCredentialss } from "@/utils/passkeys";
+import { TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 
 const errorMsg = "Invalid username or password";
 
@@ -190,8 +191,8 @@ export async function POST(request: Request) {
         const token = generateSessionToken();
         const refreshToken = generateRefreshToken();
 
-        const tokenExpiresAt = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
-        const refreshTokenExpiresAt = new Date(Date.now() + 1 * 365 * 24 * 60 * 60 * 1000);
+        const tokenExpiresAt = new Date(Date.now() + TOKEN_EXPIRES_IN);
+        const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN);
 
         const [mailboxes, _] = await db.batchFetch([
             db.query.MailboxForUser.findMany({

@@ -13,6 +13,7 @@
   "exports": {
     ".": "./index.ts",
     "./limits": "./limits.ts",
-    "./urls": "./urls.ts"
+    "./urls": "./urls.ts",
+    "./expiry": "./expiry.ts"
   }
 }

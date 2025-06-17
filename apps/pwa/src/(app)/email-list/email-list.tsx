@@ -47,7 +47,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-
+import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
 
 export default function EmailListSuspenced({
   filter,
@@ -385,7 +385,7 @@ function Emails({
             <div className="text-center font-bold text-muted-foreground">
               {categoryId
                 ? // @ts-expect-error types are boring
-                `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() * 1000 * 60 * 60 * 24))}`
+                `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() + TEMP_EMAIL_EXPIRES_IN))}`
                 : "Email addresses will be automatically deleted in 24 hours after creation."}
               {categoryId && (
                 <p className="pt-1 font-normal">

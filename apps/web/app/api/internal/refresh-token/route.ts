@@ -2,6 +2,7 @@ import { db, UserSession } from "@/db";
 import { eq, and, gt } from "drizzle-orm";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
 import { extractUserInfoHeader, isValidOrigin } from "../tools";
+import { TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
         const newToken = generateSessionToken();
         const newRefreshToken = generateRefreshToken();
 
-        const tokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24hr
+        const tokenExpiresAt = new Date(Date.now() + TOKEN_EXPIRES_IN);
 
         const sessionInfo = extractUserInfoHeader(request);
 

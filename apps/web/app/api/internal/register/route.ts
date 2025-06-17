@@ -9,6 +9,7 @@ import { generateSessionToken, generateRefreshToken } from "@/utils/token";
 import { emailUser } from "@/(auth)/register/tools";
 import { createId } from "@paralleldrive/cuid2";
 import { impersonatingEmails } from "@/validations/invalid-emails";
+import { TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 
 // Rate limiting
 const attempts = new Map<string, number>();
@@ -132,8 +133,8 @@ export async function POST(request: Request) {
         const token = generateSessionToken();
         const refreshToken = generateRefreshToken();
 
-        const tokenExpiresAt = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
-        const refreshTokenExpiresAt = new Date(Date.now() + 1 * 365 * 24 * 60 * 60 * 1000);
+        const tokenExpiresAt = new Date(Date.now() + TOKEN_EXPIRES_IN);
+        const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN);
 
         await db.batchUpdate([
             db.insert(User).values({

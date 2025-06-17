@@ -8,6 +8,7 @@ import { isValidOrigin } from "../../tools";
 import { createPasswordHash } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth";
 import { marked } from "marked";
+import { RESET_PASSWORD_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 
 // Rate limiting for password reset request phase (stricter)
 const requestAttempts = new Map<string, number>();
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
                 .values({
                     token,
                     userId: user.id,
-                    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours
+                    expiresAt: new Date(Date.now() + RESET_PASSWORD_TOKEN_EXPIRES_IN),
                     createdAt: new Date(),
                 })
                 .execute();
