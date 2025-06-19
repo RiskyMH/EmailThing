@@ -195,10 +195,16 @@ export async function POST(request: Request) {
                     }
                 }
             } else if (key === "emails") {
+                const categoryIds = await tx.select({ id: MailboxCategory.id, mailboxId: MailboxCategory.mailboxId }).from(MailboxCategory).where(inArray(MailboxCategory.mailboxId, currentUserMailboxes));
+                const categoryIdsMap: Record<string, string[]> = {};
+                for (const category of categoryIds) {
+                    if (!categoryIdsMap[category.mailboxId]) categoryIdsMap[category.mailboxId] = [];
+                    categoryIdsMap[category.mailboxId].push(category.id);
+                }
                 for (const email of body.emails || []) {
                     if (!email) continue;
 
-                    const res = await updateEmail(tx, email, currentUser.id, currentUserMailboxes);
+                    const res = await updateEmail(tx, email, currentUser.id, currentUserMailboxes, categoryIdsMap);
                     if ('error' in res) {
                         errors.push(res.error);
                     }
@@ -662,7 +668,7 @@ type UpdateError = {
 };
 
 
-async function updateEmail(tx: transaction, email: NonNullable<ChangesRequest["emails"]>[number], userId: string, mailboxIds: string[]): Promise<
+async function updateEmail(tx: transaction, email: NonNullable<ChangesRequest["emails"]>[number], userId: string, mailboxIds: string[], categoryIdsMap: Record<string, string[]>): Promise<
     | { error: UpdateError }
     | { success: true }
 > {
@@ -687,6 +693,12 @@ async function updateEmail(tx: transaction, email: NonNullable<ChangesRequest["e
             error: "Cannot create email yet",
         } as const;
         return { error };
+    }
+
+    if (email.categoryId) {
+        if (!categoryIdsMap[email.mailboxId]?.includes(email.categoryId)) {
+            email.categoryId = null;
+        }
     }
 
     // check that the emailid exists and is owned by the user
