@@ -1,6 +1,7 @@
 import db, { UserNotification, MailboxForUser } from "@/db";
 import { eq, and } from "drizzle-orm";
 import { sendNotification } from "./web-push";
+import { createId } from "@paralleldrive/cuid2";
 
 export async function notifyMailbox(
     mailboxId: string,
@@ -38,15 +39,7 @@ export async function notifyMailbox(
                 // delete the notification if it's no longer valid
                 if (res.status === 410) {
                     await db
-                        .update(UserNotification)
-                        .set({
-                            isDeleted: true,
-                            createdAt: new Date(),
-                            auth: "<deleted>",
-                            p256dh: "<deleted>",
-                            endpoint: "<deleted>",
-                            expiresAt: new Date(0),
-                        })
+                        .delete(UserNotification)
                         .where(eq(UserNotification.endpoint, n.endpoint))
                         .execute();
                 }
