@@ -34,7 +34,8 @@
 			},
 			"style": {
 				"noNonNullAssertion": "info",
-				"useCollapsedElseIf": "warn"
+				"useCollapsedElseIf": "warn",
+				"noUselessElse": "info"
 			},
 			"correctness": {
 				"useExhaustiveDependencies": "info",

@@ -34,6 +34,7 @@ import type { BatchItem } from "drizzle-orm/batch";
 import { getSession, isValidOrigin } from "../tools";
 import { deleteFile } from "@/utils/s3";
 import { env } from "@/utils/env";
+import { PgTransaction } from "drizzle-orm/pg-core";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -171,6 +172,7 @@ export async function POST(request: Request) {
     ]);
 
     if (!currentUser) return new Response("User not found", { status: 404 });
+    const currentUserMailboxes = mailboxesForUser.map((m) => m.mailboxId);
 
     // body is partial of ChangesResponse
     const body = (await request.json()) as ChangesRequest;
@@ -179,424 +181,46 @@ export async function POST(request: Request) {
     // after that, update the database and return lastsynced object
 
     const errors: { key: string; id?: string | null; error: string; moreInfo?: string }[] = [];
-    const changes = [] as BatchItem<"pg">[];
 
-    for (const key in body) {
-        if (key === "emails") {
-            // update the emails
-            // 1. verify user has access to the emails
-            // 2. can update every field except for mailboxId and its own id
-            // 2.1. if id is null, create it
+    await db.transaction(async (tx) => {
+        for (const key in body) {
+            // needs to be first as can modify requirements for other tables (i.e emails)
+            if (key === "mailboxCategories") {
+                for (const mailboxCategory of body.mailboxCategories || []) {
+                    if (!mailboxCategory) continue;
 
-            for (const email of body.emails || []) {
-                if (!email) continue;
-                if (!email.mailboxId || !mailboxesForUser.some((m) => m.mailboxId === email.mailboxId)) {
-                    errors.push({
-                        key: "emails",
-                        id: email.id,
-                        error: "User does not have access to the mailbox",
-                        moreInfo: `Mailbox id: ${email.mailboxId}; User id: ${currentUser.id}`,
-                    });
-                    continue;
+                    const res = await updateMailboxCategory(tx, mailboxCategory, currentUser.id, currentUserMailboxes);
+                    if ('error' in res) {
+                        errors.push(res.error);
+                    }
                 }
-                if (email.id == null) {
-                    errors.push({
-                        key: "emails",
-                        id: null,
-                        error: "Cannot create email yet",
-                    });
-                    continue;
+            } else if (key === "emails") {
+                for (const email of body.emails || []) {
+                    if (!email) continue;
+
+                    const res = await updateEmail(tx, email, currentUser.id, currentUserMailboxes);
+                    if ('error' in res) {
+                        errors.push(res.error);
+                    }
                 }
-                // check that the emailid exists and is owned by the user
-                const e = await db
-                    .select({ id: Email.id, size: Email.size })
-                    .from(Email)
-                    .where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)));
-                if (!e.length) {
-                    errors.push({
-                        key: "emails",
-                        id: email.id,
-                        error: "Email not found",
-                        moreInfo: `Email id: ${email.id}; Mailbox id: ${email.mailboxId}`,
-                    });
-                    continue;
+            } else if (key === "draftEmails") {
+
+                for (const draftEmail of body.draftEmails || []) {
+                    if (!draftEmail) continue;
+
+                    const res = await updateDraftEmail(tx, draftEmail, currentUser.id, currentUserMailboxes);
+                    if ('error' in res) {
+                        errors.push(res.error);
+                    }
                 }
-
-                if (email.hardDelete) {
-                    const attachments = await db.query.EmailAttachments.findMany({
-                        where: eq(EmailAttachments.emailId, email.id),
-                        columns: {
-                            id: true,
-                            filename: true,
-                        },
-                    });
-
-                    await Promise.all([
-                        deleteFile(`${email.mailboxId}/${email.id}`),
-                        deleteFile(`${email.mailboxId}/${email.id}/email.eml`),
-                        ...attachments.map((attachment) =>
-                            deleteFile(`${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`),
-                        ),
-                    ]);
-
-                    // still not actually delete, but anonimise it
-                    changes.push(
-                        db
-                            .update(Email)
-                            .set({
-                                isDeleted: true,
-                                updatedAt: new Date(),
-                                body: "<deleted>",
-                                subject: "<deleted>",
-                                binnedAt: null,
-                                categoryId: null,
-                                givenId: null,
-                                givenReferences: null,
-                                html: null,
-                                isRead: true,
-                                isSender: false,
-                                replyTo: null,
-                                snippet: null,
-                                size: 0,
-                                isStarred: false,
-                                // tempId: null,
-                                createdAt: new Date(),
-                            })
-                            .where(
-                                and(
-                                    eq(Email.id, email.id),
-                                    eq(Email.mailboxId, email.mailboxId),
-                                    email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined,
-                                ),
-                            ),
-
-                        db.delete(EmailSender).where(eq(EmailSender.emailId, email.id)),
-                        db.delete(EmailRecipient).where(eq(EmailRecipient.emailId, email.id)),
-                        db.delete(EmailAttachments).where(eq(EmailAttachments.emailId, email.id)),
-
-                        db
-                            .update(Mailbox)
-                            .set({
-                                storageUsed: sql`${Mailbox.storageUsed} - ${e[0].size}`,
-                            })
-                            .where(eq(Mailbox.id, email.mailboxId)),
-                    );
-                } else {
-                    // update the email
-                    changes.push(
-                        db
-                            .update(Email)
-                            .set({
-                                isStarred: email.isStarred,
-                                isRead: email.isRead,
-                                categoryId: email.categoryId,
-                                binnedAt: email.binnedAt ? new Date() : email.binnedAt === null ? null : undefined,
-                            })
-                            .where(
-                                and(
-                                    eq(Email.id, email.id),
-                                    eq(Email.mailboxId, email.mailboxId),
-                                    email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined,
-                                ),
-                            ),
-                    );
-                }
+            } else {
+                errors.push({
+                    key: key,
+                    error: "Invalid key: " + key,
+                });
             }
-        } else if (key === "draftEmails") {
-            // update the draft emails
-            // 1. verify user has access to the draft emails
-            // 2. can update every field except for mailboxId and its own id
-            // 2.1. if id is null, create it
-
-            for (const draftEmail of body.draftEmails || []) {
-                if (!draftEmail) continue;
-                if (!draftEmail.mailboxId || !mailboxesForUser.some((m) => m.mailboxId === draftEmail.mailboxId)) {
-                    errors.push({
-                        key: "draftEmails",
-                        id: draftEmail.id,
-                        error: "User does not have access to the mailbox",
-                    });
-                    continue;
-                }
-
-                if (draftEmail.id == null) {
-                    if (draftEmail.hardDelete) {
-                        errors.push({
-                            key: "draftEmails",
-                            id: null,
-                            error: "Cannot delete a non created draft email",
-                        });
-                        continue;
-                    }
-                } else if (draftEmail.id?.startsWith("new:")) {
-                    if (draftEmail.hardDelete) {
-                        errors.push({
-                            key: "draftEmails",
-                            id: null,
-                            error: "Cannot delete a non created draft email",
-                        });
-                        continue;
-                    }
-                    // verify that there is no draft with this id
-                    const e = await db
-                        .select({ id: DraftEmail.id, mailboxId: DraftEmail.mailboxId })
-                        .from(DraftEmail)
-                        .where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")));
-                    if (e.length) {
-                        if (e.length > 0 && !e.some((e) => e.mailboxId === draftEmail.mailboxId)) {
-                            errors.push({
-                                key: "draftEmails",
-                                id: draftEmail.id,
-                                error: "Draft email already exists",
-                            });
-                            draftEmail.id = null;
-                        } else {
-                            draftEmail.id = draftEmail.id.replace("new:", "");
-                        }
-                    }
-                } else {
-                    // check that the draftemailid exists and is owned by the user
-                    const e = await db
-                        .select({ id: DraftEmail.id })
-                        .from(DraftEmail)
-                        .where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId)));
-                    if (!e.length) {
-                        errors.push({
-                            key: "draftEmails",
-                            id: draftEmail.id,
-                            error: "Draft email not found",
-                        });
-                        continue;
-                    }
-                }
-
-                if (draftEmail.hardDelete) {
-                    // still not actually delete, but anonimise it
-                    changes.push(
-                        db
-                            .update(DraftEmail)
-                            .set({
-                                isDeleted: true,
-                                updatedAt: new Date(),
-                                body: "<deleted>",
-                                subject: "<deleted>",
-                                from: null,
-                                to: null,
-                                headers: null,
-                                createdAt: new Date(),
-                            })
-                            .where(
-                                and(
-                                    eq(DraftEmail.id, draftEmail.id!),
-                                    eq(DraftEmail.mailboxId, draftEmail.mailboxId),
-                                    draftEmail.lastUpdated
-                                        ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated))
-                                        : undefined,
-                                ),
-                            ),
-                    );
-                } else {
-                    if (draftEmail.id == null) {
-                        changes.push(
-                            db.insert(DraftEmail).values({
-                                // id: draftEmail.id,
-                                mailboxId: draftEmail.mailboxId,
-                                body: draftEmail.body,
-                                subject: draftEmail.subject,
-                                from: draftEmail.from,
-                                to: draftEmail.to,
-                                headers: draftEmail.headers,
-                            }),
-                        );
-                    } else if (draftEmail.id.startsWith("new:")) {
-                        changes.push(
-                            db.insert(DraftEmail).values({
-                                id: draftEmail.id.replace("new:", ""),
-                                mailboxId: draftEmail.mailboxId,
-                                body: draftEmail.body,
-                                subject: draftEmail.subject,
-                                from: draftEmail.from,
-                                to: draftEmail.to,
-                                headers: draftEmail.headers,
-                            }),
-                        );
-                    } else {
-                        // update the draft email
-                        changes.push(
-                            db
-                                .update(DraftEmail)
-                                .set({
-                                    body: draftEmail.body,
-                                    subject: draftEmail.subject,
-                                    from: draftEmail.from,
-                                    to: draftEmail.to,
-                                    headers: draftEmail.headers,
-                                })
-                                .where(
-                                    and(
-                                        eq(DraftEmail.id, draftEmail.id),
-                                        eq(DraftEmail.mailboxId, draftEmail.mailboxId),
-                                        draftEmail.lastUpdated
-                                            ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated))
-                                            : undefined,
-                                    ),
-                                ),
-                        );
-                    }
-                }
-            }
-        } else if (key === "mailboxCategories") {
-            // update the mailbox categories
-            // 1. verify user has access to the mailbox categories
-            // 2. can update name/color
-            // 2.1. if id is null, create it
-
-            for (const mailboxCategory of body.mailboxCategories || []) {
-                if (!mailboxCategory) continue;
-                if (
-                    !mailboxCategory.mailboxId ||
-                    !mailboxesForUser.some((m) => m.mailboxId === mailboxCategory.mailboxId)
-                ) {
-                    errors.push({
-                        key: "mailboxCategories",
-                        id: mailboxCategory.id,
-                        error: "User does not have access to the mailbox",
-                    });
-                    continue;
-                }
-
-                if (mailboxCategory.id?.startsWith("new:")) {
-                    const e = await db
-                        .select({ id: MailboxCategory.id, mailboxId: MailboxCategory.mailboxId })
-                        .from(MailboxCategory)
-                        .where(
-                            and(
-                                eq(
-                                    MailboxCategory.id,
-                                    mailboxCategory.id.replace("new:", ""),
-                                ) /*eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)*/,
-                            ),
-                        );
-                    if (e.length) {
-                        if (e.length > 0 && !e.some((e) => e.mailboxId === mailboxCategory.mailboxId)) {
-                            errors.push({
-                                key: "mailboxCategories",
-                                id: mailboxCategory.id,
-                                error: "Mailbox category already exists",
-                            });
-                            mailboxCategory.id = null;
-                        } else {
-                            mailboxCategory.id = mailboxCategory.id.replace("new:", "");
-                        }
-                    }
-                } else if (mailboxCategory.id !== null) {
-                    const e = await db
-                        .select({ id: MailboxCategory.id })
-                        .from(MailboxCategory)
-                        .where(
-                            and(
-                                eq(MailboxCategory.id, mailboxCategory.id),
-                                eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
-                            ),
-                        );
-                    if (!e.length) {
-                        errors.push({
-                            key: "mailboxCategories",
-                            id: mailboxCategory.id,
-                            error: "Mailbox category not found",
-                        });
-                        continue;
-                    }
-                }
-
-                const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-
-                if (mailboxCategory.color && !categoryColorRegex.test(mailboxCategory.color)) {
-                    errors.push({
-                        key: "mailboxCategories",
-                        id: mailboxCategory.id,
-                        error: "Invalid color for category",
-                    });
-                    continue;
-                }
-
-                if (mailboxCategory.hardDelete) {
-                    if (!mailboxCategory.id || mailboxCategory.id.startsWith("new:")) {
-                        errors.push({
-                            key: "mailboxCategories",
-                            id: mailboxCategory.id,
-                            error: "Cannot delete a non created mailbox category",
-                        });
-                        continue;
-                    }
-                    changes.push(
-                        db
-                            .update(MailboxCategory)
-                            .set({
-                                isDeleted: true,
-                                name: "<deleted>",
-                                color: "<deleted>",
-                                createdAt: new Date(),
-                                updatedAt: new Date(),
-                            })
-                            .where(
-                                and(
-                                    eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
-                                    eq(MailboxCategory.id, mailboxCategory.id),
-                                    mailboxCategory.lastUpdated
-                                        ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated))
-                                        : undefined,
-                                ),
-                            ),
-                    );
-                } else {
-                    if (mailboxCategory.id == null) {
-                        changes.push(
-                            db.insert(MailboxCategory).values({
-                                mailboxId: mailboxCategory.mailboxId,
-                                name: mailboxCategory.name,
-                                color: mailboxCategory.color,
-                            }),
-                        );
-                    } else if (mailboxCategory.id.startsWith("new:")) {
-                        changes.push(
-                            db.insert(MailboxCategory).values({
-                                id: mailboxCategory.id.replace("new:", ""),
-                                mailboxId: mailboxCategory.mailboxId,
-                                name: mailboxCategory.name,
-                                color: mailboxCategory.color,
-                            }),
-                        );
-                    } else {
-                        changes.push(
-                            db
-                                .update(MailboxCategory)
-                                .set({
-                                    name: mailboxCategory.name,
-                                    color: mailboxCategory.color,
-                                })
-                                .where(
-                                    and(
-                                        eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
-                                        eq(MailboxCategory.id, mailboxCategory.id),
-                                        mailboxCategory.lastUpdated
-                                            ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated))
-                                            : undefined,
-                                    ),
-                                ),
-                        );
-                    }
-                }
-            }
-        } else {
-            errors.push({
-                key: key,
-                error: "Invalid key: " + key,
-            });
         }
-    }
-
-    await db.batchUpdate(changes as any);
+    })
 
     const failedIds: Record<string, string[]> = {};
     for (const error of errors) {
@@ -1026,4 +650,418 @@ async function getChanges(
         //     auth: undefined as never,
         // })),
     };
+}
+
+type transaction = Parameters<Parameters<typeof db["transaction"]>[0]>[0]
+
+type UpdateError = {
+    key: "emails" | "draftEmails" | "mailboxCategories";
+    id?: string | null;
+    error: string;
+    moreInfo?: string;
+};
+
+
+async function updateEmail(tx: transaction, email: ChangesRequest["emails"][number], userId: string, mailboxIds: string[]): Promise<
+    | { error: UpdateError }
+    | { success: true }
+> {
+    // update the emails
+    // 1. verify user has access to the emails
+    // 2. can update every field except for mailboxId and its own id
+    // 2.1. if id is null, create it
+
+    if (!email.mailboxId || !mailboxIds.includes(email.mailboxId)) {
+        const error = {
+            key: "emails",
+            id: email.id,
+            error: "User does not have access to the mailbox",
+            moreInfo: `Mailbox id: ${email.mailboxId}; User id: ${userId}`,
+        } as const;
+        return { error };
+    }
+    if (email.id == null) {
+        const error = {
+            key: "emails",
+            id: null,
+            error: "Cannot create email yet",
+        } as const;
+        return { error };
+    }
+
+    // check that the emailid exists and is owned by the user
+    const e = await tx
+        .select({ id: Email.id, size: Email.size })
+        .from(Email)
+        .where(and(eq(Email.id, email.id), eq(Email.mailboxId, email.mailboxId)));
+    if (!e.length) {
+        const error = {
+            key: "emails",
+            id: email.id,
+            error: "Email not found",
+            moreInfo: `Email id: ${email.id}; Mailbox id: ${email.mailboxId}`,
+        } as const;
+        return { error };
+    }
+
+    if (email.hardDelete) {
+        const attachments = await tx.query.EmailAttachments.findMany({
+            where: eq(EmailAttachments.emailId, email.id),
+            columns: {
+                id: true,
+                filename: true,
+            },
+        });
+
+        await Promise.all([
+            deleteFile(`${email.mailboxId}/${email.id}`),
+            deleteFile(`${email.mailboxId}/${email.id}/email.eml`),
+            ...attachments.map((attachment) =>
+                deleteFile(`${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`),
+            ),
+        ]);
+
+        // still not actually delete, but anonimise it
+        await tx
+            .update(Email)
+            .set({
+                isDeleted: true,
+                updatedAt: new Date(),
+                body: "<deleted>",
+                subject: "<deleted>",
+                binnedAt: null,
+                categoryId: null,
+                givenId: null,
+                givenReferences: null,
+                html: null,
+                isRead: true,
+                isSender: false,
+                replyTo: null,
+                snippet: null,
+                size: 0,
+                isStarred: false,
+                // tempId: null,
+                createdAt: new Date(),
+            })
+            .where(
+                and(
+                    eq(Email.id, email.id),
+                    eq(Email.mailboxId, email.mailboxId),
+                    email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined,
+                ),
+            )
+
+        await tx.delete(EmailSender).where(eq(EmailSender.emailId, email.id))
+        await tx.delete(EmailRecipient).where(eq(EmailRecipient.emailId, email.id))
+        await tx.delete(EmailAttachments).where(eq(EmailAttachments.emailId, email.id))
+
+        await tx
+            .update(Mailbox)
+            .set({
+                storageUsed: sql`${Mailbox.storageUsed} - ${e[0].size}`,
+            })
+            .where(eq(Mailbox.id, email.mailboxId))
+
+        return { success: true };
+
+    } else {
+        // update the email
+        await tx
+            .update(Email)
+            .set({
+                isStarred: email.isStarred,
+                isRead: email.isRead,
+                categoryId: email.categoryId,
+                binnedAt: email.binnedAt ? new Date() : email.binnedAt === null ? null : undefined,
+            })
+            .where(
+                and(
+                    eq(Email.id, email.id),
+                    eq(Email.mailboxId, email.mailboxId),
+                    email.lastUpdated ? lte(Email.updatedAt, new Date(email.lastUpdated)) : undefined,
+                ),
+            )
+
+        return { success: true };
+
+    }
+
+    // biome-ignore lint/correctness/noUnreachable: just as backup
+    throw new Error("Should not happen");
+}
+
+async function updateDraftEmail(tx: transaction, draftEmail: ChangesRequest["draftEmails"][number], userId: string, mailboxIds: string[]): Promise<{ error: UpdateError } | { success: true }> {
+    // update the draft emails
+    // 1. verify user has access to the draft emails
+    // 2. can update every field except for mailboxId and its own id
+    // 2.1. if id is null, create it
+
+    if (!draftEmail.mailboxId || !mailboxIds.includes(draftEmail.mailboxId)) {
+        const error = {
+            key: "draftEmails",
+            id: draftEmail.id,
+            error: "User does not have access to the mailbox",
+        } as const;
+        return { error };
+    }
+
+    if (draftEmail.id == null) {
+        if (draftEmail.hardDelete) {
+            const error = {
+                key: "draftEmails",
+                id: null,
+                error: "Cannot delete a non created draft email",
+            } as const;
+            return { error };
+        }
+    } else if (draftEmail.id?.startsWith("new:")) {
+        if (draftEmail.hardDelete) {
+            const error = {
+                key: "draftEmails",
+                id: null,
+                error: "Cannot delete a non created draft email",
+            } as const;
+            return { error };
+        }
+        // verify that there is no draft with this id
+        const e = await db
+            .select({ id: DraftEmail.id, mailboxId: DraftEmail.mailboxId })
+            .from(DraftEmail)
+            .where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")));
+        if (e.length) {
+            if (e.length > 0 && !mailboxIds.includes(e[0].mailboxId)) {
+                draftEmail.id = null;
+            } else {
+                draftEmail.id = draftEmail.id.replace("new:", "");
+            }
+        }
+    } else {
+        // check that the draftemailid exists and is owned by the user
+        const e = await db
+            .select({ id: DraftEmail.id })
+            .from(DraftEmail)
+            .where(and(eq(DraftEmail.id, draftEmail.id), eq(DraftEmail.mailboxId, draftEmail.mailboxId)));
+        if (!e.length) {
+            const error = {
+                key: "draftEmails",
+                id: draftEmail.id,
+                error: "Draft email not found",
+            } as const;
+            return { error };
+        }
+    }
+
+    if (draftEmail.hardDelete) {
+        // still not actually delete, but anonimise it
+        await tx
+            .update(DraftEmail)
+            .set({
+                isDeleted: true,
+                updatedAt: new Date(),
+                body: "<deleted>",
+                subject: "<deleted>",
+                from: null,
+                to: null,
+                headers: null,
+                createdAt: new Date(),
+            })
+            .where(
+                and(
+                    eq(DraftEmail.id, draftEmail.id!),
+                    eq(DraftEmail.mailboxId, draftEmail.mailboxId),
+                    draftEmail.lastUpdated
+                        ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated))
+                        : undefined,
+                ),
+            )
+        return { success: true };
+
+    } else {
+        if (draftEmail.id == null) {
+            await tx.insert(DraftEmail).values({
+                // id: draftEmail.id,
+                mailboxId: draftEmail.mailboxId,
+                body: draftEmail.body,
+                subject: draftEmail.subject,
+                from: draftEmail.from,
+                to: draftEmail.to,
+                headers: draftEmail.headers,
+            })
+        } else if (draftEmail.id.startsWith("new:")) {
+            await tx.insert(DraftEmail).values({
+                id: draftEmail.id.replace("new:", ""),
+                mailboxId: draftEmail.mailboxId,
+                body: draftEmail.body,
+                subject: draftEmail.subject,
+                from: draftEmail.from,
+                to: draftEmail.to,
+                headers: draftEmail.headers,
+            })
+        } else {
+            // update the draft email
+            await tx
+                .update(DraftEmail)
+                .set({
+                    body: draftEmail.body,
+                    subject: draftEmail.subject,
+                    from: draftEmail.from,
+                    to: draftEmail.to,
+                    headers: draftEmail.headers,
+                })
+                .where(
+                    and(
+                        eq(DraftEmail.id, draftEmail.id),
+                        eq(DraftEmail.mailboxId, draftEmail.mailboxId),
+                        draftEmail.lastUpdated
+                            ? lte(DraftEmail.updatedAt, new Date(draftEmail.lastUpdated))
+                            : undefined,
+                    ),
+                )
+
+        }
+        return { success: true };
+    }
+
+    // biome-ignore lint/correctness/noUnreachable: just as backup
+    throw new Error("Should not happen");
+}
+
+
+
+async function updateMailboxCategory(tx: transaction, mailboxCategory: ChangesRequest["mailboxCategories"][number], userId: string, mailboxIds: string[]): Promise<{ error: UpdateError } | { success: true }> {
+    // update the mailbox categories
+    // 1. verify user has access to the mailbox categories
+    // 2. can update name/color
+    // 2.1. if id is null, create it
+
+    if (!mailboxCategory.mailboxId || !mailboxIds.includes(mailboxCategory.mailboxId)) {
+        const error = {
+            key: "mailboxCategories",
+            id: mailboxCategory.id,
+            error: "User does not have access to the mailbox",
+        } as const;
+        return { error };
+    }
+
+
+    if (mailboxCategory.id?.startsWith("new:")) {
+        const e = await tx
+            .select({ id: MailboxCategory.id, mailboxId: MailboxCategory.mailboxId })
+            .from(MailboxCategory)
+            .where(
+                and(
+                    eq(
+                        MailboxCategory.id,
+                        mailboxCategory.id.replace("new:", ""),
+                    ) /*eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId)*/,
+                ),
+            );
+        if (e.length) {
+            if (e.length > 0 && !e.some((e) => e.mailboxId === mailboxCategory.mailboxId)) {
+                const error = {
+                    key: "mailboxCategories",
+                    id: mailboxCategory.id,
+                    error: "Mailbox category already exists",
+                } as const;
+                return { error };
+            } else {
+                mailboxCategory.id = mailboxCategory.id.replace("new:", "");
+            }
+        }
+    } else if (mailboxCategory.id !== null) {
+        const e = await db
+            .select({ id: MailboxCategory.id })
+            .from(MailboxCategory)
+            .where(
+                and(
+                    eq(MailboxCategory.id, mailboxCategory.id),
+                    eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
+                ),
+            );
+        if (!e.length) {
+            const error = {
+                key: "mailboxCategories",
+                id: mailboxCategory.id,
+                error: "Mailbox category not found",
+            } as const;
+            return { error };
+        }
+    }
+
+    const categoryColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
+    if (mailboxCategory.color && !categoryColorRegex.test(mailboxCategory.color)) {
+        const error = {
+            key: "mailboxCategories",
+            id: mailboxCategory.id,
+            error: "Invalid color for category",
+        } as const;
+        return { error };
+    }
+
+    if (mailboxCategory.hardDelete) {
+        if (!mailboxCategory.id || mailboxCategory.id.startsWith("new:")) {
+            const error = {
+                key: "mailboxCategories",
+                id: mailboxCategory.id,
+                error: "Cannot delete a non created mailbox category",
+            } as const;
+            return { error };
+        }
+        await tx
+            .update(MailboxCategory)
+            .set({
+                isDeleted: true,
+                name: "<deleted>",
+                color: "<deleted>",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })
+            .where(
+                and(
+                    eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
+                    eq(MailboxCategory.id, mailboxCategory.id),
+                    mailboxCategory.lastUpdated
+                        ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated))
+                        : undefined,
+                ),
+            )
+        return { success: true };
+
+    } else {
+        if (mailboxCategory.id == null) {
+            await tx.insert(MailboxCategory).values({
+                mailboxId: mailboxCategory.mailboxId,
+                name: mailboxCategory.name,
+                color: mailboxCategory.color,
+            })
+        } else if (mailboxCategory.id.startsWith("new:")) {
+            await tx.insert(MailboxCategory).values({
+                id: mailboxCategory.id.replace("new:", ""),
+                mailboxId: mailboxCategory.mailboxId,
+                name: mailboxCategory.name,
+                color: mailboxCategory.color,
+            })
+        } else {
+            await tx
+                .update(MailboxCategory)
+                .set({
+                    name: mailboxCategory.name,
+                    color: mailboxCategory.color,
+                })
+                .where(
+                    and(
+                        eq(MailboxCategory.mailboxId, mailboxCategory.mailboxId),
+                        eq(MailboxCategory.id, mailboxCategory.id),
+                        mailboxCategory.lastUpdated
+                            ? lte(MailboxCategory.updatedAt, new Date(mailboxCategory.lastUpdated))
+                            : undefined,
+                    )
+                )
+        }
+        return { success: true };
+    }
+
+    // biome-ignore lint/correctness/noUnreachable: just as backup
+    throw new Error("Should not happen");
 }
