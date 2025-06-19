@@ -9,7 +9,7 @@
     # Link: </index.css>; rel=preload; as="style"; crossorigin="" type="text/css"
     Link: </service.js>; rel="serviceworker", </manifest.webmanifest>; rel="manifest", </icon.svg>; rel="icon"
 
-    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://www.gravatar.com https://avatars.githubusercontent.com https://svgl.app; font-src 'self' ; object-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; connect-src 'self' https://cloudflare-dns.com https://api.github.com https://emailthing.app https://pwa.emailthing.app http://localhost:3000; upgrade-insecure-requests;
+    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://www.gravatar.com https://avatars.githubusercontent.com https://svgl.app; font-src 'self' ; object-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; connect-src 'self' https://cloudflare-dns.com https://api.github.com https://emailthing.app https://api.emailthing.app https://pwa.emailthing.app http://localhost:3000; upgrade-insecure-requests;
 
 /_bun/static/*
     ! Link
