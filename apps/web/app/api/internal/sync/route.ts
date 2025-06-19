@@ -97,7 +97,7 @@ export async function GET(request: Request) {
     if (!currentUser) return new Response("User not found", { status: 404 });
 
     const apiCustomisations = {
-        apiUrl: "https://emailthing.app",
+        apiUrl: typeof Bun !== "undefined" ? "https://api.emailthing.app" : "https://emailthing.app",
         notificationsPublicKey: env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
     }
 
