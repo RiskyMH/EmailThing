@@ -662,7 +662,7 @@ type UpdateError = {
 };
 
 
-async function updateEmail(tx: transaction, email: ChangesRequest["emails"][number], userId: string, mailboxIds: string[]): Promise<
+async function updateEmail(tx: transaction, email: NonNullable<ChangesRequest["emails"]>[number], userId: string, mailboxIds: string[]): Promise<
     | { error: UpdateError }
     | { success: true }
 > {
@@ -790,7 +790,7 @@ async function updateEmail(tx: transaction, email: ChangesRequest["emails"][numb
     throw new Error("Should not happen");
 }
 
-async function updateDraftEmail(tx: transaction, draftEmail: ChangesRequest["draftEmails"][number], userId: string, mailboxIds: string[]): Promise<{ error: UpdateError } | { success: true }> {
+async function updateDraftEmail(tx: transaction, draftEmail: NonNullable<ChangesRequest["draftEmails"]>[number], userId: string, mailboxIds: string[]): Promise<{ error: UpdateError } | { success: true }> {
     // update the draft emails
     // 1. verify user has access to the draft emails
     // 2. can update every field except for mailboxId and its own id
@@ -928,7 +928,7 @@ async function updateDraftEmail(tx: transaction, draftEmail: ChangesRequest["dra
 
 
 
-async function updateMailboxCategory(tx: transaction, mailboxCategory: ChangesRequest["mailboxCategories"][number], userId: string, mailboxIds: string[]): Promise<{ error: UpdateError } | { success: true }> {
+async function updateMailboxCategory(tx: transaction, mailboxCategory: NonNullable<ChangesRequest["mailboxCategories"]>[number], userId: string, mailboxIds: string[]): Promise<{ error: UpdateError } | { success: true }> {
     // update the mailbox categories
     // 1. verify user has access to the mailbox categories
     // 2. can update name/color
