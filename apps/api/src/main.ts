@@ -20,7 +20,7 @@ for await (const route of new Bun.Glob("**/route.ts").scan({ cwd: `${import.meta
 
 const server = Bun.serve({
     idleTimeout: 60 * 2,
-    port: 3000,
+    port: process.env.PORT || 3000,
     routes,
 });
 
