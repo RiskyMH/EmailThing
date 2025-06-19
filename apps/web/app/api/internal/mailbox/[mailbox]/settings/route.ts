@@ -1,7 +1,7 @@
 import { getSession, isValidOrigin } from "../../../tools";
 import { db, MailboxForUser } from "@/db";
 import { and, eq, gte, or, getTableColumns, type InferSelectModel } from "drizzle-orm";
-import { revalidateTag } from "next/cache";
+// import { revalidateTag } from "next/cache";
 import {
     DefaultDomain,
     Mailbox,
@@ -374,7 +374,7 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
         })
         .execute();
 
-    revalidateTag(`mailbox-aliases-${mailboxId}`);
+    // revalidateTag(`mailbox-aliases-${mailboxId}`);
 
     return { success: "Alias added" }
 }
@@ -407,7 +407,7 @@ async function editAlias(mailboxId: string, data: EditAliasData) {
         .where(and(eq(MailboxAlias.id, aliasId), eq(MailboxAlias.isDeleted, false)))
         .execute();
 
-    revalidateTag(`mailbox-aliases-${mailboxId}`);
+    // revalidateTag(`mailbox-aliases-${mailboxId}`);
 
     return { success: "Alias edited" }
 }
@@ -459,7 +459,7 @@ async function changeDefaultAlias(mailboxId: string, data: ChangeDefaultAliasDat
             ),
     ]);
 
-    revalidateTag(`mailbox-aliases-${mailboxId}`);
+    // revalidateTag(`mailbox-aliases-${mailboxId}`);
 
     return { success: "Default alias changed" }
 }
@@ -503,7 +503,7 @@ async function deleteAlias(mailboxId: string, data: DeleteAliasData) {
         .where(eq(MailboxAlias.id, aliasId))
         .execute();
 
-    revalidateTag(`mailbox-aliases-${mailboxId}`);
+    // revalidateTag(`mailbox-aliases-${mailboxId}`);
 
     return { success: "Alias deleted" }
 }
@@ -569,7 +569,7 @@ async function deleteCustomDomain(mailboxId: string, data: DeleteCustomDomainDat
             ),
     ]);
 
-    revalidateTag(`mailbox-aliases-${mailboxId}`);
+    // revalidateTag(`mailbox-aliases-${mailboxId}`);
     return { success: "Custom domain deleted" }
 }
 
@@ -703,8 +703,8 @@ async function addUserToMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE", mai
         })
         .execute();
 
-    revalidateTag(`user-mailbox-access-${mailboxId}-${proposedUser.id}`);
-    revalidateTag(`user-mailboxes-${proposedUser.id}`);
+    // revalidateTag(`user-mailbox-access-${mailboxId}-${proposedUser.id}`);
+    // revalidateTag(`user-mailboxes-${proposedUser.id}`);
     return { success: `Added @${proposedUser.username} to this mailbox` }
 }
 
@@ -766,7 +766,7 @@ async function removeUserFromMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE"
         )
         .execute();
 
-    revalidateTag(`user-mailbox-access-${mailboxId}-${userId}`);
-    revalidateTag(`user-mailboxes-${userId}`);
+    // revalidateTag(`user-mailbox-access-${mailboxId}-${userId}`);
+    // revalidateTag(`user-mailboxes-${userId}`);
     return { success: `Removed @${proposedUser.username} from this mailbox` }
 }

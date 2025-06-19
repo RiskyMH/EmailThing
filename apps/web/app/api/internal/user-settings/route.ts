@@ -4,7 +4,7 @@ import { User } from "@/db";
 import { and, eq, gte, inArray, not, sql, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/validations/auth";
 import { isValidOrigin, getSession } from "../tools";
-import { revalidatePath, revalidateTag } from "next/cache";
+// import { revalidatePath, revalidateTag } from "next/cache";
 import { makeHtml } from "@/(email)/mail/[mailbox]/draft/[draft]/tools";
 import { verifyCredentials } from "@/utils/passkeys";
 import { sendEmail } from "@/utils/send-email";
@@ -202,7 +202,7 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
     // update username
     await db.update(User).set({ username }).where(eq(User.id, userId)).execute();
 
-    revalidatePath("/settings");
+    // revalidatePath("/settings");
     return { success: "Your username has been updated." };
 }
 
@@ -245,7 +245,7 @@ async function changePassword(session: string, userId: string, data: ChangePassw
             .where(and(eq(UserSession.userId, userId), not(eq(UserSession.token, session)))),
     ]);
 
-    revalidatePath("/settings");
+    // revalidatePath("/settings");
     return { success: "Your password has been updated." };
 }
 
@@ -321,7 +321,7 @@ If you did not expect this email or have any questions, please contact us at con
         .where(eq(User.id, userId))
         .execute();
 
-    revalidateTag(`user-${userId}`);
+    // revalidateTag(`user-${userId}`);
 
     return {
         success: "Please verify your backup email to continue.",
@@ -388,7 +388,7 @@ async function changeEmail(userId: string, data: ChangeEmailData) {
 
     await db.update(User).set({ email }).where(eq(User.id, userId)).execute();
 
-    revalidateTag(`user-${userId}`);
+    // revalidateTag(`user-${userId}`);
     return { success: "Your email has been updated." };
 }
 
@@ -407,7 +407,7 @@ async function changePublicEmailStatus(userId: string, data: ChangePublicEmailSt
         .returning({ username: User.username })
         .execute();
 
-    revalidatePath(`/emailme/@${user?.[0].username}`);
+    // revalidatePath(`/emailme/@${user?.[0].username}`);
     return { success: "Your can now use the page." };
 }
 
@@ -426,7 +426,7 @@ async function changePublicEmail(userId: string, data: ChangePublicEmailData) {
         .returning({ username: User.username })
         .execute();
 
-    revalidatePath(`/emailme/@${user?.[0].username}`);
+    // revalidatePath(`/emailme/@${user?.[0].username}`);
     return { success: "Your public email has been updated." };
 }
 
@@ -471,9 +471,9 @@ async function leaveMailbox(userId: string, data: LeaveMailboxData) {
         )
         .execute();
 
-    revalidateTag(`user-mailbox-access-${mailboxId}-${currentUserId}`);
-    revalidateTag(`user-mailboxes-${currentUserId}`);
-    revalidatePath(`/mail/${mailboxId}/config`);
+    // revalidateTag(`user-mailbox-access-${mailboxId}-${currentUserId}`);
+    // revalidateTag(`user-mailboxes-${currentUserId}`);
+    // revalidatePath(`/mail/${mailboxId}/config`);
     // (await cookies()).delete("mailboxId");
     // redirect("/mail");
     return { success: "You have left the mailbox" };

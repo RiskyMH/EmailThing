@@ -1,6 +1,5 @@
 import db, { MailboxTokens } from "@/db";
 import { and, eq, gt, isNull, or } from "drizzle-orm";
-import { headers } from "next/headers";
 
 async function getToken(headers: Headers) {
     // const h = await headers();

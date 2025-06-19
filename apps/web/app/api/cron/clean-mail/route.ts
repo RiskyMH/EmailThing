@@ -1,11 +1,10 @@
 import { Email, EmailSender, EmailRecipient, EmailAttachments, Mailbox, TempAlias, UserSession, db } from "@/db";
 import { deleteFile } from "@/utils/s3";
 import { eq, inArray, lt, or, sql } from "drizzle-orm";
-import type { NextRequest } from "next/server";
 
 export const revalidate = 0;
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
     const authHeader = request.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return new Response("Unauthorized", {

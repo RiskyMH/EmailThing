@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { createPasswordHash } from "@/utils/password";
 import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, UserSession } from "@/db";
 import { User } from "@/db";
@@ -25,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     const ResponseJson = (body: any, init?: ResponseInit) => {
-        return NextResponse.json(body, {
+        return Response.json(body, {
             ...init,
             headers: {
                 "Access-Control-Allow-Origin": origin,

@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { ResetPasswordToken, User, UserSession, db } from "@/db";
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq, gt, not, sql } from "drizzle-orm";
@@ -40,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     const ResponseJson = (body: ResponseBody, init?: ResponseInit) => {
-        return NextResponse.json(body, {
+        return Response.json(body, {
             ...init,
             headers: {
                 "Access-Control-Allow-Origin": origin,
