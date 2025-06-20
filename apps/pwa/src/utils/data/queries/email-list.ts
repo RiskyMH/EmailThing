@@ -575,6 +575,7 @@ export async function createDraftEmail(
         updatedAt: new Date(),
         isDeleted: 0,
         isNew: true,
+        needsSync: 1,
       };
     } else {
       const aliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).toArray();
@@ -592,6 +593,7 @@ export async function createDraftEmail(
         headers: [],
         isDeleted: 0,
         isNew: true,
+        needsSync: 1,
       };
     }
 

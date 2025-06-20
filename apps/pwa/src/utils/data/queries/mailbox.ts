@@ -94,6 +94,7 @@ export async function createCategory(mailboxId: string, name: string, color?: st
     updatedAt: new Date(),
     isDeleted: 0,
     isNew: true,
+    needsSync: 1,
   });
 
   if (mailboxId !== "demo") {

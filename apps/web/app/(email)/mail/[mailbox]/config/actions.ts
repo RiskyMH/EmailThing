@@ -511,7 +511,7 @@ export async function deleteCategory(mailboxId: string, categoryId: string) {
         .set({
             isDeleted: true,
             name: "<deleted>",
-            color: "<deleted>",
+            color: null,
             createdAt: new Date(),
             updatedAt: new Date(),
         })

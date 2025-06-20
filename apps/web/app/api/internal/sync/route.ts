@@ -1025,7 +1025,7 @@ async function updateMailboxCategory(tx: transaction, mailboxCategory: NonNullab
             .set({
                 isDeleted: true,
                 name: "<deleted>",
-                color: "<deleted>",
+                color: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             })
