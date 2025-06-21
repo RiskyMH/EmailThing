@@ -20,7 +20,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     };
 
     // Get mailbox ID from URL
-    const { mailbox: mailboxId } = await params;
+    const { mailbox: mailboxId } = (await params) || (request as any).params;
 
     // Get type from search param
     const date = new Date();

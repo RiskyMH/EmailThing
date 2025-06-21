@@ -7,6 +7,7 @@ import * as api_internal_sync from "../../web/app/api/internal/sync/route.ts";
 import * as api_internal_revoke_token from "../../web/app/api/internal/revoke-token/route.ts";
 import * as api_internal_register from "../../web/app/api/internal/register/route.ts";
 import * as api_internal_refresh_token from "../../web/app/api/internal/refresh-token/route.ts";
+import * as api_internal_mailbox_mailbox_temp_aliases from "../../web/app/api/internal/mailbox/[mailbox]/temp-aliases/route.ts";
 import * as api_internal_mailbox_mailbox_settings from "../../web/app/api/internal/mailbox/[mailbox]/settings/route.ts";
 import * as api_internal_login_reset_password from "../../web/app/api/internal/login/reset-password/route.ts";
 import * as api_internal_login from "../../web/app/api/internal/login/route.ts";
@@ -26,7 +27,8 @@ export default {
     "/api/internal/revoke-token": api_internal_revoke_token,
     "/api/internal/register": api_internal_register,
     "/api/internal/refresh-token": api_internal_refresh_token,
-    "/api/internal/mailbox/[mailbox]/settings": api_internal_mailbox_mailbox_settings,
+    "/api/internal/mailbox/:mailbox/temp-aliases": api_internal_mailbox_mailbox_temp_aliases,
+    "/api/internal/mailbox/:mailbox/settings": api_internal_mailbox_mailbox_settings,
     "/api/internal/login/reset-password": api_internal_login_reset_password,
     "/api/internal/login": api_internal_login,
     "/api/internal/auth-query": api_internal_auth_query,

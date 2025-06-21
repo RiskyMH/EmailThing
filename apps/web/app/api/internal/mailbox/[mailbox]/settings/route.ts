@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
     };
 
     // Get mailbox ID from URL
-    const { mailbox: mailboxId } = await params;
+    const { mailbox: mailboxId } = (await params) || (request as any).params;
 
     // Get type from search param
     const type = new URL(request.url).searchParams.get("type") as keyof MappedPossibleData | null;

@@ -41,14 +41,15 @@ for (const [routeName, route] of localRoutes) {
         .replace(/-/g, '_')
         .replace(/_{2,}/g, '_')
         .replace(/^_/, '');
+    const normalizedRouteName = routeName.replace(/\[([^\]]+)\]/g, ':$1');
 
     const fileContent = await Bun.file(route).text();
     if (fileContent.includes('export default')) {
         imports.push([`${importName}_default`, relativePath]);
-        exports.push([routeName, `${importName}_default`]);
+        exports.push([normalizedRouteName, `${importName}_default`]);
     } else {
         imports.push([`* as ${importName}`, relativePath]);
-        exports.push([routeName, importName]);
+        exports.push([normalizedRouteName, importName]);
     }
 }
 
