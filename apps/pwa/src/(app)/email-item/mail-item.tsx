@@ -117,14 +117,14 @@ function MailItem({ mailId }: { mailId?: string }) {
   if (email === null) return (
     <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-background rounded-lg bg-background">
       <p className="text-muted-foreground">Email not found</p>
-      <MailboxTitle mailboxId={params.mailboxId} />
+      <MailboxTitle mailboxId={mailboxId} />
     </div>
   )
   if (!(email && emailId))
     return (
       <>
         <Loading />
-        <MailboxTitle mailboxId={params.mailboxId} />
+        <MailboxTitle mailboxId={mailboxId} />
       </>
     );
 
@@ -134,13 +134,13 @@ function MailItem({ mailId }: { mailId?: string }) {
   return (
     <div className="flex size-full min-w-0 flex-col //gap-3 [.emailslist_&]:p-0 bg-background [.emailslist_&]:rounded-lg">
       <TopButtons
-        mailboxId={params.mailboxId}
+        mailboxId={mailboxId}
         emailId={email.id}
         email={email}
         onUpdateEmail={updateEmail}
       />
       <div className="flex gap-3 flex-col overflow-y-auto rounded-lg pt-3 p-3 [.emailslist_&]:p-0 [.emailslist_&]:pt-3 [.emailslist_&]:rounded-none">
-        <MailboxTitle mailboxId={params.mailboxId} title={email.subject} />
+        <MailboxTitle mailboxId={mailboxId} title={email.subject} />
 
         <h1 className="mt-3 break-words px-3 font-bold text-2xl @xl:text-3xl">{email.subject}</h1>
         <div className="flex flex-col gap-3 bg-card [.emailslist_&]:rounded-none rounded-md">
@@ -287,11 +287,11 @@ function MailItem({ mailId }: { mailId?: string }) {
                         href={
                           email.raw === "s3"
                             ? // ?  getSignedUrl({
-                            //     key: `${params.mailboxId}/${params.emailId}/email.eml`,
+                            //     key: `${mailboxId}/${emailId}/email.eml`,
                             //     responseContentType: "text/plain",
                             // })
-                            `/mail/${params.mailboxId}/${params.mailId}/raw`
-                            : `/mail/${params.mailboxId}/${params.mailId}/raw`
+                            `/mail/${mailboxId}/${emailId}/raw`
+                            : `/mail/${mailboxId}/${emailId}/raw`
                         }
                         rel="noreferrer"
                       >
@@ -306,10 +306,10 @@ function MailItem({ mailId }: { mailId?: string }) {
                         href={
                           email.raw === "s3"
                             ? // ? await getSignedUrl({
-                            //     key: `${params.mailboxId}/${params.emailId}/email.eml`,
+                            //     key: `${mailboxId}/${emailId}/email.eml`,
                             // })
-                            `/mail/${params.mailboxId}/${params.mailId}/raw`
-                            : `/mail/${params.mailboxId}/${params.mailId}/raw`
+                            `/mail/${mailboxId}/${emailId}/raw`
+                            : `/mail/${mailboxId}/${emailId}/raw`
                         }
                         rel="noreferrer"
                       >
@@ -329,7 +329,7 @@ function MailItem({ mailId }: { mailId?: string }) {
               {email.attachments.map((a) => (
                 <a
                   key={a.id}
-                  href={`/mail/${params.mailboxId}/${params.mailId}/attachment/${a.id}`}
+                  href={`/mail/${mailboxId}/${emailId}/attachment/${a.id}`}
                   target="_blank"
                   className="flex items-center gap-2 rounded-md bg-background p-2 hover:bg-background/80"
                   rel="noreferrer"

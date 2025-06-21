@@ -1,6 +1,13 @@
-/docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
 /discord https://discord.gg/GT9Q2Yz4VS 307
-/api/:splat* https://emailthing.app/api/:splat* 307
+/github https://github.com/RiskyMH/EmailThing 307
+/gh https://github.com/RiskyMH/EmailThing 307
+/twitter https://x.com/EmailThing_ 307
+/twitter/me https://x.com/RiskyMH5 307
+
+
+
+/docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
+/api/:splat* https://api.emailthing.app/api/:splat* 307
 /mail/:id/:mailId/raw https://emailthing.app/mail/:id/:mailId/raw 307
 /mail/:id/:mailId/attachment/:attachmentId https://emailthing.app/mail/:id/:mailId/attachment/:attachmentId 307
 
