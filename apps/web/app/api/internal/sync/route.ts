@@ -472,8 +472,7 @@ async function getChanges(
                     inArray(TempAlias.mailboxId, mailboxIds),
                     or(
                         gte(TempAlias.updatedAt, lastSyncDate),
-                        includeIds.mailboxAliases ? inArray(TempAlias.id, includeIds.mailboxAliases) : undefined,
-                        forceIncludeMailboxes ? inArray(MailboxAlias.mailboxId, forceIncludeMailboxes) : undefined,
+                        forceIncludeMailboxes ? inArray(TempAlias.mailboxId, forceIncludeMailboxes) : undefined,
                     ),
                 ),
             ),
