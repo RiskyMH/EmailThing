@@ -8,7 +8,7 @@ import {
   getEmailCount,
   getEmailList,
 } from "@/utils/data/queries/email-list";
-import { getCategories, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
+import { getCategories, getMailbox, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
 import { tempEmailsLimit } from "@emailthing/const/limits";
 import { formatTimeAgo } from "@/utils/tools";
 import { cn } from "@/utils/tw";
@@ -584,7 +584,7 @@ function Categories({
               disabled={
                 // biome-ignore lint/complexity/useOptionalChain: <explanation>
                 ((categories && categories?.length) || 0) >=
-                tempEmailsLimit[mailboxPlan?.plan as keyof typeof tempEmailsLimit]
+                tempEmailsLimit[mailboxPlan as keyof typeof tempEmailsLimit]
               }
             >
               Create email

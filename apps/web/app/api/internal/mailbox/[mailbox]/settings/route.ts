@@ -540,6 +540,7 @@ async function createTempAlias(mailboxId: string, data: CreateTempAliasData) {
     }
 
     // todo support mailbox custom temp domains
+    // todo also limit temp aliases per mailbox
 
     const tempId = createId();
     const alias = `${createSmallId()}@${domain}`;

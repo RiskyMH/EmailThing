@@ -19,9 +19,7 @@ import {
   SmartDrawerTitle,
 } from "@/components/ui/smart-drawer";
 import { db } from "@/utils/data/db";
-import { getMailbox } from "@/utils/data/queries/mailbox";
 import { getLogedInUserApi } from "@/utils/data/queries/user";
-import { useLiveQuery } from "dexie-react-hooks";
 import { CopyIcon, Loader2 } from "lucide-react";
 import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -39,11 +37,10 @@ export function CreateTempEmailForm({
   const [isPending, startTransition] = useTransition();
   const [tempEmail, setTempEmail] = useState<string | null>(null);
 
-  const mailbox = useLiveQuery(() => getMailbox(mailboxId!), [mailboxId]);
-  const { data: domains } = useSWR(
+  const { data: domains } = useSWR<string[]>(
     `/api/internal/mailbox/${mailboxId}/temp-aliases`,
     async () => {
-      if (!mailboxId) return;
+      if (!mailboxId) return [];
       if (mailboxId === "demo") return [];
 
       let sync = await getLogedInUserApi();
@@ -84,7 +81,7 @@ export function CreateTempEmailForm({
       if ("error" in res) {
         toast.error(res.error);
       } else {
-        setTempEmail(res?.success!);
+        setTempEmail(res?.success);
       }
     });
   };
@@ -167,7 +164,7 @@ export function CreateTempEmailForm({
 
       <SmartDrawerFooter className="flex pt-2 sm:hidden">
         <SmartDrawerClose asChild>
-          <Button variant="secondary" className="w-full">
+          <Button variant="secondary" className="w-full" autoFocus>
             Cancel
           </Button>
         </SmartDrawerClose>

@@ -4,6 +4,7 @@ import Dexie from "dexie";
 import { parse as markedParse } from "marked";
 import { db } from "../db";
 import type { DBEmail, DBEmailDraft } from "../types";
+import { getMailbox } from "./mailbox";
 
 export type EmailListType = "inbox" | "sent" | "drafts" | "trash" | "starred" | "temp";
 
@@ -350,10 +351,17 @@ export async function getEmailCategoriesList({ mailboxId, type, search }: EmailL
     return counts;
   });
 
+  // demo just disables temp emails
+  // and only check the actual plan for temp emails
+  const plan =
+    mailboxId === "demo" ? "DEMO"
+      : type === "temp" ? (await getMailbox(mailboxId))?.plan
+        : undefined;
+
   return {
     categories: await categories,
     allCount: await allCount,
-    mailboxPlan: mailboxId === "demo" ? { plan: "DEMO" } : undefined,
+    mailboxPlan: plan,
   };
 }
 
