@@ -35,12 +35,14 @@ jobs:
           echo "OLD_VERSIONS<<EOF" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/web" && format_deps "Web" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/api" && format_deps "API" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/packages/db" && format_deps "DB" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
           # Update dependencies in each directory
           cd "$GITHUB_WORKSPACE/apps/web" && bun update
           cd "$GITHUB_WORKSPACE/apps/pwa" && bun update
+          cd "$GITHUB_WORKSPACE/apps/api" && bun update
           cd "$GITHUB_WORKSPACE/packages/db" && bun update
 
           # Force a clean update
@@ -51,6 +53,7 @@ jobs:
           echo "NEW_VERSIONS<<EOF" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/web" && format_deps "Web" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/api" && format_deps "API" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/packages/db" && format_deps "DB" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
