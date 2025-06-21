@@ -120,9 +120,13 @@ export async function GET(request: Request) {
 
     const newMailboxes = mailboxesForUser.filter((m) => m.joinedAt > lastSyncDate).map((m) => m.mailboxId);
 
+    console.time("[api/internal/sync] getChanges");
+    const changes = await getChanges(lastSyncDate, currentUser, mailboxesForUser, {}, newMailboxes);
+    console.timeEnd("[api/internal/sync] getChanges");
+
     return Response.json(
         {
-            ...(await getChanges(lastSyncDate, currentUser, mailboxesForUser, {}, newMailboxes)),
+            ...changes,
             time: d.toISOString(),
             apiCustomisations,
         },
