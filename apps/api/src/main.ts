@@ -19,6 +19,8 @@
 // }
 
 import routes from "./routes.ts";
+import db from "@emailthing/db/connect";
+import { sql } from "drizzle-orm";
 
 const httpExports = [
     "GET",
@@ -58,3 +60,5 @@ const server = Bun.serve({
 });
 
 console.log(`Server is running on ${server.url}api/v0`);
+
+await db.execute(sql`SELECT 1`);

@@ -58,6 +58,7 @@ export async function GET(request: Request) {
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
     }
+    console.time("[api/internal/sync] GET");
 
     // a user can request a sync of their data to be storred in apps\pwa\src\utils\data\types.ts
     // this should give a list of objects that have been changed since the last sync
@@ -120,9 +121,10 @@ export async function GET(request: Request) {
 
     const newMailboxes = mailboxesForUser.filter((m) => m.joinedAt > lastSyncDate).map((m) => m.mailboxId);
 
-    console.time("[api/internal/sync] getChanges");
+    console.time("[api/internal/sync] GET getChanges");
     const changes = await getChanges(lastSyncDate, currentUser, mailboxesForUser, {}, newMailboxes);
-    console.timeEnd("[api/internal/sync] getChanges");
+    console.timeEnd("[api/internal/sync] GET getChanges");
+    console.timeEnd("[api/internal/sync] GET");
 
     return Response.json(
         {
