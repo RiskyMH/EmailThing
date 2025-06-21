@@ -18,34 +18,73 @@ import {
   SmartDrawerHeader,
   SmartDrawerTitle,
 } from "@/components/ui/smart-drawer";
+import { db } from "@/utils/data/db";
+import { getMailbox } from "@/utils/data/queries/mailbox";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { useLiveQuery } from "dexie-react-hooks";
 import { CopyIcon, Loader2 } from "lucide-react";
 import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
+import useSWR from "swr";
+import changeMailboxSettings from "../mailbox-config/_api";
 
-const makeTempEmail = async (...args: any[]) => ({ error: "not implemented" });
+const makeTempEmail = async (mailboxId: string, domain: string, name: string) => {
+  return changeMailboxSettings(mailboxId, "create-temp-alias", { domain, name });
+};
 
 export function CreateTempEmailForm({
   mailboxId,
-  domains = ["temp.emailthing.xyz"],
+  // domains = ["temp.emailthing.xyz"],
 }: { mailboxId: string; domains?: string[] }) {
   const [isPending, startTransition] = useTransition();
   const [tempEmail, setTempEmail] = useState<string | null>(null);
+
+  const mailbox = useLiveQuery(() => getMailbox(mailboxId!), [mailboxId]);
+  const { data: domains } = useSWR(
+    `/api/internal/mailbox/${mailboxId}/temp-aliases`,
+    async () => {
+      if (!mailboxId) return;
+      if (mailboxId === "demo") return [];
+
+      let sync = await getLogedInUserApi();
+      if (sync?.tokenNeedsRefresh) {
+        await db.refreshToken();
+        sync = await getLogedInUserApi();
+      }
+
+      const response = await fetch(
+        `${sync?.apiUrl || ""}/api/internal/mailbox/${mailboxId}/temp-aliases`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `session ${sync?.token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        return [];
+      }
+      return response.json() as Promise<string[]>;
+    },
+    {
+      fallbackData: ["temp.emailthing.xyz"],
+    }
+  );
 
   const formSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isPending) return;
 
     startTransition(async () => {
-      // @ts-expect-error
       const res = await makeTempEmail(
         mailboxId,
-        event.target.domain.value,
-        event.target.name.value,
+        (event.target as HTMLFormElement).domain.value,
+        (event.target as HTMLFormElement).name.value,
       );
-      if (res?.error) {
+      if ("error" in res) {
         toast.error(res.error);
       } else {
-        setTempEmail(res?.alias!);
+        setTempEmail(res?.success!);
       }
     });
   };
@@ -103,7 +142,7 @@ export function CreateTempEmailForm({
               <SelectValue placeholder="Select Domain" />
             </SelectTrigger>
             <SelectContent>
-              {domains.map((domain) => (
+              {domains?.map((domain) => (
                 <SelectItem key={domain} value={domain}>
                   {domain}
                 </SelectItem>

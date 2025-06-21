@@ -377,12 +377,12 @@ function Emails({
       {resultArrays.length > 0 || initialData.length > 0 ? (
         <>
           {type === "trash" && (
-            <div className="text-center font-bold text-muted-foreground">
+            <div className="text-center font-bold text-muted-foreground px-4 text-balance">
               Messages that have been in the Bin for more than 30 days will be deleted automatically
             </div>
           )}
           {type === "temp" && (
-            <div className="text-center font-bold text-muted-foreground">
+            <div className="text-center font-bold text-muted-foreground px-4 text-balance">
               {categoryId
                 ? // @ts-expect-error types are boring
                 `This email address and emails will be automatically deleted ${formatTimeAgo(currentCategory?.expiresAt || new Date(Date.now() + TEMP_EMAIL_EXPIRES_IN))}`
@@ -396,7 +396,7 @@ function Emails({
             </div>
           )}
           {emails.length === 0 && (
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground px-4 text-balance">
               {search
                 ? `Couldn't find any emails matching "${search}"`
                 : type === "drafts"

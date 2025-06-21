@@ -1,5 +1,5 @@
 import { getSession, isValidOrigin } from "../../../tools";
-import { db, MailboxForUser } from "@/db";
+import { db, MailboxForUser, TempAlias } from "@/db";
 import { and, eq, gte, or, getTableColumns, type InferSelectModel } from "drizzle-orm";
 // import { revalidateTag } from "next/cache";
 import {
@@ -16,7 +16,10 @@ import { generateToken } from "@/utils/token";
 import { emailSchema } from "@/validations/auth";
 import { impersonatingEmails } from "@/validations/invalid-emails";
 import { count, like, not, sql } from "drizzle-orm";
-import { createId } from "@paralleldrive/cuid2";
+import { createId, init } from "@paralleldrive/cuid2";
+import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
+
+const createSmallId = init({ length: 7 });
 
 export async function POST(request: Request, { params }: { params: Promise<{ mailbox: string }> }) {
     const origin = request.headers.get("origin");
@@ -71,6 +74,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
         "delete-token": deleteToken,
         "add-user": addUserToMailbox.bind(null, userAccess.role),
         "remove-user": removeUserFromMailbox.bind(null, userAccess.role),
+        "create-temp-alias": createTempAlias,
     } as const;
 
 
@@ -156,6 +160,7 @@ export type PossibleData =
     | DeleteTokenData
     | AddUserData
     | RemoveUserData
+    | CreateTempAliasData
 
 export type MappedPossibleData = {
     "verify-domain": VerifyDomainData;
@@ -168,6 +173,7 @@ export type MappedPossibleData = {
     "delete-token": DeleteTokenData;
     "add-user": AddUserData;
     "remove-user": RemoveUserData;
+    "create-temp-alias": CreateTempAliasData;
 }
 
 export type MappedPossibleDataResponse =
@@ -506,6 +512,50 @@ async function deleteAlias(mailboxId: string, data: DeleteAliasData) {
     // revalidateTag(`mailbox-aliases-${mailboxId}`);
 
     return { success: "Alias deleted" }
+}
+
+export interface CreateTempAliasData {
+    domain: string;
+    name: string | null;
+}
+async function createTempAlias(mailboxId: string, data: CreateTempAliasData) {
+    const { domain, name } = data;
+
+    // check that aliasDomain is public and available
+    const defaultDomain = await db.query.DefaultDomain.findFirst({
+        where: and(
+            eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${domain})`),
+            eq(DefaultDomain.available, true),
+            eq(DefaultDomain.tempDomain, true),
+            eq(DefaultDomain.isDeleted, false),
+        ),
+    });
+    if (!defaultDomain) {
+        return { error: "Domain not available" };
+    }
+
+    // todo support mailbox custom temp domains
+
+    const tempId = createId();
+    const alias = `${createSmallId()}@${domain}`;
+    // a day lasting
+    const expires = new Date(Date.now() + TEMP_EMAIL_EXPIRES_IN);
+
+    await db
+        .insert(TempAlias)
+        .values({
+            id: tempId,
+            mailboxId,
+            name,
+            expiresAt: expires,
+            alias,
+        })
+        .execute();
+
+    return {
+        success: alias,
+        description: `This alias will expire in ${Math.ceil(TEMP_EMAIL_EXPIRES_IN / 1000 / 60 / 60)} hours`,
+    };
 }
 
 export interface DeleteCustomDomainData {

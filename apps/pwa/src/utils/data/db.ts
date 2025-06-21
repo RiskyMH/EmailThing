@@ -79,7 +79,7 @@ export class EmailDB extends Dexie {
       mailboxes: "id,createdAt",
       mailboxAliases: "id,[mailboxId+alias],mailboxId,alias,default,[mailboxId+default],needsSync",
       mailboxCategories: "id,[mailboxId+name],mailboxId,name,[mailboxId+isDeleted],needsSync",
-      tempAliases: "id,[mailboxId+alias],mailboxId,alias,expiresAt",
+      tempAliases: "id,[mailboxId+alias],mailboxId,alias,expiresAt,[mailboxId+isDeleted]",
       user: "id",
       // passkeyCredentials: 'id,[userId+id],userId,id',
       // userNotifications: 'id,[userId+id],userId,id',

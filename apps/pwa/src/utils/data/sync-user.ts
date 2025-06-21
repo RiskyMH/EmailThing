@@ -62,6 +62,7 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
     mailboxes: db.mailboxes,
     mailboxCategories: db.mailboxCategories,
     mailboxAliases: db.mailboxAliases,
+    tempAliases: db.tempAliases,
     draftEmails: db.draftEmails,
     // mailboxTokens: db.mailboxTokens,
     mailboxCustomDomains: db.mailboxCustomDomains,

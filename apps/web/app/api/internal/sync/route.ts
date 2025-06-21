@@ -12,6 +12,7 @@ import db, {
     MailboxForUser,
     MailboxTokens,
     PasskeyCredentials,
+    TempAlias,
     User,
     UserNotification,
 } from "@/db";
@@ -459,6 +460,19 @@ async function getChanges(
                     ),
                 ),
             ),
+        db
+            .select()
+            .from(TempAlias)
+            .where(
+                and(
+                    inArray(TempAlias.mailboxId, mailboxIds),
+                    or(
+                        gte(TempAlias.updatedAt, lastSyncDate),
+                        includeIds.mailboxAliases ? inArray(TempAlias.id, includeIds.mailboxAliases) : undefined,
+                        forceIncludeMailboxes ? inArray(MailboxAlias.mailboxId, forceIncludeMailboxes) : undefined,
+                    ),
+                ),
+            ),
         // db.select().from(MailboxTokens).where(and(
         //     inArray(MailboxTokens.mailboxId, mailboxIds),
         //     or(
@@ -529,6 +543,7 @@ async function getChanges(
         mailboxes,
         mailboxCategories,
         mailboxAliases,
+        tempAliases,
         // mailboxTokens,
         mailboxCustomDomains,
         draftEmails,
@@ -636,6 +651,7 @@ async function getChanges(
         mailboxCategories,
         draftEmails,
         mailboxAliases,
+        tempAliases,
         // mailboxTokens: mailboxTokens.map((t) => ({
         //     ...t,
         //     token: hideToken(t.token),

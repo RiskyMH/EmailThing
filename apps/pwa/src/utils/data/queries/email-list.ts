@@ -66,11 +66,11 @@ export async function getEmailList({
   let emailQuery = (
     type === "drafts"
       ? db.draftEmails
-          .where("[mailboxId+isDeleted+updatedAt]")
-          .between([mailboxId, 0, Dexie.minKey], [mailboxId, 0, Dexie.maxKey])
+        .where("[mailboxId+isDeleted+updatedAt]")
+        .between([mailboxId, 0, Dexie.minKey], [mailboxId, 0, Dexie.maxKey])
       : db.emails
-          .where("[mailboxId+isDeleted+createdAt]")
-          .between([mailboxId, 0, Dexie.minKey], [mailboxId, 0, Dexie.maxKey])
+        .where("[mailboxId+isDeleted+createdAt]")
+        .between([mailboxId, 0, Dexie.minKey], [mailboxId, 0, Dexie.maxKey])
   ) as ReturnType<typeof db.emails.where>;
 
   // Apply filters based on type
@@ -287,11 +287,12 @@ export async function getEmailCategoriesList({ mailboxId, type, search }: EmailL
   const allCount = emailQuery.count();
 
   // Get categories with counts
-  const categories = db.transaction("r", [db.emails, db.mailboxCategories], async () => {
-    const cats = await db.mailboxCategories
+  const categories = db.transaction("r", [db.emails, type === "temp" ? db.tempAliases : db.mailboxCategories], async () => {
+    const cats = await (type === "temp" ? db.tempAliases : db.mailboxCategories)
       .where("[mailboxId+isDeleted]")
       .equals([mailboxId, 0])
       .sortBy("createdAt");
+
 
     // Can't count categories for drafts
     if (type === "drafts") {
@@ -325,8 +326,8 @@ export async function getEmailCategoriesList({ mailboxId, type, search }: EmailL
             break;
           case "temp":
             categoryQuery = db.emails
-              .where("[mailboxId+categoryId+tempId+isSender+binnedAt+isDeleted]")
-              .equals([mailboxId, cat.id, 1, 0, 0, 0]);
+              .where("[mailboxId+isSender+binnedAt+tempId+isDeleted]")
+              .equals([mailboxId, 0, 0, cat.id, 0]);
             break;
           default:
             categoryQuery = db.emails
@@ -339,9 +340,11 @@ export async function getEmailCategoriesList({ mailboxId, type, search }: EmailL
 
         return {
           id: cat.id,
-          name: cat.name,
+          name: type === "temp" ? cat.name || cat.alias : cat.name,
           color: cat.color || undefined,
           count,
+          expiresAt: type === "temp" ? cat.expiresAt : undefined,
+          alias: type === "temp" ? cat.alias : undefined,
         };
       }),
     );
@@ -463,9 +466,9 @@ export async function deleteDraftEmail(mailboxId: string, draftId: string) {
     mailboxId === "demo"
       ? db.draftEmails.where("[id+mailboxId]").equals([draftId, mailboxId]).delete()
       : db.draftEmails
-          .where("[id+mailboxId]")
-          .equals([draftId, mailboxId])
-          .modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() }),
+        .where("[id+mailboxId]")
+        .equals([draftId, mailboxId])
+        .modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() }),
   );
 
   if (mailboxId !== "demo") {
@@ -564,18 +567,17 @@ export async function createDraftEmail(
         to: to ?? 0,
         headers: email.givenId
           ? [
-              { key: "In-Reply-To", value: email.givenId },
-              {
-                key: "References",
-                value: [email.givenId, ...(email.givenReferences || [])].join(" "),
-              },
-            ]
+            { key: "In-Reply-To", value: email.givenId },
+            {
+              key: "References",
+              value: [email.givenId, ...(email.givenReferences || [])].join(" "),
+            },
+          ]
           : [],
         createdAt: new Date(),
         updatedAt: new Date(),
         isDeleted: 0,
         isNew: true,
-        needsSync: 1,
       };
     } else {
       const aliases = await db.mailboxAliases.where("mailboxId").equals(mailboxId).toArray();
