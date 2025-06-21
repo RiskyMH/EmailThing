@@ -6,7 +6,7 @@
     "@types/pg": "^8.15.4",
     "drizzle-kit": "^0.31.1",
     "drizzle-orm": "^0.43.1",
-    "pg": "^8.16.0"
+    "pg": "^8.16.2"
   },
   "main": "index.ts",
   "typings": "index.ts",
