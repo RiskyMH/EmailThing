@@ -1,6 +1,6 @@
 import { relative } from "node:path";
 
-const glob = new Bun.Glob("**/route.ts");
+const glob = new Bun.Glob("**/route.{ts,tsx}");
 
 const imports = [] as [string, string][];
 const exports = [] as [string, string][];
@@ -10,7 +10,7 @@ const localRoutes = new Map();
 for await (const route of glob.scan({ cwd: `${import.meta.dir}/routes`, absolute: true })) {
     const routeName = route
         .replace(/^.*?\/routes/, "/api")
-        .replace(/\/route\.ts$/, "");
+        .replace(/\/route\.tsx?$/, "");
 
     localRoutes.set(routeName, route);
 }
@@ -19,7 +19,7 @@ for await (const route of glob.scan({ cwd: `${import.meta.dir}/routes`, absolute
 for await (const route of glob.scan({ cwd: `${import.meta.dir}/../../web/app/api`, absolute: true })) {
     const routeName = route
         .replace(/^.*?\/app\/api/, "/api")
-        .replace(/\/route\.ts$/, "");
+        .replace(/\/route\.tsx?$/, "");
 
     // Skip if we already have this route locally
     if (localRoutes.has(routeName)) {

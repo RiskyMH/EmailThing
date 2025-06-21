@@ -83,6 +83,13 @@ export async function getCategories(mailboxId: string) {
     .toArray();
 }
 
+export async function getTempAliases(mailboxId: string) {
+  return db.tempAliases
+    .where("mailboxId")
+    .equals(mailboxId)
+    .toArray();
+}
+
 export async function createCategory(mailboxId: string, name: string, color?: string | null) {
   const categoryId = createId();
   await db.mailboxCategories.add({

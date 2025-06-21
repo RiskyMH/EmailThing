@@ -127,10 +127,10 @@ export async function getEmailList({
       case "temp":
         if (categoryId) {
           emailQuery = db.emails
-            .where("[mailboxId+categoryId+tempId+isSender+binnedAt+isDeleted+createdAt]")
+            .where("[mailboxId+tempId+isSender+binnedAt+isDeleted+createdAt]")
             .between(
-              [mailboxId, categoryId, 1, 0, 0, 0, Dexie.minKey],
-              [mailboxId, categoryId, Dexie.maxKey, 0, 0, 0, Dexie.maxKey],
+              [mailboxId, categoryId, 0, 0, 0, Dexie.minKey],
+              [mailboxId, categoryId, 0, 0, 0, Dexie.maxKey],
             );
         } else {
           emailQuery = db.emails
@@ -343,8 +343,6 @@ export async function getEmailCategoriesList({ mailboxId, type, search }: EmailL
           name: type === "temp" ? cat.name || cat.alias : cat.name,
           color: cat.color || undefined,
           count,
-          expiresAt: type === "temp" ? cat.expiresAt : undefined,
-          alias: type === "temp" ? cat.alias : undefined,
         };
       }),
     );

@@ -97,6 +97,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
             db.query.MailboxCategory.findMany({
                 where: and(eq(MailboxCategory.mailboxId, mailboxId), gte(MailboxCategory.updatedAt, date)),
             }),
+            db.query.TempAlias.findMany({
+                where: and(eq(TempAlias.mailboxId, mailboxId), gte(TempAlias.updatedAt, date)),
+            }),
             db.select({
                 ...getTableColumns(MailboxForUser),
                 username: User.username,
@@ -122,7 +125,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
                 mailboxAliases: sync[1],
                 mailboxCustomDomains: sync[2],
                 mailboxCategories: sync[3],
-                mailboxesForUser: sync[4],
+                tempAliases: sync[4],
+                mailboxesForUser: sync[5],
             } 
         } satisfies MappedPossibleDataResponse, { status: 200, headers });
     } catch (error) {
@@ -189,6 +193,7 @@ export type MappedPossibleDataResponse =
             mailboxAliases: InferSelectModel<typeof MailboxAlias>[];
             mailboxCustomDomains: InferSelectModel<typeof MailboxCustomDomain>[];
             mailboxCategories: InferSelectModel<typeof MailboxCategory>[];
+            tempAliases: InferSelectModel<typeof TempAlias>[];
             mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
         };
     }

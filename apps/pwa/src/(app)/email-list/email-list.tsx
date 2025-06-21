@@ -8,7 +8,7 @@ import {
   getEmailCount,
   getEmailList,
 } from "@/utils/data/queries/email-list";
-import { getCategories, getMailboxName } from "@/utils/data/queries/mailbox";
+import { getCategories, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
 import { tempEmailsLimit } from "@emailthing/const/limits";
 import { formatTimeAgo } from "@/utils/tools";
 import { cn } from "@/utils/tw";
@@ -228,7 +228,7 @@ function Emails({
     a: getAll,
   });
 
-  const categories = useLiveQuery(() => getCategories(mailboxId), [mailboxId]);
+  const categories = useLiveQuery(() => type === "temp" ? getTempAliases(mailboxId) : getCategories(mailboxId), [mailboxId, type]);
 
   const createLiveQuery = useCallback(
     (pageNo: number) =>
@@ -349,6 +349,8 @@ function Emails({
   const emails = useMemo(() => resultArrays.flat(1), [resultArrays]);
 
   const today = new Date().getDate();
+
+  const currentCategory = useMemo(() => categories?.find((c) => c.id === categoryId), [categories, categoryId]);
 
   return (
     <InfiniteScroll
@@ -562,19 +564,16 @@ function Categories({
           category={null}
           main
         />
-        {type !== "drafts" &&
-          type !== "temp" &&
-          !search &&
-          (categories || []).map((category) => (
-            <CategoryItem
-              key={category.id}
-              circleColor={category.color || "grey"}
-              name={category.name}
-              count={category.count || 0}
-              link={baseUrl}
-              category={category.id}
-            />
-          ))}
+        {type !== "drafts" && !search && (categories || []).map((category) => (
+          <CategoryItem
+            key={category.id}
+            circleColor={category.color || "grey"}
+            name={category.name}
+            count={category.count || 0}
+            link={baseUrl}
+            category={category.id}
+          />
+        ))}
       </div>
       {type === "temp" && (
         <SmartDrawer>
