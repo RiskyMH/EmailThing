@@ -7,13 +7,12 @@
 
 
 /docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
-/api/:splat* https://api.emailthing.app/api/:splat* 307
+/api/* https://api.emailthing.app/api/:splat 307
 /mail/:id/:mailId/raw https://emailthing.app/mail/:id/:mailId/raw 307
 /mail/:id/:mailId/attachment/:attachmentId https://emailthing.app/mail/:id/:mailId/attachment/:attachmentId 307
 
 
 
-/home/all/* /home 200
 /mail/:id /mail/[mailboxId] 200
 /mail/:id/config /mail/[mailboxId]/config 200
 /mail/:id/drafts /mail/[mailboxId]/drafts 200
@@ -26,4 +25,4 @@
 /mail/:id/starred /mail/[mailboxId]/starred 200
 /mail/:id/:mailId /mail/[mailboxId]/[mailId] 200
 
-/mail/:splat* /mail/[mailboxId] 200
+# /mail/* /mail/[mailboxId] 200
