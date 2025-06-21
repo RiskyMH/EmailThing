@@ -24,6 +24,6 @@ bun install
 ### Running the development environment
 
 ```sh
-# in pwa directory
+# in api directory
 bun dev
 ```
