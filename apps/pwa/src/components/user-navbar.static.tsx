@@ -13,7 +13,7 @@ export function UserNavLogin() {
       className={buttonVariants({
         variant: "secondary",
         size: "sm",
-        className: "px-4",
+        className: "px-4 not-dark:[.bg-sidebar_&]:bg-background",
       })}
     >
       Login
