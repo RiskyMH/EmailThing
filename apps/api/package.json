@@ -23,15 +23,15 @@
     "jose": "^6.0.11",
     "mailauth": "^4.8.6",
     "mimetext": "^3.0.27",
-    "postal-mime": "^2.4.3",
-    "ua-parser-js": "^2.0.3",
+    "postal-mime": "^2.4.4",
+    "ua-parser-js": "^2.0.4",
     "zod": "^3.25.67"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@emailthing/web": "workspace:*",
     "@types/ua-parser-js": "^0.7.39",
-    "drizzle-kit": "^0.31.1"
+    "drizzle-kit": "^0.31.4"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
