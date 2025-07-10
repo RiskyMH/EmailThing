@@ -27,7 +27,6 @@
         "zod": "^3.25.67",
       },
       "devDependencies": {
-        "@emailthing/web": "workspace:*",
         "@types/bun": "latest",
         "@types/ua-parser-js": "^0.7.39",
         "drizzle-kit": "^0.31.4",
@@ -238,13 +237,6 @@
     },
     "packages/const": {
       "name": "@emailthing/const",
-      "dependencies": {
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@types/pg": "^8.15.2",
-        "drizzle-kit": "^0.31.1",
-        "drizzle-orm": "^0.43.1",
-        "pg": "^8.16.0",
-      },
     },
     "packages/db": {
       "name": "@emailthing/db",

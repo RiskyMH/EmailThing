@@ -48,6 +48,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { db } from "@/utils/data/db";
 
 export default function EmailListSuspenced({
   filter,
@@ -348,6 +350,15 @@ function Emails({
 
   const emails = useMemo(() => resultArrays.flat(1), [resultArrays]);
 
+  const hasSynced = useLiveQuery(async () => {
+    if (emails.length === 0) {
+      const syncing = await db.localSyncData.toArray();
+      return syncing?.every((s) => s.lastSync);
+    }
+    return true;
+  }, [emails]);
+
+
   const today = new Date().getDate();
 
   const currentCategory = useMemo(() => categories?.find((c) => c.id === categoryId), [categories, categoryId]);
@@ -376,7 +387,7 @@ function Emails({
           e.target?.scrollTop;
       }}
     >
-      {resultArrays.length > 0 || initialData.length > 0 ? (
+      {((resultArrays.length > 0 || initialData.length > 0) && hasSynced) ? (
         <>
           {type === "trash" && (
             <div className="text-center font-bold text-muted-foreground px-4 text-balance">

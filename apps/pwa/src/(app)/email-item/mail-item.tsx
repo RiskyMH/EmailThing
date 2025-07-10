@@ -43,6 +43,8 @@ import Loading from "./loading";
 import TopButtons from "./mail-item-top-buttons";
 import { parseHTML } from "./parse-html";
 import { MailboxTitle } from "@/components/mailbox-title";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { db } from "@/utils/data/db";
 
 export default function MailItemSuspense({ mailId }: { mailId?: string }) {
   if (typeof window === "undefined") return <Loading />;
@@ -65,6 +67,14 @@ function MailItem({ mailId }: { mailId?: string }) {
     const d = await getEmailWithDetails(mailboxId, emailId);
     return d;
   }, [mailboxId, emailId]);
+
+  const isSyncing = useLiveQuery(async () => {
+    if (email === null) {
+      const syncing = await db.localSyncData.toArray();
+      return syncing?.some((s) => s.isSyncing);
+    }
+    return true;
+  }, [email]);
 
   const updateEmail = async (updates: Record<string, any>, { auto }: { auto?: boolean } = {}) => {
     if (mailboxId === "demo") {
@@ -113,13 +123,22 @@ function MailItem({ mailId }: { mailId?: string }) {
     </div>
   )
 
-
-  if (email === null) return (
-    <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-background rounded-lg bg-background">
-      <p className="text-muted-foreground">Email not found</p>
-      <MailboxTitle mailboxId={mailboxId} />
-    </div>
-  )
+  if (email === null) {
+    if (isSyncing) {
+      return (
+        <>
+          <Loading />
+          <MailboxTitle mailboxId={mailboxId} />
+        </>
+      );
+    }
+    return (
+      <div className="flex size-full flex-col items-center justify-center [.emailslist_&]:bg-background rounded-lg bg-background">
+        <p className="text-muted-foreground">Email not found</p>
+        <MailboxTitle mailboxId={mailboxId} />
+      </div>
+    )
+  }
   if (!(email && emailId))
     return (
       <>

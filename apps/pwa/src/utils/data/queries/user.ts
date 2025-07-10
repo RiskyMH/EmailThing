@@ -40,6 +40,7 @@ export async function getLogedInUserApi() {
     tokenFullyExpired: false,
     userId: user.id,
     username: user.username,
+    isSyncing: false,
   };
   session.apiUrl ||= "https://emailthing.app";
   const apiUrl = await db.apiCustomisations.get(session.apiUrl);
@@ -52,5 +53,6 @@ export async function getLogedInUserApi() {
     tokenFullyExpired: session.refreshTokenExpiresAt < new Date(),
     userId: user.id,
     username: user.username,
+    isSyncing: session.isSyncing,
   };
 }

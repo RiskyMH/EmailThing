@@ -1,8 +1,13 @@
-import { serve } from "bun";
+import { serve, type BunFile } from "bun";
 import service from "./public/service.js" with { type: "text" };
 import app from "./src/app.html";
 import docs from "./src/docs.html";
 import home from "./src/home.html";
+
+const publicFiles: Record<string, BunFile> = {};
+for await (const file of new Bun.Glob("**").scan({ cwd: "./public" })) {
+  publicFiles[`/${file}`] = Bun.file(`./public/${file}`);
+}
 
 const server = serve({
   routes: {
@@ -21,6 +26,7 @@ const server = serve({
     "/docs/*": docs,
 
     // public files
+    ...publicFiles,
     "/service.js": new Response(service, { headers: { "Content-Type": "text/javascript" } }),
   },
   development: {

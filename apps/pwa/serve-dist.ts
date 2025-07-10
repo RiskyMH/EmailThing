@@ -22,6 +22,7 @@ async function getRoutes() {
   }
   const redirects = await Bun.file("./dist/_redirects").text();
   for (const redirect of redirects.split("\n")) {
+    if (redirect.startsWith("#")) continue;
     const [from, to, status] = redirect.split(" ");
     if (status === "200") continue;
     routes[from] = Response.redirect(to, Number(status) || 301);
