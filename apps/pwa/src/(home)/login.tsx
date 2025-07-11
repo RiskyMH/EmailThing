@@ -2,7 +2,7 @@ import Logo from "@/components/logo";
 // import Logo from "@/icons/Logo"
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
-import { ChevronLeft, KeyRoundIcon, SettingsIcon } from "lucide-react";
+import { ChevronLeft, GlobeIcon, KeyRoundIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
 import { useEffect, useState, type FormEvent, useTransition } from "react";
@@ -25,6 +25,7 @@ export const dynamic = "force-dynamic";
 export default function LoginPage() {
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
+  const apiUrl = searchParams.get("api") || API_URL;
   return (
     <div className="container flex h-screen min-h-screen w-screen flex-col items-center justify-center bg-background">
       <Link
@@ -45,10 +46,14 @@ export default function LoginPage() {
           <h1 className="font-semibold text-2xl tracking-tight">
             {username ? "Welcome back" : "Welcome back"}
           </h1>
-          <p className="text-muted-foreground text-sm">
-            {username
-              ? "Enter your password to sign back into your email"
-              : "Enter your username to sign in to your email"}
+          <p className="text-muted-foreground text-sm text-balance">
+            {apiUrl !== API_URL ? <>
+              <span className="font-bold text-yellow-500">Warning:</span> You are using a custom API URL. This may not be stable or secure.
+            </> :
+              username
+                ? "Enter your password to sign back into your email"
+                : "Enter your username to sign in to your email"
+            }
           </p>
         </div>
 
@@ -225,6 +230,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </Button>
           </div>
         </form>
+        {apiUrl !== API_URL ? <div className="flex flex-col gap-2 text-center -my-2 -mt-4">
+          <p className="text-muted-foreground text-xs text-balance flex gap-2 self-center">
+            <GlobeIcon
+              className="size-3 self-center [&[data-only-http]]:text-red-500"
+              data-only-http={(new URL(apiUrl).protocol === "http:") && apiUrl !== "http://localhost:3000" ? "true" : undefined}
+            />
+            <span className="self-center">{new URL(apiUrl).hostname}</span>
+          </p>
+        </div> : null}
       </div>
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -234,7 +248,18 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
         </div>
       </div>
+
       <PasskeysLogin transition={[isPending, startTransition]} />
+      {apiUrl !== API_URL ? <div className="flex flex-col gap-2 text-center -my-2 -mt-4">
+        <p className="text-muted-foreground text-xs text-balance flex gap-2 self-center">
+          <GlobeIcon
+            className="size-3 self-center [&[data-only-http]]:text-red-500"
+            data-only-http={(new URL(apiUrl).protocol === "http:") && apiUrl !== "http://localhost:3000" ? "true" : undefined}
+          />
+          <span className="self-center">{new URL(apiUrl).hostname}</span>
+        </p>
+      </div> : null}
+
       <p className="flex flex-col gap-2 px-8 text-center text-muted-foreground text-sm">
         <Link href="/register" className="underline underline-offset-4 hover:text-muted-foreground">
           Don&apos;t have an account? Sign Up
@@ -384,45 +409,111 @@ export function ApiUrlButton() {
     searchParams.set("api", apiUrl);
     navigate({ search: searchParams.toString() }, { replace: true });
     document.getElementById("smart-drawer:close")?.click();
+
+    const allowedOrigins = ["https://emailthing.app", "https://api.emailthing.app", API_URL];
+    allowedOrigins.push(apiUrl);
+    localStorage.setItem("allowedOrigins", JSON.stringify(allowedOrigins));
   };
 
+  const [allowedOrigins, setAllowedOrigins] = useState<string[] | null>(null);
+  const [isAllowed, setIsAllowed] = useState(false);
+
+  useEffect(() => {
+    if (document.referrer && new URL(document.referrer).origin !== window.location.origin) {
+      searchParams.delete("api");
+      navigate({ search: searchParams.toString() }, { replace: true });
+      return;
+    }
+
+    const allowedOrigins = ["https://emailthing.app", "https://api.emailthing.app", API_URL];
+    const allowedOriginsFromLocalStorage = localStorage.getItem("allowedOrigins");
+    if (allowedOriginsFromLocalStorage) {
+      allowedOrigins.push(...JSON.parse(allowedOriginsFromLocalStorage));
+    }
+    setIsAllowed(allowedOrigins.includes(apiUrl));
+    setAllowedOrigins(allowedOrigins);
+  }, [apiUrl]);
+
   return (
+    <>
+      {allowedOrigins && !isAllowed ? (
+        <SmartDrawer defaultOpen onOpenChange={(open) => {
+          if (!open) {
+            document.getElementById("allow-api-url-no")?.focus();
+          }
+        }}>
+          <SmartDrawerContent className="sm:max-w-[425px]">
+            <SmartDrawerHeader>
+              <SmartDrawerTitle>Do you trust this API URL?</SmartDrawerTitle>
+            </SmartDrawerHeader>
+            <SmartDrawerDescription>
+              This API URL is not in the list of allowed origins. Do you want to allow it?
+            </SmartDrawerDescription>
+            <div className="grid items-start gap-4 px-4 sm:px-0">
+              <p className="text-foreground font-mono text-sm text-balance flex gap-2 self-center">
+                <GlobeIcon
+                  className="size-4 self-center [&[data-only-http]]:text-red-500"
+                  data-only-http={(new URL(apiUrl).protocol === "http:") && apiUrl !== "http://localhost:3000" ? "true" : undefined}
+                />
+                <span className="self-center">{apiUrl}</span>
+              </p>
+            </div>
+            <SmartDrawerFooter className="flex pt-4">
+              <SmartDrawerClose asChild>
+                <Button variant="destructive" onClick={() => {
+                  allowedOrigins.push(apiUrl);
+                  localStorage.setItem("allowedOrigins", JSON.stringify(allowedOrigins));
+                  setIsAllowed(true);
+                }}>Yes</Button>
+              </SmartDrawerClose>
+              <SmartDrawerClose asChild>
+                <Button id="allow-api-url-no" type="submit" variant="default" autoFocus onClick={() => {
+                  searchParams.delete("api");
+                  navigate({ search: searchParams.toString() }, { replace: true });
+                }}>No</Button>
+              </SmartDrawerClose>
 
-    <SmartDrawer>
-      <SmartDrawerTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" className="absolute bottom-4 right-4">
-          <SettingsIcon className="size-4" />
-        </Button>
-      </SmartDrawerTrigger>
-      <SmartDrawerContent className="sm:max-w-[425px]">
+            </SmartDrawerFooter>
+          </SmartDrawerContent>
+        </SmartDrawer>
+      ) : null}
 
-        <SmartDrawerHeader>
-          <SmartDrawerTitle>API URL</SmartDrawerTitle>
-          <SmartDrawerDescription>
-            Change the API URL to use a different server.
-          </SmartDrawerDescription>
-        </SmartDrawerHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid items-start gap-4 px-4 sm:px-0">
+      <SmartDrawer>
+        <SmartDrawerTrigger asChild>
+          <Button type="button" variant="ghost" size="icon" className="absolute bottom-4 right-4">
+            <SettingsIcon className="size-4" />
+          </Button>
+        </SmartDrawerTrigger>
+        <SmartDrawerContent className="sm:max-w-[425px]">
 
-            <Input
-              defaultValue={apiUrl}
-              name="api"
-              id="api-url-input"
-              className="border-none bg-secondary"
-              autoFocus
-              required
-            />
-          </div>
+          <SmartDrawerHeader>
+            <SmartDrawerTitle>API URL</SmartDrawerTitle>
+            <SmartDrawerDescription>
+              Change the API URL to use a different server.
+            </SmartDrawerDescription>
+          </SmartDrawerHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid items-start gap-4 px-4 sm:px-0">
 
-          <SmartDrawerFooter className="flex pt-4">
-            <SmartDrawerClose asChild>
-              <Button type="submit">Save</Button>
-            </SmartDrawerClose>
-          </SmartDrawerFooter>
-        </form>
+              <Input
+                defaultValue={apiUrl}
+                name="api"
+                id="api-url-input"
+                className="border-none bg-secondary"
+                autoFocus
+                required
+              />
+            </div>
 
-      </SmartDrawerContent>
-    </SmartDrawer>
+            <SmartDrawerFooter className="flex pt-4">
+              <SmartDrawerClose asChild>
+                <Button type="submit">Save</Button>
+              </SmartDrawerClose>
+            </SmartDrawerFooter>
+          </form>
+
+        </SmartDrawerContent>
+      </SmartDrawer>
+    </>
   );
 }

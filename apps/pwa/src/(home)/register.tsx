@@ -3,10 +3,13 @@ import Logo from "@/components/logo";
 // import Logo from "@/icons/Logo"
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
-import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon } from "lucide-react";
+import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon, GlobeIcon } from "lucide-react";
 import { API_URL, DISCORD_URL } from "@emailthing/const/urls";
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const searchParams = useSearchParams()[0];
+  const apiUrl = searchParams.get("api") || API_URL;
+
   return (
     <div className="container flex h-screen min-h-screen w-screen flex-col items-center justify-center bg-background">
       <div className="flex w-full items-center justify-between">
@@ -40,33 +43,50 @@ export default function LoginPage() {
           {/* <p className="text-sm text-muted-foreground">
                         Choose an username and password to create an account
                     </p> */}
-          <p className="text-muted-foreground text-sm">
-            Currently you need an invite code, please{" "}
-            <a
-              href="mailto:emailthing@riskymh.dev"
-              className="font-bold hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              email me
-            </a>{" "}
-            or ask on{" "}
-            <a
-              href={DISCORD_URL}
-              className="font-bold hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Discord
-            </a>{" "}
-            for an invite code.
-          </p>
+          {apiUrl !== API_URL ? (
+            <p className="text-muted-foreground text-sm text-balance">
+              <span className="font-bold text-yellow-500">Warning:</span> You are using a custom API URL. This may not be stable or secure.
+            </p>
+          ) : (
+            <p className="text-muted-foreground text-sm text">
+              Currently you need an invite code, please{" "}
+              <a
+                href="mailto:emailthing@riskymh.dev"
+                className="font-bold hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                email me
+              </a>{" "}
+              or ask on{" "}
+              <a
+                href={DISCORD_URL}
+                className="font-bold hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Discord
+              </a>{" "}
+              for an invite code.
+            </p>
+          )}
+
+
         </div>
 
         {/* the actual form part */}
         <UserAuthForm />
         <ApiUrlButton />
 
+        {apiUrl !== API_URL ? <div className="flex flex-col gap-2 text-center -my-2 -mt-4">
+          <p className="text-muted-foreground text-xs text-balance flex gap-2 self-center">
+            <GlobeIcon
+              className="size-3 self-center [&[data-only-http]]:text-red-500"
+              data-only-http={(new URL(apiUrl).protocol === "http:") && apiUrl !== "http://localhost:3000" ? "true" : undefined}
+            />
+            <span className="self-center">{new URL(apiUrl).hostname}</span>
+          </p>
+        </div> : null}
 
         <p className="flex flex-col gap-2 px-8 text-center text-muted-foreground text-sm">
           <Link href="/login" className="underline underline-offset-4 hover:text-brand">
@@ -198,7 +218,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Label className="sr-only" htmlFor="email">
               Username
             </Label>
-            <Input asChild disabled={isPending} className="bg-secondary flex gap-2 border-none">
+            <Input asChild disabled={isPending} className="bg-secondary flex gap-2 border-none items-center">
               <div>
                 <input
                   id="username"
