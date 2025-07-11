@@ -46,6 +46,7 @@ import { MailboxTitle } from "@/components/mailbox-title";
 import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { db } from "@/utils/data/db";
 import { DBEmail } from "@/utils/data/types";
+import { API_URL } from "@emailthing/const/urls";
 
 export default function MailItemSuspense({ mailId }: { mailId?: string }) {
   if (typeof window === "undefined") return <Loading />;
@@ -565,12 +566,15 @@ function DownloadEmailButtons({ emailId, mailboxId, raw }: { emailId: string; ma
   const api = useLiveQuery(getLogedInUserApi)
 
   const apiIfy = (pathname: string) => {
-    const a = new URL(api?.apiUrl || "https://api.emailthing.app")
+    if (!api) return pathname;
+    const a = new URL(('apiUrl' in api ? api.apiUrl : API_URL))
     const parts = pathname.split("?")
     a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
     if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
     a.search = parts[1] || ""
+    a.searchParams.set((crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, ""), "useless-spacer")
     a.searchParams.set("session", api.token!)
+    a.searchParams.set((crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, ""), "useless-spacer")
     return a.toString()
   }
 
@@ -581,7 +585,7 @@ function DownloadEmailButtons({ emailId, mailboxId, raw }: { emailId: string; ma
         <a
           target="_blank"
           // intentionally not show the token for on hover
-          href={(`/mail/${mailboxId}/${emailId}/raw`)}
+          href={`/mail/${mailboxId}/${emailId}/raw`}
           rel="noreferrer"
           onClick={(e) => {
             window.open(apiIfy(`/mailbox/${mailboxId}/mail/${emailId}/raw?type=eml`), "_blank");
@@ -614,13 +618,16 @@ function DownloadEmailButtons({ emailId, mailboxId, raw }: { emailId: string; ma
 function AttachmentsList({ emailId, mailboxId, attachments }: { emailId: string; mailboxId: string, attachments: DBEmail["attachments"] }) {
   const api = useLiveQuery(getLogedInUserApi)
 
-  const apiIfy = (pathname: string, token?: string) => {
-    const a = new URL(api?.apiUrl || "https://api.emailthing.app")
+  const apiIfy = (pathname: string) => {
+    if (!api) return pathname;
+    const a = new URL(('apiUrl' in api ? api.apiUrl : API_URL))
     const parts = pathname.split("?")
     a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
     if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
     a.search = parts[1] || ""
-    a.searchParams.set("session", token!)
+    a.searchParams.set((crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, ""), "useless-spacer")
+    a.searchParams.set("session", api?.token!)
+    a.searchParams.set((crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID() + crypto.randomUUID()).replace(/-/g, ""), "useless-spacer2")
     return a.toString()
   }
 

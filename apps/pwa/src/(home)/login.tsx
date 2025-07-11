@@ -446,10 +446,10 @@ export function ApiUrlButton() {
             <SmartDrawerHeader>
               <SmartDrawerTitle>Do you trust this API URL?</SmartDrawerTitle>
             </SmartDrawerHeader>
-            <SmartDrawerDescription>
+            <SmartDrawerDescription className="max-sm:px-4">
               This API URL is not in the list of allowed origins. Do you want to allow it?
             </SmartDrawerDescription>
-            <div className="grid items-start gap-4 px-4 sm:px-0">
+            <div className="grid items-start gap-4 px-4 sm:px-0 max-sm:m-4">
               <p className="text-foreground font-mono text-sm text-balance flex gap-2 self-center">
                 <GlobeIcon
                   className="size-4 self-center [&[data-only-http]]:text-red-500"

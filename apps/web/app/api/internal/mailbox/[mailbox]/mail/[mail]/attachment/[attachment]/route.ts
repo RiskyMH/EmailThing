@@ -45,11 +45,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
 
     if (!mailbox || !userAccess) return Response.json({ message: { error: "Access denied to mailbox" } }, { status: 403, headers });
 
-
-    // 3 options: email.eml, email.txt, email.html
-    const type = new URL(request.url).searchParams.get("type") as "eml" | "txt" | "html" | null;
-    if (!type) return Response.json({ message: { error: "Missing type parameter" } }, { status: 400, headers });
-
     const email = await db.query.Email.findFirst({
         where: and(eq(Email.id, mailId), eq(Email.mailboxId, mailboxId)),
     });
@@ -63,8 +58,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     const filename = attachment.filename.replace(/[^a-zA-Z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
     const download = new URL(request.url).searchParams.get("download") === "true";
     const url = await getSignedUrl({
-        key: `${mailboxId}/${mailId}/attachments/${attachment.id}`,
-        filename: download ? `${attachment.id}-${filename}` : undefined,
+        key: `${mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`,
+        filename: download ? attachment.filename : undefined,
     });
     return Response.redirect(url);
 }
