@@ -36,7 +36,8 @@ const server = Bun.serve({
     idleTimeout: 60 * 2,
     port: process.env.PORT || 3000,
     routes: {
-        "/": Response.redirect("https://emailthing.app/docs/api"),
+        // "/": Response.redirect("https://emailthing.app/docs/api"),
+        "/": Response.redirect("/sitemap.json"),
         "/internal/*": (req) => Response.redirect(req.url.replace("/internal", "/api/internal")),
         "/v0/*": (req) => Response.redirect(req.url.replace("/v0", "/api/v0")),
         "/alive": () => new Response("OK"),
