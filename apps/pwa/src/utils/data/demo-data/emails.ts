@@ -228,14 +228,15 @@ export const demoEmails: DBEmail[] = [
     mailboxId: demoMailboxId,
     subject: "Try EmailThing Pro free for 30 days",
     snippet: "Unlock premium features with our Pro plan...",
-    body: "Get access to unlimited categories, advanced filters, and priority support with EmailThing Pro!",
+    body: "Get access to unlimited categories, advanced filters, and priority support with EmailThing Pro! \n\nSike! This is a free app, so you can't upgrade to pro\n\nHowever, you can sponsor me the creator [here](https://github.com/sponsors/RiskyMH)",
     createdAt: new Date("2025-01-09T10:00:00"),
     updatedAt: new Date("2025-01-09T10:00:00"),
     isRead: 0,
     isStarred: 0,
     isSender: 0,
     html: makeHtml(
-      "<p>Get access to unlimited categories, advanced filters, and priority support with EmailThing Pro!</p>",
+      "<p>Get access to unlimited categories, advanced filters, and priority support with EmailThing Pro!</p>\n" +
+      "<hr><i>Sike! This is a free app, so you can't upgrade to pro</i> <p>However, you can sponsor me the creator <a href='https://github.com/sponsors/RiskyMH'>here</a></p>",
     ),
     size: 789,
     raw: "s3",

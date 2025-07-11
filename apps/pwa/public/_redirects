@@ -10,6 +10,7 @@
 /api/* https://api.emailthing.app/api/:splat 307
 /mail/:id/:mailId/raw https://emailthing.app/mail/:id/:mailId/raw 307
 /mail/:id/:mailId/attachment/:attachmentId https://emailthing.app/mail/:id/:mailId/attachment/:attachmentId 307
+/demo /mail/demo 307
 
 
 
