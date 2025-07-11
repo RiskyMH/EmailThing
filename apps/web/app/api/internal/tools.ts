@@ -6,6 +6,7 @@ export const allowedOrigins = [
     "https://pwa.emailthing.app",
     "https://*.emailthing.app",
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://localhost:1234",
     "https://emailthing.pages.dev",
     "https://*.emailthing.pages.dev",
@@ -18,8 +19,13 @@ export const isValidOrigin = (origin: string) => {
     return allowedOrigins.includes(origin);
 };
 
-export const getSession = async (request: Request, sudo?: boolean) => {
-    const authHeader = request.headers.get("authorization");
+export const getSession = async (request: Request, sudo = false, allowSearchParamExtract = false) => {
+    let authHeader = request.headers.get("authorization");
+    if (!authHeader && allowSearchParamExtract) {
+        const url = new URL(request.url);
+        authHeader = url.searchParams.get("session");
+        if (authHeader) authHeader = `session ${authHeader}`;
+    }
     if (!authHeader?.startsWith("session ")) return null;
     const token = authHeader.split(" ")[1];
     if (!token) return null;
@@ -47,7 +53,7 @@ export const getSession = async (request: Request, sudo?: boolean) => {
             })
             .where(eq(UserSession.token, token))
             .execute()
-            .then(() => {})
+            .then(() => { })
             .catch((err) => {
                 // Silently handle any errors since this is non-critical
                 console.error("Failed to update session:", err);

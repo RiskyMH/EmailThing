@@ -10,6 +10,8 @@ import * as api_internal_register from "../../web/app/api/internal/register/rout
 import * as api_internal_refresh_token from "../../web/app/api/internal/refresh-token/route.ts";
 import * as api_internal_mailbox_mailbox_temp_aliases from "../../web/app/api/internal/mailbox/[mailbox]/temp-aliases/route.ts";
 import * as api_internal_mailbox_mailbox_settings from "../../web/app/api/internal/mailbox/[mailbox]/settings/route.ts";
+import * as api_internal_mailbox_mailbox_mail_mail_raw from "../../web/app/api/internal/mailbox/[mailbox]/mail/[mail]/raw/route.ts";
+import * as api_internal_mailbox_mailbox_mail_mail_attachment_attachment_ from "../../web/app/api/internal/mailbox/[mailbox]/mail/[mail]/attachment/[attachment]/route.ts";
 import * as api_internal_login_reset_password from "../../web/app/api/internal/login/reset-password/route.ts";
 import * as api_internal_login from "../../web/app/api/internal/login/route.ts";
 import * as api_internal_auth_query from "../../web/app/api/internal/auth-query/route.ts";
@@ -31,6 +33,8 @@ export default {
     "/api/internal/refresh-token": api_internal_refresh_token,
     "/api/internal/mailbox/:mailbox/temp-aliases": api_internal_mailbox_mailbox_temp_aliases,
     "/api/internal/mailbox/:mailbox/settings": api_internal_mailbox_mailbox_settings,
+    "/api/internal/mailbox/:mailbox/mail/:mail/raw": api_internal_mailbox_mailbox_mail_mail_raw,
+    "/api/internal/mailbox/:mailbox/mail/:mail/attachment/:attachment": api_internal_mailbox_mailbox_mail_mail_attachment_attachment_,
     "/api/internal/login/reset-password": api_internal_login_reset_password,
     "/api/internal/login": api_internal_login,
     "/api/internal/auth-query": api_internal_auth_query,

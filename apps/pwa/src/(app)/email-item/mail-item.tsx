@@ -45,6 +45,7 @@ import { parseHTML } from "./parse-html";
 import { MailboxTitle } from "@/components/mailbox-title";
 import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { db } from "@/utils/data/db";
+import { DBEmail } from "@/utils/data/types";
 
 export default function MailItemSuspense({ mailId }: { mailId?: string }) {
   if (typeof window === "undefined") return <Loading />;
@@ -298,45 +299,7 @@ function MailItem({ mailId }: { mailId?: string }) {
               <DropdownMenuContent className="min-w-[10rem] ">
                 <ViewSelect htmlValid={!!email.html} />
                 {email.raw !== "draft" && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
-                      <a
-                        target="_blank"
-                        href={
-                          email.raw === "s3"
-                            ? // ?  getSignedUrl({
-                            //     key: `${mailboxId}/${emailId}/email.eml`,
-                            //     responseContentType: "text/plain",
-                            // })
-                            `/mail/${mailboxId}/${emailId}/raw`
-                            : `/mail/${mailboxId}/${emailId}/raw`
-                        }
-                        rel="noreferrer"
-                      >
-                        <CodeIcon className="size-5 text-muted-foreground" />
-                        View original
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
-                      <a
-                        download
-                        target="_blank" // its meant to download, but as so much redirecting is happening we give up
-                        href={
-                          email.raw === "s3"
-                            ? // ? await getSignedUrl({
-                            //     key: `${mailboxId}/${emailId}/email.eml`,
-                            // })
-                            `/mail/${mailboxId}/${emailId}/raw`
-                            : `/mail/${mailboxId}/${emailId}/raw`
-                        }
-                        rel="noreferrer"
-                      >
-                        <DownloadIcon className="size-5 text-muted-foreground" />
-                        Download message
-                      </a>
-                    </DropdownMenuItem>
-                  </>
+                  <DownloadEmailButtons emailId={email.id} mailboxId={mailboxId} raw={email.raw} />
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -345,21 +308,7 @@ function MailItem({ mailId }: { mailId?: string }) {
           {/* attachments */}
           {email.attachments.length > 0 && (
             <div className="grid grid-cols-1 gap-2 px-3 @md:grid-cols-2 @3xl:grid-cols-3 @7xl:grid-cols-4">
-              {email.attachments.map((a) => (
-                <a
-                  key={a.id}
-                  href={`/mail/${mailboxId}/${emailId}/attachment/${a.id}`}
-                  target="_blank"
-                  className="flex items-center gap-2 rounded-md bg-background p-2 hover:bg-background/80"
-                  rel="noreferrer"
-                >
-                  {GetAttachmentIcon(a.filename.split(".").at(-1) || "")}
-                  <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {a.title || a.filename}
-                  </p>
-                  <span className="text-muted-foreground text-sm">{size(a.size)}</span>
-                </a>
-              ))}
+              <AttachmentsList emailId={email.id} mailboxId={mailboxId} attachments={email.attachments} />
             </div>
           )}
           <EmailContent
@@ -610,4 +559,96 @@ function EmailPicture({ email, fallback }: { email: string; fallback?: string })
       <AvatarFallback className="bg-background">{fallback}</AvatarFallback>
     </Avatar>
   );
+}
+
+function DownloadEmailButtons({ emailId, mailboxId, raw }: { emailId: string; mailboxId: string, raw: string }) {
+  const api = useLiveQuery(getLogedInUserApi)
+
+  const apiIfy = (pathname: string) => {
+    if (api) {
+      const a = new URL(api.apiUrl)
+      const parts = pathname.split("?")
+      a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
+      if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
+      a.search = parts[1] || ""
+      a.searchParams.set("session", api.token!)
+      return a.toString()
+    }
+    return pathname;
+  }
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+        <a
+          target="_blank"
+          // intentionally not show the token for on hover
+          href={(`/mail/${mailboxId}/${emailId}/raw`)}
+          rel="noreferrer"
+          onClick={(e) => {
+            window.open(apiIfy(`/mailbox/${mailboxId}/mail/${emailId}/raw?type=eml`), "_blank");
+            e.preventDefault()
+          }}
+        >
+          <CodeIcon className="size-5 text-muted-foreground" />
+          View original
+        </a>
+      </DropdownMenuItem>
+      <DropdownMenuItem className="flex w-full cursor-pointer gap-2" asChild>
+        <a
+          download
+          target="_blank" // its meant to download, but as so much redirecting is happening we give up
+          href={`/mail/${mailboxId}/${emailId}/raw`}
+          rel="noreferrer"
+          onClick={(e) => {
+            window.open(apiIfy(`/mailbox/${mailboxId}/mail/${emailId}/raw?type=eml&download=true`), "_blank");
+            e.preventDefault()
+          }}
+        >
+          <DownloadIcon className="size-5 text-muted-foreground" />
+          Download message
+        </a>
+      </DropdownMenuItem>
+    </>
+  );
+}
+
+function AttachmentsList({ emailId, mailboxId, attachments }: { emailId: string; mailboxId: string, attachments: DBEmail["attachments"] }) {
+  const api = useLiveQuery(getLogedInUserApi)
+
+  const apiIfy = (pathname: string, token?: string) => {
+    if (api) {
+      const a = new URL(api.apiUrl)
+      const parts = pathname.split("?")
+      a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
+      if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
+      a.search = parts[1] || ""
+      a.searchParams.set("session", token!)
+      return a.toString()
+    }
+    return pathname;
+  }
+
+  return (
+    attachments.map((a) => (
+      <a
+        key={a.id}
+        href={`/mail/${mailboxId}/${emailId}/attachment/${a.id}`}
+        onClick={(e) => {
+          window.open(apiIfy(`/mail/${mailboxId}/${emailId}/attachment/${a.id}?download=false`), "_blank");
+          e.preventDefault()
+        }}
+        target="_blank"
+        className="flex items-center gap-2 rounded-md bg-background p-2 hover:bg-background/80"
+        rel="noreferrer"
+      >
+        {GetAttachmentIcon(a.filename.split(".").at(-1) || "")}
+        <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+          {a.title || a.filename}
+        </p>
+        <span className="text-muted-foreground text-sm">{size(a.size)}</span>
+      </a>
+    ))
+  )
 }

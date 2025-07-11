@@ -157,7 +157,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       if (!res.ok || data.error) {
         setHadAnError((event.target as HTMLFormElement).username.value ?? "unknown");
         setLoading(false);
-        return void toast.error(data.error || (await res.text()));
+        return void toast.error(data.error || JSON.stringify(data));
       }
       await handleLoginResponse({ data, navigate, username, apiUrl });
       setLoading(false);

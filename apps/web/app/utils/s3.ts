@@ -13,11 +13,13 @@ export function getSignedUrl({
     key,
     responseContentType,
     expiresIn = 3600,
-}: { key: string; responseContentType?: string; expiresIn?: number }) {
+    filename,
+}: { key: string; responseContentType?: string; expiresIn?: number; filename?: string }) {
     return s3.presign.GetObject({
         key,
         "X-Amz-Expires": expiresIn,
         "response-content-type": responseContentType,
+        ...(filename ? { "response-content-disposition": `attachment; filename="${filename}"` } : {}),
     });
 }
 
