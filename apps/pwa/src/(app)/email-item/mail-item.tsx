@@ -565,16 +565,13 @@ function DownloadEmailButtons({ emailId, mailboxId, raw }: { emailId: string; ma
   const api = useLiveQuery(getLogedInUserApi)
 
   const apiIfy = (pathname: string) => {
-    if (api) {
-      const a = new URL(api.apiUrl)
-      const parts = pathname.split("?")
-      a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
-      if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
-      a.search = parts[1] || ""
-      a.searchParams.set("session", api.token!)
-      return a.toString()
-    }
-    return pathname;
+    const a = new URL(api?.apiUrl || "https://api.emailthing.app")
+    const parts = pathname.split("?")
+    a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
+    if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
+    a.search = parts[1] || ""
+    a.searchParams.set("session", api.token!)
+    return a.toString()
   }
 
   return (
@@ -618,16 +615,13 @@ function AttachmentsList({ emailId, mailboxId, attachments }: { emailId: string;
   const api = useLiveQuery(getLogedInUserApi)
 
   const apiIfy = (pathname: string, token?: string) => {
-    if (api) {
-      const a = new URL(api.apiUrl)
-      const parts = pathname.split("?")
-      a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
-      if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
-      a.search = parts[1] || ""
-      a.searchParams.set("session", token!)
-      return a.toString()
-    }
-    return pathname;
+    const a = new URL(api?.apiUrl || "https://api.emailthing.app")
+    const parts = pathname.split("?")
+    a.pathname = (`${a.pathname}/api/internal${parts[0]}`).replaceAll("//", "/")
+    if (a.pathname.startsWith('/')) a.pathname = a.pathname.slice(1)
+    a.search = parts[1] || ""
+    a.searchParams.set("session", token!)
+    return a.toString()
   }
 
   return (
@@ -636,7 +630,7 @@ function AttachmentsList({ emailId, mailboxId, attachments }: { emailId: string;
         key={a.id}
         href={`/mail/${mailboxId}/${emailId}/attachment/${a.id}`}
         onClick={(e) => {
-          window.open(apiIfy(`/mail/${mailboxId}/${emailId}/attachment/${a.id}?download=false`), "_blank");
+          window.open(apiIfy(`/mailbox/${mailboxId}/mail/${emailId}/attachment/${a.id}?download=false`), "_blank");
           e.preventDefault()
         }}
         target="_blank"
