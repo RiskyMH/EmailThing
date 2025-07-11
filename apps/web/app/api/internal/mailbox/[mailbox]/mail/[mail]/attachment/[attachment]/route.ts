@@ -8,12 +8,17 @@ import { getSignedUrl } from "@/utils/s3";
 
 export async function GET(request: Request, { params }: { params: Promise<{ mailbox: string, mail: string, attachment: string }> }) {
     const origin = request.headers.get("origin");
+    const referer = request.headers.get("referer");
     if (!origin || !isValidOrigin(origin)) {
-        return new Response("Not allowed", { status: 403 });
+        if (referer && isValidOrigin(new URL(referer).origin)) {
+            // return Response.redirect(referer);
+        } else {
+            return new Response("Not allowed", { status: 403 });
+        }
     }
 
     const headers = {
-        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Origin": origin || referer || "https://emailthing.app",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "authorization,content-type",
         "Access-Control-Allow-Credentials": "false",
