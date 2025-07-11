@@ -4,7 +4,7 @@ import Logo from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
 import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon } from "lucide-react";
-import { DISCORD_URL } from "@emailthing/const/urls";
+import { API_URL, DISCORD_URL } from "@emailthing/const/urls";
 
 export default function LoginPage() {
   return (
@@ -101,7 +101,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const navigate = useNavigate();
   const searchParams = useSearchParams()[0];
   const inviteCode = searchParams.get("invite");
-  const apiUrl = searchParams.get("api") || "https://emailthing.app";
+  const apiUrl = searchParams.get("api") || API_URL;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

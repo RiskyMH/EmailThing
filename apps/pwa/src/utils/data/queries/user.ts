@@ -1,3 +1,4 @@
+import { API_URL } from "@emailthing/const/urls";
 import { db } from "../db";
 import { getMailboxAliases, getUserMailboxes } from "./mailbox";
 
@@ -33,7 +34,7 @@ export async function getLogedInUserApi() {
   if (!user) return;
   const session = await db.localSyncData.where("userId").equals(user.id).first();
   if (!session) return {
-    apiUrl: "https://emailthing.app",
+    apiUrl: API_URL,
     token: null,
     notificationsPublicKey: null,
     tokenNeedsRefresh: false,
@@ -42,7 +43,7 @@ export async function getLogedInUserApi() {
     username: user.username,
     isSyncing: false,
   };
-  session.apiUrl ||= "https://emailthing.app";
+  session.apiUrl ||= API_URL;
   const apiUrl = await db.apiCustomisations.get(session.apiUrl);
 
   return {

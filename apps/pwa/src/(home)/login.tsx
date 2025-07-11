@@ -75,6 +75,7 @@ export default function LoginPage() {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { API_URL } from "@emailthing/const/urls";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -140,7 +141,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const navigate = useNavigate();
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
-  const apiUrl = searchParams.get("api") || "https://emailthing.app";
+  const apiUrl = searchParams.get("api") || API_URL;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -247,7 +248,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 function ResetPasswordDiag({ username }: { username: string }) {
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams()[0];
-  const apiUrl = searchParams.get("api") || "https://emailthing.app";
+  const apiUrl = searchParams.get("api") || API_URL;
 
   const resetPasswordAction = async () => {
     startTransition(async () => {
@@ -311,7 +312,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
   const navigate = useNavigate();
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
-  const apiUrl = searchParams.get("api") || "https://emailthing.app";
+  const apiUrl = searchParams.get("api") || API_URL;
   useEffect(() => {
     setSupport(supported());
   }, []);
@@ -373,7 +374,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
 // icon button in bottom right of screen where you can change the api url (button press opens modal where its defaulted to the https://emailthing.app)
 export function ApiUrlButton() {
   const searchParams = useSearchParams()[0];
-  const apiUrl = searchParams.get("api") || "https://emailthing.app";
+  const apiUrl = searchParams.get("api") || API_URL;
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

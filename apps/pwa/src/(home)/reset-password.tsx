@@ -3,6 +3,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/utils/tw";
+import { API_URL } from "@emailthing/const/urls";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
@@ -70,7 +71,7 @@ function ResetPasswordForm({ token }: { token: string }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const searchParams = useSearchParams()[0];
-  const apiUrl = searchParams.get("api") || "https://emailthing.app";
+  const apiUrl = searchParams.get("api") || API_URL;
   const username = searchParams.get("username");
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {

@@ -4,6 +4,7 @@ import type {
   MinimalChangesResponse,
 } from "@/../../web/app/api/internal/sync/route";
 import { db } from "@/utils/data/db";
+import { API_URL } from "@emailthing/const/urls";
 
 export const getApiUrl = ({
   lastSync,
@@ -18,7 +19,7 @@ export const getApiUrl = ({
   if (minimal) {
     params.append("minimal", "true");
   }
-  return `${apiUrl ?? "https://emailthing.app"}/api/internal/sync?${params.toString()}`;
+  return `${apiUrl ?? API_URL}/api/internal/sync?${params.toString()}`;
 };
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
