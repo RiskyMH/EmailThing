@@ -3,7 +3,7 @@
   "private": true,
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
-    "@types/pg": "^8.15.4",
+    "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.43.1",
     "pg": "^8.16.3"

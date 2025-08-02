@@ -20,12 +20,12 @@
     "@simplewebauthn/server": "13.1.0",
     "aws4fetch": "^1.0.20",
     "drizzle-orm": "^0.43.1",
-    "jose": "^6.0.11",
+    "jose": "^6.0.12",
     "mailauth": "^4.8.6",
     "mimetext": "^3.0.27",
     "postal-mime": "^2.4.4",
     "ua-parser-js": "^2.0.4",
-    "zod": "^3.25.67"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -33,6 +33,6 @@
     "drizzle-kit": "^0.31.4"
   },
   "peerDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }
