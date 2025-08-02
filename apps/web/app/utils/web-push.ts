@@ -11,5 +11,9 @@ const vapid: VapidKeys = {
 export async function sendNotification({ data, subscription }: { data: string; subscription: PushSubscription }) {
     const message: PushMessage = { data };
     const payload = await buildPushPayload(message, subscription, vapid);
-    return fetch(subscription.endpoint, payload);
+    return fetch(subscription.endpoint, {
+        ...payload,
+        // typescript changes are a pain
+        body: payload.body as BodyInit
+    });
 }
