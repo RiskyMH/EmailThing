@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getSha } from "./git.macro" with { type: "macro" };
+import { API_URL } from "@emailthing/const/urls";
 
 export const sha = await getSha();
 
@@ -43,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         if (res?.error) {
           if (res.error === "Token expired") {
             const user = await getLogedInUserApi();
-            const apiUrl = (!user || user?.apiUrl === "https://emailthing.app") ? "" : `&api=${user?.apiUrl}`;
+            const apiUrl = (!user || user?.apiUrl === API_URL) ? "" : `&api=${user?.apiUrl}`;
             const t = toast("Session expired, please login again.", {
               description: "Please login again to get latest data.",
               duration: Number.POSITIVE_INFINITY,

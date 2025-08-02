@@ -8,6 +8,7 @@ import { createPasswordHash } from "@/utils/password";
 import { userAuthSchema } from "@/validations/auth";
 import { marked } from "marked";
 import { RESET_PASSWORD_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
+import { API_URL } from "@emailthing/const/urls";
 
 // Rate limiting for password reset request phase (stricter)
 const requestAttempts = new Map<string, number>();
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
 
 You have requested to reset your password on EmailThing. Click the link below to reset your password:
 
-https://emailthing.app/login/reset?token=${token}&username=${user.username}&api=https://emailthing.app
+https://emailthing.app/login/reset?token=${token}&username=${user.username}&api=${API_URL}
 
 If you did not request this, please ignore this email.`
             const mail = createMimeMessage();
