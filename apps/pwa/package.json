@@ -11,7 +11,7 @@
     "preview": "bun x serve dist"
   },
   "dependencies": {
-    "@babel/core": "^7.28.3",
+    "@babel/core": "^7.28.4",
     "@fontsource-variable/inter": "^5.2.6",
     "@fontsource/inter": "^5.2.6",
     "@github/webauthn-json": "^2.1.1",
@@ -78,7 +78,7 @@
     "sonner": "^2.0.7",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.12",
+    "tailwindcss": "^4.1.13",
     "tailwindcss-animate": "^1.0.7",
     "turndown": "^7.2.1",
     "ua-parser-js": "^2.0.4",
@@ -87,19 +87,19 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.34.0",
+    "@eslint/js": "^9.35.0",
     "@types/babel__core": "^7.20.5",
     "@types/bun": "^1.2.21",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@types/turndown": "^5.0.5",
     "@types/ua-parser-js": "^0.7.39",
-    "eslint": "^9.34.0",
+    "eslint": "^9.35.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
-    "shiki": "^3.12.1",
+    "shiki": "^3.12.2",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.42.0"
+    "typescript-eslint": "^8.43.0"
   }
 }
