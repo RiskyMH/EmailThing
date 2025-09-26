@@ -80,7 +80,8 @@ await Promise.all(
 );
 
 const cssFile = await Bun.file(path.join(import.meta.dir, "./dist/app.html")).text();
-const cssFilePath = cssFile.match(/(<link rel="stylesheet".*?_bun.*?>)/)?.[1];
+const cssFilePath = cssFile.match(/(<link rel="stylesheet".*?_bun.*?>)/)?.[1]
+  .replace('<link ', '<link fetchpriority="high" ');
 
 for (const file of result.outputs) {
   if (file.path.endsWith(".css")) {
@@ -184,7 +185,7 @@ async function computeModulePreloadsForHtml(html: string): Promise<string> {
   }
   if (collected.size === 0) return "";
 
-  return Array.from(collected).map((rel) => `<link rel=\"modulepreload\" crossorigin href=\"/_bun/static/${rel}\">`).join("");
+  return Array.from(collected).map((rel) => `<link rel=\"modulepreload\" crossorigin href=\"/_bun/static/${rel}\" fetchpriority="medium">`).join("");
 }
 
 for (const [name, html] of Object.entries(templates)) {
