@@ -28,8 +28,8 @@ const server = Bun.serve({
     routes: {
         // "/": Response.redirect("https://emailthing.app/docs/api"),
         "/": Response.redirect("/sitemap.json"),
-        "/internal/*": (req) => Response.redirect(req.url.replace("/internal", "/api/internal")),
-        "/v0/*": (req) => Response.redirect(req.url.replace("/v0", "/api/v0")),
+        "/internal/*": (req) => Response.redirect(req.url.replace("/internal", "/api/internal").replace("http://", "https://")),
+        "/v0/*": (req) => Response.redirect(req.url.replace("/v0", "/api/v0").replace("http://", "https://")),
         "/alive": () => new Response("OK"),
         "/sitemap.json": () => Response.json(
             Object.entries(routes).flatMap(([route, handlers]) =>

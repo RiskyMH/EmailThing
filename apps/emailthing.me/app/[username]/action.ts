@@ -20,15 +20,19 @@ interface User {
 
 export async function fetchUser(username: string): Promise<User | null> {
   const res = await fetch(
-    `${API_URL}/internal/emailthing-me?username=${username}`,
+    `${API_URL}/api/internal/emailthing-me?username=${username}`,
     {
       method: "GET",
       headers: {
         Authorization: `Bearer ${process.env.EMAILTHING_ME_TOKEN}`,
       },
+      redirect: "manual"
     }
   );
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.error(await res.text());
+    return null;
+  };
   const user = (await res.json()) as User;
   return user;
 }
@@ -38,7 +42,7 @@ export async function sendEmail(
   rawEmail: string
 ): Promise<boolean> {
   const res = await fetch(
-    `${API_URL}/internal/emailthing-me?username=${username}`,
+    `${API_URL}/api/internal/emailthing-me?username=${username}`,
     {
       method: "POST",
       headers: {

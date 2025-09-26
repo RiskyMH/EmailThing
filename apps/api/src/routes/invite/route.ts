@@ -1,17 +1,16 @@
 import { db } from "@emailthing/db/connect";
 import { InviteCode } from "@emailthing/db";
 import { createId } from "@paralleldrive/cuid2";
-import { headers } from "next/headers";
 
 export const revalidate = 0;
 
 process.env.SECRET_SPECIAL_TOKEN_YAY ||= Bun.randomUUIDv7();
 
-export async function GET() {
+export async function GET(request: Request) {
   // scamful way of getting bot :)
   if (
     process.env.SECRET_SPECIAL_TOKEN_YAY !==
-    (await headers()).get("Authorization")
+    request.headers.get("authorization")
   ) {
     return new Response("Unauthorized", { status: 401 });
   }

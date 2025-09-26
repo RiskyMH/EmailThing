@@ -24,7 +24,7 @@ const fetchUser = (username: string) => {
 
 export async function GET(request: Request) {
   if (
-    request.headers.get("Authorization") !==
+    request.headers.get("authorization") !==
     `Bearer ${process.env.EMAILTHING_ME_TOKEN}`
   ) {
     return new Response("Unauthorized", { status: 401 });
