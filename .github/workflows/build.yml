@@ -31,7 +31,7 @@ jobs:
 
       - name: Build PWA
         run: bun run build
-        working-directory: apps/web
+        working-directory: apps/pwa
 
       - name: Build API
         run: bun run build
