@@ -23,5 +23,3 @@ export default function Link({
     />
   );
 }
-
-export { useMatch } from "react-router-dom";

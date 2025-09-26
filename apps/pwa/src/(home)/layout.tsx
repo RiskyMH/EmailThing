@@ -3,9 +3,11 @@ import Link from "@/components/link";
 import { EmailThing } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import { DemoLinkButton, UserNavLogin } from "@/components/user-navbar.static";
-import { type PropsWithChildren, Suspense } from "react";
+import { cn } from "@/utils/tw";
+import { ExternalLinkIcon } from "lucide-react";
+import { type PropsWithChildren, Suspense, useEffect, useState } from "react";
 import { lazy } from "react";
-import { Header, MainNavItem } from "./components";
+import { useMatch } from "react-router-dom";
 
 const UserNav = lazy(() => import("@/components/user-navbar"));
 const DemoLink = lazy(() =>
@@ -49,4 +51,54 @@ export default function HomeLayout({ children }: PropsWithChildren) {
   );
 }
 
-export { Header, MainNavItem }
+export function MainNavItem({
+  href,
+  title,
+  disabled = false,
+  mobileShow = false,
+}: PropsWithChildren<{
+  href: string;
+  disabled?: boolean;
+  title: string;
+  mobileShow?: boolean;
+}>) {
+  const match = useMatch(`${href}/*`);
+  // const segment = useSelectedLayoutSegment();
+
+  return (
+    <Link
+      href={disabled ? "#" : href}
+      target={href.startsWith("http") ? "_blank" : undefined}
+      className={cn(
+        "hidden items-center gap-2 font-medium text-sm transition-colors hover:text-foreground/80 md:flex",
+        match ? "text-foreground" : "text-foreground/60",
+        disabled && "cursor-not-allowed opacity-80",
+        mobileShow && "flex",
+      )}
+    >
+      {title}
+      {href.startsWith("http") && <ExternalLinkIcon className="size-4 stroke-[3px]" />}
+    </Link>
+  );
+}
+
+export function Header({ children, className }: PropsWithChildren<{ className?: string }>) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 0;
+      setScrolled(isScrolled);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header className={cn(className, scrolled && "h-16 border-b-2 bg-background")}>
+      {children}
+    </header>
+  );
+}
