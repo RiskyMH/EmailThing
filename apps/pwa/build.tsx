@@ -189,11 +189,14 @@ async function computeModulePreloadsForHtml(html: string): Promise<string> {
 }
 
 for (const [name, html] of Object.entries(templates)) {
+  // for now only app.html should get modulepreloads
+  // for homepage, it scales weirdly and the css doesn't get imported as quickly 
+  // (so much other files get shared)
+  if (name !== "app.html") continue;
   const links = await computeModulePreloadsForHtml(html);
   if (links) {
     const updated = html.replace('</head>', `${links}</head>`);
     templates[name] = updated;
-    await Bun.write(`./dist/${name}`, updated);
   }
 }
 
