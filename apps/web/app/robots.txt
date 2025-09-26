@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: /mail
-Allow: /
-Allow: /home

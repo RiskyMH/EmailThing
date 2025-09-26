@@ -2,12 +2,12 @@ import { createPasswordHash } from "@/utils/password";
 import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, UserSession } from "@/db";
 import { User } from "@/db";
 import { and, eq, gte, isNull, sql } from "drizzle-orm";
-import { userAuthSchema } from "@/validations/auth";
+import { userAuthSchema } from "@/utils/validations/auth";
 import { isValidOrigin } from "../tools";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
-import { emailUser } from "@/(auth)/register/tools";
+import { emailUser } from "./tools";
 import { createId } from "@paralleldrive/cuid2";
-import { impersonatingEmails } from "@/validations/invalid-emails";
+import { impersonatingEmails } from "@/utils/validations/invalid-emails";
 import { TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 
 // Rate limiting

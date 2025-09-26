@@ -1,4 +1,4 @@
-import { getSession, isValidOrigin } from "../../../tools";
+import { getSession, isValidOrigin } from "@/routes/internal/tools";
 import { db, MailboxForUser, TempAlias } from "@/db";
 import { and, eq, gte, or, getTableColumns, type InferSelectModel } from "drizzle-orm";
 // import { revalidateTag } from "next/cache";
@@ -11,10 +11,10 @@ import {
     MailboxTokens,
     User,
 } from "@/db";
-import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@/utils/limits";
+import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@emailthing/const/limits";
 import { generateToken } from "@/utils/token";
-import { emailSchema } from "@/validations/auth";
-import { impersonatingEmails } from "@/validations/invalid-emails";
+import { emailSchema } from "@/utils/validations/auth";
+import { impersonatingEmails } from "@/utils/validations/invalid-emails";
 import { count, like, not, sql } from "drizzle-orm";
 import { createId, init } from "@paralleldrive/cuid2";
 import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";

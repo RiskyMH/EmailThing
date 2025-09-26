@@ -2,7 +2,7 @@ import { verifyPassword } from "@/utils/password";
 import { db, MailboxForUser, PasskeyCredentials, UserSession } from "@/db";
 import { User } from "@/db";
 import { and, eq, sql } from "drizzle-orm";
-import { userAuthSchema } from "@/validations/auth";
+import { userAuthSchema } from "@/utils/validations/auth";
 import { isValidOrigin } from "../tools";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
 import { verifyCredentialss } from "@/utils/passkeys";

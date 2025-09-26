@@ -5,7 +5,7 @@ import { createMimeMessage } from "mimetext";
 import { sendEmail } from "@/utils/send-email";
 import { isValidOrigin } from "../../tools";
 import { createPasswordHash } from "@/utils/password";
-import { userAuthSchema } from "@/validations/auth";
+import { userAuthSchema } from "@/utils/validations/auth";
 import { marked } from "marked";
 import { RESET_PASSWORD_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 import { API_URL } from "@emailthing/const/urls";

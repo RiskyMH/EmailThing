@@ -1,4 +1,4 @@
-import { getSession, isValidOrigin } from "../../../tools";
+import { getSession, isValidOrigin } from "@/routes/internal/tools";
 import { db, MailboxForUser } from "@/db";
 import { and, eq, asc } from "drizzle-orm";
 import { DefaultDomain, Mailbox } from "@/db";
