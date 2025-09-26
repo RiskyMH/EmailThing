@@ -165,6 +165,37 @@ const templates = {
   "home.html": homeHtml,
 } as Record<string, string>;
 
+// Precompute modulepreload links per base template (handles static & side-effect imports only; excludes dynamic imports)
+async function computeModulePreloadsForHtml(html: string): Promise<string> {
+  const jsImportMatch = html.match(/<script[^>]*src="([^"]*\/_bun\/static\/[^"]*\.js)"[^>]*>/);
+  if (!jsImportMatch) return "";
+
+  const mainJsPath = jsImportMatch[1];
+  const entryPath = path.join(outdir, mainJsPath.replace('/_bun/static/', '_bun/static/'));
+  if (!existsSync(entryPath)) return "";
+
+  const content = await Bun.file(entryPath).text();
+  const collected = new Set<string>();
+  for (const m of content.matchAll(/import\s*[^'"\n]*?from\s*["']\.\/([^"']+\.js)["']/g)) {
+    collected.add(m[1]);
+  }
+  for (const m of content.matchAll(/import\s*["']\.\/([^"']+\.js)["']/g)) {
+    collected.add(m[1]);
+  }
+  if (collected.size === 0) return "";
+
+  return Array.from(collected).map((rel) => `<link rel=\"modulepreload\" crossorigin href=\"/_bun/static/${rel}\">`).join("");
+}
+
+for (const [name, html] of Object.entries(templates)) {
+  const links = await computeModulePreloadsForHtml(html);
+  if (links) {
+    const updated = html.replace('</head>', `${links}</head>`);
+    templates[name] = updated;
+    await Bun.write(`./dist/${name}`, updated);
+  }
+}
+
 const { query, dataRoutes } = createStaticHandler(routes);
 
 async function processRoute(route: RouteObject & { preferTemplate?: string }) {
@@ -226,13 +257,16 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
     <StaticRouterProvider router={router} context={context} />,
   );
 
-  const _html = templates[route.preferTemplate || "app.html"]
+  let _html = templates[route.preferTemplate || "app.html"]
     .replaceAll(/(\s{2,}|\n+)/gm, "")
     // .replaceAll(/\n+/gm, '')
     .replace(replace, prerendered)
     // .replaceAll(/(\s{2,}|\n+)/gm, "")
     .replace(/<!-- META -->.*?<!-- \/META -->/gm, meta)
     .replace(/<script>window\.__staticRouterHydrationData.*\);<\/script>/gm, "");
+
+  // Preloads are already baked into the template
+
 
   await Bun.write(`./dist/${path === "/" ? "index" : path}.html`, _html);
   // await Bun.write(`./dist/${path}/index.html`, _html)
