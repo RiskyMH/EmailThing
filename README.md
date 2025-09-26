@@ -19,31 +19,29 @@ There are 3 apps in this repository. It originally started with the web app, but
       <h3>
       <img src="https://svgl.app/library/nextjs_icon_dark.svg" alt="Next.js Logo" width="50">
       <br>
-      <a href="./apps/web#readme"><b>Web</b></a> <em>(original)</em>
+      <a href="./apps/web#readme"><b>Web</b></a> <em>(old)</em>
       </h3>
       <br>
-      The original web app that was made with Next.js. 
-      <br><br>
-      <p>This is right now whats used in production, however the others are being focused on and this soon will just be here as deprecated and historic value.</p>
+      The original web app that was made with Next.js. It is here for archival reasons as it's not in production.
     </td>
     <td align="center" width="33%" valign="top">
       <!-- <br> -->
       <h3>
       <img src="https://react.dev/images/brand/logo_dark.svg" alt="React.js Logo" width="50">
       <br>
-      <a href="./apps/pwa#readme"><b>PWA</b></a> <em>(in progress)</em>
+      <a href="./apps/pwa#readme"><b>PWA</b></a> <em>(front end)</em>
       </h3>
       <br>
       The PWA app that was made with React & Bun bundler. This is a complete rewrite of the web app.
       <br><br>
-      <a href="https://pwa.emailthing.app">Try it out.</a>
+      <a href="https://emailthing.app">Try it out.</a>
     </td>
     <td align="center" width="33%" valign="top">
       <!-- <br> -->
       <h3>
       <img src="https://bun.sh/logo.svg" alt="Next.js Logo" width="50">
       <br>
-      <a href="./apps/api#readme"><b>API</b></a> <em>(in progress)</em>
+      <a href="./apps/api#readme"><b>API</b></a> <em>(backend)</em>
       </h3>
       <br>
       The API that was made with Bun's <code>Bun.serve</code>. This is a complete rewrite of the web app (api section).

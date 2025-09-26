@@ -2,24 +2,24 @@ import * as api_v0_whoami from "../../web/app/api/v0/whoami/route.ts";
 import * as api_v0_send from "../../web/app/api/v0/send/route.ts";
 import * as api_v0_receive_email from "../../web/app/api/v0/receive-email/route.ts";
 import * as api_v0 from "./routes/v0/route.ts";
-import * as api_internal_user_settings from "../../web/app/api/internal/user-settings/route.ts";
-import * as api_internal_sync from "../../web/app/api/internal/sync/route.ts";
-import * as api_internal_send_draft from "../../web/app/api/internal/send-draft/route.tsx";
-import * as api_internal_revoke_token from "../../web/app/api/internal/revoke-token/route.ts";
-import * as api_internal_register from "../../web/app/api/internal/register/route.ts";
-import * as api_internal_refresh_token from "../../web/app/api/internal/refresh-token/route.ts";
-import * as api_internal_mailbox_mailbox_temp_aliases from "../../web/app/api/internal/mailbox/[mailbox]/temp-aliases/route.ts";
-import * as api_internal_mailbox_mailbox_settings from "../../web/app/api/internal/mailbox/[mailbox]/settings/route.ts";
-import * as api_internal_mailbox_mailbox_mail_mail_raw from "../../web/app/api/internal/mailbox/[mailbox]/mail/[mail]/raw/route.ts";
-import * as api_internal_mailbox_mailbox_mail_mail_attachment_attachment from "../../web/app/api/internal/mailbox/[mailbox]/mail/[mail]/attachment/[attachment]/route.ts";
-import * as api_internal_login_reset_password from "../../web/app/api/internal/login/reset-password/route.ts";
-import * as api_internal_login from "../../web/app/api/internal/login/route.ts";
-import * as api_internal_auth_query from "../../web/app/api/internal/auth-query/route.ts";
+import * as api_internal_user_settings from "./routes/internal/user-settings/route.ts";
+import * as api_internal_sync from "./routes/internal/sync/route.ts";
+import * as api_internal_send_draft from "./routes/internal/send-draft/route.tsx";
+import * as api_internal_revoke_token from "./routes/internal/revoke-token/route.ts";
+import * as api_internal_register from "./routes/internal/register/route.ts";
+import * as api_internal_refresh_token from "./routes/internal/refresh-token/route.ts";
+import * as api_internal_mailbox_mailbox_temp_aliases from "./routes/internal/mailbox/[mailbox]/temp-aliases/route.ts";
+import * as api_internal_mailbox_mailbox_settings from "./routes/internal/mailbox/[mailbox]/settings/route.ts";
+import * as api_internal_mailbox_mailbox_mail_mail_raw from "./routes/internal/mailbox/[mailbox]/mail/[mail]/raw/route.ts";
+import * as api_internal_mailbox_mailbox_mail_mail_attachment_attachment from "./routes/internal/mailbox/[mailbox]/mail/[mail]/attachment/[attachment]/route.ts";
+import * as api_internal_login_reset_password from "./routes/internal/login/reset-password/route.ts";
+import * as api_internal_login from "./routes/internal/login/route.ts";
+import * as api_internal_auth_query from "./routes/internal/auth-query/route.ts";
 import * as api_github_secret_alert from "../../web/app/api/github/secret-alert/route.ts";
 import * as api_debug_runtime_info from "../../web/app/api/debug/runtime-info/route.ts";
 import * as api_debug_info from "./routes/debug/info/route.ts";
 import * as api_debug_build_info from "../../web/app/api/debug/build-info/route.ts";
-import * as api_cron_clean_mail from "../../web/app/api/cron/clean-mail/route.ts";
+import * as api_cron_clean_mail from "./routes/cron/clean-mail/route.ts";
 
 export default {
     "/api/v0/whoami": api_v0_whoami,
