@@ -49,3 +49,13 @@ jobs:
         run: bun run build
         working-directory: packages/emailthing
         if: always()
+
+      - name: Assert no changes
+        run: |
+          if git diff --exit-code; then
+            echo "No changes detected"
+          else
+            echo "Changes detected"
+            exit 1
+          fi
+        if: always()
