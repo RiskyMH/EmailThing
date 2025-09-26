@@ -57,9 +57,6 @@ const result = await build({
   },
 });
 
-// await cp(path.join(import.meta.dir, "../web/public"), path.join(import.meta.dir, "./dist"), {
-//   recursive: true,
-// });
 await cp(path.join(import.meta.dir, "./public"), path.join(import.meta.dir, "./dist"), {
   recursive: true,
 });
@@ -103,7 +100,6 @@ for (const file of result.outputs) {
 
 const publicFiles = [
   ...(await readdir(path.join(import.meta.dir, "./public"), { recursive: true })),
-  // ...(await readdir(path.join(import.meta.dir, "../web/public"), { recursive: true })),
   // ...await readdir(require.resolve("@fontsource/inter") + "/../files", {recursive: true}),
 ];
 // Print the results

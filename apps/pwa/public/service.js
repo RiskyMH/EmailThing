@@ -80,9 +80,9 @@ if (CACHE_NAME !== "emailthing-offline-v1") {
         event.respondWith(
           (async () => {
             try {
-              if (event.request.url === "https://pwa.emailthing.app/") {
+              if (event.request.url === "https://emailthing.app/") {
                 if (await this?.cookieStore?.get("mailboxId")) {
-                  return Response.redirect("https://pwa.emailthing.app/mail");
+                  return Response.redirect("https://emailthing.app/mail");
                 }
               }
               event.request.signal = AbortSignal.timeout(3_000);

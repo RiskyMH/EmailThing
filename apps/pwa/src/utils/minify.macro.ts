@@ -8,7 +8,7 @@ export function minify(strings: TemplateStringsArray | string, ...values: any[])
             return acc + str + (values[i] || '');
         }, '');
 
-    if ((typeof window === "undefined" && process.platform === "win32") || typeof window !== "undefined") {
+    if ((typeof window === "undefined" && process.platform === "win32") || typeof window !== "undefined" || typeof Bun === "undefined") {
         return code.replaceAll(/(\s{2,}|\n+)/gm, "");
     }
 

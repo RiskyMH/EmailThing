@@ -85,7 +85,7 @@ import { API_URL } from "@emailthing/const/urls";
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 // Shared login handler for both password and passkey
-async function handleLoginResponse({ data, navigate, username, apiUrl }: {
+async function handleLoginResponse({ data, navigate, username, apiUrl, from }: {
   data: {
     token: string;
     refreshToken: string;
@@ -98,6 +98,7 @@ async function handleLoginResponse({ data, navigate, username, apiUrl }: {
   navigate: ReturnType<typeof useNavigate>;
   username?: string | null;
   apiUrl: string;
+  from?: string | null;
 }) {
   if (!data || 'error' in data && data.error) {
     return void toast.error(data?.error || "Login failed");
@@ -134,7 +135,24 @@ async function handleLoginResponse({ data, navigate, username, apiUrl }: {
     : undefined;
   const selectedMailbox = mailboxId && mailboxes.includes(mailboxId) ? mailboxId : mailboxes[0];
   document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-  navigate(`/mail/${selectedMailbox}${!userOnboarding ? "?onboarding" : ""}`);
+  const defaultNavigate = `/mail/${selectedMailbox}${!userOnboarding ? "?onboarding" : ""}`;
+
+  if (from) {
+    if (from.startsWith("/mail/")) {
+      // get the id from /mail/.../anythingelse, and ensure it is in mailboxes
+      const id = from.split("/")[2];
+      if (mailboxes.includes(id)) {
+        navigate(from);
+      } else {
+        navigate(defaultNavigate);
+      }
+    } else {
+      navigate(from);
+    }
+  } else {
+    navigate(defaultNavigate);
+  }
+
   toast.success("Welcome back!");
   db.initialFetchSync();
 }
@@ -147,6 +165,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
   const apiUrl = searchParams.get("api") || API_URL;
+  const from = searchParams.get("from");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -165,7 +184,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         setLoading(false);
         return void toast.error(data.error || JSON.stringify(data));
       }
-      await handleLoginResponse({ data, navigate, username, apiUrl });
+      await handleLoginResponse({ data, navigate, username, apiUrl, from });
       setLoading(false);
     });
   }
@@ -175,16 +194,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       if (typeof window !== "undefined" && !username && document.cookie.includes("mailboxId=")) {
         const { db, initializeDB } = await import("@/utils/data/db");
         await initializeDB();
+        if (from) {
+          if (from.startsWith("/mail/")) {
+            const mailboxes = (await db.mailboxes.toArray()).map(m => m.id);
+            const id = from.split("/")[2];
+            if (mailboxes.includes(id)) {
+              return void navigate(from);
+            }
+          } else {
+            return void navigate(from);
+          }
+        }
+
         const mailboxId = document.cookie.split("mailboxId=")[1].split(";")[0];
         const mailbox = await db.mailboxes.get(mailboxId);
         if (mailbox) {
-          navigate(`/mail/${mailboxId}`);
+          return void navigate(`/mail/${mailboxId}`);
         }
       }
     }
 
     checkMailboxId();
-  }, [username, navigate]);
+  }, [username, navigate, from]);
 
   return (
     <>
@@ -338,6 +369,8 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
   const searchParams = useSearchParams()[0];
   const username = searchParams.get("username");
   const apiUrl = searchParams.get("api") || API_URL;
+  const from = searchParams.get("from");
+
   useEffect(() => {
     setSupport(supported());
   }, []);
@@ -373,7 +406,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
           setLoading(false);
           return void toast.error(data.error || "Failed to sign in with passkey");
         }
-        await handleLoginResponse({ data, navigate, username, apiUrl });
+        await handleLoginResponse({ data, navigate, username, apiUrl, from });
         setLoading(false);
       } catch (err) {
         console.error(err);

@@ -2,27 +2,18 @@ name: Build
 
 on:
   push:
-    branches: 
-      - main
-    paths: 
-      - apps/web/**/*
-      - packages/db/**/*
-      - .github/workflows/build.yml
-      - bun.lock
-  pull_request: 
     branches:
       - main
-    paths:
-      - apps/web/*
-      - packages/db/*
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
 
-
 jobs:
-  website:
-    name: Build Next.JS App
+  build-all:
+    name: Build All Apps
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,56 +26,36 @@ jobs:
         with:
           bun-version: latest
 
-      - uses: actions/cache@v4
-        with:
-          path: apps/web/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}
-          restore-keys: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+        if: always()
 
-      - name: Install deps
-        run: bun install --frozen-lockfile && touch bun.lockb
+      - name: Build PWA
+        run: bun run build
+        working-directory: apps/pwa
+        if: always()
 
-      - name: Build
+      - name: Build API
+        run: bun run build
+        working-directory: apps/api
+        if: always()
+
+      - name: Build EmailThing.me
+        run: bun run build
+        working-directory: apps/emailthing.me
+        if: always()
+
+      - name: Build EmailThing (cli)
+        run: bun run build
+        working-directory: packages/emailthing
+        if: always()
+
+      - name: Assert no changes
         run: |
-          set -o pipefail
-          bun run build 2>&1 | tee -a build.log
-        working-directory: apps/web
-        env:
-          STANDALONE: "1"
-          # TURBOPACK_BUILD: 1
-          # TURBOPACK: 1
-          # TURBO: 1
-
-          DATABASE_URL: "libsql://void.riskymh.dev"
-          EMAIL_AUTH_TOKEN: "no"
-          S3_KEY_ID: "no"
-          NEXT_PUBLIC_APP_URL: "https://emailthing.xyz"
-          WEB_NOTIFICATIONS_PRIVATE_KEY: "no"
-          NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY:  ${{ vars.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY || 'just pls dont error' }}
-          S3_URL: "no"
-          S3_SECRET_ACCESS_KEY: "no"
-      
-      - name: Echo build log to $GITHUB_STEP_SUMMARY
-        run: |
-          echo "\`\`\`txt" >> $GITHUB_STEP_SUMMARY
-          cat apps/web/build.log >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-        
-      - name: Copy static asset files
-        working-directory: apps/web
-        run: |
-          ls .next/standalone/*
-          mkdir --parents ./.next/standalone/public/_next/static 
-          cp ./public -r ./.next/standalone
-          cp ./.next/static -r ./.next/standalone/public/_next
-
-          (mv ./.next/standalone/public/* ./.next/standalone/apps/web/public) || true
-          (mv ./.next/standalone/apps/web/* ./.next/standalone) || true
-          (mv ./.next/standalone/apps/web/.[!.]* ./.next/standalone) || true
-
-      - uses: actions/upload-artifact@v4
-        with:
-          path: apps/web/.next/standalone
-          name: Standalone Next.js
-          compression-level: 1
-          include-hidden-files: true
+          if git diff --exit-code; then
+            echo "No changes detected"
+          else
+            echo "Changes detected"
+            exit 1
+          fi
+        if: always()

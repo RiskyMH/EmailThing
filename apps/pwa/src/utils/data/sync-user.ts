@@ -2,7 +2,7 @@ import type {
   ChangesRequest,
   ChangesResponse,
   MinimalChangesResponse,
-} from "@/../../web/app/api/internal/sync/route";
+} from "@emailthing/api/src/routes/internal/sync/route";
 import { db } from "@/utils/data/db";
 import { API_URL } from "@emailthing/const/urls";
 

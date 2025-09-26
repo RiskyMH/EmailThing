@@ -15,19 +15,6 @@ for await (const route of glob.scan({ cwd: `${import.meta.dir}/routes`, absolute
     localRoutes.set(routeName, route);
 }
 
-// Then check Next.js routes, skipping any that exist locally
-for await (const route of glob.scan({ cwd: `${import.meta.dir}/../../web/app/api`, absolute: true })) {
-    const routeName = route
-        .replace(/^.*?\/app\/api/, "/api")
-        .replace(/\/route\.tsx?$/, "");
-
-    // Skip if we already have this route locally
-    if (localRoutes.has(routeName)) {
-        continue;
-    }
-    localRoutes.set(routeName, route);
-}
-
 // Generate imports and exports for all routes
 for (const [routeName, route] of localRoutes) {
     let relativePath = relative(import.meta.dir, route);

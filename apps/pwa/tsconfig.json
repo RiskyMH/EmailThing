@@ -14,7 +14,6 @@
       "next/navigation": ["./src/components/next-pathname.tsx"],
       "@/(home)/components.client": ["./src/(home)/layout.tsx"],
       "@/*": ["./src/*"],
-      // "@/components/*": ["./src/components/*", "../web/app/components/*"],
     }
   }
 }

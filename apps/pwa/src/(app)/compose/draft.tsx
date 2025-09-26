@@ -40,7 +40,7 @@ import Loading from "./loading";
 import { getData, makeHtml } from "./tools";
 import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { db } from "@/utils/data/db";
-import type { SaveActionProps, SendEmailResponse } from "@/../app/api/internal/send-draft/route";
+import type { SaveActionProps, SendEmailResponse } from "@emailthing/api/src/routes/internal/send-draft/route";
 import { parseSync } from "@/utils/data/sync-user";
 import Turndown from "turndown";
 import { MailboxTitle } from "@/components/mailbox-title";

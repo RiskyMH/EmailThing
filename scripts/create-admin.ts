@@ -1,5 +1,5 @@
 import { Mailbox, MailboxAlias, MailboxForUser, User, db } from "@emailthing/db/connect";
-import { createPasswordHash } from "../apps/web/app/utils/password";
+import { createPasswordHash } from "../apps/api/src/utils/password";
 import { createId } from "@paralleldrive/cuid2";
 
 const username = prompt("Enter username:");

@@ -8,16 +8,6 @@
 //     routes[routeName] = "default" in imp ? imp.default : imp;
 // }
 
-// const routes = {} as Record<string, any>
-// for await (const route of new Bun.Glob("**/route.ts").scan({ cwd: `${import.meta.dir}/../../web/app/api`, absolute: true })) {
-//     const imp = await import(route);
-//     const routeName = route
-//         .replace(/^.*?\/app\/api/, "/api")
-//         .replace(/\/route\.ts$/, "");
-
-//     routes[routeName] = "default" in imp ? imp.default : imp;
-// }
-
 import routes from "./routes.ts";
 import db from "@emailthing/db/connect";
 import { sql } from "drizzle-orm";
