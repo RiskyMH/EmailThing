@@ -11,7 +11,7 @@ export default class EmailThing {
         this.token = token;
     }
 
-    baseURL = "https://emailthing.app/api/v0";
+    baseURL = "https://api.emailthing.app/api/v0";
     token: string;
 
     private async fetch(

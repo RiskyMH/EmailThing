@@ -6,7 +6,7 @@
 
 
 
-/docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/web/app/api/v0#readme 307
+/docs/api https://github.com/RiskyMH/EmailThing/tree/main/apps/api/src/routes/v0#readme 307
 /api/* https://api.emailthing.app/api/:splat 307
 /mail/:id/:mailId/raw https://emailthing.app/mail/:id/:mailId/raw 307
 /mail/:id/:mailId/attachment/:attachmentId https://emailthing.app/mail/:id/:mailId/attachment/:attachmentId 307
