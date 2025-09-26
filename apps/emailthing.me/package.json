@@ -12,6 +12,7 @@
     "@emailthing/db": "workspace:^",
     "@radix-ui/react-slot": "^1.2.3",
     "@riskymh/aws": "^0.0.9",
+    "@tailwindcss/postcss": "^4.1.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.513.0",

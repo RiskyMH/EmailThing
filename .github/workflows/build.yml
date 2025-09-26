@@ -28,19 +28,24 @@ jobs:
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
+        if: always()
 
       - name: Build PWA
         run: bun run build
         working-directory: apps/pwa
+        if: always()
 
       - name: Build API
         run: bun run build
         working-directory: apps/api
+        if: always()
 
       - name: Build EmailThing.me
         run: bun run build
         working-directory: apps/emailthing.me
-      
+        if: always()
+
       - name: Build EmailThing (cli)
         run: bun run build
         working-directory: packages/emailthing
+        if: always()
