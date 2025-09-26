@@ -10,8 +10,7 @@
 
 ## Getting Started
 
-There are 2 apps in this repository. It originally started with the https://github.com/RiskyMH/EmailThing/tree/7e2deb88e29118735d8e46b60f1633b668ed3a37/apps/web, but I have since made a PWA and API to improve the user experience and do cool custom things.
-<!-- table for the 3 apps (pwa, api) - web being default -->
+There are 2 apps in this repository. It originally started as a nextjs app ([see archived code](https://github.com/RiskyMH/EmailThing/tree/7e2deb88e29118735d8e46b60f1633b668ed3a37/apps/web)), but I have since made a PWA and API to improve the user experience and do cool custom things.
 <table>
   <tr>
     <td align="center" width="50%" valign="top">
@@ -21,10 +20,7 @@ There are 2 apps in this repository. It originally started with the https://gith
       <br>
       <a href="./apps/pwa#readme"><b>PWA</b></a> <em>(front end)</em>
       </h3>
-      <br>
       The PWA app that was made with React & Bun bundler.
-      <br><br>
-      <a href="https://emailthing.app">See it in action.</a>
     </td>
     <td align="center" width="50%" valign="top">
       <!-- <br> -->
@@ -33,7 +29,6 @@ There are 2 apps in this repository. It originally started with the https://gith
       <br>
       <a href="./apps/api#readme"><b>API</b></a> <em>(backend)</em>
       </h3>
-      <br>
       The API that was made with Bun's <code>Bun.serve</code>.
     </td>
   </tr>
@@ -63,6 +58,7 @@ Many individuals and organizations have contributed to the creation of this proj
 
 * [Cloudflare](https://cloudflare.com) for providing S3, workers, and email routing.
 * [Xata](https://xata.io) for providing a good pricing for database.
+* [Bun](https://bun.com) too many things to count.
 * [Alfonsusac](https://github.com/alfonsusac) for designing the logo and sticker.
 * [Members of Next.js Discord](https://discord.gg/NextJS) for helping me with motivation and testing.
 * *and many more that I can't possibly mention...*
