@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-all:
+    name: Build All Apps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Build PWA
+        run: bun run build
+        working-directory: apps/web
+
+      - name: Build API
+        run: bun run build
+        working-directory: apps/api
+
+      - name: Build EmailThing.me
+        run: bun run build
+        working-directory: apps/emailthing.me
