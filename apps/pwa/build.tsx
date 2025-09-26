@@ -185,7 +185,7 @@ async function computeModulePreloadsForHtml(html: string): Promise<string> {
   }
   if (collected.size === 0) return "";
 
-  return Array.from(collected).map((rel) => `<link rel=\"modulepreload\" crossorigin href=\"/_bun/static/${rel}\" fetchpriority="medium">`).join("");
+  return Array.from(collected).map((rel) => `<link rel=\"modulepreload\" crossorigin href=\"/_bun/static/${rel}\" fetchpriority="low">`).join("");
 }
 
 for (const [name, html] of Object.entries(templates)) {
