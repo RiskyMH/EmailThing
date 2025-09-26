@@ -26,6 +26,9 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
       - name: Build PWA
         run: bun run build
         working-directory: apps/web
