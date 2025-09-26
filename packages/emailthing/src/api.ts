@@ -3,7 +3,7 @@ import type { EmailSendOptions, EmailSendResponse, ReceiveEmailPostOptions, Whoa
 /**
  * **EmailThing API**
  *
- * Raw api docs: https://github.com/RiskyMH/EmailThing/blob/main/app/api/v0
+ * Raw api docs: https://emailthing.app/docs/api
  */
 export default class EmailThing {
     constructor(token: string) {

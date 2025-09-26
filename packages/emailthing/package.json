@@ -1,10 +1,11 @@
 {
   "name": "emailthing",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A web app for receiving and sending your emails!",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RiskyMH/EmailThing.git"
+    "url": "git+https://github.com/RiskyMH/EmailThing.git",
+    "directory": "packages/emailthing"
   },
   "keywords": ["cli", "sdk", "email"],
   "author": "RiskyMH (https://riskymh.dev)",
@@ -25,7 +26,8 @@
   "types": "./src/sdk.ts",
   "sideEffects": false,
   "scripts": {
-    "build": "bun build src/cli.ts src/sdk.ts --outdir dist --splitting",
+    "//build": "bun build src/cli.ts src/sdk.ts --outdir dist --splitting",
+    "build": "bun build src/*.ts --outdir dist --splitting",
     "prepack": "bun exec \"rm -rf dist && bun run build\""
   },
   "homepage": "https://emailthing.app/home"
