@@ -21,9 +21,6 @@ import PostalMime from "postal-mime";
 import Turndown from "turndown";
 import { getTokenMailbox } from "../tools";
 
-export const revalidate = 0;
-// export const runtime = 'edge';
-
 export async function POST(request: Request) {
     const { searchParams } = new URL(request.url);
 

@@ -5,8 +5,6 @@ import { and, eq, sql } from "drizzle-orm";
 import { Mailbox as MimeMailbox, createMimeMessage } from "mimetext";
 import { getTokenMailbox } from "../tools";
 
-export const revalidate = 0;
-
 interface EmailPostOptions {
     html?: string;
     text?: string;

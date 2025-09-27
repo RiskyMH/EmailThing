@@ -2,8 +2,6 @@ import { db } from "@emailthing/db/connect";
 import { InviteCode } from "@emailthing/db";
 import { createId } from "@paralleldrive/cuid2";
 
-export const revalidate = 0;
-
 process.env.SECRET_SPECIAL_TOKEN_YAY ||= Bun.randomUUIDv7();
 
 export async function GET(request: Request) {

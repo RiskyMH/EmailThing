@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/jsdom": "^21.1.7",
     "@types/ua-parser-js": "^0.7.39",
     "drizzle-kit": "^0.31.4"
   },
