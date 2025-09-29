@@ -70,108 +70,110 @@ export async function GET(request: Request) {
     },
   });
 
-  await Promise.all(
-    emails.map(async (email) => {
-      await deleteFile(`${email.mailboxId}/${email.id}`);
-      await deleteFile(`${email.mailboxId}/${email.id}/email.eml`);
-      await Promise.all(
-        email.attachments.map(async (attachment) => {
-          await deleteFile(
-            `${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`
-          );
-        })
-      );
-    })
-  );
+  console.log(`would delete ${emails.length} emails and ${tempAliases.length} temp aliases`);
 
-  await db.batchUpdate([
-    // delete from db
-    db
-      .update(Email)
-      .set({
-        isDeleted: true,
-        updatedAt: new Date(),
-        body: "<deleted>",
-        subject: "<deleted>",
-        binnedAt: null,
-        categoryId: null,
-        givenId: null,
-        givenReferences: null,
-        html: null,
-        isRead: true,
-        isSender: false,
-        replyTo: null,
-        snippet: null,
-        size: 0,
-        isStarred: false,
-        // tempId: null,
-        createdAt: new Date(),
-      })
-      .where(
-        emails.length
-          ? inArray(
-              Email.id,
-              emails.map((email) => email.id)
-            )
-          : sql`1 = 0`
-      ),
+  // await Promise.all(
+  //   emails.map(async (email) => {
+  //     await deleteFile(`${email.mailboxId}/${email.id}`);
+  //     await deleteFile(`${email.mailboxId}/${email.id}/email.eml`);
+  //     await Promise.all(
+  //       email.attachments.map(async (attachment) => {
+  //         await deleteFile(
+  //           `${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`
+  //         );
+  //       })
+  //     );
+  //   })
+  // );
 
-    db.delete(EmailSender).where(
-      emails.length
-        ? inArray(
-            EmailSender.emailId,
-            emails.map((email) => email.id)
-          )
-        : sql`1 = 0`
-    ),
-    db.delete(EmailRecipient).where(
-      emails.length
-        ? inArray(
-            EmailRecipient.emailId,
-            emails.map((email) => email.id)
-          )
-        : sql`1 = 0`
-    ),
-    db.delete(EmailAttachments).where(
-      emails.length
-        ? inArray(
-            EmailAttachments.emailId,
-            emails.map((email) => email.id)
-          )
-        : sql`1 = 0`
-    ),
+  // await db.batchUpdate([
+  //   // delete from db
+  //   db
+  //     .update(Email)
+  //     .set({
+  //       isDeleted: true,
+  //       updatedAt: new Date(),
+  //       body: "<deleted>",
+  //       subject: "<deleted>",
+  //       binnedAt: null,
+  //       categoryId: null,
+  //       givenId: null,
+  //       givenReferences: null,
+  //       html: null,
+  //       isRead: true,
+  //       isSender: false,
+  //       replyTo: null,
+  //       snippet: null,
+  //       size: 0,
+  //       isStarred: false,
+  //       // tempId: null,
+  //       createdAt: new Date(),
+  //     })
+  //     .where(
+  //       emails.length
+  //         ? inArray(
+  //             Email.id,
+  //             emails.map((email) => email.id)
+  //           )
+  //         : sql`1 = 0`
+  //     ),
 
-    db
-      .update(TempAlias)
-      .set({
-        isDeleted: true,
-        createdAt: new Date(),
-        name: "<deleted>",
-        updatedAt: new Date(),
-        // alias: "<deleted>",
-      })
-      .where(
-        tempAliases.length
-          ? inArray(
-              TempAlias.id,
-              tempAliases.map((temp) => temp.id)
-            )
-          : sql`1 = 0`
-      ),
+  //   db.delete(EmailSender).where(
+  //     emails.length
+  //       ? inArray(
+  //           EmailSender.emailId,
+  //           emails.map((email) => email.id)
+  //         )
+  //       : sql`1 = 0`
+  //   ),
+  //   db.delete(EmailRecipient).where(
+  //     emails.length
+  //       ? inArray(
+  //           EmailRecipient.emailId,
+  //           emails.map((email) => email.id)
+  //         )
+  //       : sql`1 = 0`
+  //   ),
+  //   db.delete(EmailAttachments).where(
+  //     emails.length
+  //       ? inArray(
+  //           EmailAttachments.emailId,
+  //           emails.map((email) => email.id)
+  //         )
+  //       : sql`1 = 0`
+  //   ),
 
-    ...emails.map((email) =>
-      db
-        .update(Mailbox)
-        .set({
-          storageUsed: sql`${Mailbox.storageUsed} - ${email.size}`,
-        })
-        .where(eq(Mailbox.id, email.mailboxId))
-    ),
+  //   db
+  //     .update(TempAlias)
+  //     .set({
+  //       isDeleted: true,
+  //       createdAt: new Date(),
+  //       name: "<deleted>",
+  //       updatedAt: new Date(),
+  //       // alias: "<deleted>",
+  //     })
+  //     .where(
+  //       tempAliases.length
+  //         ? inArray(
+  //             TempAlias.id,
+  //             tempAliases.map((temp) => temp.id)
+  //           )
+  //         : sql`1 = 0`
+  //     ),
 
-    db
-      .delete(UserSession)
-      .where(lt(UserSession.refreshTokenExpiresAt, new Date())),
-  ]);
+  //   ...emails.map((email) =>
+  //     db
+  //       .update(Mailbox)
+  //       .set({
+  //         storageUsed: sql`${Mailbox.storageUsed} - ${email.size}`,
+  //       })
+  //       .where(eq(Mailbox.id, email.mailboxId))
+  //   ),
+
+  //   db
+  //     .delete(UserSession)
+  //     .where(lt(UserSession.refreshTokenExpiresAt, new Date())),
+  // ]);
 
   return Response.json({
     success: true,
