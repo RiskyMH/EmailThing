@@ -22,6 +22,8 @@ import Turndown from "turndown";
 import { getTokenMailbox } from "../tools";
 
 export async function POST(request: Request) {
+    console.log("receive-email!");
+    console.time("receive-email");
     const { searchParams } = new URL(request.url);
 
     const { email: rawEmail, from, to } = (await request.json()) as Record<string, string>;
@@ -193,6 +195,7 @@ export async function POST(request: Request) {
         url: `/mail/${mailboxId}/${emailId}`,
     });
 
+    console.timeEnd("receive-email");
     return Response.json({
         success: true,
         id: emailId,
