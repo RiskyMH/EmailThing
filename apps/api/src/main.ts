@@ -27,16 +27,16 @@ const server = Bun.serve({
     port: process.env.PORT || 3000,
     routes: {
         // "/": Response.redirect("https://emailthing.app/docs/api"),
-        "/": Response.redirect("/sitemap.json"),
+        "/": Response.redirect("/sitemap.json", 307),
         "/internal/*": (req) => {
             const url = new URL(req.url);
             url.pathname = `/api/internal/${url.pathname.slice(1)}`;
-            Response.redirect(url.pathname);
+            Response.redirect(url.pathname, 308);
         },
         "/v0/*": (req) => {
             const url = new URL(req.url);
             url.pathname = `/api/v0/${url.pathname.slice(1)}`;
-            Response.redirect(url.pathname);
+            Response.redirect(url.pathname, 308);
         },
         "/alive": () => new Response("OK"),
         "/sitemap.json": () => Response.json(
@@ -47,8 +47,8 @@ const server = Bun.serve({
             )
         ),
         // old routes that had misspellings
-        "/recieve-email": Response.redirect("/api/v0/receive-email"),
-        "/api/recieve-email": Response.redirect("/api/v0/receive-email"),
+        "/recieve-email": Response.redirect("/api/v0/receive-email", 308),
+        "/api/recieve-email": Response.redirect("/api/v0/receive-email", 308),
         ...routes,
     },
     fetch(req, server) {
