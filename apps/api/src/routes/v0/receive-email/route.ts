@@ -261,3 +261,5 @@ function emailContent({ text, html }: { text?: string; html?: string }) {
 
     return `<!-- Converted markdown from HTML -->\n${_text}`;
 }
+
+export const GET = new Response("GET method not allowed. Use POST instead.", { status: 405 });
