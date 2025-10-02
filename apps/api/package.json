@@ -23,17 +23,17 @@
     "drizzle-orm": "^0.43.1",
     "jose": "^6.1.0",
     "jsdom": "^27.0.0",
-    "mailauth": "^4.9.4",
+    "mailauth": "^4.9.5",
     "mimetext": "^3.0.27",
-    "postal-mime": "^2.4.4",
-    "ua-parser-js": "^2.0.4",
+    "postal-mime": "^2.4.6",
+    "ua-parser-js": "^2.0.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/jsdom": "^21.1.7",
     "@types/ua-parser-js": "^0.7.39",
-    "drizzle-kit": "^0.31.4"
+    "drizzle-kit": "^0.31.5"
   },
   "peerDependencies": {
     "typescript": "^5.9.2"
