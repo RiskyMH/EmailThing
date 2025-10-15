@@ -12,6 +12,7 @@ const defaultSvgl = {
   "protonmail.com": null,
   "mail.com": null,
   "emailthing.xyz": null,
+  "bun.com": ":bun",
 };
 
 export async function getSvgl(): Promise<Record<string, string | null>> {
