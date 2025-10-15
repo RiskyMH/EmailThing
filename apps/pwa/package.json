@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.28.4",
+    "@emailthing/const": "workspace:*",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
     "@github/webauthn-json": "^2.1.1",
