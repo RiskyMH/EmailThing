@@ -5,7 +5,10 @@ import { sql } from "drizzle-orm";
 import { dkimSign } from "mailauth/lib/dkim/sign";
 import type { MIMEMessage } from "mimetext";
 import { env } from "./env";
-import { todayDate } from "./tools";
+
+export function todayDate(): `${number}-${number}-${number}` {
+    return new Date().toISOString().slice(0, 10) as any;
+}
 
 export async function sendEmail(data: {
     from: string;

@@ -1,4 +1,3 @@
-import "server-only";
 import { S3Client } from "@riskymh/aws/s3";
 import { env } from "./env";
 

@@ -1,4 +1,3 @@
-import "server-only";
 import { type PushMessage, type PushSubscription, type VapidKeys, buildPushPayload } from "@block65/webcrypto-web-push";
 import { env } from "./env";
 
