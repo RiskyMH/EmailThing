@@ -27,9 +27,9 @@
     "mailauth": "^4.9.5",
     "marked": "^16.4.0",
     "mimetext": "^3.0.27",
-    "postal-mime": "^2.4.6",
+    "postal-mime": "^2.5.0",
     "turndown": "^7.2.1",
-    "ua-parser-js": "^2.0.5",
+    "ua-parser-js": "^2.0.6",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -40,6 +40,6 @@
     "drizzle-kit": "^0.31.5"
   },
   "peerDependencies": {
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }
