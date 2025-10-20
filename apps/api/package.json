@@ -19,7 +19,7 @@
     "@github/webauthn-json": "^2.1.1",
     "@paralleldrive/cuid2": "^3.1.0",
     "@riskymh/aws": "^0.0.9",
-    "@simplewebauthn/server": "13.2.2",
+    "@simplewebauthn/server": "13.1.0",
     "@t3-oss/env-nextjs": "^0.13.8",
     "aws4fetch": "^1.0.20",
     "drizzle-orm": "^0.44.6",
