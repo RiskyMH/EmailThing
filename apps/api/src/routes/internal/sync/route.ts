@@ -205,8 +205,9 @@ export async function POST(request: Request) {
                 const categoryIds = await tx.select({ id: MailboxCategory.id, mailboxId: MailboxCategory.mailboxId }).from(MailboxCategory).where(inArray(MailboxCategory.mailboxId, currentUserMailboxes));
                 const categoryIdsMap: Record<string, string[]> = {};
                 for (const category of categoryIds) {
-                    if (!categoryIdsMap[category.mailboxId]) categoryIdsMap[category.mailboxId] = [];
-                    categoryIdsMap[category.mailboxId].push(category.id);
+                    const mailboxCategories = categoryIdsMap[category.mailboxId] ?? [];
+                    mailboxCategories.push(category.id);
+                    categoryIdsMap[category.mailboxId] = mailboxCategories;
                 }
                 for (const email of body.emails || []) {
                     if (!email) continue;
@@ -238,8 +239,9 @@ export async function POST(request: Request) {
     const failedIds: Record<string, string[]> = {};
     for (const error of errors) {
         if (error.id) {
-            if (!failedIds[error.key]) failedIds[error.key] = [];
-            failedIds[error.key].push(error.id);
+            const keyFailures = failedIds[error.key] ?? [];
+            keyFailures.push(error.id);
+            failedIds[error.key] = keyFailures;
         }
     }
 
@@ -788,12 +790,14 @@ async function updateEmail(tx: transaction, email: NonNullable<ChangesRequest["e
         await tx.delete(EmailRecipient).where(eq(EmailRecipient.emailId, email.id))
         await tx.delete(EmailAttachments).where(eq(EmailAttachments.emailId, email.id))
 
-        await tx
-            .update(Mailbox)
-            .set({
-                storageUsed: sql`${Mailbox.storageUsed} - ${e[0].size}`,
-            })
-            .where(eq(Mailbox.id, email.mailboxId))
+        if (e[0]) {
+            await tx
+                .update(Mailbox)
+                .set({
+                    storageUsed: sql`${Mailbox.storageUsed} - ${e[0].size}`,
+                })
+                .where(eq(Mailbox.id, email.mailboxId))
+        }
 
         return { success: true };
 
@@ -862,7 +866,7 @@ async function updateDraftEmail(tx: transaction, draftEmail: NonNullable<Changes
             .from(DraftEmail)
             .where(eq(DraftEmail.id, draftEmail.id.replace("new:", "")));
         if (e.length) {
-            if (e.length > 0 && !mailboxIds.includes(e[0].mailboxId)) {
+            if (e[0] && !mailboxIds.includes(e[0].mailboxId)) {
                 draftEmail.id = null;
             } else {
                 draftEmail.id = draftEmail.id.replace("new:", "");

@@ -10,6 +10,7 @@
     "pwa:build": "cd apps/pwa && bun run build",
     "pwa:start": "cd apps/pwa && bun run preview",
     "lint": "echo idk",
+    "typecheck": "bun run --filter=\"*\" --elide-lines=0 typecheck",
     "db:push": "drizzle-kit push --config=./packages/db/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config=./packages/db/drizzle.config.ts"
   },

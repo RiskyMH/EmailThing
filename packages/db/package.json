@@ -1,12 +1,17 @@
 {
   "name": "@emailthing/db",
   "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@paralleldrive/cuid2": "^3.1.0",
-    "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.5",
     "drizzle-orm": "^0.44.6",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.5"
   },
   "main": "index.ts",
   "typings": "index.ts",

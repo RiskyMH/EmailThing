@@ -45,7 +45,7 @@ import changeMailboxSettings from "./_api";
 import changeUserSettings from "../user-settings/_api";
 
 const leaveMailbox = async (mailboxId: string) => {
-  const res = await changeUserSettings("leave-mailbox", {mailboxId});
+  const res = await changeUserSettings("leave-mailbox", { mailboxId });
   if ("error" in res) {
     toast.error(res.error);
   } else {
@@ -69,7 +69,9 @@ const addUserToMailbox = async (mailboxId: string, username: string, role: strin
     toast.error(res.error);
   } else {
     toast.success(res?.success ?? "User added");
+    return true;
   }
+  return false;
 };
 
 export default function Users() {
@@ -223,7 +225,7 @@ export default function Users() {
                             <DropdownMenuItem
                               asChild
                               disabled={row.role === "OWNER" || mailboxUser?.role !== "OWNER"}
-                             
+
                             >
                               <SmartDrawerTrigger className="w-full gap-2">
                                 <UserRoundXIcon className="size-5" />
@@ -286,15 +288,12 @@ export function InviteUserForm({ mailboxId }: { mailboxId: string }) {
     if (isPending) return;
 
     startTransition(async () => {
-      // @ts-expect-error
       const res = await addUserToMailbox(
         mailboxId,
-        event.target.username.value,
-        event.target.role.value,
+        (event.target as HTMLFormElement).username?.value,
+        (event.target as HTMLFormElement).role?.value as string,
       );
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
+      if (res === true) {
         document.getElementById("smart-drawer:close")?.click();
       }
     });

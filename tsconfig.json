@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/api" },
+    { "path": "./apps/pwa" },
+    { "path": "./apps/emailthing.me" },
+    { "path": "./packages/db" },
+    { "path": "./packages/emailthing" }
+  ],
+  "compilerOptions": {
+    "skipLibCheck": true
+  }
+}

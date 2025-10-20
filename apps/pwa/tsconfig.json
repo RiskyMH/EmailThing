@@ -8,6 +8,7 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
 
     "paths": {
       "next/link": ["./src/components/next-link.tsx"],
@@ -15,5 +16,7 @@
       "@/(home)/components.client": ["./src/(home)/layout.tsx"],
       "@/*": ["./src/*"],
     }
-  }
+  },
+  "include": ["src/**/*", "build.tsx", "dev.ts"],
+  "exclude": ["node_modules", "dist", "@emailthing/api", "../emailthing.me/app"]
 }

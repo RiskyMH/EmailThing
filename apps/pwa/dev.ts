@@ -1,4 +1,5 @@
 import { serve, type BunFile } from "bun";
+// @ts-ignore - we are just getting the file's content, not the file itself
 import service from "./public/service.js" with { type: "text" };
 import app from "./src/app.html";
 import docs from "./src/docs.html";

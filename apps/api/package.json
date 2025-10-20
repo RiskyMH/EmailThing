@@ -8,7 +8,8 @@
     "dev": "bun gen-routes && NODE_ENV=development bun run --hot --conditions=react-server src/main.ts",
     "gen-routes": "bun run --conditions=react-server src/gen-routes.ts",
     "build": "bun gen-routes && NODE_ENV=production bun build src/main.ts --outdir=dist --target=bun --conditions=react-server --minify-syntax --sourcemap",
-    "start:built": "NODE_ENV=production bun run dist/main.js"
+    "start:built": "NODE_ENV=production bun run dist/main.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@block65/webcrypto-web-push": "^1.0.2",

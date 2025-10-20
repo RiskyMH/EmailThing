@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development bun --hot dev.ts",
-    "build:tsc": "tsc -b && bun build.tsx",
+    "build:tsc": "tsc -b --noEmit && bun build.tsx",
     "build": "NODE_ENV=production bun build.tsx",
     "lint": "eslint .",
-    "preview": "bun x serve dist"
+    "preview": "bun x serve dist",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@babel/core": "^7.28.4",
@@ -88,6 +89,8 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@emailthing/api": "workspace:^",
+    "@emailthing/db": "workspace:^",
     "@eslint/js": "^9.38.0",
     "@types/babel__core": "^7.20.5",
     "@types/bun": "^1.3.0",
@@ -95,6 +98,7 @@
     "@types/react-dom": "^19.2.2",
     "@types/turndown": "^5.0.5",
     "@types/ua-parser-js": "^0.7.39",
+    "drizzle-orm": "^0.44.6",
     "eslint": "^9.38.0",
     "eslint-plugin-react-hooks": "^7.0.0",
     "eslint-plugin-react-refresh": "^0.4.24",

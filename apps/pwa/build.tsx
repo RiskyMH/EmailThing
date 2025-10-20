@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @ts-nocheck
 import { existsSync } from "node:fs";
 import { cp, readdir, rm } from "node:fs/promises";
 import path from "node:path";
@@ -261,7 +262,7 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
     <StaticRouterProvider router={router} context={context} />,
   );
 
-  let _html = templates[route.preferTemplate || "app.html"]
+  const _html = templates[route.preferTemplate || "app.html"]
     .replaceAll(/(\s{2,}|\n+)/gm, "")
     // .replaceAll(/\n+/gm, '')
     .replace(replace, prerendered)

@@ -283,7 +283,7 @@ export async function sendEmailAction(mailboxId: string, draftId: string, data: 
           to: draft.to,
           html: html,
           headers: draft.headers,
-        } satisfies SaveActionProps),
+        } satisfies SaveActionProps & Record<string, unknown>),
       }
     );
 

@@ -34,7 +34,7 @@ function formatDuration(seconds: number) {
     return `${hours}h ${minutes}m ${remainingSeconds}s`;
 }
 
-function formatObjectOfBytes(objj: Record<string, number>) {
+function formatObjectOfBytes(objj: NodeJS.MemoryUsage) {
     const obj: Record<string, string> = {}
 
     for (const [key, value] of Object.entries(objj)) {

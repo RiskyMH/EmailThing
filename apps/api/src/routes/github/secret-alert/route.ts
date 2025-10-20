@@ -26,7 +26,7 @@ const verify_signature = async (payload: string, signature: string, keyID: strin
     }
 
     const keys: Record<string, any> = await (
-        await fetch(GITHUB_KEYS_URI, { next: { revalidate: 60 * 60 * 24 } })
+        await fetch(GITHUB_KEYS_URI)
     ).json();
 
     if (!Array.isArray(keys?.public_keys) || keys.length === 0) {

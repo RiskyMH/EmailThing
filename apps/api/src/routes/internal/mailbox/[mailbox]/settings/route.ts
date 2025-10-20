@@ -241,7 +241,7 @@ async function verifyDomain(mailboxId: string, data: VerifyDomainData) {
         throw new Error("Mailbox not found");
     }
 
-    if (customDomainLimit[mailbox.plan] <= customDomains[0].count) {
+    if (!customDomains[0] || customDomainLimit[mailbox.plan] <= customDomains[0].count) {
         return { error: "Custom domain limit reached" };
     }
 
@@ -306,7 +306,7 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
     // check emailSchema
     const validEmail = emailSchema.safeParse({ email: alias });
     if (!validEmail.success) {
-        return { error: validEmail.error.errors[0].message };
+        return { error: validEmail.error.issues[0]?.message };
     }
 
     // check if alias exists
@@ -363,6 +363,9 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
     if (defaultDomain && mailbox?.plan !== "UNLIMITED") {
         const emailPart = alias.split("@")[0];
 
+        if (!emailPart) {
+            return { error: "Invalid alias format" };
+        }
         if (emailPart.length <= 3) {
             return { error: "Email too short" };
         }
@@ -371,7 +374,7 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
         }
     }
 
-    if (aliasCount[0].count >= aliasLimit[mailbox?.plan ?? "FREE"]) {
+    if (mailbox && aliasCount[0]?.count >= aliasLimit[mailbox.plan]) {
         return { error: "Alias limit reached" };
     }
 
@@ -699,7 +702,7 @@ async function addUserToMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE", mai
         }),
     ]);
 
-    if (!mailbox || mailboxUsers[0].count >= mailboxUsersLimit[mailbox.plan]) {
+    if (!mailbox || (mailboxUsers[0] && mailboxUsers[0].count >= mailboxUsersLimit[mailbox.plan])) {
         return { error: "Mailbox users limit reached" };
     }
 
@@ -733,7 +736,7 @@ async function addUserToMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE", mai
 
     // TODO: either make it 5 free mailboxes or somehow make a plan for this
     // (mailboxes having the free plan sounds better then users having pro, but this is harder)
-    if (userMailboxes[0].count >= 5) {
+    if (userMailboxes[0] && userMailboxes[0].count >= 5) {
         return { error: "User is already in 5 other mailboxes" };
     }
 
