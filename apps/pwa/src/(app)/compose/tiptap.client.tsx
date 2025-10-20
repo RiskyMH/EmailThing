@@ -33,7 +33,8 @@ export default function EditorContent2({
   savedBody,
   onSave,
 }: { savedBody?: string; onSave: (e?: any) => void }) {
-  "use no memo";
+  "use no memo"; // tiptap buttons need the events
+
   // const debounced = useDebouncedCallback(() => (document.getElementById("draft-form") as any)?.requestSubmit(), 1000);
   const debounced = onSave;
 
@@ -85,6 +86,7 @@ export default function EditorContent2({
     },
     onUpdate: (e) => setTimeout(debounced, 0),
     onBlur: (e) => setTimeout(debounced, 0),
+    shouldRerenderOnTransaction: true,
   });
 
   const html = editor?.getHTML();
