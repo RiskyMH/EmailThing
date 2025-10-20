@@ -250,7 +250,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle unordered list"
             pressed={editor?.isActive("bulletList")}
-            disabled={editor ? !editor.can().toggleBulletList() : false}
+            disabled={editor ? !editor.can().toggleBulletList() && !editor.can().toggleOrderedList() : false}
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -265,7 +265,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle ordered list"
             pressed={editor?.isActive("orderedList")}
-            disabled={editor ? !editor.can().toggleOrderedList() : false}
+            disabled={editor ? !editor.can().toggleOrderedList() && !editor.can().toggleBulletList() : false}
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
