@@ -3,7 +3,14 @@ name: Update Dependencies
 on:
   schedule:
     - cron: '0 0 1 * *'  # Run monthly at midnight on the 1st
-  workflow_dispatch:      # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      latest:
+        description: 'Use --latest flag to update to latest versions'
+        required: false
+        type: boolean
+        default: false
+     
 
 jobs:
   update-deps:
@@ -31,19 +38,26 @@ jobs:
             jq -r '.dependencies + .devDependencies | to_entries | .[] | "\n- `\(.key)`: `\(.value)`"' package.json
           }
 
+          # Determine update command based on input
+          if [ "${{ github.event.inputs.latest }}" = "true" ]; then
+            UPDATE_CMD="bun update --latest"
+          else
+            UPDATE_CMD="bun update"
+          fi
+
           # Store current versions
           echo "OLD_VERSIONS<<EOF" >> $GITHUB_ENV
-          cd "$GITHUB_WORKSPACE/apps/web" && format_deps "Web" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/api" && format_deps "API" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/emailthing.me" && format_deps "EmailThing.me" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/packages/db" && format_deps "DB" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
           # Update dependencies in each directory
-          cd "$GITHUB_WORKSPACE/apps/web" && bun update
-          cd "$GITHUB_WORKSPACE/apps/pwa" && bun update
-          cd "$GITHUB_WORKSPACE/apps/api" && bun update
-          cd "$GITHUB_WORKSPACE/packages/db" && bun update
+          cd "$GITHUB_WORKSPACE/apps/pwa" && $UPDATE_CMD
+          cd "$GITHUB_WORKSPACE/apps/api" && $UPDATE_CMD
+          cd "$GITHUB_WORKSPACE/apps/emailthing.me" && $UPDATE_CMD
+          cd "$GITHUB_WORKSPACE/packages/db" && $UPDATE_CMD
 
           # Force a clean update
           cd "$GITHUB_WORKSPACE" && rm -f bun.lock bun.lockb
@@ -51,9 +65,9 @@ jobs:
 
           # Store new versions and generate diff
           echo "NEW_VERSIONS<<EOF" >> $GITHUB_ENV
-          cd "$GITHUB_WORKSPACE/apps/web" && format_deps "Web" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/api" && format_deps "API" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE/apps/emailthing.me" && format_deps "EmailThing.me" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/packages/db" && format_deps "DB" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
@@ -101,8 +115,8 @@ jobs:
           token: ${{ secrets.PR_GITHUB_TOKEN }}
           branch-token: ${{ secrets.PR_GITHUB_TOKEN }}
           # token: ${{ steps.generate-token.outputs.token }}
-          commit-message: "chore: update dependencies"
-          title: "chore: update dependencies"
+          commit-message: "chore: update dependencies${{ github.event.inputs.latest == 'true' && ' (latest)' || '' }}"
+          title: "chore: update dependencies${{ github.event.inputs.latest == 'true' && ' (latest)' || '' }}"
           body: |
             ## 📦 Dependency Updates
 
