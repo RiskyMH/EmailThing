@@ -33,7 +33,7 @@ jobs:
         run: bun test
 
   typecheck:
-    name: TypeCheck
+    name: Typecheck (disabled errors)
     runs-on: ubuntu-latest
     continue-on-error: true
     
@@ -52,7 +52,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: TypeCheck All
-        run: bun run --filter=\"*\" typecheck || true # todo: actually error when we stop being sus
+        run: bun run --filter=* typecheck || true # todo: actually error when we stop being sus
 
   build-all:
     name: Build All Apps
