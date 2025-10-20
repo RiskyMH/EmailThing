@@ -20,6 +20,8 @@ export async function sendEmail(data: {
     // check if the "from" gives spf
     // use 1.1.1.1 doh api
     const domain = data.from.split("@")[1];
+    if (!domain) return { error: "Invalid from address" };
+
     const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=TXT`, {
         headers: {
             accept: "application/dns-json",

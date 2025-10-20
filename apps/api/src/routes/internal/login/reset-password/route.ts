@@ -207,7 +207,7 @@ If you did not request this, please ignore this email.`
                 userResetAttempts.set(userId, (userResetAttempts.get(userId) || 0) + 1);
                 userResetTimestamps.set(userId, now);
                 return ResponseJson({
-                    error: passwordValidation.error.errors[0].message || "Password does not meet requirements"
+                    error: passwordValidation.error.issues[0]?.message || "Password does not meet requirements"
                 }, { status: 400 });
             }
 

@@ -36,9 +36,9 @@ const leaveMailbox = async (mailboxId: string) => {
 };
 
 export default function UserSettingsMailboxes() {
-  const mailboxes = useLiveQuery(async () => {
-    return await getUserMailboxes().then((mailboxes) => mailboxes.filter((m) => m.id !== "demo"));
-  });
+  const mailboxes = useLiveQuery(async () =>
+    getUserMailboxes().then((mailboxes) => mailboxes?.filter((m) => m.id !== "demo"))
+  );
 
   const mailboxesIcons = useGravatars(mailboxes?.map((m) => m.name || "no") || []);
 

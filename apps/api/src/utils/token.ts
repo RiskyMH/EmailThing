@@ -17,7 +17,7 @@ function crc32(str: string) {
 
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
-        crc = (crc >>> 8) ^ crcTable[(crc ^ char) & 0xff];
+        crc = (crc >>> 8) ^ (crcTable[(crc ^ char) & 0xff] ?? 0);
     }
 
     return (crc ^ -1) >>> 0;
@@ -83,11 +83,12 @@ export function generateRefreshToken() {
 /** Function to verify last 6 digit checksum (works on emailthing and github tokens) */
 export function verifyTokenChecksum(token: string) {
     // const regex = (?<prefix>et_)_(?<random>[A-Za-z0-9]{30})(?<checksum>[A-Za-z0-9]{6})
-    const regex = /^(?<prefix>[a-z_]{3})_(?<random>[A-Za-z0-9]{30})(?<checksum>[A-Za-z0-9]{6})$/;
+    const regex = /^(?<prefix>[a-z_]{3})_(?<random>[A-Za-z0-9]{30,50})(?<checksum>[A-Za-z0-9]{6})$/;
     const match = token.match(regex);
     if (!match?.groups) return false;
 
     const { prefix, random, checksum } = match.groups;
+    if (!prefix || !random || !checksum) return false;
 
     return checksum === generateChecksum(random);
 }

@@ -125,8 +125,8 @@ export async function POST(request: Request) {
 
         db.insert(EmailSender).values({
             emailId: emailId,
-            address: email.from.address!,
-            name: email.from.name,
+            address: email.from?.address ?? "",
+            name: email.from?.name,
         }),
 
         // increment the mailbox storage used
@@ -190,7 +190,7 @@ export async function POST(request: Request) {
         }
     }
     await notifyMailbox(mailboxId, {
-        title: email.from.address,
+        title: email.from?.address ?? "Unknown Sender",
         body: email.subject ? slice(email.subject, 200) : undefined,
         url: `/mail/${mailboxId}/${emailId}`,
     });

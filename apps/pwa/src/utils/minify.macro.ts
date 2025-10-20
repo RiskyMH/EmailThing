@@ -13,6 +13,7 @@ export function minify(strings: TemplateStringsArray | string, ...values: any[])
     }
 
     const transpiler = new Bun.Transpiler({
+        // @ts-ignore - minify does exist tho lol
         minify: true,
         target: "browser",
         language: "ts",

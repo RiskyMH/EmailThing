@@ -440,31 +440,28 @@ export function ApiUrlButton() {
     const formData = new FormData(e.target as HTMLFormElement);
     const apiUrl = formData.get("api") as string;
     searchParams.set("api", apiUrl);
+
     navigate({ search: searchParams.toString() }, { replace: true });
     document.getElementById("smart-drawer:close")?.click();
-
-    const allowedOrigins = ["https://emailthing.app", "https://api.emailthing.app", API_URL];
-    allowedOrigins.push(apiUrl);
-    localStorage.setItem("allowedOrigins", JSON.stringify(allowedOrigins));
   };
 
   const [allowedOrigins, setAllowedOrigins] = useState<string[] | null>(null);
   const [isAllowed, setIsAllowed] = useState(false);
 
   useEffect(() => {
-    if (document.referrer && new URL(document.referrer).origin !== window.location.origin) {
-      searchParams.delete("api");
-      navigate({ search: searchParams.toString() }, { replace: true });
-      return;
-    }
+    // if (document.referrer && new URL(document.referrer).origin !== window.location.origin) {
+    //   searchParams.delete("api");
+    //   navigate({ search: searchParams.toString() }, { replace: true });
+    //   return;
+    // }
 
-    const allowedOrigins = ["https://emailthing.app", "https://api.emailthing.app", API_URL];
+    const allowedOrigins = new Set(["https://emailthing.app", "https://api.emailthing.app", API_URL]);
     const allowedOriginsFromLocalStorage = localStorage.getItem("allowedOrigins");
     if (allowedOriginsFromLocalStorage) {
-      allowedOrigins.push(...JSON.parse(allowedOriginsFromLocalStorage));
+      JSON.parse(allowedOriginsFromLocalStorage).forEach(origin => allowedOrigins.add(origin));
     }
-    setIsAllowed(allowedOrigins.includes(apiUrl));
-    setAllowedOrigins(allowedOrigins);
+    setIsAllowed(allowedOrigins.has(apiUrl));
+    setAllowedOrigins(Array.from(allowedOrigins));
   }, [apiUrl]);
 
   return (

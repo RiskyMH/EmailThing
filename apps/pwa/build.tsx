@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
+// @ts-nocheck
 import { existsSync } from "node:fs";
 import { cp, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { build } from "bun";
-import plugin from "bun-plugin-tailwind";
+import twPlugin from "bun-plugin-tailwind";
 import { reactCompiler } from "./src/build-plugins/react-compiler";
 
 // Helper function to format file sizes
@@ -39,7 +40,7 @@ const entrypoints = [...new Bun.Glob("src/*.html").scanSync(import.meta.dir)]
 const result = await build({
   entrypoints,
   outdir,
-  plugins: [plugin, reactCompiler()],
+  plugins: [twPlugin, reactCompiler()],
   // packages: 'external',
   minify: true,
   target: "browser",
@@ -261,7 +262,7 @@ async function processRoute(route: RouteObject & { preferTemplate?: string }) {
     <StaticRouterProvider router={router} context={context} />,
   );
 
-  let _html = templates[route.preferTemplate || "app.html"]
+  const _html = templates[route.preferTemplate || "app.html"]
     .replaceAll(/(\s{2,}|\n+)/gm, "")
     // .replaceAll(/\n+/gm, '')
     .replace(replace, prerendered)

@@ -50,11 +50,14 @@ import {
 } from "lucide-react";
 
 export function BodyHeader({ editor }: { editor?: Editor | null }) {
+  "use no memo"; // tiptap buttons need the events
+
   return (
     <div className="flex w-full gap-1">
       <span />
       <Select
         value={editor?.getAttributes("textStyle").fontFamily || "Arial, sans-serif"}
+        disabled={editor ? !editor.can().setFontFamily("Arial, sans-serif") : false}
         onValueChange={(v) => editor?.chain().focus().setFontFamily(v).run()}
       >
         <TooltipText text="Change Font">
@@ -125,6 +128,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             <Button
               variant="ghost"
               size="icon-sm"
+              disabled={editor ? !editor.can().toggleHeading({ level: 1 }) : false}
               className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
             >
               {
@@ -149,7 +153,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
                 ?.chain()
                 .focus()
                 .toggleHeading({
-                  level: Number.parseInt(v) as any,
+                  level: Number.parseInt(v) as 1 | 2 | 3 | 4 | 5 | 6,
                 })
                 .run()
             }
@@ -184,6 +188,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle bold"
             pressed={editor?.isActive("bold")}
+            disabled={editor ? !editor.can().toggleBold() : false}
             onClick={() => editor?.chain().focus().toggleBold().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -198,6 +203,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle italic"
             pressed={editor?.isActive("italic")}
+            disabled={editor ? !editor.can().toggleItalic() : false}
             onClick={() => editor?.chain().focus().toggleItalic().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -212,6 +218,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle underline"
             pressed={editor?.isActive("underline")}
+            disabled={editor ? !editor.can().toggleUnderline() : false}
             onClick={() => editor?.chain().focus().toggleUnderline().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -226,6 +233,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle strikethrough"
             pressed={editor?.isActive("strike")}
+            disabled={editor ? !editor.can().toggleStrike() : false}
             onClick={() => editor?.chain().focus().toggleStrike().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -242,6 +250,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle unordered list"
             pressed={editor?.isActive("bulletList")}
+            disabled={editor ? !editor.can().toggleBulletList() && !editor.can().toggleOrderedList() : false}
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -256,6 +265,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle ordered list"
             pressed={editor?.isActive("orderedList")}
+            disabled={editor ? !editor.can().toggleOrderedList() && !editor.can().toggleBulletList() : false}
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -272,6 +282,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
             size="icon-sm"
             aria-label="Toggle blockquote list"
             pressed={editor?.isActive("blockquote")}
+            disabled={editor ? !editor.can().toggleBlockquote() : false}
             onClick={() => editor?.chain().focus().toggleBlockquote().run()}
             className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           >
@@ -283,6 +294,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
       <Dialog>
         <TooltipText text={editor?.getAttributes("link")?.href ? "Update Link" : "Insert Link"}>
           <DialogTrigger
+            disabled={editor ? !editor.can().setLink({ href: "" }) : false}
             className={buttonVariants({
               variant: "ghost",
               size: "icon-sm",
@@ -372,6 +384,7 @@ export function BodyHeader({ editor }: { editor?: Editor | null }) {
         <Button
           variant="ghost"
           size="icon-sm"
+          disabled={editor ? !editor.can().unsetAllMarks() : false}
           className="shrink-0 hover:bg-input/70 focus:z-20 data-[state=on]:bg-input"
           onClick={() => editor?.chain().focus().unsetAllMarks().run()}
         >

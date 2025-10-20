@@ -5,16 +5,16 @@ import babel from "@babel/core";
 import BabelPluginReactCompiler from "babel-plugin-react-compiler";
 
 export function reactCompiler(
-  options = {} as { filter?: RegExp; reactCompilerConfig?: any },
+  options = {} as { filter?: RegExp; reactCompilerConfig?: babel.PluginOptions },
 ): Bun.BunPlugin {
   const filter = options.filter || /\.[jt]sx$/;
   const reactCompilerConfig = options.reactCompilerConfig || {};
 
-  function b64enc(b: any) {
+  function b64enc(b: string | Buffer<ArrayBufferLike>) {
     return Buffer.from(b).toString("base64");
   }
 
-  function toUrl(map: any) {
+  function toUrl(map: babel.BabelFileResult["map"]) {
     return `data:application/json;charset=utf-8;base64,${b64enc(JSON.stringify(map))}`;
   }
 

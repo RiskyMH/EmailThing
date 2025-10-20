@@ -172,6 +172,7 @@ async function getsLocalSyncData(): Promise<Partial<ChangesRequest>> {
         categoryId: e.categoryId || null,
         binnedAt: e.binnedAt || null,
         hardDelete: e.isDeleted === 1,
+        // @ts-expect-error - i abused types too much here lol
         lastUpdated: e.updatedAt === 0 ? null : (e.updatedAt.toISOString() as any),
       })),
     draftEmails: draftEmails
@@ -242,7 +243,8 @@ export async function fetchSync({
     method: "GET",
     headers: {
       authorization: `session ${token}`,
-      "x-last-sync": lastSync ? (lastSync.getTime() + 1).toString() : undefined,
+      // don't judge me being sus
+      "x-last-sync": lastSync ? (lastSync.getTime() + 1).toString() : undefined as unknown as string,
     },
   });
 

@@ -185,7 +185,7 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
         username,
         password: "password",
     });
-    if (!validUsername.success) return { error: validUsername.error.errors[0].message };
+    if (!validUsername.success) return { error: validUsername.error.issues[0]?.message };
 
     if (impersonatingEmails.some((v) => validUsername.data.username.toLowerCase().includes(v))) {
         const user = await db.query.User.findFirst({

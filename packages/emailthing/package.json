@@ -28,7 +28,8 @@
   "scripts": {
     "//build": "bun build src/cli.ts src/sdk.ts --outdir dist --splitting",
     "build": "bun build src/*.ts --outdir dist --splitting",
-    "prepack": "bun exec \"rm -rf dist && bun run build\""
+    "prepack": "bun exec \"rm -rf dist && bun run build\"",
+    "typecheck": "tsc --noEmit"
   },
   "homepage": "https://emailthing.app/home"
 }

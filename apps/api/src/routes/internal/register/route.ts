@@ -61,7 +61,7 @@ export async function POST(request: Request) {
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson({ error: parsedData.error.errors[0].message ||"failed to parse data" }, { status: 400 });
+            return ResponseJson({ error: parsedData.error.issues[0]?.message ||"failed to parse data" }, { status: 400 });
         }
 
         const { username, password } = parsedData.data;

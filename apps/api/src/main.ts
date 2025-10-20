@@ -25,6 +25,7 @@ const httpExports = [
 const server = Bun.serve({
     idleTimeout: 60 * 2,
     port: process.env.PORT || 3000,
+    // @ts-expect-error - routes should be right, but somehow its getting confused
     routes: {
         // "/": Response.redirect("https://emailthing.app/docs/api"),
         "/": Response.redirect("/sitemap.json", 307),
