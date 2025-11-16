@@ -1,4 +1,4 @@
-import type { EmailSendOptions, EmailSendResponse, ReceiveEmailPostOptions, WhoamiResponse } from "./types";
+import type { EmailSendOptions, EmailSendResponse, ReceiveEmailPostOptions, ReceiveEmailResponse, WhoamiResponse } from "./types";
 
 /**
  * **EmailThing API**
@@ -41,6 +41,8 @@ export default class EmailThing {
                 throw new Error("Unauthorized. Check your token.");
             } else if (res.status === 404) {
                 throw new Error(`Route not found: ${pathname}`);
+            } else if (res.status === 400) {
+                throw new Error(`EmailThing API Error 400: ${await res.text() || "Bad request. Check your request body."}`);
             }
             throw new Error((await res.text()) || "An error occurred while using the EmailThing API.");
         }
@@ -62,7 +64,7 @@ export default class EmailThing {
      * (adds email to your mailbox)
      * @throws on error
      */
-    async receiveEmail(options: ReceiveEmailPostOptions): Promise<void> {
+    async receiveEmail(options: ReceiveEmailPostOptions): Promise<ReceiveEmailResponse> {
         const res = await this.fetch("/receive-email", "POST", options);
         return res.json();
     }

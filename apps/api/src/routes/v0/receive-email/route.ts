@@ -64,6 +64,7 @@ export async function POST(request: Request) {
             return Response.json({
                 success: true,
                 id: existingEmail.id,
+                emailId: existingEmail.id,
                 alreadyExists: true,
             });
         }
@@ -199,6 +200,7 @@ export async function POST(request: Request) {
     return Response.json({
         success: true,
         id: emailId,
+        emailId,
     });
 }
 

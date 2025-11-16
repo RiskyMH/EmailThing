@@ -58,15 +58,23 @@ export interface EmailSendOptions {
 
 export interface EmailSendResponse {
     success: boolean;
-    /** if you chose to save in sent */
+    /** If successful, the inserted email id into sent folder. */
     emailId?: string;
 }
 
 export interface ReceiveEmailPostOptions {
-    /** The raw email */
+    /** The raw email content. */
     raw: string;
     from: string;
     to: string;
+}
+
+export interface ReceiveEmailResponse {
+    success: boolean;
+    /** If successful, the inserted email id into inbox. */
+    emailId?: string;
+    /** If the email already exists in the inbox and was not added again. */
+    alreadyExists?: boolean;
 }
 
 export interface WhoamiResponse {
