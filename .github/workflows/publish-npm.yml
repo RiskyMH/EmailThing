@@ -22,7 +22,8 @@ jobs:
       node-version: "*"
       registry-url: "https://registry.npmjs.org"
    - uses: oven-sh/setup-bun@v2
-     version: 1.2.23
+     with:
+      bun-version: 1.2.23
    - run: bun install --frozen-lockfile
    - run: bun run build
      working-directory: packages/emailthing
