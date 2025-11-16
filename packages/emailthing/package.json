@@ -1,6 +1,6 @@
 {
   "name": "emailthing",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A web app for receiving and sending your emails!",
   "repository": {
     "type": "git",
@@ -26,10 +26,14 @@
   "types": "./src/sdk.ts",
   "sideEffects": false,
   "scripts": {
-    "//build": "bun build src/cli.ts src/sdk.ts --outdir dist --splitting",
-    "build": "bun build src/*.ts --outdir dist --sourcemap",
+    "build": "bun build src/cli.ts src/sdk.ts --outdir dist --sourcemap --//splitting",
     "prepack": "bun exec \"rm -rf dist && bun run build\"",
     "typecheck": "tsc --noEmit"
   },
-  "homepage": "https://emailthing.app/home"
+  "homepage": "https://emailthing.app/home",
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ]
 }

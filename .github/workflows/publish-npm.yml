@@ -23,6 +23,13 @@ jobs:
    - run: bun install --frozen-lockfile
    - run: bun pm pack
      working-directory: packages/emailthing
+   - name: assert dist/cli.js exists
+     working-directory: packages/emailthing
+     run: |
+      if [ ! -f "dist/cli.js" ]; then
+        echo "dist/cli.js does not exist"
+        exit 1
+      fi
    - run: npm publish emailthing-*.tgz --provenance --access public || true
      name: Publish to npm
      working-directory: packages/emailthing
