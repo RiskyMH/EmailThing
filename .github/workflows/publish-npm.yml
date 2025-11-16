@@ -21,6 +21,8 @@ jobs:
       registry-url: "https://registry.npmjs.org"
    - uses: oven-sh/setup-bun@v2
    - run: bun install --frozen-lockfile
+   - run: bun run build
+     working-directory: packages/emailthing
    - run: bun pm pack
      working-directory: packages/emailthing
    - name: assert dist/cli.js exists
