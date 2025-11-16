@@ -26,7 +26,7 @@
   "types": "./src/sdk.ts",
   "sideEffects": false,
   "scripts": {
-    "build": "bun build src/cli.ts src/sdk.ts --outdir dist --sourcemap --//splitting",
+    "build": "bun build src/cli.ts src/sdk.ts --outdir dist --sourcemap",
     "prepack": "bun exec \"rm -rf dist && bun run build\"",
     "typecheck": "tsc --noEmit"
   },
