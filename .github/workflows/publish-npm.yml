@@ -1,7 +1,9 @@
 name: Publish npm packages
 on:
  push:
-  paths: packages/emailthing/package.json
+  paths: 
+    - packages/emailthing/package.json
+    - .github/workflows/publish-npm.yml
   branches: main
 
 jobs:
