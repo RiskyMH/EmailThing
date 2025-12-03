@@ -5,7 +5,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@paralleldrive/cuid2": "^3.0.4",
+    "@paralleldrive/cuid2": "3.0.0",
     "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.16.3"

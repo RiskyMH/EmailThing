@@ -17,7 +17,7 @@
     "@emailthing/db": "workspace:^",
     "@emailthing/web-pwa": "workspace:^",
     "@github/webauthn-json": "^2.1.1",
-    "@paralleldrive/cuid2": "^3.0.4",
+    "@paralleldrive/cuid2": "3.0.0",
     "@riskymh/aws": "^0.0.9",
     "@simplewebauthn/server": "13.2.2",
     "@t3-oss/env-nextjs": "^0.13.8",
