@@ -20,26 +20,26 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
     <RootLayout>
       <div className="//min-h-screen //bg-sidebar h-screen overflow-hidden emailscolumn" vaul-drawer-wrapper="" id="app:root-layout">
         <script dangerouslySetInnerHTML={{
-          __html: minify(/*js*/`
-        const fn = () => {
-        const emailView = localStorage.getItem("email-view") ?? "column";
-        const rootLayout = document.getElementById("app:root-layout");
-        if (emailView === "column") {
-          rootLayout?.classList.add("emailscolumn");
-        } else {
-            rootLayout?.classList.remove("emailscolumn");
-          };
-        };
-        fn();
+          __html: minify(/*js*/`{
+            const fn = () => {
+              const emailView = localStorage.getItem("email-view") ?? "column";
+              const rootLayout = document.getElementById("app:root-layout");
+              if (emailView === "column") {
+                rootLayout?.classList.add("emailscolumn");
+              } else {
+                rootLayout?.classList.remove("emailscolumn");
+              };
+            };
+            fn();
 
-        // on local storage change, run fn
-        window.addEventListener("storage", fn);
-        window.addEventListener("load", fn);
-        /* return () => {*/
-        /*   window.removeEventListener("storage", fn);*/
-        /*   window.removeEventListener("load", fn);*/
-        /* }*/
-      `)
+            // on local storage change, run fn
+            window.addEventListener("storage", fn);
+            window.addEventListener("load", fn);
+            /* return () => {*/
+            /*   window.removeEventListener("storage", fn);*/
+            /*   window.removeEventListener("load", fn);*/
+            /* }*/
+          }`)
         }} />
         <style dangerouslySetInnerHTML={{
           __html: /*css*/`
