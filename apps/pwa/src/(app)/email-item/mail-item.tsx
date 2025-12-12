@@ -357,7 +357,7 @@ function EmailContent({
         ref.current.style.height = "0px";
       }
     }
-    const handleResize = () => {
+    const handleResize = requestAnimationFrame.bind(null, () => {
       setHtmlLoaded(true);
       if (ref.current?.contentWindow?.document.documentElement) {
         heights.current[id] = ref.current.contentWindow.document.documentElement.offsetHeight + 1;
@@ -365,7 +365,7 @@ function EmailContent({
       } else if (ref.current) {
         ref.current.style.height = "calc(100vh - 100px)";
       }
-    };
+    });
     window.addEventListener("resize", handleResize);
     ref.current?.addEventListener("load", handleResize);
     ref.current?.addEventListener("resize", handleResize);

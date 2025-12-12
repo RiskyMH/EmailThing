@@ -17,9 +17,14 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.8"
   },
-  "trustedDependencies": ["@emailthing/web-pwa"],
+  "trustedDependencies": [
+    "@emailthing/web-pwa"
+  ],
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "overrides": {
+    "bun": "npm:@riskymh/bun"
+  }
 }
