@@ -55,6 +55,18 @@ export async function POST(request: Request) {
 
         const body = await request.json();
 
+        if (body.honeypot) {
+            await Bun.sleep(Math.random() * 1500);
+            return ResponseJson({
+                token: "fake-token",
+                refreshToken: "fake-refresh-token",
+                tokenExpiresAt: new Date(Date.now() + TOKEN_EXPIRES_IN),
+                refreshTokenExpiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN),
+                mailboxes: [],
+                userId: "fake-user-id",
+            });
+        }
+
         const parsedData = userAuthSchema.safeParse(body);
         if (!parsedData.success) {
             // Increment failed attempts

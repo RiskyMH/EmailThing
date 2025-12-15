@@ -62,6 +62,10 @@ export async function emailMeForm(
   _prevState: any,
   data: FormData
 ): Promise<{ error?: string; success?: string } | undefined> {
+  if (data.get("honeypot")) {
+    await new Promise(r => setTimeout(r, Math.random() * 1500));
+    return { success: "Successfully sent your message!" };
+  }
   const username = data.get("username") as string;
   if (!username) return { error: "Username is required" };
   const user = await fetchUser(username);

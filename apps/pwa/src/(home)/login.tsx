@@ -254,6 +254,18 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 disabled={isPending}
               />
             </div>
+            <div style={{ position: 'absolute', left: '-5000px' }} aria-hidden="true">
+              <Input
+                id="honeypot"
+                name="honeypot"
+                placeholder="Fax"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                className="border-none bg-secondary hidden"
+                disabled={isPending}
+              />
+            </div>
 
             <Button disabled={isPending} type="submit">
               {loading && <Loader2 className="me-2 size-4 animate-spin" />}

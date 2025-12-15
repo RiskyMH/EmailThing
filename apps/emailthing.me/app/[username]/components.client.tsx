@@ -58,6 +58,17 @@ export function Form({ publicEmail, username }: { className?: string; publicEmai
                         suppressHydrationWarning
                     />
                 </div>
+                <div style={{ position: 'absolute', left: '-5000px' }} aria-hidden="true">
+                    <ClientInput
+                        placeholder="Fax"
+                        className="w-full border-none bg-secondary sm:w-1/2 hidden"
+                        name="honeypot"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        id="honeypot"
+                        suppressHydrationWarning
+                    />
+                </div>
                 <ClientInput
                     placeholder="Subject"
                     className="w-full border-none bg-secondary"
