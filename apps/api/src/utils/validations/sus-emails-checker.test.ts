@@ -6,6 +6,7 @@ import { createId } from "@paralleldrive/cuid2";
 describe("validateAlias", () => {
     it("should flag impersonating emails", () => {
         impersonatingEmails.forEach((emailPart) => {
+            // remember it may be failing because the db isnt synced 
             expect(validateAlias(emailPart)).toMatchInlineSnapshot(`
               {
                 "error": "Email already taken",

@@ -106,4 +106,7 @@ export const impersonatingEmails = [
     "admin",
     "plan",
     "storage",
+    "anydesk",
+    "teamviewer",
+    "steam",
 ];

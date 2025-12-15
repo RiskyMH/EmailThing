@@ -99,7 +99,7 @@ export default function DraftPage() {
       toast.info("You are offline - changes will be synced when you come back online");
     }
     await deleteDraftEmail(params.mailboxId!, params.draftId!);
-    navigate(`/mail/${params.mailboxId}`);
+    navigate(`/mail/${params.mailboxId}/drafts`);
   }
 
   async function saveDraftHeadersAction(data: FormData) {

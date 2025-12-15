@@ -77,7 +77,7 @@ const genericBrandWords = [
     "sky",
     "swc",
     "qt",
-    "steam",
+    // "steam",
     "c#",
     "swr",
     "zoom",
