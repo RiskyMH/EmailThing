@@ -14,7 +14,7 @@ import {
 import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@emailthing/const/limits";
 import { generateToken } from "@/utils/token";
 import { emailSchema } from "@/utils/validations/auth";
-import { impersonatingEmails } from "@/utils/validations/invalid-emails";
+import { validateAlias } from "@/utils/validations/sus-emails-checker";
 import { count, like, not, sql } from "drizzle-orm";
 import { createId, init } from "@paralleldrive/cuid2";
 import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
@@ -369,8 +369,9 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
         if (emailPart.length <= 3) {
             return { error: "Email too short" };
         }
-        if (impersonatingEmails.some((v) => emailPart.toLowerCase().includes(v))) {
-            return { error: "Invalid alias" };
+        const validationError = validateAlias(emailPart);
+        if (validationError) {
+            return validationError
         }
     }
 

@@ -8,7 +8,7 @@ import { isValidOrigin, getSession } from "../tools";
 import { makeHtml } from "@emailthing/web-pwa/src/(app)/compose/tools";
 import { verifyCredentials } from "@/utils/passkeys";
 import { sendEmail } from "@/utils/send-email";
-import { impersonatingEmails } from "@/utils/validations/invalid-emails";
+import { validateAlias } from "@/utils/validations/sus-emails-checker";
 import { createId } from "@paralleldrive/cuid2";
 import { marked } from "marked";
 import { Mailbox as MimeMailbox, createMimeMessage } from "mimetext";
@@ -187,7 +187,8 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
     });
     if (!validUsername.success) return { error: validUsername.error.issues[0]?.message };
 
-    if (impersonatingEmails.some((v) => validUsername.data.username.toLowerCase().includes(v))) {
+    const validationError = validateAlias(validUsername.data.username);
+    if (validationError) {
         const user = await db.query.User.findFirst({
             where: eq(User.id, userId),
             columns: {
@@ -195,7 +196,7 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
             },
         });
         if (!user?.admin) {
-            return { error: "Invalid username" };
+            return validationError;
         }
     }
 

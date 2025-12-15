@@ -7,7 +7,7 @@ import { isValidOrigin } from "../tools";
 import { generateSessionToken, generateRefreshToken } from "@/utils/token";
 import { emailUser } from "./tools";
 import { createId } from "@paralleldrive/cuid2";
-import { impersonatingEmails } from "@/utils/validations/invalid-emails";
+import { validateAlias } from "@/utils/validations/sus-emails-checker";
 import { TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 
 // Rate limiting
@@ -116,12 +116,12 @@ export async function POST(request: Request) {
             return ResponseJson({ error: "Username already taken" }, { status: 401 });
         }
 
-        if (impersonatingEmails.some((v) => parsedData.data.username.toLowerCase().includes(v))) {
+        const validationError = validateAlias(parsedData.data.username);
+        if (validationError) {
             // Increment failed attempts
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
-
-            return ResponseJson({ error: "Username already taken" }, { status: 401 });
+            return ResponseJson(validationError, { status: 401 });
         }
 
         // check email alaises too

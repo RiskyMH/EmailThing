@@ -1,3 +1,5 @@
+// make sure to regenerate the ./sus-emails-checker.db
+
 export const impersonatingEmails = [
     "emailthing",
     "risky",
