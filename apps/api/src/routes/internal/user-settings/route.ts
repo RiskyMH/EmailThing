@@ -1,5 +1,5 @@
 import { createPasswordHash, verifyPassword } from "@/utils/password";
-import { db, MailboxForUser, PasskeyCredentials, UserNotification, UserSession } from "@/db";
+import { db, MailboxForUser, PasskeyCredentials, ResetPasswordToken, UserNotification, UserSession } from "@/db";
 import { User } from "@/db";
 import { and, eq, gte, inArray, not, sql, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/utils/validations/auth";
@@ -244,6 +244,8 @@ async function changePassword(session: string, userId: string, data: ChangePassw
         db
             .delete(UserSession)
             .where(and(eq(UserSession.userId, userId), not(eq(UserSession.token, session)))),
+
+        db.delete(ResetPasswordToken).where(eq(ResetPasswordToken.userId, userId)),
     ]);
 
     // revalidatePath("/settings");

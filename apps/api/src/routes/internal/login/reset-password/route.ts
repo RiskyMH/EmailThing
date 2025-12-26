@@ -221,6 +221,7 @@ If you did not request this, please ignore this email.`
                     .where(eq(User.id, reset.userId)),
 
                 db.delete(ResetPasswordToken).where(eq(ResetPasswordToken.token, token)),
+                db.delete(ResetPasswordToken).where(eq(ResetPasswordToken.userId, reset.userId)),
 
                 // Invalidate all sessions except the current one
                 db.delete(UserSession).where(eq(UserSession.userId, reset.userId)),
