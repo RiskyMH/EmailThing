@@ -185,6 +185,7 @@ export function HTMLPreviewEditor({ savedHTML }: { savedHTML?: string }) {
         sandbox="allow-popups"
         srcDoc={savedHTML}
         title="The Email"
+        referrerPolicy="no-referrer"
       />
     </>
   );

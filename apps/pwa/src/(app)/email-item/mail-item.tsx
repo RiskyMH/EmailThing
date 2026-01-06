@@ -346,6 +346,10 @@ function EmailContent({
   const heights = useRef<Record<string, number>>({});
 
   useEffect(() => {
+    if (ref.current) {
+      // @ts-expect-error idk why its not documented in react
+      ref.current.credentialless = true;
+    }
     if (heights.current[id]) {
       setHtmlLoaded(true)
       if (ref.current) {
@@ -407,6 +411,7 @@ function EmailContent({
           sandbox="allow-popups allow-same-origin"
           srcDoc={genericHtml(parseHTML(html || body, true), sender)}
           title={subject || "The Email"}
+          referrerPolicy="no-referrer"
         />
         {htmlLoaded !== true && <EmailContentSpinner className="h-36" />}
       </>
@@ -427,6 +432,7 @@ export function genericHtml(html: string, sender?: string | null) {
   if (html.startsWith("<!DOCTYPE html")) return html;
 
   const added = new Set<string>();
+  added.add('<base target="_blank"><meta name="referrer" content="no-referrer">');
 
   if (!html.includes("color:") && !html.includes("background:")) {
     // check that it isnt already dark only or light only
