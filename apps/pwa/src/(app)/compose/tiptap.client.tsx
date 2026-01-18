@@ -113,11 +113,12 @@ export default function EditorContent2({
 
         {/* //todo: maybe use json instead of html */}
         {/* <input hidden value={JSON.stringify(editor?.getJSON()) || savedBody} name="body" /> */}
-        <input hidden value={`${html}<!--tiptap-->` || savedBody} name="body" readOnly />
-        <input
+        <textarea hidden value={`${html}<!--tiptap-->` || savedBody} name="body" readOnly />
+        <textarea
           hidden
           value={html
-            ?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")}
+            ?.replaceAll(/<li><p>(.*?)<\/p><(\/?)(ol|li|ul)>/gi, "<li>$1<$2$3>")
+          }
           name="html"
           readOnly
         />
