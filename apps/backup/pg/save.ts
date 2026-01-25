@@ -33,7 +33,7 @@ async function runDump(file: Bun.BunFile) {
     console.log(`→ Creating backup dump at ${file.name}...`);
     await file.delete().catch(() => { });
 
-    const proc = await Bun.$`pg_dump --format=custom --compress=0 ${DATABASE_URL} | zstd -9 -T0 --long -o ${file.name}`
+    const proc = await Bun.$`sh -c 'pg_dump --format=custom --compress=0 "$DATABASE_URL" | zstd -9 -T0 --long -o "${file.name}"'`
         .env({ DATABASE_URL, PATH: process.env.PATH })
         .nothrow();
     if (proc.exitCode !== 0) throw new Error(`Backup failed (exit ${proc.exitCode})`);
