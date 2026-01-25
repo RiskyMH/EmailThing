@@ -1,0 +1,8 @@
+{
+    "name": "@emailthing/backup",
+    "version": "1.0.0",
+    "private": true,
+    "devDependencies": {
+        "@types/bun": "^1.3.5"
+    }
+}
