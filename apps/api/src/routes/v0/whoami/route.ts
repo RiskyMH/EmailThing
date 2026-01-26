@@ -6,5 +6,5 @@ export async function GET(request: Request) {
         return new Response("Unauthorized", { status: 401 });
     }
 
-    return Response.json({ mailboxId });
+    return Response.json({ mailboxId, mailbox_id: mailboxId });
 }

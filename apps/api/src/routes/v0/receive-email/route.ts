@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     console.time("receive-email");
     const { searchParams } = new URL(request.url);
 
-    const { email: rawEmail, from, to } = (await request.json()) as Record<string, string>;
+    const { email: rawEmail, from, to, category_id: _categoryId } = (await request.json()) as Record<string, string>;
     if (!(rawEmail && from && to)) {
         return Response.json({ error: "missing required fields" }, { status: 400 });
     }
@@ -70,7 +70,9 @@ export async function POST(request: Request) {
                 success: true,
                 id: existingEmail.id,
                 emailId: existingEmail.id,
+                email_id: existingEmail.id,
                 alreadyExists: true,
+                already_exists: true,
             });
         }
     }
@@ -99,6 +101,17 @@ export async function POST(request: Request) {
     if (email.inReplyTo) references.add(email.inReplyTo);
     for (const id of email.references?.split(" ") ?? []) references.add(id);
 
+    // only set category if it exists for this mailbox
+    let categoryId = null;
+    if (_categoryId) {
+        const [category] = await db
+            .select({ id: Mailbox.id })
+            .from(Mailbox)
+            .where(and(eq(Mailbox.id, _categoryId), eq(Mailbox.isDeleted, false)))
+            .limit(1);
+        if (category) categoryId = category.id;
+    }
+
     const emailId = createId();
     await db.batchUpdate([
         db.insert(Email).values({
@@ -114,6 +127,7 @@ export async function POST(request: Request) {
             tempId,
             givenId: email.messageId,
             givenReferences: references.size ? [...references] : undefined,
+            categoryId,
         }),
 
         db.insert(EmailRecipient).values([
@@ -209,6 +223,9 @@ export async function POST(request: Request) {
         success: true,
         id: emailId,
         emailId,
+        email_id: emailId,
+        alreadyExists: false,
+        already_exists: false,
     });
 }
 

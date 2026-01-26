@@ -154,7 +154,7 @@ export async function POST(request: Request) {
             })
             .where(eq(Mailbox.id, mailboxId)),
     ]);
-    return Response.json({ success: true, emailId });
+    return Response.json({ success: true, emailId, email_id: emailId });
     // }
 
     // return Response.json({ success: true })

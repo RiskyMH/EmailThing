@@ -27,6 +27,7 @@ export default {
                 email: raw,
                 from: message.from,
                 to: message.to,
+                // category_id: "<optional-category-id-here>"
             }),
         });
 

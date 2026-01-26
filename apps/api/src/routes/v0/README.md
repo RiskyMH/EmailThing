@@ -20,14 +20,15 @@ The headers all routes use and require.
 Sending your emails to the front-end app. Mainly for custom domains and cloudflare email workers.
 
 **JSON Body:**
-| Key     | Value    | Description                                |
-| ------- | -------- | ------------------------------------------ |
-| `to`    | `string` | The email address the email was sent to.   |
-| `from`  | `string` | The email address the email was sent from. |
-| `email` | `string` | The raw email content.                     |
+| Key           | Value     | Description                                |
+| ------------- | --------- | ------------------------------------------ |
+| `to`          | `string`  | The email address the email was sent to.   |
+| `from`        | `string`  | The email address the email was sent from. |
+| `email`       | `string`  | The raw email content.                     |
+| `category_id` | `string?` | The category ID for the email.             |
 
 **Example:**
-```json
+```jsonc
 {
   "to": "RiskyMH@riskymh.dev",
   "from": "RiskyMH@emailthing.xyz",
@@ -38,7 +39,24 @@ Subject: Hello, World!
 To: <RiskyMH@riskymh.dev>
 Content-Type: text/plain
 
-Hello, World!"
+Hello, World!",
+  "category_id": "somerandomid"
+}
+```
+
+**Response (200)**
+```json
+{
+  "success": true,
+  "email_id": "somerandomid",
+  "already_exists": false
+}
+```
+
+**Response (400)**
+```json
+{
+  "error": "Mailbox over storage limit"
 }
 ```
 
@@ -60,7 +78,8 @@ Send an email with an mailbox alias.
 | `headers`             | `object?`   | Custom headers to add to the email.    |
 
 **Example:**
-```json
+
+```jsonc
 {
   "to": [
     "RiskyMH@riskymh.dev",
