@@ -105,11 +105,28 @@ export function EmailItem({ email: _email, mailboxId, type, categories, isSelect
     } else if (!navigator.onLine) {
       toast.info("You are offline - changes will be synced when you come back online");
     }
+    if ((updates.binnedAt && !email.binnedAt) || (!updates.binnedAt && email.binnedAt)) {
+      if (window.location.search.includes("mailId")) {
+        const s = new URLSearchParams(window.location.search);
+        if (s.get("mailId") === emailId) {
+          s.delete("mailId");
+          navigate({ search: s.toString() })
+        }
+      }
+    }
     setEmail({ ...email, ...updates });
     await updateEmailProperties(mailboxId, emailId, updates);
   };
 
   const deleteEmail = async () => {
+    if (window.location.search.includes("mailId")) {
+      const s = new URLSearchParams(window.location.search);
+      if (s.get("mailId") === emailId) {
+        s.delete("mailId");
+        navigate({ search: s.toString() })
+      }
+    }
+
     if (type === "drafts") {
       if (mailboxId === "demo") {
         toast("This is a demo - changes won't actually do anything", {

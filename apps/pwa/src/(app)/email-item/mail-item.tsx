@@ -86,19 +86,31 @@ function MailItem({ mailId }: { mailId?: string }) {
     } else if (!navigator.onLine) {
       toast.info("You are offline - changes will be synced when you come back online");
     }
-    await updateEmailProperties(mailboxId, emailId, updates);
+    const upd = updateEmailProperties.bind(null, mailboxId, emailId, updates);
     if (updates.binnedAt) {
       if (window.location.search.includes("mailId")) {
         const s = new URLSearchParams(window.location.search);
         s.delete("mailId");
-        return navigate({ search: s.toString() });
+        await navigate({ search: s.toString() });
+        await upd();
       }
 
       if (history.length > 1) {
-        return navigate(-1);
+        await upd(false);
+        const sync = db.sync();
+        await navigate(-1);
+        if (window.location.search.includes("mailId")) {
+          const s = new URLSearchParams(window.location.search);
+          if (s.get("mailId") === emailId) {
+            s.delete("mailId");
+            await navigate({ search: s.toString() }, { replace: true });
+          }
+        }
+        await sync;
       }
-      return navigate(`/mail/${mailboxId}`);
-    }
+      navigate(`/mail/${mailboxId}`);
+      await upd();
+    } else return await upd();
   };
 
   const lastEmailId = useRef<string | null>(null);

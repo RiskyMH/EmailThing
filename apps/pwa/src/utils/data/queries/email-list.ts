@@ -391,6 +391,7 @@ export async function updateEmailProperties(
     binnedAt?: Date | null;
     hardDelete?: boolean;
   },
+  sync = true
 ) {
   await db.transaction("rw", [db.emails], async () => {
     const email = await db.emails.where("[id+mailboxId]").equals([emailId, mailboxId]).first();
@@ -413,7 +414,7 @@ export async function updateEmailProperties(
       await db.emails.where("id").equals(emailId).modify(modify);
     }
   });
-  if (mailboxId !== "demo") {
+  if (mailboxId !== "demo" && sync) {
     await db.sync();
   }
 }
