@@ -47,6 +47,7 @@ jobs:
 
           # Store current versions
           echo "OLD_VERSIONS<<EOF" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE" && format_deps "Root" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/api" && format_deps "API" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/emailthing.me" && format_deps "EmailThing.me" >> $GITHUB_ENV
@@ -54,6 +55,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
           # Update dependencies in each directory
+          cd "$GITHUB_WORKSPACE" && $UPDATE_CMD
           cd "$GITHUB_WORKSPACE/apps/pwa" && $UPDATE_CMD
           cd "$GITHUB_WORKSPACE/apps/api" && $UPDATE_CMD
           cd "$GITHUB_WORKSPACE/apps/emailthing.me" && $UPDATE_CMD
@@ -65,6 +67,7 @@ jobs:
 
           # Store new versions and generate diff
           echo "NEW_VERSIONS<<EOF" >> $GITHUB_ENV
+          cd "$GITHUB_WORKSPACE" && format_deps "Root" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/pwa" && format_deps "PWA" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/api" && format_deps "API" >> $GITHUB_ENV
           cd "$GITHUB_WORKSPACE/apps/emailthing.me" && format_deps "EmailThing.me" >> $GITHUB_ENV

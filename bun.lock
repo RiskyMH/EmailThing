@@ -6,7 +6,7 @@
       "name": "emailthing",
       "devDependencies": {
         "@biomejs/biome": "2.3.8",
-        "@types/bun": "^1.3.5",
+        "@types/bun": "^1.3.6",
       },
     },
     "apps/api": {
@@ -22,7 +22,7 @@
         "@simplewebauthn/server": "13.2.2",
         "@t3-oss/env-nextjs": "^0.13.10",
         "aws4fetch": "^1.0.20",
-        "drizzle-orm": "^1.0.0-beta.9-e89174b",
+        "drizzle-orm": "beta",
         "jose": "^6.1.3",
         "jsdom": "^27.4.0",
         "mailauth": "^4.12.0",
@@ -38,7 +38,7 @@
         "@types/jsdom": "^27.0.0",
         "@types/turndown": "^5.0.6",
         "@types/ua-parser-js": "^0.7.39",
-        "drizzle-kit": "^1.0.0-beta.9-e89174b",
+        "drizzle-kit": "beta",
       },
       "peerDependencies": {
         "typescript": "^5.9.3",
@@ -79,7 +79,7 @@
         "@types/turndown": "^5.0.6",
         "@types/ua-parser-js": "^0.7.39",
         "autoprefixer": "^10.4.23",
-        "drizzle-kit": "^1.0.0-beta.9-e89174b",
+        "drizzle-kit": "beta",
         "postcss": "^8.5.6",
         "tailwindcss": "^4.1.18",
         "typescript": "^5.9.3",
@@ -175,7 +175,7 @@
         "@types/react-dom": "^19.2.3",
         "@types/turndown": "^5.0.6",
         "@types/ua-parser-js": "^0.7.39",
-        "drizzle-orm": "^1.0.0-beta.9-e89174b",
+        "drizzle-orm": "beta",
         "eslint": "^9.39.2",
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.26",
@@ -192,8 +192,8 @@
       "name": "@emailthing/db",
       "dependencies": {
         "@paralleldrive/cuid2": "3.0.0",
-        "drizzle-kit": "^1.0.0-beta.9-e89174b",
-        "drizzle-orm": "^1.0.0-beta.9-e89174b",
+        "drizzle-kit": "beta",
+        "drizzle-orm": "beta",
         "pg": "^8.17.2",
       },
       "devDependencies": {
@@ -992,9 +992,9 @@
 
     "dompurify": ["dompurify@3.3.1", "", { "optionalDependencies": { "@types/trusted-types": "^2.0.7" } }, "sha512-qkdCKzLNtrgPFP1Vo+98FRzJnBRGe4ffyCea9IwHB1fyxPOeNTHpLKYGd4Uk9xvNoH0ZoOjwZxNptyMwqrId1Q=="],
 
-    "drizzle-kit": ["drizzle-kit@1.0.0-beta.9-e89174b", "", { "dependencies": { "@drizzle-team/brocli": "^0.11.0", "@js-temporal/polyfill": "^0.5.1", "esbuild": "^0.25.10", "tsx": "^4.20.6" }, "bin": { "drizzle-kit": "bin.cjs" } }, "sha512-Xrw3k8E2CbSZr+kqe3k5W4oxd2fbEyczjKtyGIkAq0x9Wqpa/VtAT6Mkh83sIzqG4OSN7lOoUafsDxSE/AR7RA=="],
+    "drizzle-kit": ["drizzle-kit@1.0.0-beta.12-a5629fb", "", { "dependencies": { "@drizzle-team/brocli": "^0.11.0", "@js-temporal/polyfill": "^0.5.1", "esbuild": "^0.25.10", "tsx": "^4.20.6" }, "bin": { "drizzle-kit": "bin.cjs" } }, "sha512-l+p4QOMvPGYBYEE9NBlU7diu+NSlxuOUwi0I7i01Uj1PpfU0NxhPzaks/9q1MDw4FAPP8vdD0dOhoqosKtRWWQ=="],
 
-    "drizzle-orm": ["drizzle-orm@1.0.0-beta.9-e89174b", "", { "peerDependencies": { "@aws-sdk/client-rds-data": ">=3", "@cloudflare/workers-types": ">=4", "@effect/sql": "^0.48.5", "@effect/sql-pg": "^0.49.7", "@electric-sql/pglite": ">=0.2.0", "@libsql/client": ">=0.10.0", "@libsql/client-wasm": ">=0.10.0", "@neondatabase/serverless": ">=0.10.0", "@op-engineering/op-sqlite": ">=2", "@opentelemetry/api": "^1.4.1", "@planetscale/database": ">=1.13", "@prisma/client": "*", "@sqlitecloud/drivers": ">=1.0.653", "@tidbcloud/serverless": "*", "@tursodatabase/database": ">=0.2.1", "@tursodatabase/database-common": ">=0.2.1", "@tursodatabase/database-wasm": ">=0.2.1", "@types/better-sqlite3": "*", "@types/mssql": "^9.1.4", "@types/pg": "*", "@types/sql.js": "*", "@upstash/redis": ">=1.34.7", "@vercel/postgres": ">=0.8.0", "@xata.io/client": "*", "better-sqlite3": ">=9.3.0", "bun-types": "*", "expo-sqlite": ">=14.0.0", "gel": ">=2", "mssql": "^11.0.1", "mysql2": ">=2", "pg": ">=8", "postgres": ">=3", "sql.js": ">=1", "sqlite3": ">=5" }, "optionalPeers": ["@aws-sdk/client-rds-data", "@cloudflare/workers-types", "@effect/sql", "@effect/sql-pg", "@electric-sql/pglite", "@libsql/client", "@libsql/client-wasm", "@neondatabase/serverless", "@op-engineering/op-sqlite", "@opentelemetry/api", "@planetscale/database", "@prisma/client", "@sqlitecloud/drivers", "@tidbcloud/serverless", "@tursodatabase/database", "@tursodatabase/database-common", "@tursodatabase/database-wasm", "@types/better-sqlite3", "@types/pg", "@types/sql.js", "@upstash/redis", "@vercel/postgres", "@xata.io/client", "better-sqlite3", "bun-types", "expo-sqlite", "gel", "mysql2", "pg", "postgres", "sql.js", "sqlite3"] }, "sha512-B5KR/qYMZ0JMOurK+0xi1ObpOQcgrjaC9wHUiU2eTJjLemuh2CoQIw6yur68NxZG6Xcd0b9qghUNC/78/bEfbg=="],
+    "drizzle-orm": ["drizzle-orm@1.0.0-beta.12-a5629fb", "", { "peerDependencies": { "@aws-sdk/client-rds-data": ">=3", "@cloudflare/workers-types": ">=4", "@effect/sql": "^0.48.5", "@effect/sql-pg": "^0.49.7", "@electric-sql/pglite": ">=0.2.0", "@libsql/client": ">=0.10.0", "@libsql/client-wasm": ">=0.10.0", "@neondatabase/serverless": ">=0.10.0", "@op-engineering/op-sqlite": ">=2", "@opentelemetry/api": "^1.4.1", "@planetscale/database": ">=1.13", "@prisma/client": "*", "@sqlitecloud/drivers": ">=1.0.653", "@tidbcloud/serverless": "*", "@tursodatabase/database": ">=0.2.1", "@tursodatabase/database-common": ">=0.2.1", "@tursodatabase/database-wasm": ">=0.2.1", "@types/better-sqlite3": "*", "@types/mssql": "^9.1.4", "@types/pg": "*", "@types/sql.js": "*", "@upstash/redis": ">=1.34.7", "@vercel/postgres": ">=0.8.0", "@xata.io/client": "*", "better-sqlite3": ">=9.3.0", "bun-types": "*", "expo-sqlite": ">=14.0.0", "gel": ">=2", "mssql": "^11.0.1", "mysql2": ">=2", "pg": ">=8", "postgres": ">=3", "sql.js": ">=1", "sqlite3": ">=5" }, "optionalPeers": ["@aws-sdk/client-rds-data", "@cloudflare/workers-types", "@effect/sql", "@effect/sql-pg", "@electric-sql/pglite", "@libsql/client", "@libsql/client-wasm", "@neondatabase/serverless", "@op-engineering/op-sqlite", "@opentelemetry/api", "@planetscale/database", "@prisma/client", "@sqlitecloud/drivers", "@tidbcloud/serverless", "@tursodatabase/database", "@tursodatabase/database-common", "@tursodatabase/database-wasm", "@types/better-sqlite3", "@types/pg", "@types/sql.js", "@upstash/redis", "@vercel/postgres", "@xata.io/client", "better-sqlite3", "bun-types", "expo-sqlite", "gel", "mysql2", "pg", "postgres", "sql.js", "sqlite3"] }, "sha512-wyOAgr9Cy9oEN6z5S0JGhfipLKbRRJtQKgbDO9SXGR9swMBbGNIlXkeMqPRrqYQ8k70mh+7ZJ/eVmJ2F7zR3Vg=="],
 
     "ecdsa-sig-formatter": ["ecdsa-sig-formatter@1.0.11", "", { "dependencies": { "safe-buffer": "^5.0.1" } }, "sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ=="],
 
@@ -1050,7 +1050,7 @@
 
     "fast-levenshtein": ["fast-levenshtein@2.0.6", "", {}, "sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw=="],
 
-    "fast-xml-parser": ["fast-xml-parser@4.5.2", "", { "dependencies": { "strnum": "^1.0.5" }, "bin": { "fxparser": "src/cli/cli.js" } }, "sha512-xmnYV9o0StIz/0ArdzmWTxn9oDy0lH8Z80/8X/TD2EUQKXY4DHxoT9mYBqgGIG17DgddCJtH1M6DriMbalNsAA=="],
+    "fast-xml-parser": ["fast-xml-parser@4.5.3", "", { "dependencies": { "strnum": "^1.1.1" }, "bin": { "fxparser": "src/cli/cli.js" } }, "sha512-RKihhV+SHsIUGXObeVy9AXiBbFwkVk7Syp8XgwN5U3JV416+Gwp/GO9i0JYKmikykgz/UHRrrV4ROuZEo/T0ig=="],
 
     "fdir": ["fdir@6.5.0", "", { "peerDependencies": { "picomatch": "^3 || ^4" }, "optionalPeers": ["picomatch"] }, "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg=="],
 
@@ -1723,6 +1723,8 @@
     "jsdom/parse5": ["parse5@8.0.0", "", { "dependencies": { "entities": "^6.0.0" } }, "sha512-9m4m5GSgXjL4AjumKzq1Fgfp3Z8rsvjRNbnkVwfu2ImRqE5D0LnY2QfDen18FSY9C573YU5XxSapdHZTZ2WolA=="],
 
     "jsonwebtoken/semver": ["semver@7.7.3", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q=="],
+
+    "mailauth/fast-xml-parser": ["fast-xml-parser@4.5.2", "", { "dependencies": { "strnum": "^1.0.5" }, "bin": { "fxparser": "src/cli/cli.js" } }, "sha512-xmnYV9o0StIz/0ArdzmWTxn9oDy0lH8Z80/8X/TD2EUQKXY4DHxoT9mYBqgGIG17DgddCJtH1M6DriMbalNsAA=="],
 
     "markdown-it/entities": ["entities@4.5.0", "", {}, "sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw=="],
 
