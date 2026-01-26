@@ -94,14 +94,16 @@ export async function POST(request: Request) {
             }
 
             // Find user
-            const user = await db.query.User.findFirst({
-                where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
-                columns: {
-                    id: true,
-                    password: true,
-                    onboardingStatus: true,
-                },
-            });
+            const [user] = await db
+                .select({ id: User.id, password: User.password, onboardingStatus: User.onboardingStatus })
+                .from(User)
+                .where(
+                    eq(
+                        sql`lower(${User.username})`,
+                        sql`${username.toLowerCase()}`
+                    )
+                )
+                .limit(1);
 
             if (!user) {
                 // Increment failed attempts
@@ -130,9 +132,11 @@ export async function POST(request: Request) {
             }
         } else if (type === "passkey") {
             const credential = body.credential as Credential;
-            const cred = await db.query.PasskeyCredentials.findFirst({
-                where: eq(PasskeyCredentials.credentialId, credential.id),
-            });
+            const [cred] = await db
+                .select()
+                .from(PasskeyCredentials)
+                .where(eq(PasskeyCredentials.credentialId, credential.id))
+                .limit(1);
             if (cred == null) {
                 // Increment failed attempts
                 attempts.set(ip, (attempts.get(ip) || 0) + 1);
@@ -161,13 +165,11 @@ export async function POST(request: Request) {
                 return ResponseJson({ error: "Failed to verify passkey" }, { status: 401 });
             }
 
-            const user = await db.query.User.findFirst({
-                where: eq(User.id, cred.userId),
-                columns: {
-                    id: true,
-                    onboardingStatus: true,
-                },
-            });
+            const [user] = await db
+                .select({ id: User.id, onboardingStatus: User.onboardingStatus })
+                .from(User)
+                .where(eq(User.id, cred.userId))
+                .limit(1);
 
             if (!user) {
                 // Increment failed attempts
@@ -206,11 +208,12 @@ export async function POST(request: Request) {
         const tokenExpiresAt = new Date(Date.now() + TOKEN_EXPIRES_IN);
         const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN);
 
-        const [mailboxes, _] = await db.batchFetch([
-            db.query.MailboxForUser.findMany({
-                where: and(eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)),
-                columns: { mailboxId: true },
-            }),
+        const [mailboxes,] = await db.batchFetch([
+            db
+                .select({ mailboxId: MailboxForUser.mailboxId })
+                .from(MailboxForUser)
+                .where(and(eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false))),
+
             db.insert(UserSession).values({
                 userId: userId,
                 token,

@@ -8,18 +8,22 @@ import { and, sql, eq } from "drizzle-orm";
 
 process.env.EMAILTHING_ME_TOKEN ||= Bun.randomUUIDv7();
 
-const fetchUser = (username: string) => {
-  return db.query.User.findFirst({
-    where: and(
-      eq(sql`lower(${User.username})`, sql`lower(${username})`),
-      eq(User.publicContactPage, true)
-    ),
-    columns: {
-      username: true,
-      email: true,
-      publicEmail: true,
-    },
-  });
+const fetchUser = async (username: string) => {
+  const [user] = await db
+    .select({
+      username: User.username,
+      email: User.email,
+      publicEmail: User.publicEmail,
+    })
+    .from(User)
+    .where(
+      and(
+        eq(sql`lower(${User.username})`, sql`lower(${username})`),
+        eq(User.publicContactPage, true)
+      )
+    )
+    .limit(1);
+  return user;
 };
 
 export async function GET(request: Request) {

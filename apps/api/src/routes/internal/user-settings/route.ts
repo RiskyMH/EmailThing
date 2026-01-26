@@ -36,9 +36,11 @@ export async function POST(request: Request) {
     const currentUserid = await getSession(request);
     if (!currentUserid) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
-    const currentUser = await db.query.User.findFirst({
-        where: eq(User.id, currentUserid),
-    });
+    const [currentUser] = await db
+        .select()
+        .from(User)
+        .where(eq(User.id, currentUserid))
+        .limit(1);
     if (!currentUser) return Response.json({ message: { error: "User not found" } }, { status: 404, headers });
 
     const data = await request.json();
@@ -62,44 +64,41 @@ export async function POST(request: Request) {
 
     if ("error" in result) return Response.json({ message: result }, { status: 400, headers });
 
-    const sync = await db.batchFetch([
-        db.query.User.findFirst({
-            where: eq(User.id, currentUserid),
-            columns: {
-                id: true,
-                username: true,
-                email: true,
-                onboardingStatus: true,
-                password: false,
-                admin: true,
-                backupEmail: true,
-                publicEmail: true,
-                publicContactPage: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        }),
-        db.query.MailboxForUser.findMany({
-            where: and(eq(MailboxForUser.userId, currentUserid), gte(MailboxForUser.updatedAt, date)),
-            columns: {
-                userId: true,
-                mailboxId: true,
-                joinedAt: true,
-                role: true,
-                isDeleted: true,
-                updatedAt: true,
-            },
-        }),
+    const [[user], mailboxesForUser] = await db.batchFetch([
+        db.select({
+            id: User.id,
+            username: User.username,
+            email: User.email,
+            onboardingStatus: User.onboardingStatus,
+            admin: User.admin,
+            backupEmail: User.backupEmail,
+            publicEmail: User.publicEmail,
+            publicContactPage: User.publicContactPage,
+            createdAt: User.createdAt,
+            updatedAt: User.updatedAt,
+        }).from(User).where(eq(User.id, currentUserid)).limit(1),
+
+        db
+            .select({
+                userId: MailboxForUser.userId,
+                mailboxId: MailboxForUser.mailboxId,
+                joinedAt: MailboxForUser.joinedAt,
+                role: MailboxForUser.role,
+                isDeleted: MailboxForUser.isDeleted,
+                updatedAt: MailboxForUser.updatedAt,
+            })
+            .from(MailboxForUser)
+            .where(and(eq(MailboxForUser.userId, currentUserid), gte(MailboxForUser.updatedAt, date))),
     ]);
 
-    if (!sync[0]) return Response.json({ message: { error: "User not found?" } }, { status: 404, headers });
+    if (!user) return Response.json({ message: { error: "User not found?" } }, { status: 404, headers });
 
     return Response.json(
         {
             message: result,
             sync: {
-                user: sync[0],
-                mailboxesForUser: sync[1],
+                user: user,
+                mailboxesForUser: mailboxesForUser,
             },
         } satisfies MappedPossibleDataResponse,
         { status: 200, headers },
@@ -174,9 +173,11 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
     const username = data.newName;
 
     // check if taken (but not by the user)
-    const existingUser = await db.query.User.findFirst({
-        where: and(eq(sql`lower(${User.username})`, sql`lower(${username})`), not(eq(User.id, userId))),
-    });
+    const [existingUser] = await db
+        .select()
+        .from(User)
+        .where(and(eq(sql`lower(${User.username})`, sql`lower(${username})`), not(eq(User.id, userId))))
+        .limit(1);
 
     if (existingUser) return { error: "Username already taken" };
 
@@ -189,12 +190,11 @@ async function changeUsername(userId: string, data: ChangeUsernameData) {
 
     const validationError = validateAlias(validUsername.data.username);
     if (validationError) {
-        const user = await db.query.User.findFirst({
-            where: eq(User.id, userId),
-            columns: {
-                admin: true,
-            },
-        });
+        const [user] = await db
+            .select({ admin: User.admin })
+            .from(User)
+            .where(eq(User.id, userId))
+            .limit(1);
         if (!user?.admin) {
             return validationError;
         }
@@ -217,12 +217,11 @@ async function changePassword(session: string, userId: string, data: ChangePassw
     const newPassword = data.newPassword;
 
     // check old password
-    const user = await db.query.User.findFirst({
-        where: eq(User.id, userId),
-        columns: {
-            password: true,
-        },
-    });
+    const [user] = await db
+        .select({ password: User.password })
+        .from(User)
+        .where(eq(User.id, userId))
+        .limit(1);
 
     if (!user) return { error: "User not found" };
 
@@ -258,15 +257,16 @@ export interface ChangeBackupEmailData {
 async function changeBackupEmail(userId: string, data: ChangeBackupEmailData) {
     const email = data.email;
 
-    const user = await db.query.User.findFirst({
-        where: eq(User.id, userId),
-        columns: {
-            id: true,
-            backupEmail: true,
-            username: true,
-            email: true,
-        },
-    });
+    const [user] = await db
+        .select({
+            id: User.id,
+            backupEmail: User.backupEmail,
+            username: User.username,
+            email: User.email,
+        })
+        .from(User)
+        .where(eq(User.id, userId))
+        .limit(1);
 
     if (!user) throw new Error("User not found");
 
@@ -441,16 +441,15 @@ async function leaveMailbox(userId: string, data: LeaveMailboxData) {
     const currentUserId = userId;
 
     // check if they are owner
-    const userRole = await db.query.MailboxForUser.findFirst({
-        where: and(
+    const [userRole] = await db
+        .select({ role: MailboxForUser.role })
+        .from(MailboxForUser)
+        .where(and(
             eq(MailboxForUser.mailboxId, mailboxId),
             eq(MailboxForUser.userId, currentUserId),
             eq(MailboxForUser.isDeleted, false),
-        ),
-        columns: {
-            role: true,
-        },
-    });
+        ))
+        .limit(1);
 
     if (userRole?.role === "OWNER") {
         return { error: "Owner can't leave the mailbox" };
@@ -513,8 +512,15 @@ async function saveNotification(userId: string, data: SaveNotificationData) {
     // save subscription
     if (!subscription.keys) return { error: "Subscription keys are missing" };
     if (!subscription.endpoint) return { error: "Subscription endpoint is missing" };
+    if (!subscription.keys.p256dh) return { error: "Subscription p256dh key is missing" };
+    if (!subscription.keys.auth) return { error: "Subscription auth key is missing" };
 
-    await db.insert(UserNotification).values({ userId, endpoint: subscription.endpoint, p256dh: subscription.keys.p256dh, auth: subscription.keys.auth }).execute();
+    await db.insert(UserNotification).values({
+        userId,
+        endpoint: subscription.endpoint,
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
+    }).execute();
 
     // send test notification
     const res = await sendNotification({

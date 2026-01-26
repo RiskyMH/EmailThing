@@ -35,51 +35,65 @@ export async function GET(request: Request) {
   }
 
   // get the temp aliases that are expires
-  const tempAliases = await db.query.TempAlias.findMany({
-    where: lt(TempAlias.expiresAt, new Date()),
-    columns: {
-      id: true,
-      mailboxId: true,
-      alias: true,
-    },
-  });
+  const tempAliases = await db.select({
+    id: TempAlias.id,
+    mailboxId: TempAlias.mailboxId,
+    alias: TempAlias.alias
+  })
+    .from(TempAlias)
+    .where(lt(TempAlias.expiresAt, new Date()))
+    .execute();
 
-  const emails = await db.query.Email.findMany({
-    where: and(
-      or(
-        // get emails deleted more than 30 days ago
-        lt(Email.binnedAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
-        // or if its part of a expired temp alias
-        tempAliases.length
-          ? inArray(
-              Email.tempId,
-              tempAliases.map((temp) => temp.id)
-            )
-          : undefined
-      ),
-      not(eq(Email.isDeleted, true))
+  const emailWhere = and(
+    or(
+      // get emails deleted more than 30 days ago
+      lt(Email.binnedAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
+      // or if its part of a expired temp alias
+      tempAliases.length
+        ? inArray(
+          Email.tempId,
+          tempAliases.map((temp) => temp.id)
+        )
+        : undefined
     ),
-    columns: {
-      id: true,
-      mailboxId: true,
-      size: true,
-    },
-    with: {
-      attachments: {
-        columns: {
-          id: true,
-          filename: true,
-        },
-      },
-    },
-  });
+    not(eq(Email.isDeleted, true))
+  );
+
+  const emails = await db
+    .select({
+      id: Email.id,
+      mailboxId: Email.mailboxId,
+      size: Email.size,
+    })
+    .from(Email)
+    .where(emailWhere)
+    .execute();
+
+  let attachments: Array<{ id: string; filename: string; emailId: string }> = [];
+  if (emails.length) {
+    attachments = await db
+      .select({
+        id: EmailAttachments.id,
+        filename: EmailAttachments.filename,
+        emailId: EmailAttachments.emailId,
+      })
+      .from(EmailAttachments)
+      .where(inArray(EmailAttachments.emailId, emails.map((e) => e.id)))
+      .execute();
+  }
+
+  const emailsWithAttachments = emails.map((email) => ({
+    ...email,
+    attachments: attachments.filter((a) => a.emailId === email.id),
+  }));
+
 
   console.log(
-    `would delete ${emails.length} emails and ${tempAliases.length} temp aliases`
+    `would delete ${emailsWithAttachments.length} emails and ${tempAliases.length} temp aliases`
   );
 
   await Promise.all(
-    emails.map(async (email) => {
+    emailsWithAttachments.map(async (email) => {
       await deleteFile(`${email.mailboxId}/${email.id}`);
       await deleteFile(`${email.mailboxId}/${email.id}/email.eml`);
       await Promise.all(
@@ -116,36 +130,36 @@ export async function GET(request: Request) {
         createdAt: new Date(),
       })
       .where(
-        emails.length
+        emailsWithAttachments.length
           ? inArray(
-              Email.id,
-              emails.map((email) => email.id)
-            )
+            Email.id,
+            emailsWithAttachments.map((email) => email.id)
+          )
           : sql`1 = 0`
       ),
 
     db.delete(EmailSender).where(
-      emails.length
+      emailsWithAttachments.length
         ? inArray(
-            EmailSender.emailId,
-            emails.map((email) => email.id)
-          )
+          EmailSender.emailId,
+          emailsWithAttachments.map((email) => email.id)
+        )
         : sql`1 = 0`
     ),
     db.delete(EmailRecipient).where(
-      emails.length
+      emailsWithAttachments.length
         ? inArray(
-            EmailRecipient.emailId,
-            emails.map((email) => email.id)
-          )
+          EmailRecipient.emailId,
+          emailsWithAttachments.map((email) => email.id)
+        )
         : sql`1 = 0`
     ),
     db.delete(EmailAttachments).where(
-      emails.length
+      emailsWithAttachments.length
         ? inArray(
-            EmailAttachments.emailId,
-            emails.map((email) => email.id)
-          )
+          EmailAttachments.emailId,
+          emailsWithAttachments.map((email) => email.id)
+        )
         : sql`1 = 0`
     ),
 
@@ -161,13 +175,13 @@ export async function GET(request: Request) {
       .where(
         tempAliases.length
           ? inArray(
-              TempAlias.id,
-              tempAliases.map((temp) => temp.id)
-            )
+            TempAlias.id,
+            tempAliases.map((temp) => temp.id)
+          )
           : sql`1 = 0`
       ),
 
-    ...emails.map((email) =>
+    ...emailsWithAttachments.map((email) =>
       db
         .update(Mailbox)
         .set({
@@ -183,6 +197,6 @@ export async function GET(request: Request) {
 
   return Response.json({
     success: true,
-    message: `Deleted ${emails.length} emails and ${tempAliases.length} temp aliases`,
+    message: `Deleted ${emailsWithAttachments.length} emails and ${tempAliases.length} temp aliases`,
   });
 }

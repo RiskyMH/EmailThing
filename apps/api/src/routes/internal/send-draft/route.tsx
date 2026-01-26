@@ -49,30 +49,31 @@ export async function POST(request: Request) {
     const currentUserId = await getSession(request);
     if (!currentUserId) return Response.json({ error: "Unauthorized" } as SendEmailResponse, { status: 401, headers: responseHeaders });
 
-    const [mailbox, userAccess] = await db.batchFetch([
-        db.query.Mailbox.findFirst({
-            where: eq(Mailbox.id, data.mailboxId),
-            columns: {
-                id: true,
-            },
-        }),
-        db.query.MailboxForUser.findFirst({
-            where: and(eq(MailboxForUser.mailboxId, data.mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),
-        }),
+    const [[mailbox], [userAccess]] = await db.batchFetch([
+        db.select({ id: Mailbox.id })
+            .from(Mailbox)
+            .where(eq(Mailbox.id, data.mailboxId))
+            .limit(1),
+        db.select()
+            .from(MailboxForUser)
+            .where(and(
+                eq(MailboxForUser.mailboxId, data.mailboxId),
+                eq(MailboxForUser.userId, currentUserId),
+                eq(MailboxForUser.isDeleted, false)
+            ))
+            .limit(1),
     ]);
 
     if (!mailbox || !userAccess) return Response.json({ error: "Access denied to mailbox" } as SendEmailResponse, { status: 403, headers: responseHeaders });
 
-    const draft = await db.query.DraftEmail.findFirst({
-        where: and(
+    const [draft] = await db.select({ id: DraftEmail.id })
+        .from(DraftEmail)
+        .where(and(
             eq(DraftEmail.id, data.draftId),
             eq(DraftEmail.mailboxId, data.mailboxId),
             eq(DraftEmail.isDeleted, false),
-        ),
-        columns: {
-            id: true,
-        },
-    });
+        ))
+        .limit(1)
 
     if (!draft) return Response.json({ error: "Draft not found" } as SendEmailResponse, { status: 404, headers: responseHeaders });
 
@@ -97,17 +98,16 @@ export async function POST(request: Request) {
     }
 
     // verify alias is valid (and user has access to it)
-    const alias = await db.query.MailboxAlias.findFirst({
-        where: and(
+
+    const [alias] = await db
+        .select({ name: MailboxAlias.name, alias: MailboxAlias.alias })
+        .from(MailboxAlias)
+        .where(and(
             eq(MailboxAlias.mailboxId, mailboxId),
             eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${from})`),
             eq(MailboxAlias.isDeleted, false),
-        ),
-        columns: {
-            name: true,
-            alias: true,
-        },
-    });
+        ))
+        .limit(1);
     if (!alias)
         return Response.json({ error: "Can't find your alias. Make sure you have access to it." } as SendEmailResponse, { status: 400, headers: responseHeaders });
 
@@ -213,26 +213,15 @@ export async function POST(request: Request) {
             .where(and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId))),
     ]);
 
+
     // send the changed data to the client
-    const sync = await db.batchFetch([
-        db.query.Mailbox.findFirst({
-            where: and(eq(Mailbox.id, mailboxId)),
-        }),
-        db.query.EmailRecipient.findMany({
-            where: and(eq(EmailRecipient.emailId, emailId)),
-        }),
-        db.query.EmailSender.findFirst({
-            where: and(eq(EmailSender.emailId, emailId)),
-        }),
-        db.query.EmailAttachments.findMany({
-            where: and(eq(EmailAttachments.emailId, emailId)),
-        }),
-        db.query.Email.findFirst({
-            where: and(eq(Email.id, emailId)),
-        }),
-        db.query.DraftEmail.findFirst({
-            where: and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId)),
-        }),
+    const [[mailboxSync], recipientsSync, [senderSync], attachmentsSync, [emailSync], [draftSync]] = await db.batchFetch([
+        db.select().from(Mailbox).where(eq(Mailbox.id, mailboxId)).limit(1),
+        db.select().from(EmailRecipient).where(eq(EmailRecipient.emailId, emailId)),
+        db.select().from(EmailSender).where(eq(EmailSender.emailId, emailId)).limit(1),
+        db.select().from(EmailAttachments).where(eq(EmailAttachments.emailId, emailId)),
+        db.select().from(Email).where(eq(Email.id, emailId)).limit(1),
+        db.select().from(DraftEmail).where(and(eq(DraftEmail.id, draftId), eq(DraftEmail.mailboxId, mailboxId))).limit(1),
     ]);
 
     return Response.json({
@@ -240,14 +229,14 @@ export async function POST(request: Request) {
             success: "Email sent",
         },
         sync: {
-            mailboxs: sync[0] ? [sync[0]] : [],
-            emails: sync[4] ? [{
-                ...sync[4],
-                recipients: sync[1],
-                sender: sync[2],
-                attachments: sync[3],
+            mailboxs: mailboxSync ? [mailboxSync] : [],
+            emails: emailSync ? [{
+                ...emailSync,
+                recipients: recipientsSync,
+                sender: senderSync,
+                attachments: attachmentsSync,
             }] : [],
-            draftEmails: sync[5] ? [sync[5]] : [],
+            draftEmails: draftSync ? [draftSync] : [],
         },
     } satisfies SendEmailResponse, { status: 200, headers: responseHeaders });
 

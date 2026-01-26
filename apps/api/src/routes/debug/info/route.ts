@@ -6,13 +6,13 @@ export async function GET() {
         Bun.$`git show -s --format="%s [%ci]" HEAD`.text().then(text => text.trim()),
     ]);
 
-    if (bunVersion !== Bun.version) {
-        throw new Error(`Bun version mismatch: ${bunVersion} !== ${Bun.version}`);
-    }
+    // if (bunVersion !== Bun.version) {
+    //     throw new Error(`Bun version mismatch: ${bunVersion} !== ${Bun.version}`);
+    // }
 
     return Response.json({
         sha,
-        bunVersion,
+        bunVersion: Bun.version,
         gitCommit,
         runtime: {
             runtimeVersion: process.versions.bun,

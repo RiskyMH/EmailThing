@@ -46,16 +46,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
     const currentUserId = await getSession(request);
     if (!currentUserId) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
-    const [mailbox, userAccess] = await db.batchFetch([
-        db.query.Mailbox.findFirst({
-            where: eq(Mailbox.id, mailboxId),
-            columns: {
-                id: true,
-            },
-        }),
-        db.query.MailboxForUser.findFirst({
-            where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),
-        }),
+    const [[mailbox], [userAccess]] = await db.batchFetch([
+        db
+            .select({ id: Mailbox.id })
+            .from(Mailbox)
+            .where(eq(Mailbox.id, mailboxId))
+            .limit(1),
+        db
+            .select()
+            .from(MailboxForUser)
+            .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)))
+            .limit(1),
     ]);
 
     if (!mailbox || !userAccess) return Response.json({ message: { error: "Access denied to mailbox" } }, { status: 403, headers });
@@ -81,25 +82,31 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
     try {
         const result = await results[type as keyof typeof results](mailboxId, data);
         if (!result) return new Response("Not allowed", { status: 403 });
-    
+
         if ("error" in result) return Response.json({ message: result }, { status: 400, headers });
 
-        const sync = await db.batchFetch([
-            db.query.Mailbox.findFirst({
-                where: eq(Mailbox.id, mailboxId),
-            }),
-            db.query.MailboxAlias.findMany({
-                where: and(eq(MailboxAlias.mailboxId, mailboxId), gte(MailboxAlias.updatedAt, date)),
-            }),
-            db.query.MailboxCustomDomain.findMany({
-                where: and(eq(MailboxCustomDomain.mailboxId, mailboxId), gte(MailboxCustomDomain.updatedAt, date)),
-            }),
-            db.query.MailboxCategory.findMany({
-                where: and(eq(MailboxCategory.mailboxId, mailboxId), gte(MailboxCategory.updatedAt, date)),
-            }),
-            db.query.TempAlias.findMany({
-                where: and(eq(TempAlias.mailboxId, mailboxId), gte(TempAlias.updatedAt, date)),
-            }),
+        const [[mailbox], mailboxAliases, mailboxCustomDomains, mailboxCategories, tempAliases, mailboxesForUser] = await db.batchFetch([
+            db
+                .select()
+                .from(Mailbox)
+                .where(eq(Mailbox.id, mailboxId))
+                .limit(1),
+            db
+                .select()
+                .from(MailboxAlias)
+                .where(and(eq(MailboxAlias.mailboxId, mailboxId), gte(MailboxAlias.updatedAt, date))),
+            db
+                .select()
+                .from(MailboxCustomDomain)
+                .where(and(eq(MailboxCustomDomain.mailboxId, mailboxId), gte(MailboxCustomDomain.updatedAt, date))),
+            db
+                .select()
+                .from(MailboxCategory)
+                .where(and(eq(MailboxCategory.mailboxId, mailboxId), gte(MailboxCategory.updatedAt, date))),
+            db
+                .select()
+                .from(TempAlias)
+                .where(and(eq(TempAlias.mailboxId, mailboxId), gte(TempAlias.updatedAt, date))),
             db.select({
                 ...getTableColumns(MailboxForUser),
                 username: User.username,
@@ -118,16 +125,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
                 ),
         ]);
 
-        return Response.json({ 
-            message: result, 
+        return Response.json({
+            message: result,
             sync: {
-                mailboxes: sync[0] ? [sync[0]] : [],
-                mailboxAliases: sync[1],
-                mailboxCustomDomains: sync[2],
-                mailboxCategories: sync[3],
-                tempAliases: sync[4],
-                mailboxesForUser: sync[5],
-            } 
+                mailboxes: mailbox ? [mailbox] : [],
+                mailboxAliases: mailboxAliases,
+                mailboxCustomDomains: mailboxCustomDomains,
+                mailboxCategories: mailboxCategories,
+                tempAliases: tempAliases,
+                mailboxesForUser: mailboxesForUser,
+            }
         } satisfies MappedPossibleDataResponse, { status: 200, headers });
     } catch (error) {
         console.error("Error in mailbox settings:", error);
@@ -212,29 +219,26 @@ async function verifyDomain(mailboxId: string, data: VerifyDomainData) {
     const { customDomain } = data;
 
     // check if mailbox plan allows for more than 1 custom domain
-    const [mailbox, customDomains, exists] = await db.batchFetch([
-        db.query.Mailbox.findFirst({
-            where: eq(Mailbox.id, mailboxId),
-            columns: {
-                plan: true,
-            },
-        }),
+    const [[mailbox], customDomains, [exists]] = await db.batchFetch([
+        db
+            .select({ plan: Mailbox.plan })
+            .from(Mailbox)
+            .where(eq(Mailbox.id, mailboxId))
+            .limit(1),
 
         db
             .select({ count: count() })
             .from(MailboxCustomDomain)
             .where(and(eq(MailboxCustomDomain.mailboxId, mailboxId), eq(MailboxCustomDomain.isDeleted, false))),
-
-        db.query.MailboxCustomDomain.findFirst({
-            where: and(
+        db
+            .select({ id: MailboxCustomDomain.id })
+            .from(MailboxCustomDomain)
+            .where(and(
                 eq(sql`lower(${MailboxCustomDomain.domain})`, sql`lower(${customDomain})`),
                 eq(MailboxCustomDomain.mailboxId, mailboxId),
                 eq(MailboxCustomDomain.isDeleted, false),
-            ),
-            columns: {
-                id: true,
-            },
-        }),
+            ))
+            .limit(1),
     ]);
 
     if (!mailbox) {
@@ -310,48 +314,51 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
     }
 
     // check if alias exists
-    const existingAlias = await db.query.MailboxAlias.findFirst({
+    const [existingAlias] = await db
+        .select({ id: MailboxAlias.id })
+        .from(MailboxAlias)
         // intentionally not checking if it's deleted, as we don't want people to get already used aliases
-        where: eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${alias})`),
-        columns: {
-            id: true,
-        },
-    });
+        .where(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${alias})`))
+        .limit(1);
 
     if (existingAlias) {
         return { error: "Alias already exists" };
     }
 
     // check if domain is a custom domain (and they have access to it) or just a default domain
-    const [defaultDomain, customDomain, aliasCount, mailbox] = await db.batchFetch([
-        db.query.DefaultDomain.findFirst({
-            where: and(
+    const [[defaultDomain], [customDomain], [aliasCount], [mailbox]] = await db.batchFetch([
+        db
+            .select()
+            .from(DefaultDomain)
+            .where(and(
                 eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${alias.split("@")[1]})`),
                 not(eq(DefaultDomain.tempDomain, true)),
                 eq(DefaultDomain.available, true),
                 eq(DefaultDomain.isDeleted, false),
-            ),
-        }),
+            ))
+            .limit(1),
 
-        db.query.MailboxCustomDomain.findFirst({
-            where: and(
+        db
+            .select()
+            .from(MailboxCustomDomain)
+            .where(and(
                 eq(MailboxCustomDomain.mailboxId, mailboxId),
                 eq(sql`lower(${MailboxCustomDomain.domain})`, sql`lower(${alias.split("@")[1]})`),
                 eq(MailboxCustomDomain.isDeleted, false),
-            ),
-        }),
+            ))
+            .limit(1),
 
         db
             .select({ count: count() })
             .from(MailboxAlias)
-            .where(and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.isDeleted, false))),
+            .where(and(eq(MailboxAlias.mailboxId, mailboxId), eq(MailboxAlias.isDeleted, false)))
+            .limit(1),
 
-        db.query.Mailbox.findFirst({
-            where: eq(Mailbox.id, mailboxId),
-            columns: {
-                plan: true,
-            },
-        }),
+        db
+            .select({ plan: Mailbox.plan })
+            .from(Mailbox)
+            .where(eq(Mailbox.id, mailboxId))
+            .limit(1),
     ]);
 
     if (!(defaultDomain || customDomain)) {
@@ -375,7 +382,7 @@ async function addAlias(mailboxId: string, data: AddAliasData) {
         }
     }
 
-    if (mailbox && aliasCount[0]?.count >= aliasLimit[mailbox.plan]) {
+    if (mailbox && (aliasCount?.count ?? 99) >= aliasLimit[mailbox.plan]) {
         return { error: "Alias limit reached" };
     }
 
@@ -402,12 +409,11 @@ async function editAlias(mailboxId: string, data: EditAliasData) {
     const { aliasId, name } = data;
 
     // check if alias exists
-    const existingAlias = await db.query.MailboxAlias.findFirst({
-        where: and(eq(MailboxAlias.id, aliasId), eq(MailboxAlias.isDeleted, false)),
-        columns: {
-            id: true,
-        },
-    });
+    const [existingAlias] = await db
+        .select({ id: MailboxAlias.id })
+        .from(MailboxAlias)
+        .where(and(eq(MailboxAlias.id, aliasId), eq(MailboxAlias.isDeleted, false)))
+        .limit(1);
 
     if (!existingAlias) {
         return { error: "Alias not found" };
@@ -434,12 +440,11 @@ async function changeDefaultAlias(mailboxId: string, data: ChangeDefaultAliasDat
     const { defaultAliasId } = data;
 
     // check if alias exists
-    const existingAlias = await db.query.MailboxAlias.findFirst({
-        where: and(eq(MailboxAlias.id, defaultAliasId), eq(MailboxAlias.isDeleted, false)),
-        columns: {
-            id: true,
-        },
-    });
+    const [existingAlias] = await db
+        .select({ id: MailboxAlias.id })
+        .from(MailboxAlias)
+        .where(and(eq(MailboxAlias.id, defaultAliasId), eq(MailboxAlias.isDeleted, false)))
+        .limit(1);
 
     if (!existingAlias) {
         return { error: "Alias not found" };
@@ -485,17 +490,15 @@ export interface DeleteAliasData {
 async function deleteAlias(mailboxId: string, data: DeleteAliasData) {
     const { aliasId } = data;
 
-    const alias = await db.query.MailboxAlias.findFirst({
-        where: and(
+    const [alias] = await db
+        .select({ default: MailboxAlias.default, alias: MailboxAlias.alias })
+        .from(MailboxAlias)
+        .where(and(
             eq(MailboxAlias.id, aliasId),
             eq(MailboxAlias.mailboxId, mailboxId),
             eq(MailboxAlias.isDeleted, false),
-        ),
-        columns: {
-            default: true,
-            alias: true,
-        },
-    });
+        ))
+        .limit(1);
 
     if (!alias) {
         return { error: "Alias not found" };
@@ -531,14 +534,16 @@ async function createTempAlias(mailboxId: string, data: CreateTempAliasData) {
     const { domain, name } = data;
 
     // check that aliasDomain is public and available
-    const defaultDomain = await db.query.DefaultDomain.findFirst({
-        where: and(
+    const [defaultDomain] = await db
+        .select()
+        .from(DefaultDomain)
+        .where(and(
             eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${domain})`),
             eq(DefaultDomain.available, true),
             eq(DefaultDomain.tempDomain, true),
             eq(DefaultDomain.isDeleted, false),
-        ),
-    });
+        ))
+        .limit(1);
     if (!defaultDomain) {
         return { error: "Domain not available" };
     }
@@ -574,22 +579,26 @@ export interface DeleteCustomDomainData {
 async function deleteCustomDomain(mailboxId: string, data: DeleteCustomDomainData) {
     const { domainId } = data;
 
-    const domain = await db.query.MailboxCustomDomain.findFirst({
-        where: and(
+    const [domain] = await db
+        .select()
+        .from(MailboxCustomDomain)
+        .where(and(
             eq(MailboxCustomDomain.id, domainId),
             eq(MailboxCustomDomain.mailboxId, mailboxId),
             eq(MailboxCustomDomain.isDeleted, false),
-        ),
-    });
+        ))
+        .limit(1);
 
-    const defaultAliasFromThis = await db.query.MailboxAlias.findFirst({
-        where: and(
+    const [defaultAliasFromThis] = await db
+        .select()
+        .from(MailboxAlias)
+        .where(and(
             eq(MailboxAlias.mailboxId, mailboxId),
             eq(MailboxAlias.default, true),
             like(sql`lower(${MailboxAlias.alias})`, sql`lower(${`%@${domain?.domain}`})`),
             eq(MailboxAlias.isDeleted, false),
-        ),
-    });
+        ))
+        .limit(1);
 
     if (!domain) {
         return { error: "Domain not found" };
@@ -690,17 +699,16 @@ async function addUserToMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE", mai
     }
 
     // check how many users are in the mailbox
-    const [mailboxUsers, mailbox] = await db.batchFetch([
+    const [mailboxUsers, [mailbox]] = await db.batchFetch([
         db
             .select({ count: count() })
             .from(MailboxForUser)
             .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.isDeleted, false))),
-        db.query.Mailbox.findFirst({
-            where: and(eq(Mailbox.id, mailboxId), eq(Mailbox.isDeleted, false)),
-            columns: {
-                plan: true,
-            },
-        }),
+        db
+            .select({ plan: Mailbox.plan })
+            .from(Mailbox)
+            .where(and(eq(Mailbox.id, mailboxId), eq(Mailbox.isDeleted, false)))
+            .limit(1),
     ]);
 
     if (!mailbox || (mailboxUsers[0] && mailboxUsers[0].count >= mailboxUsersLimit[mailbox.plan])) {
@@ -708,22 +716,22 @@ async function addUserToMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE", mai
     }
 
     // check if user exists
-    const proposedUser = await db.query.User.findFirst({
-        where: eq(sql`lower(${User.username})`, sql`lower(${username})`),
-        columns: {
-            id: true,
-            username: true,
-        },
-    });
+    const [proposedUser] = await db
+        .select({ id: User.id, username: User.username })
+        .from(User)
+        .where(eq(sql`lower(${User.username})`, sql`lower(${username})`))
+        .limit(1);
 
     if (!proposedUser) {
         return { error: `Can't find user "${username}"` };
     }
 
     // check if they already have access
-    const userAccess = await db.query.MailboxForUser.findFirst({
-        where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, proposedUser.id), eq(MailboxForUser.isDeleted, false)),
-    });
+    const [userAccess] = await db
+        .select()
+        .from(MailboxForUser)
+        .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, proposedUser.id), eq(MailboxForUser.isDeleted, false)))
+        .limit(1);
     if (userAccess) {
         return { error: "User already has access to this mailbox" };
     }
@@ -780,29 +788,26 @@ async function removeUserFromMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE"
     }
 
     // check if the current user is an admin
-    const userRole = await db.query.MailboxForUser.findFirst({
-        where: and(
+    const [userRole] = await db
+        .select({ role: MailboxForUser.role })
+        .from(MailboxForUser)
+        .where(and(
             eq(MailboxForUser.mailboxId, mailboxId),
             eq(MailboxForUser.userId, userId),
             eq(MailboxForUser.isDeleted, false),
-        ),
-        columns: {
-            role: true,
-        },
-    });
+        ))
+        .limit(1);
 
     if (userRole?.role === "OWNER") {
         return { error: "User is owner, cannot remove them" };
     }
 
     // check if user exists
-    const proposedUser = await db.query.User.findFirst({
-        where: eq(User.id, userId),
-        columns: {
-            id: true,
-            username: true,
-        },
-    });
+    const [proposedUser] = await db
+        .select({ id: User.id, username: User.username })
+        .from(User)
+        .where(eq(User.id, userId))
+        .limit(1);
 
     if (!proposedUser) {
         return { error: `Can't find user with id "${userId}"` };

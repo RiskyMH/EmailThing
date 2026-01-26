@@ -1,5 +1,4 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 import { index, integer, pgTable, varchar, boolean, timestamp, json, text } from "drizzle-orm/pg-core";
 import { Mailbox, MailboxCategory, TempAlias } from "./mailbox";
 
@@ -82,27 +81,6 @@ export const Email = pgTable(
     },
 );
 
-export const EmailRelations = relations(Email, ({ many, one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [Email.mailboxId],
-        references: [Mailbox.id],
-    }),
-    from: one(EmailSender, {
-        fields: [Email.id],
-        references: [EmailSender.emailId],
-    }),
-    recipients: many(EmailRecipient),
-    category: one(MailboxCategory, {
-        fields: [Email.categoryId],
-        references: [MailboxCategory.id],
-    }),
-    attachments: many(EmailAttachments),
-    temp: one(TempAlias, {
-        fields: [Email.tempId],
-        references: [TempAlias.id],
-    }),
-}));
-
 // Email sender
 export const EmailSender = pgTable("email_senders", {
     emailId: varchar("email_id", { length: 25 })
@@ -112,13 +90,6 @@ export const EmailSender = pgTable("email_senders", {
     name: varchar("name", { length: 20_055 }),
     address: varchar("address", { length: 20_055 }).notNull(),
 });
-
-export const EmailSenderRelations = relations(EmailSender, ({ one }) => ({
-    email: one(Email, {
-        fields: [EmailSender.emailId],
-        references: [Email.id],
-    }),
-}));
 
 // Email Recipients
 export const EmailRecipient = pgTable(
@@ -142,13 +113,6 @@ export const EmailRecipient = pgTable(
     },
 );
 
-export const EmailRecipientRelations = relations(EmailRecipient, ({ one }) => ({
-    email: one(Email, {
-        fields: [EmailRecipient.emailId],
-        references: [Email.id],
-    }),
-}));
-
 // Email Attachments
 export const EmailAttachments = pgTable(
     "email_attachments",
@@ -171,13 +135,6 @@ export const EmailAttachments = pgTable(
         };
     },
 );
-
-export const EmailAttachmentsRelations = relations(EmailAttachments, ({ one }) => ({
-    email: one(Email, {
-        fields: [EmailAttachments.emailId],
-        references: [Email.id],
-    }),
-}));
 
 // Draft email
 export const DraftEmail = pgTable(
@@ -214,9 +171,3 @@ export const DraftEmail = pgTable(
     },
 );
 
-export const DraftEmailRelations = relations(DraftEmail, ({ one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [DraftEmail.mailboxId],
-        references: [Mailbox.id],
-    }),
-}));

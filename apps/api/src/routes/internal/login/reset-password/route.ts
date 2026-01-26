@@ -81,14 +81,11 @@ export async function POST(request: Request) {
                 return ResponseJson({ error: "Username is required" }, { status: 400 });
             }
 
-            const user = await db.query.User.findFirst({
-                where: eq(sql`lower(${User.username})`, sql`lower(${username})`),
-                columns: {
-                    id: true,
-                    backupEmail: true,
-                    username: true,
-                }
-            });
+            const [user] = await db
+                .select({ id: User.id, backupEmail: User.backupEmail, username: User.username })
+                .from(User)
+                .where(eq(sql`lower(${User.username})`, sql`lower(${username})`))
+                .limit(1);
 
             if (!user?.backupEmail) {
                 // Always return success even if user doesn't exist to prevent enumeration
@@ -169,12 +166,11 @@ If you did not request this, please ignore this email.`
             }
 
             // Verify token is valid and not expired
-            const reset = await db.query.ResetPasswordToken.findFirst({
-                where: and(eq(ResetPasswordToken.token, token), gt(ResetPasswordToken.expiresAt, new Date())),
-                columns: {
-                    userId: true,
-                },
-            });
+            const [reset] = await db
+                .select({ userId: ResetPasswordToken.userId })
+                .from(ResetPasswordToken)
+                .where(and(eq(ResetPasswordToken.token, token), gt(ResetPasswordToken.expiresAt, new Date())))
+                .limit(1);
 
             if (!reset) {
                 // Increment failed attempts

@@ -35,5 +35,8 @@
     "dist",
     "src",
     "README.md"
-  ]
+  ],
+  "devDependencies": {
+    "@types/bun": "^1.3.5"
+  }
 }

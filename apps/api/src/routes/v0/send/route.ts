@@ -60,17 +60,19 @@ export async function POST(request: Request) {
     const fromObj = getInfoFromAddress(data.from);
 
     // verify alias is valid (and user has access to it)
-    const alias = await db.query.MailboxAlias.findFirst({
-        where: and(
-            eq(MailboxAlias.mailboxId, mailboxId),
-            eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${fromObj.email})`),
-            eq(MailboxAlias.isDeleted, false),
-        ),
-        columns: {
-            name: true,
-            alias: true,
-        },
-    });
+    const [alias] = await db
+        .select({
+            name: MailboxAlias.name,
+            alias: MailboxAlias.alias,
+        })
+        .from(MailboxAlias)
+        .where(
+            and(
+                eq(MailboxAlias.mailboxId, mailboxId),
+                eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${fromObj.email})`),
+                eq(MailboxAlias.isDeleted, false),
+            )
+        );
     if (!alias) return Response.json({ error: "invalid alias" }, { status: 400 });
 
     const mail = createMimeMessage();
@@ -162,8 +164,8 @@ function getInfoFromAddress(email: string) {
     // RiskyMH@emailthing.xyz => { address: "RiskyMH@emailthing.xyz" }
     // RiskyMH <RiskyMH@emailthing.xyz> => { address: "RiskyMH@emailthing.xyz", name: "RiskyMH" }
     const match = email.match(/(.*)<(.*)>/);
-    if (match) {
-        return { name: match[1].trim(), email: match[2].trim() };
+    if (match && match[2]) {
+        return { name: match[1]?.trim(), email: match[2].trim() };
     }
     return { email };
 }

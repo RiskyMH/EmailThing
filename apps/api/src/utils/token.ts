@@ -46,7 +46,7 @@ function generateRandomToken(length = 30) {
     while (token.length < length) {
         const randomValues = crypto.getRandomValues(new Uint8Array(length)); // Generate multiple random bytes
         for (let i = 0; i < randomValues.length && token.length < length; i++) {
-            const randomValue = randomValues[i];
+            const randomValue = randomValues[i]!;
             if (randomValue < maxValidValue) {
                 token += charset[randomValue % charsetLength];
             }

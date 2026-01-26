@@ -1,7 +1,6 @@
 import db, { Stats } from "@/db";
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
-// @ts-expect-error types not there :(
 import { dkimSign } from "mailauth/lib/dkim/sign";
 import type { MIMEMessage } from "mimetext";
 import { env } from "./env";
@@ -122,6 +121,7 @@ export async function withDKIM(
 
     const _message = `${message.replace(/\r?\n/g, "\r\n").trim()}\r\n`;
 
+    // @ts-expect-error they made bad types
     const signResult = await dkimSign(_message, {
         canonicalization: "relaxed/relaxed", // c=
         // algorithm: 'rsa-sha256',
@@ -131,7 +131,7 @@ export async function withDKIM(
             {
                 signingDomain: dkim?.domain || "emailthing.app", // d=
                 selector: dkim?.selector || "emailthing", // s=
-                privateKey: dkim?.privateKey || env.EMAIL_DKIM_PRIVATE_KEY,
+                privateKey: dkim?.privateKey || env.EMAIL_DKIM_PRIVATE_KEY!,
                 // algorithm: 'rsa-sha256',
                 canonicalization: "relaxed/relaxed", // c=
             },
