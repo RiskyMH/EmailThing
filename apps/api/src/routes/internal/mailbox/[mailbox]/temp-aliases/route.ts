@@ -28,25 +28,25 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     const currentUserId = await getSession(request);
     if (!currentUserId) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
-    const [mailbox, userAccess] = await db.batchFetch([
-        db.query.Mailbox.findFirst({
-            where: eq(Mailbox.id, mailboxId),
-            columns: {
-                id: true,
-            },
-        }),
-        db.query.MailboxForUser.findFirst({
-            where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),
-        }),
+    const [[mailbox], [userAccess]] = await db.batchFetch([
+        db.select({ id: Mailbox.id })
+            .from(Mailbox)
+            .where(eq(Mailbox.id, mailboxId))
+            .limit(1),
+        db.select()
+            .from(MailboxForUser)
+            .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)))
+            .limit(1),
     ]);
 
     if (!mailbox || !userAccess) return Response.json({ message: { error: "Access denied to mailbox" } }, { status: 403, headers });
 
     try {
-        const tempDomains = await db.query.DefaultDomain.findMany({
-            where: and(eq(DefaultDomain.available, true), eq(DefaultDomain.tempDomain, true), eq(DefaultDomain.isDeleted, false)),
-            orderBy: asc(DefaultDomain.createdAt)
-        })
+        const tempDomains = await db
+            .select()
+            .from(DefaultDomain)
+            .where(and(eq(DefaultDomain.available, true), eq(DefaultDomain.tempDomain, true), eq(DefaultDomain.isDeleted, false)))
+            .orderBy(asc(DefaultDomain.createdAt));
 
         return Response.json(tempDomains.map(e => e.domain), { status: 200, headers });
     } catch (error) {

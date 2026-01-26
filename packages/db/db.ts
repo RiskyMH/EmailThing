@@ -1,11 +1,11 @@
 import { drizzle as drizzleNode } from "drizzle-orm/node-postgres";
 // import { drizzle as drizzleBun } from "drizzle-orm/bun-sql";
 import type { BatchItem, BatchResponse } from "drizzle-orm/batch";
-import * as schema from "./schema";
+import { relations } from "./relations";
 
 const _db = process.versions.bun
-    ? drizzleNode(process.env.DATABASE_URL as string, { schema, logger: false })
-    : drizzleNode(process.env.DATABASE_URL as string, { schema, logger: false });
+    ? drizzleNode(process.env.DATABASE_URL as string, { relations, logger: false })
+    : drizzleNode(process.env.DATABASE_URL as string, { relations, logger: false });
 
 
 // SOME POLLYFILL FUNCTIONS TO MAKE SQLITE -> POSTGRES EASIER
@@ -36,5 +36,6 @@ db.batchUpdate = batchUpdate;
 db.batchFetch = batchFetch;
 
 export default db;
-export { schema, db };
+export { relations, db };
 export * from "./schema";
+export * as schema from "./schema";

@@ -33,7 +33,7 @@
     "@types/turndown": "^5.0.6",
     "@types/ua-parser-js": "^0.7.39",
     "autoprefixer": "^10.4.23",
-    "drizzle-kit": "^0.31.8",
+    "drizzle-kit": "^1.0.0-beta.12-a5629fb",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"

@@ -62,13 +62,11 @@ export async function POST(request: Request) {
 
     try {
         // Get user from database
-        const user = await db.query.UserSession.findFirst({
-            where: and(eq(UserSession.refreshToken, refreshToken), gt(UserSession.refreshTokenExpiresAt, new Date())),
-            columns: {
-                userId: true,
-                id: true,
-            },
-        });
+        const [user] = await db
+            .select({ userId: UserSession.userId, id: UserSession.id })
+            .from(UserSession)
+            .where(and(eq(UserSession.refreshToken, refreshToken), gt(UserSession.refreshTokenExpiresAt, new Date())))
+            .limit(1);
 
         if (!user) {
             return Response.json(

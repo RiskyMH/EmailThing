@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
     index,
     integer,
@@ -12,8 +12,6 @@ import {
     uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { caseSensitiveText, nocaseText } from "./custom-drizzle";
-import { Email } from "./email";
-import { User } from "./user";
 
 // The mailbox
 export const Mailbox = pgTable("mailboxes", {
@@ -35,15 +33,6 @@ export const Mailbox = pgTable("mailboxes", {
     isDeleted: boolean("is_deleted").default(false),
 });
 
-export const MailboxRelations = relations(Mailbox, ({ many, one }) => ({
-    aliases: many(MailboxAlias),
-    customDomains: many(MailboxCustomDomain),
-    categories: many(MailboxCategory),
-    users: many(MailboxForUser),
-    tempAliases: many(TempAlias),
-    tokens: many(MailboxTokens),
-}));
-
 // Aliases
 export const MailboxAlias = pgTable(
     "mailbox_aliases",
@@ -63,7 +52,6 @@ export const MailboxAlias = pgTable(
             .defaultNow()
             .$onUpdateFn(() => new Date()),
         default: boolean("default").default(false).notNull(),
-
         // anonymous data - but here for syncing
         isDeleted: boolean("is_deleted").default(false),
     },
@@ -78,13 +66,6 @@ export const MailboxAlias = pgTable(
         };
     },
 );
-
-export const MailboxAliasRelations = relations(MailboxAlias, ({ many, one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [MailboxAlias.mailboxId],
-        references: [Mailbox.id],
-    }),
-}));
 
 // Temp Alias (for short lived email)
 export const TempAlias = pgTable(
@@ -105,7 +86,6 @@ export const TempAlias = pgTable(
             .defaultNow()
             .$onUpdateFn(() => new Date()),
         expiresAt: timestamp("expires_at").notNull(),
-
         // anonymous data - but here for syncing
         isDeleted: boolean("is_deleted").default(false),
     },
@@ -118,14 +98,6 @@ export const TempAlias = pgTable(
         };
     },
 );
-
-export const TempAliasRelations = relations(TempAlias, ({ many, one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [TempAlias.mailboxId],
-        references: [Mailbox.id],
-    }),
-    emails: many(Email),
-}));
 
 // Custom Domains
 export const MailboxCustomDomain = pgTable(
@@ -144,7 +116,6 @@ export const MailboxCustomDomain = pgTable(
             .defaultNow()
             .$onUpdateFn(() => new Date()),
         domain: nocaseText("domain").notNull(),
-
         // anonymous data - but here for syncing
         isDeleted: boolean("is_deleted").default(false),
     },
@@ -157,13 +128,6 @@ export const MailboxCustomDomain = pgTable(
         };
     },
 );
-
-export const MailboxCustomDomainRelations = relations(MailboxCustomDomain, ({ many, one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [MailboxCustomDomain.mailboxId],
-        references: [Mailbox.id],
-    }),
-}));
 
 // API Tokens
 export const MailboxTokens = pgTable(
@@ -190,13 +154,6 @@ export const MailboxTokens = pgTable(
     }),
 );
 
-export const MailboxTokensRelations = relations(MailboxTokens, ({ many, one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [MailboxTokens.mailboxId],
-        references: [Mailbox.id],
-    }),
-}));
-
 // Categories
 export const MailboxCategory = pgTable(
     "mailbox_categories",
@@ -215,7 +172,6 @@ export const MailboxCategory = pgTable(
             // .notNull()
             .defaultNow()
             .$onUpdateFn(() => new Date()),
-
         // anonymous data - but here for syncing
         isDeleted: boolean("is_deleted").default(false),
     },
@@ -226,14 +182,6 @@ export const MailboxCategory = pgTable(
         };
     },
 );
-
-export const MailboxCategoryRelations = relations(MailboxCategory, ({ many, one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [MailboxCategory.mailboxId],
-        references: [Mailbox.id],
-    }),
-    emails: many(Email),
-}));
 
 // User mapping
 export const MailboxForUser = pgTable(
@@ -251,7 +199,6 @@ export const MailboxForUser = pgTable(
             // .notNull()
             .defaultNow()
             .$onUpdateFn(() => new Date()),
-
         // anonymous data - but here for syncing
         isDeleted: boolean("is_deleted").default(false),
     },
@@ -264,13 +211,3 @@ export const MailboxForUser = pgTable(
     },
 );
 
-export const MailboxForUserRelations = relations(MailboxForUser, ({ many, one }) => ({
-    mailbox: one(Mailbox, {
-        fields: [MailboxForUser.mailboxId],
-        references: [Mailbox.id],
-    }),
-    user: one(User, {
-        fields: [MailboxForUser.userId],
-        references: [User.id],
-    }),
-}));

@@ -32,13 +32,15 @@ export const getSession = async (request: Request, sudo = false, allowSearchPara
 
     const sessionInfo = extractUserInfoHeader(request);
 
-    const sessionToken = await db.query.UserSession.findFirst({
-        where: and(
+    const [sessionToken] = await db
+        .select()
+        .from(UserSession)
+        .where(and(
             eq(UserSession.token, token),
             gte(UserSession.tokenExpiresAt, new Date()),
             ...(sudo ? [gte(UserSession.sudoExpiresAt, new Date())] : []),
-        ),
-    });
+        ))
+        .limit(1);
 
     if (sessionToken) {
         // Fire and forget the update

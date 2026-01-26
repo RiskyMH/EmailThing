@@ -1,8 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { index, pgTable, varchar, timestamp, boolean, json, uniqueIndex } from "drizzle-orm/pg-core";
 import { nocaseText, caseSensitiveText } from "./custom-drizzle";
-import { MailboxForUser } from "./mailbox";
 
 // The User
 export const User = pgTable(
@@ -33,14 +32,6 @@ export const User = pgTable(
         uniqueUsername: uniqueIndex("user_username_unique").on(sql`lower(${table.username})`),
     }),
 );
-
-export const UserRelations = relations(User, ({ many, one }) => ({
-    notifications: many(UserNotification),
-    mailboxes: many(MailboxForUser),
-    passwordResets: many(ResetPasswordToken),
-    passkeys: many(PasskeyCredentials),
-    sessions: many(UserSession),
-}));
 
 // user session
 export const UserSession = pgTable(
@@ -75,13 +66,6 @@ export const UserSession = pgTable(
     }),
 );
 
-export const UserSessionRelations = relations(UserSession, ({ one }) => ({
-    user: one(User, {
-        fields: [UserSession.userId],
-        references: [User.id],
-    }),
-}));
-
 // passkeys
 export const PasskeyCredentials = pgTable(
     "passkey_credentials",
@@ -111,13 +95,6 @@ export const PasskeyCredentials = pgTable(
     }),
 );
 
-export const PasskeyCredentialsSchemaRelations = relations(PasskeyCredentials, ({ many, one }) => ({
-    user: one(User, {
-        fields: [PasskeyCredentials.userId],
-        references: [User.id],
-    }),
-}));
-
 // Notifications
 export const UserNotification = pgTable(
     "user_notifications",
@@ -146,13 +123,6 @@ export const UserNotification = pgTable(
     },
 );
 
-export const UserNotificationRelations = relations(UserNotification, ({ many, one }) => ({
-    user: one(User, {
-        fields: [UserNotification.userId],
-        references: [User.id],
-    }),
-}));
-
 // Reset password tokens
 export const ResetPasswordToken = pgTable(
     "reset_password_tokens",
@@ -173,13 +143,6 @@ export const ResetPasswordToken = pgTable(
         userIdx: index("reset_password_user_id").on(table.userId),
     }),
 );
-
-export const ResetPasswordTokenRelations = relations(ResetPasswordToken, ({ many, one }) => ({
-    user: one(User, {
-        fields: [ResetPasswordToken.userId],
-        references: [User.id],
-    }),
-}));
 
 // Invite codes
 export const InviteCode = pgTable("invite_codes", {

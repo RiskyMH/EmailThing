@@ -31,16 +31,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     const currentUserId = await getSession(request, false, true);
     if (!currentUserId) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
-    const [mailbox, userAccess] = await db.batchFetch([
-        db.query.Mailbox.findFirst({
-            where: eq(Mailbox.id, mailboxId),
-            columns: {
-                id: true,
-            },
-        }),
-        db.query.MailboxForUser.findFirst({
-            where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)),
-        }),
+    const [[mailbox], [userAccess]] = await db.batchFetch([
+        db.select({ id: Mailbox.id })
+            .from(Mailbox)
+            .where(eq(Mailbox.id, mailboxId))
+            .limit(1),
+        db.select()
+            .from(MailboxForUser)
+            .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserId), eq(MailboxForUser.isDeleted, false)))
+            .limit(1),
     ]);
 
     if (!mailbox || !userAccess) return Response.json({ message: { error: "Access denied to mailbox" } }, { status: 403, headers });
@@ -50,9 +49,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     const type = new URL(request.url).searchParams.get("type") as "eml" | "txt" | "html" | null;
     if (!type) return Response.json({ message: { error: "Missing type parameter" } }, { status: 400, headers });
 
-    const email = await db.query.Email.findFirst({
-        where: and(eq(Email.id, mailId), eq(Email.mailboxId, mailboxId)),
-    });
+    const [email] = await db
+        .select()
+        .from(Email)
+        .where(and(eq(Email.id, mailId), eq(Email.mailboxId, mailboxId)))
+        .limit(1);
     if (!email) return Response.json({ message: { error: "Email not found" } }, { status: 404, headers });
 
     // make it <emailid>-<subject>.eml, accept sanitized subject and remove double -

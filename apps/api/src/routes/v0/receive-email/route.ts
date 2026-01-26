@@ -53,12 +53,17 @@ export async function POST(request: Request) {
 
     if (email.messageId) {
         // work out if the email is already in the database (using Message-ID)
-        const existingEmail = await db.query.Email.findFirst({
-            where: and(eq(Email.mailboxId, mailboxId), eq(Email.givenId, email.messageId), eq(Email.isDeleted, false)),
-            columns: {
-                id: true,
-            },
-        });
+        const [existingEmail] = await db
+            .select({ id: Email.id })
+            .from(Email)
+            .where(
+                and(
+                    eq(Email.mailboxId, mailboxId),
+                    eq(Email.givenId, email.messageId),
+                    eq(Email.isDeleted, false)
+                )
+            )
+            .limit(1);
         if (existingEmail) {
             console.info("Email already exists, no need to add!");
             return Response.json({
@@ -71,13 +76,16 @@ export async function POST(request: Request) {
     }
 
     // get storage used and see if over limit
-    const mailbox = await db.query.Mailbox.findFirst({
-        where: and(eq(Mailbox.id, mailboxId), eq(Mailbox.isDeleted, false)),
-        columns: {
-            storageUsed: true,
-            plan: true,
-        },
-    });
+    const [mailbox] = await db
+        .select({ storageUsed: Mailbox.storageUsed, plan: Mailbox.plan })
+        .from(Mailbox)
+        .where(
+            and(
+                eq(Mailbox.id, mailboxId),
+                eq(Mailbox.isDeleted, false)
+            )
+        )
+        .limit(1);
 
     const limit = storageLimit[mailbox?.plan ?? "FREE"];
     if ((mailbox?.storageUsed ?? 0) > limit) {
@@ -215,30 +223,41 @@ async function getMailbox({ internal, zone, auth, to, headers }: { internal: boo
     }
 
     // check if its a default domain (and if so, check the alias and get the mailbox id)
-    const defaultDomain = await db.query.DefaultDomain.findFirst({
-        where: and(eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${zone})`), eq(DefaultDomain.authKey, auth), eq(DefaultDomain.isDeleted, false)),
-        columns: {
-            id: true,
-            tempDomain: true,
-        },
-    });
+    const [defaultDomain] = await db
+        .select({ id: DefaultDomain.id, tempDomain: DefaultDomain.tempDomain })
+        .from(DefaultDomain)
+        .where(
+            and(
+                eq(sql`lower(${DefaultDomain.domain})`, sql`lower(${zone})`),
+                eq(DefaultDomain.authKey, auth),
+                eq(DefaultDomain.isDeleted, false)
+            )
+        )
+        .limit(1);
     if (!defaultDomain) return null;
 
-    const alias = defaultDomain.tempDomain
-        ? await db.query.TempAlias.findFirst({
-            where: and(eq(sql`lower(${TempAlias.alias})`, sql`lower(${to})`), gt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)),
-            columns: {
-                mailboxId: true,
-                id: true,
-            },
-        })
-        : await db.query.MailboxAlias.findFirst({
-            where: and(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${to})`), eq(MailboxAlias.isDeleted, false)),
-            columns: {
-                mailboxId: true,
-                id: true,
-            },
-        });
+    const [alias] = defaultDomain.tempDomain
+        ? await db
+            .select({ mailboxId: TempAlias.mailboxId, id: TempAlias.id })
+            .from(TempAlias)
+            .where(
+                and(
+                    eq(sql`lower(${TempAlias.alias})`, sql`lower(${to})`),
+                    gt(TempAlias.expiresAt, new Date()),
+                    eq(TempAlias.isDeleted, false)
+                )
+            )
+            .limit(1)
+        : await db
+            .select({ mailboxId: MailboxAlias.mailboxId, id: MailboxAlias.id })
+            .from(MailboxAlias)
+            .where(
+                and(
+                    eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${to})`),
+                    eq(MailboxAlias.isDeleted, false)
+                )
+            )
+            .limit(1);
 
     if (defaultDomain.tempDomain) {
         return { mailboxId: alias?.mailboxId, tempId: alias?.id };

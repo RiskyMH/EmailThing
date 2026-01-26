@@ -1,5 +1,4 @@
 import db, {
-    DefaultDomain,
     DraftEmail,
     Email,
     EmailAttachments,
@@ -10,11 +9,8 @@ import db, {
     MailboxCategory,
     MailboxCustomDomain,
     MailboxForUser,
-    MailboxTokens,
-    PasskeyCredentials,
     TempAlias,
     User,
-    UserNotification,
 } from "@/db";
 import {
     inArray,
@@ -23,19 +19,15 @@ import {
     gte,
     eq,
     type InferSelectModel,
-    not,
-    isNull,
     getTableColumns,
     sql,
     lte,
     or,
 } from "drizzle-orm";
 // import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
-import type { BatchItem } from "drizzle-orm/batch";
 import { getSession, isValidOrigin } from "../tools";
 import { deleteFile } from "@/utils/s3";
 import { env } from "@/utils/env";
-import { PgTransaction } from "drizzle-orm/pg-core";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -87,13 +79,9 @@ export async function GET(request: Request) {
             },
         });
 
-    const [currentUser, mailboxesForUser] = await db.batchFetch([
-        db.query.User.findFirst({
-            where: eq(User.id, currentUserid),
-        }),
-        db.query.MailboxForUser.findMany({
-            where: and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
-        }),
+    const [[currentUser], mailboxesForUser] = await db.batchFetch([
+        db.select().from(User).where(eq(User.id, currentUserid)).limit(1),
+        db.select().from(MailboxForUser).where(and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false))),
     ]);
 
     if (!currentUser) return new Response("User not found", { status: 404 });
@@ -169,13 +157,9 @@ export async function POST(request: Request) {
             },
         });
 
-    const [currentUser, mailboxesForUser] = await db.batchFetch([
-        db.query.User.findFirst({
-            where: eq(User.id, currentUserid),
-        }),
-        db.query.MailboxForUser.findMany({
-            where: and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
-        }),
+    const [[currentUser], mailboxesForUser] = await db.batchFetch([
+        db.select().from(User).where(eq(User.id, currentUserid)).limit(1),
+        db.select().from(MailboxForUser).where(and(eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false))),
     ]);
 
     if (!currentUser) return new Response("User not found", { status: 404 });
@@ -740,13 +724,10 @@ async function updateEmail(tx: transaction, email: NonNullable<ChangesRequest["e
     }
 
     if (email.hardDelete) {
-        const attachments = await tx.query.EmailAttachments.findMany({
-            where: eq(EmailAttachments.emailId, email.id),
-            columns: {
-                id: true,
-                filename: true,
-            },
-        });
+        const attachments = await tx.select({
+            id: EmailAttachments.id,
+            filename: EmailAttachments.filename,
+        }).from(EmailAttachments).where(eq(EmailAttachments.emailId, email.id));
 
         await Promise.all([
             deleteFile(`${email.mailboxId}/${email.id}`),

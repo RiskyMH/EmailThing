@@ -39,35 +39,33 @@ export async function GET(request: Request) {
     if (!currentUserid) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
     if (type === "passkeys") {
-        const passkeys = await db.query.PasskeyCredentials.findMany({
-            where: and(eq(PasskeyCredentials.userId, currentUserid), eq(PasskeyCredentials.isDeleted, false)),
-            columns: {
-                id: true,
-                userId: true,
-                credentialId: false,
-                createdAt: true,
-                name: true,
-                publicKey: false,
-                isDeleted: true,
-            },
-        });
+const passkeys = await db
+    .select({
+        id: PasskeyCredentials.id,
+        userId: PasskeyCredentials.userId,
+        createdAt: PasskeyCredentials.createdAt,
+        name: PasskeyCredentials.name,
+        isDeleted: PasskeyCredentials.isDeleted,
+    })
+    .from(PasskeyCredentials)
+    .where(
+        and(eq(PasskeyCredentials.userId, currentUserid), eq(PasskeyCredentials.isDeleted, false))
+    );
         return Response.json(passkeys, { status: 200, headers });
     } else if (type === "sessions") {
-        const sessions = await db.query.UserSession.findMany({
-            where: eq(UserSession.userId, currentUserid),
-            columns: {
-                id: true,
-                userId: true,
-                createdAt: true,
-                tokenExpiresAt: true,
-                token: false,
-                refreshToken: false,
-                method: true,
-                sudoExpiresAt: true,
-                lastUsed: true,
-                refreshTokenExpiresAt: true,
-            },
-        });
+const sessions = await db
+    .select({
+        id: UserSession.id,
+        userId: UserSession.userId,
+        createdAt: UserSession.createdAt,
+        tokenExpiresAt: UserSession.tokenExpiresAt,
+        method: UserSession.method,
+        sudoExpiresAt: UserSession.sudoExpiresAt,
+        lastUsed: UserSession.lastUsed,
+        refreshTokenExpiresAt: UserSession.refreshTokenExpiresAt,
+    })
+    .from(UserSession)
+    .where(eq(UserSession.userId, currentUserid));
 
         const uaParser = new UAParser();
 
@@ -86,22 +84,35 @@ export async function GET(request: Request) {
         );
     } else if (type.startsWith("mailbox-token:")) {
         const mailboxId = type.slice("mailbox-token:".length);
-        const mailbox = await db.query.MailboxForUser.findFirst({
-            where: and(eq(MailboxForUser.mailboxId, mailboxId), eq(MailboxForUser.userId, currentUserid), eq(MailboxForUser.isDeleted, false)),
-        });
+const [mailbox] = await db
+    .select()
+    .from(MailboxForUser)
+    .where(
+        and(
+            eq(MailboxForUser.mailboxId, mailboxId),
+            eq(MailboxForUser.userId, currentUserid),
+            eq(MailboxForUser.isDeleted, false)
+        )
+    )
+    .limit(1);
         if (!mailbox) return Response.json({ message: { error: "Mailbox not found" } }, { status: 404, headers });
 
-        const tokens = await db.query.MailboxTokens.findMany({
-            where: and(eq(MailboxTokens.mailboxId, mailboxId), eq(MailboxTokens.isDeleted, false)),
-            columns: {
-                id: true,
-                mailboxId: true,
-                createdAt: true,
-                expiresAt: true,
-                token: true, // going to need to anonymize this
-                name: true,
-            },
-        });
+const tokens = await db
+    .select({
+        id: MailboxTokens.id,
+        mailboxId: MailboxTokens.mailboxId,
+        createdAt: MailboxTokens.createdAt,
+        expiresAt: MailboxTokens.expiresAt,
+        token: MailboxTokens.token,
+        name: MailboxTokens.name,
+    })
+    .from(MailboxTokens)
+    .where(
+        and(
+            eq(MailboxTokens.mailboxId, mailboxId),
+            eq(MailboxTokens.isDeleted, false)
+        )
+    );
 
         return Response.json(
             tokens.map((t) => ({ ...t, token: hideToken(t.token) })),

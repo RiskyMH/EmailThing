@@ -12,17 +12,17 @@ export async function getTokenMailbox(headers: Headers): Promise<string | null> 
     const auth = await getToken(headers);
     if (!auth) return null;
 
-    const token = await db.query.MailboxTokens.findFirst({
-        where: and(
-            eq(MailboxTokens.token, auth),
-            or(isNull(MailboxTokens.expiresAt), gt(MailboxTokens.expiresAt, new Date())),
-            eq(MailboxTokens.isDeleted, false),
-        ),
-        columns: {
-            id: true,
-            mailboxId: true,
-        },
-    });
+    const [token] = await db
+        .select({ id: MailboxTokens.id, mailboxId: MailboxTokens.mailboxId })
+        .from(MailboxTokens)
+        .where(
+            and(
+                eq(MailboxTokens.token, auth),
+                or(isNull(MailboxTokens.expiresAt), gt(MailboxTokens.expiresAt, new Date())),
+                eq(MailboxTokens.isDeleted, false),
+            )
+        )
+        .limit(1);
 
     return token?.mailboxId ?? null;
 }

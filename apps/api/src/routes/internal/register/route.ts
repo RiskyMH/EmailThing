@@ -88,13 +88,11 @@ export async function POST(request: Request) {
         }
 
         // check if invite code is valid
-        const invite = await db.query.InviteCode.findFirst({
-            where: and(eq(InviteCode.code, inviteCode), gte(InviteCode.expiresAt, new Date()), isNull(InviteCode.usedAt)),
-            columns: {
-                expiresAt: true,
-                usedAt: true,
-            },
-        });
+        const [invite] = await db
+            .select({ expiresAt: InviteCode.expiresAt, usedAt: InviteCode.usedAt })
+            .from(InviteCode)
+            .where(and(eq(InviteCode.code, inviteCode), gte(InviteCode.expiresAt, new Date()), isNull(InviteCode.usedAt)))
+            .limit(1);
 
         if (!invite) {
             // Increment failed attempts
@@ -104,9 +102,11 @@ export async function POST(request: Request) {
             return ResponseJson({ error: "Invalid invite code" }, { status: 401 });
         }
 
-        const existingUser = await db.query.User.findFirst({
-            where: eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`),
-        });
+        const [existingUser] = await db
+            .select()
+            .from(User)
+            .where(eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`))
+            .limit(1);
 
         if (existingUser) {
             // Increment failed attempts
@@ -125,9 +125,11 @@ export async function POST(request: Request) {
         }
 
         // check email alaises too
-        const existingEmail = await db.query.MailboxAlias.findFirst({
-            where: eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${`${parsedData.data.username}@emailthing.xyz`})`),
-        });
+        const [existingEmail] = await db
+            .select()
+            .from(MailboxAlias)
+            .where(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${`${parsedData.data.username}@emailthing.xyz`})`))
+            .limit(1);
 
         if (existingEmail) {
             // Increment failed attempts

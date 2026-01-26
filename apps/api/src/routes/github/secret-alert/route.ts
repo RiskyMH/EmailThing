@@ -64,28 +64,24 @@ export async function POST(request: Request) {
     }[];
 
     for (const match of json) {
-        const token = await db.query.MailboxTokens.findFirst({
-            where: eq(MailboxTokens.token, match.token),
-            columns: {
-                token: true,
-                mailboxId: true,
-            },
-        });
+        const [token] = await db
+            .select({ token: MailboxTokens.token, mailboxId: MailboxTokens.mailboxId })
+            .from(MailboxTokens)
+            .where(eq(MailboxTokens.token, match.token))
+            .limit(1);
 
         if (!token) {
             continue;
         }
 
         // get default mailbox alias and send email
-        const [alias] = await db.batchFetch([
-            db.query.MailboxAlias.findFirst({
-                where: eq(MailboxAlias.mailboxId, token.mailboxId),
-                columns: {
-                    alias: true,
-                    name: true,
-                },
-                orderBy: asc(MailboxAlias.default),
-            }),
+        const [[alias],] = await db.batchFetch([
+            db
+                .select({ alias: MailboxAlias.alias, name: MailboxAlias.name })
+                .from(MailboxAlias)
+                .where(eq(MailboxAlias.mailboxId, token.mailboxId))
+                .orderBy(asc(MailboxAlias.default))
+                .limit(1),
 
             // invalidate it
             db
