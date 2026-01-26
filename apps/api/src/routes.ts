@@ -9,10 +9,10 @@ import * as api_internal_send_draft from "./routes/internal/send-draft/route.tsx
 import * as api_internal_revoke_token from "./routes/internal/revoke-token/route.ts";
 import * as api_internal_register from "./routes/internal/register/route.ts";
 import * as api_internal_refresh_token from "./routes/internal/refresh-token/route.ts";
-import * as api_internal_mailbox_mailbox_temp_aliases from "./routes/internal/mailbox/[mailbox]/temp-aliases/route.ts";
 import * as api_internal_mailbox_mailbox_settings from "./routes/internal/mailbox/[mailbox]/settings/route.ts";
 import * as api_internal_mailbox_mailbox_mail_mail_raw from "./routes/internal/mailbox/[mailbox]/mail/[mail]/raw/route.ts";
 import * as api_internal_mailbox_mailbox_mail_mail_attachment_attachment from "./routes/internal/mailbox/[mailbox]/mail/[mail]/attachment/[attachment]/route.ts";
+import * as api_internal_mailbox_mailbox_default_domains from "./routes/internal/mailbox/[mailbox]/default-domains/route.ts";
 import * as api_internal_login_reset_password from "./routes/internal/login/reset-password/route.ts";
 import * as api_internal_login from "./routes/internal/login/route.ts";
 import * as api_internal_emailthing_me from "./routes/internal/emailthing-me/route.ts";
@@ -33,10 +33,10 @@ export default {
     "/api/internal/revoke-token": api_internal_revoke_token,
     "/api/internal/register": api_internal_register,
     "/api/internal/refresh-token": api_internal_refresh_token,
-    "/api/internal/mailbox/:mailbox/temp-aliases": api_internal_mailbox_mailbox_temp_aliases,
     "/api/internal/mailbox/:mailbox/settings": api_internal_mailbox_mailbox_settings,
     "/api/internal/mailbox/:mailbox/mail/:mail/raw": api_internal_mailbox_mailbox_mail_mail_raw,
     "/api/internal/mailbox/:mailbox/mail/:mail/attachment/:attachment": api_internal_mailbox_mailbox_mail_mail_attachment_attachment,
+    "/api/internal/mailbox/:mailbox/default-domains": api_internal_mailbox_mailbox_default_domains,
     "/api/internal/login/reset-password": api_internal_login_reset_password,
     "/api/internal/login": api_internal_login,
     "/api/internal/emailthing-me": api_internal_emailthing_me,

@@ -22,7 +22,7 @@ import {
   SmartDrawerTrigger,
 } from "@/components/ui/smart-drawer";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getMailbox, getMailboxAliases } from "@/utils/data/queries/mailbox";
+import { getMailbox, getMailboxAliases, getMailboxCustomDomains } from "@/utils/data/queries/mailbox";
 import { aliasLimit } from "@emailthing/const/limits";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -39,6 +39,10 @@ import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ContextMenuAction } from "../components";
 import changeMailboxSettings from "./_api";
+import useSWR from "swr";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { db } from "@/utils/data/db";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const addAlias = async (mailboxId: string, alias: string, name: string) => {
   return changeMailboxSettings(mailboxId, "add-alias", { alias, name });
@@ -56,17 +60,51 @@ const deleteAlias = async (mailboxId: string, aliasId: string) => {
   return changeMailboxSettings(mailboxId, "delete-alias", { aliasId });
 };
 
+export function useDefaultDomains(mailboxId: string) {
+  return useSWR<{ domains: string[], tempDomains: string[] }>(
+    `/api/internal/mailbox/${mailboxId}/default-domains`,
+    async () => {
+      if (!mailboxId) return { domains: [], tempDomains: [] };
+      if (mailboxId === "demo") return { domains: [], tempDomains: [] };
+
+      let sync = await getLogedInUserApi();
+      if (sync?.tokenNeedsRefresh) {
+        await db.refreshToken();
+        sync = await getLogedInUserApi();
+      }
+
+      const response = await fetch(
+        `${sync?.apiUrl || ""}/api/internal/mailbox/${mailboxId}/default-domains`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `session ${sync?.token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        return { domains: [], tempDomains: [] };
+      }
+      return response.json() as Promise<{ domains: string[], tempDomains: string[] }>;
+    },
+    {
+      fallbackData: { domains: ["emailthing.xyz"], tempDomains: ["temp.emailthing.xyz"] },
+    }
+  );
+
+}
 
 export default function Aliases() {
   const { mailboxId } = useParams<{ mailboxId: string }>();
 
   const data = useLiveQuery(
-    () => Promise.all([getMailbox(mailboxId!), getMailboxAliases(mailboxId!)]),
+    () => Promise.all([getMailbox(mailboxId!), getMailboxAliases(mailboxId!), getMailboxCustomDomains(mailboxId!)]),
     [mailboxId],
   );
 
-  const [mailbox, aliases] = data ?? [];
-
+  const [mailbox, aliases, customDomains] = data ?? [];
+  const { data: defaultDomainss } = useDefaultDomains(mailboxId!);
+  const defaultDomains = defaultDomainss?.domains;
 
   return (
     <div className="mb-3 max-w-[40rem]">
@@ -93,7 +131,7 @@ export default function Aliases() {
               </SmartDrawerDescription>
             </SmartDrawerHeader>
 
-            <AddAliasForm mailboxId={mailboxId!} />
+            <AddAliasForm mailboxId={mailboxId!} defaultDomains={defaultDomains} customDomains={customDomains?.map(domain => domain.domain)} />
 
             <SmartDrawerFooter className="flex pt-2 sm:hidden">
               <SmartDrawerClose asChild>
@@ -181,7 +219,6 @@ export default function Aliases() {
                             className="flex w-full gap-2"
                             disabled={!!row.default || aliases?.length <= 1}
                             asChild
-                           
                           >
                             <SmartDrawerTrigger>
                               <Trash2Icon className="size-5 text-muted-foreground" />
@@ -231,7 +268,7 @@ export default function Aliases() {
   );
 }
 
-export function AddAliasForm({ mailboxId }: { mailboxId: string }) {
+export function AddAliasForm({ mailboxId, defaultDomains, customDomains }: { mailboxId: string; defaultDomains?: string[]; customDomains?: string[] }) {
   const [isPending, startTransition] = useTransition();
 
   const formSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -240,7 +277,7 @@ export function AddAliasForm({ mailboxId }: { mailboxId: string }) {
 
     startTransition(async () => {
       // @ts-expect-error
-      const res = await addAlias(mailboxId, event.target.alias.value, event.target.name.value);
+      const res = await addAlias(mailboxId, event.target.alias.value + "@" + event.target.domain.value, event.target.name.value);
       if (res?.error) {
         toast.error(res.error);
       } else {
@@ -248,20 +285,38 @@ export function AddAliasForm({ mailboxId }: { mailboxId: string }) {
       }
     });
   };
+  const _domains = new Set<string>();
+  defaultDomains?.forEach(domain => _domains.add(domain));
+  customDomains?.forEach(domain => _domains.add(domain));
+  const domains = [..._domains]
 
   return (
     <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
       <div className="grid gap-2">
         <Label htmlFor="alias">Alias</Label>
-        <Input
-          className="border-none bg-secondary"
-          name="alias"
-          placeholder="me@example.com"
-          id="alias"
-          autoFocus
-          disabled={isPending}
-          required
-        />
+        <div className="flex gap-2 w-full">
+          <Input
+            className="border-none bg-secondary w-4/7"
+            name="alias"
+            placeholder="Johnny"
+            id="alias"
+            autoFocus
+            disabled={isPending}
+            required
+          />
+          <Select name="domain" defaultValue={domains[0]}>
+            <SelectTrigger className="w-3/7 overflow-auto border-none bg-secondary">
+              <SelectValue placeholder="@domain" className="overflow-auto" />
+            </SelectTrigger>
+            <SelectContent>
+              {domains?.map((domain, index) => (
+                <SelectItem key={domain} value={domain} defaultChecked={index === 0}>
+                  @{domain}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <Label htmlFor="name">Name</Label>
         <Input

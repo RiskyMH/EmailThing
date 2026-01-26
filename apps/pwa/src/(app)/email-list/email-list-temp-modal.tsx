@@ -25,6 +25,7 @@ import { type FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
 import useSWR from "swr";
 import changeMailboxSettings from "../mailbox-config/_api";
+import { useDefaultDomains } from "../mailbox-config/aliases";
 
 const makeTempEmail = async (mailboxId: string, domain: string, name: string) => {
   return changeMailboxSettings(mailboxId, "create-temp-alias", { domain, name });
@@ -37,36 +38,8 @@ export function CreateTempEmailForm({
   const [isPending, startTransition] = useTransition();
   const [tempEmail, setTempEmail] = useState<string | null>(null);
 
-  const { data: domains } = useSWR<string[]>(
-    `/api/internal/mailbox/${mailboxId}/temp-aliases`,
-    async () => {
-      if (!mailboxId) return [];
-      if (mailboxId === "demo") return [];
-
-      let sync = await getLogedInUserApi();
-      if (sync?.tokenNeedsRefresh) {
-        await db.refreshToken();
-        sync = await getLogedInUserApi();
-      }
-
-      const response = await fetch(
-        `${sync?.apiUrl || ""}/api/internal/mailbox/${mailboxId}/temp-aliases`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `session ${sync?.token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        return [];
-      }
-      return response.json() as Promise<string[]>;
-    },
-    {
-      fallbackData: ["temp.emailthing.xyz"],
-    }
-  );
+  const { data: defaultDomains } = useDefaultDomains(mailboxId);
+  const domains = defaultDomains?.tempDomains;
 
   const formSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

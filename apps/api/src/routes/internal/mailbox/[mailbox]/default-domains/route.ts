@@ -5,7 +5,7 @@ import { DefaultDomain, Mailbox } from "@/db";
 
 
 // right now there isn't much point for it mailbox scoped, but in future may have mailbox custom alias domains so just make my life easier
-export async function GET(request: Request, { params }: { params: Promise<{ mailbox: string }> }) {
+export async function GET(request: Bun.BunRequest) {
     const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
@@ -20,13 +20,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     };
 
     // Get mailbox ID from URL
-    const { mailbox: mailboxId } = (await params) || (request as any).params;
+    const { mailbox: mailboxId } = request.params;
 
     // Get type from search param
     const date = new Date();
 
     const currentUserId = await getSession(request);
-    if (!currentUserId) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
+    if (!currentUserId || !mailboxId) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
     const [[mailbox], [userAccess]] = await db.batchFetch([
         db.select({ id: Mailbox.id })
@@ -42,13 +42,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     if (!mailbox || !userAccess) return Response.json({ message: { error: "Access denied to mailbox" } }, { status: 403, headers });
 
     try {
-        const tempDomains = await db
+        const domains = await db
             .select()
             .from(DefaultDomain)
-            .where(and(eq(DefaultDomain.available, true), eq(DefaultDomain.tempDomain, true), eq(DefaultDomain.isDeleted, false)))
+            .where(and(eq(DefaultDomain.available, true), eq(DefaultDomain.isDeleted, false)))
             .orderBy(asc(DefaultDomain.createdAt));
 
-        return Response.json(tempDomains.map(e => e.domain), { status: 200, headers });
+        return Response.json({
+            domains: domains.filter(e => !e.tempDomain).map(e => e.domain),
+            tempDomains: domains.filter(e => e.tempDomain).map(e => e.domain),
+        }, { status: 200, headers });
     } catch (error) {
         console.error("Error in mailbox settings:", error);
         return Response.json({ message: { error: "An error occurred" } }, { status: 500, headers });
