@@ -523,7 +523,7 @@ function Categories({
     return [emails, key];
   }, [mailboxId, type, search, key]);
 
-  const { selectionMode, selectAll, selectMultiple, clearSelection, toggleSelection, getSelectedIds, getExcludedIds, getIncludedIds, getFilter } = useSelection();
+  const { selectionMode, selectAll, selectMultiple, clearSelection, getSelectedIds, getExcludedIds, getFilter } = useSelection();
 
   const isLoading = !(data || _data);
   if (isLoading) return <EmailListCategoryLoadingSkeleton />;
@@ -685,9 +685,9 @@ function Categories({
             type={type}
             selectedIds={getSelectedIds()}
             excludedIds={getExcludedIds()}
-            includedIds={getIncludedIds()}
             filter={getFilter()}
             categories={categories}
+            defaultFilter={{ categoryId, search }}
             // onComplete={clearSelection}
             onComplete={() => { }}
           />

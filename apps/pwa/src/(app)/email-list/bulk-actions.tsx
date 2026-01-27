@@ -23,10 +23,11 @@ import { toast } from "sonner";
 import type { SelectionFilter } from "./selection-context";
 import type { EmailListType } from "@/utils/data/queries/email-list";
 import TooltipText from "@/components/tooltip-text";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Collection } from "dexie";
 import { DBEmail } from "@/utils/data/types";
+import { useHoldingShift } from "@/utils/hooks";
 
 interface BulkActionsProps {
   mailboxId: string;
@@ -35,6 +36,7 @@ interface BulkActionsProps {
   excludedIds: Set<string>;
   filter: SelectionFilter | null;
   categories?: { id: string; name: string; color?: string | 0 }[];
+  defaultFilter?: { categoryId?: string | null; search?: string | null };
   onComplete: () => void;
 }
 
@@ -85,27 +87,6 @@ async function bulkDeleteDrafts(mailboxId: string, query: Collection<DBEmail, st
   }
 }
 
-const useHoldingShift = () => {
-  const [isHoldingShift, setIsHoldingShift] = useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Shift") setIsHoldingShift(true)
-    };
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "Shift") setIsHoldingShift(false)
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, []);
-
-  return isHoldingShift;
-}
 
 export function BulkActions({
   mailboxId,
@@ -114,6 +95,7 @@ export function BulkActions({
   excludedIds,
   filter,
   categories = [],
+  defaultFilter,
   onComplete
 }: BulkActionsProps) {
   const [isPending, startTransition_] = useTransition();
@@ -137,7 +119,7 @@ export function BulkActions({
       let firstId: string | undefined;
 
       if (selectedIds === "all" && filter) {
-        let allIdsQuery = getEmailListQuery({ mailboxId, type, take: 1, categoryId: filter.categoryId, search: filter.search });
+        let allIdsQuery = getEmailListQuery({ mailboxId, type, take: 1, categoryId: filter?.categoryId || undefined, search: filter?.search });
         const hasSubfilter = type !== "drafts" && filter.subFilter
         const hasExcluded = excludedIds.size > 0;
         if (hasSubfilter || hasExcluded) {
@@ -154,7 +136,26 @@ export function BulkActions({
         }
         firstId = (await allIdsQuery.first())?.id;
       } else if (selectedIds instanceof Set) {
-        firstId = Array.from(selectedIds)[0];
+        let query = db.emails.where("[id+mailboxId]").anyOf(Array.from(selectedIds).map(id => [id, mailboxId]));
+        query = query.filter(item => {
+          if (!selectedIds.has(item.id)) return false;
+          if (defaultFilter?.categoryId) {
+            if (item.categoryId !== defaultFilter.categoryId) return false;
+          }
+          if (defaultFilter?.search) {
+            const searchLower = defaultFilter.search.toLowerCase();
+            if (!(
+              (item.subject && item.subject.toLowerCase().includes(searchLower)) ||
+              (item.snippet && item.snippet.toLowerCase().includes(searchLower)) ||
+              (item.body && item.body.toLowerCase().includes(searchLower))
+            )) {
+              return false;
+            }
+          }
+          return true;
+        });
+        // firstId = Array.from(selectedIds)[0];
+        firstId = (await query.first())?.id;
       } else {
         return null;
       }
@@ -184,7 +185,7 @@ export function BulkActions({
       let query = null as null | Collection<DBEmail, string, DBEmail>;
 
       if (selectedIds === "all" && filter) {
-        let allIdsQuery = getEmailListQuery({ mailboxId, type, take: Infinity, categoryId: filter.categoryId, search: filter.search });
+        let allIdsQuery = getEmailListQuery({ mailboxId, type, take: Infinity, categoryId: filter?.categoryId, search: filter?.search });
         const hasSubfilter = type !== "drafts" && filter.subFilter
         const hasExcluded = excludedIds.size > 0;
         if (hasSubfilter || hasExcluded) {
@@ -202,6 +203,24 @@ export function BulkActions({
         query = allIdsQuery;
       } else if (selectedIds instanceof Set) {
         query = db.emails.where("[id+mailboxId]").anyOf(Array.from(selectedIds).map(id => [id, mailboxId]));
+        query = query.filter(item => {
+          if (!selectedIds.has(item.id)) return false;
+          if (defaultFilter?.categoryId) {
+            if (item.categoryId !== defaultFilter.categoryId) return false;
+          }
+          if (defaultFilter?.search) {
+            const searchLower = defaultFilter.search.toLowerCase();
+            if (!(
+              (item.subject && item.subject.toLowerCase().includes(searchLower)) ||
+              (item.snippet && item.snippet.toLowerCase().includes(searchLower)) ||
+              (item.body && item.body.toLowerCase().includes(searchLower))
+            )) {
+              return false;
+            }
+          }
+          return true;
+        });
+
       } else {
         return;
       }

@@ -13,10 +13,10 @@ export interface SelectionFilter {
   subFilter?: 'read' | 'unread' | 'starred' | 'unstarred';
 }
 
-type SelectionMode = 
+type SelectionMode =
   | { type: "none" }
   | { type: "some"; ids: Set<string> }
-  | { type: "all"; filter: SelectionFilter; excludedIds: Set<string>; includedIds: Set<string> };
+  | { type: "all"; filter: SelectionFilter; excludedIds: Set<string> };
 
 interface SelectionContextValue {
   selectionMode: SelectionMode;
@@ -28,7 +28,6 @@ interface SelectionContextValue {
   clearSelection: () => void;
   getSelectedIds: () => Set<string> | "all";
   getExcludedIds: () => Set<string>;
-  getIncludedIds: () => Set<string>;
   getFilter: () => SelectionFilter | null;
 }
 
@@ -40,8 +39,8 @@ export function SelectionProvider({ children }: PropsWithChildren) {
   const isSelected = useCallback((email: DBEmail): boolean => {
     if (selectionMode.type === "none") return false;
     if (selectionMode.type === "all") {
-      // Selected if: (matches filter AND not excluded) OR explicitly included
-      const isSelected = selectionMode.includedIds.has(email.id) || !selectionMode.excludedIds.has(email.id);
+      // Selected if: (matches filter AND not excluded)
+      const isSelected = !selectionMode.excludedIds.has(email.id);
       if (!isSelected) return false;
 
       if (selectionMode.filter.subFilter) {
@@ -64,15 +63,14 @@ export function SelectionProvider({ children }: PropsWithChildren) {
       if (prev.type === "all") {
         // When in "all" mode, clicking toggles exclusion (assumes email matches filter)
         const newExcludedIds = new Set(prev.excludedIds);
-        const newIncludedIds = new Set(prev.includedIds);
-        
+
         if (newExcludedIds.has(id)) {
           newExcludedIds.delete(id);
         } else {
           newExcludedIds.add(id);
         }
-        
-        return { type: "all", filter: prev.filter, excludedIds: newExcludedIds, includedIds: newIncludedIds };
+
+        return { type: "all", filter: prev.filter, excludedIds: newExcludedIds };
       }
       // type === "some"
       const newIds = new Set(prev.ids);
@@ -95,8 +93,7 @@ export function SelectionProvider({ children }: PropsWithChildren) {
       }
       if (prev.type === "all") {
         const newExcludedIds = new Set(prev.excludedIds);
-        const newIncludedIds = new Set(prev.includedIds);
-        
+
         if (emailMatchesFilter) {
           // Email matches filter - toggle exclusion
           if (newExcludedIds.has(id)) {
@@ -104,16 +101,9 @@ export function SelectionProvider({ children }: PropsWithChildren) {
           } else {
             newExcludedIds.add(id);
           }
-        } else {
-          // Email doesn't match filter - toggle inclusion
-          if (newIncludedIds.has(id)) {
-            newIncludedIds.delete(id);
-          } else {
-            newIncludedIds.add(id);
-          }
         }
-        
-        return { type: "all", filter: prev.filter, excludedIds: newExcludedIds, includedIds: newIncludedIds };
+
+        return { type: "all", filter: prev.filter, excludedIds: newExcludedIds };
       }
       // type === "some"
       const newIds = new Set(prev.ids);
@@ -130,7 +120,7 @@ export function SelectionProvider({ children }: PropsWithChildren) {
   }, []);
 
   const selectAll = useCallback((filter: SelectionFilter) => {
-    setSelectionMode({ type: "all", filter, excludedIds: new Set(), includedIds: new Set() });
+    setSelectionMode({ type: "all", filter, excludedIds: new Set() });
   }, []);
 
   const selectMultiple = useCallback((ids: string[]) => {
@@ -156,11 +146,6 @@ export function SelectionProvider({ children }: PropsWithChildren) {
     return new Set();
   }, [selectionMode]);
 
-  const getIncludedIds = useCallback((): Set<string> => {
-    if (selectionMode.type === "all") return selectionMode.includedIds;
-    return new Set();
-  }, [selectionMode]);
-
   const getFilter = useCallback((): SelectionFilter | null => {
     if (selectionMode.type === "all") return selectionMode.filter;
     return null;
@@ -181,7 +166,6 @@ export function SelectionProvider({ children }: PropsWithChildren) {
         clearSelection,
         getSelectedIds,
         getExcludedIds,
-        getIncludedIds,
         getFilter,
       }}
     >

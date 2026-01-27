@@ -22,3 +22,25 @@ export function useMailbox() {
   const params = useParams<"mailboxId">();
   return useMemo(() => params.mailboxId, [params.mailboxId]);
 }
+
+export const useHoldingShift = () => {
+  const [isHoldingShift, setIsHoldingShift] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setIsHoldingShift(true)
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setIsHoldingShift(false)
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  return isHoldingShift;
+}
