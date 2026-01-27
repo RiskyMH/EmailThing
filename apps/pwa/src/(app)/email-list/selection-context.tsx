@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type PropsWithChildren } from "react";
+import { createContext, useContext, useState, useCallback, type PropsWithChildren, useEffect } from "react";
 import type { EmailListType } from "@/utils/data/queries/email-list";
 import { DBEmail } from "@/utils/data/types";
+import { useLocation } from "react-router-dom";
 
 export interface SelectionFilter {
   mailboxId: string;
@@ -164,6 +165,9 @@ export function SelectionProvider({ children }: PropsWithChildren) {
     if (selectionMode.type === "all") return selectionMode.filter;
     return null;
   }, [selectionMode]);
+
+  const navigate = useLocation();
+  useEffect(clearSelection, [navigate.pathname, clearSelection]);
 
   return (
     <SelectionContext.Provider
