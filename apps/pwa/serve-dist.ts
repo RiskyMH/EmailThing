@@ -1,14 +1,14 @@
 import type { BunFile } from "bun";
 import { watch } from "node:fs";
 
-const files = new Bun.Glob("**/*").scan({ cwd: "./dist" });
+const files = new Bun.Glob("**/*").scan({ cwd: `${import.meta.dir}/dist` });
 
 async function getRoutes() {
   const routes: Record<string, Response | BunFile> = {};
   for await (const filename of files) {
     try {
       const path = filename.replace(/\[([^\]]+)\]/g, ":$1").replace(/\\/g, "/");
-      const file = Bun.file(`./dist/${filename}`);
+      const file = Bun.file(`${import.meta.dir}/dist/${filename}`);
       routes[`/${path}`] = file;
       if (path.endsWith(".html")) {
         routes[`/${path.replace(".html", "")}`] = file;
@@ -20,7 +20,7 @@ async function getRoutes() {
       console.error(e);
     }
   }
-  const redirects = await Bun.file("./dist/_redirects").text();
+  const redirects = await Bun.file(`${import.meta.dir}/dist/_redirects`).text();
   for (const redirect of redirects.split("\n")) {
     if (redirect.startsWith("#")) continue;
     const [from, to, status] = redirect.split(" ");
@@ -35,7 +35,7 @@ const server = Bun.serve({
 });
 console.info(`Server is running on ${server.url}`);
 
-watch("./dist", {}, async () => {
+watch(`${import.meta.dir}/dist`, {}, async () => {
   // server.reload({
   //     routes: await getRoutes(),
   //     fetch(request) {
@@ -46,4 +46,4 @@ watch("./dist", {}, async () => {
   console.info("may want to reload (dist changed)")
 })
 
-watch("./dist", {}, async () => { });
+watch(`${import.meta.dir}/dist`, {}, async () => { });

@@ -8,7 +8,7 @@ import {
   getEmailCount,
   getEmailList,
 } from "@/utils/data/queries/email-list";
-import { getCategories, getMailbox, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
+import { getCategories, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
 import { tempEmailsLimit } from "@emailthing/const/limits";
 import { formatTimeAgo } from "@/utils/tools";
 import { cn } from "@/utils/tw";
@@ -29,8 +29,16 @@ import {
 } from "date-fns";
 import { type Observable, liveQuery } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, ChevronDown, StarIcon, MailOpenIcon, XIcon, StarOffIcon, ListChecksIcon } from "lucide-react";
+import MailUnreadIcon from "@/components/icons/mail-unread";
 import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useParams, useSearchParams } from "react-router-dom";
 import { EmailItem } from "./email-list-item";
@@ -48,8 +56,10 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { db } from "@/utils/data/db";
+import { SelectionProvider, useSelection } from "./selection-context";
+import { BulkActions } from "./bulk-actions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function EmailListSuspenced({
   filter,
@@ -115,28 +125,29 @@ function EmailList({
   return (
     <ResizablePanelGroup direction="horizontal" className="flex w-full min-w-0 flex-row h-full gap-2 2xl:gap-3 md:[.emailscolumn_&]:pb-2 md:[.emailscolumn_&]:pe-2 emailslist bg-sidebar">
       <ResizablePanel className="flex w-full flex-col //p-3 md:[.emailscolumn_&]:w-1/2 xl:[.emailscolumn_&]:w-2/5 h-full overflow-auto md:[.emailscolumn_&]:rounded-lg @container" defaultSize={isLg ? 40 : 50} minSize={isLg ? 30 : 35} collapsible={false}>
-        {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
-        <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-background px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
-          <Categories filter={type} />
-        </div>
+        <SelectionProvider>
+          {/* <div className="flex flex-col h-full gap-2 pb-2 bg-card rounded-lg overflow-auto"> */}
+          <div className="overflow z-10 flex h-10 w-full min-w-0 flex-row items-center justify-center gap-2 //overflow-y-hidden border-b-2 bg-background px-4 md:[.emailscolumn_&]:rounded-t-lg sm:rounded-tl-lg ">
+            <Categories filter={type} />
+          </div>
 
-        <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-background pt-2 //px-2" id="email-list-content">
-          <Emails filter={type} />
-        </div>
-        <Title type={type} />
-        {/* </div> */}
+          <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden w-full bg-background pt-2 //px-2" id="email-list-content">
+            <Emails filter={type} />
+          </div>
+          <Title type={type} />
+          {/* </div> */}
+        </SelectionProvider>
       </ResizablePanel>
 
       <ResizableHandle className="bg-transparent mx-[-0.25rem] 2xl:mx-[-0.375rem] w-0 max-sm:hidden" />
 
       <ResizablePanel className="min-w-0 flex-col h-full //p-3 md:[.emailscolumn_&]:flex hidden w-1/2 xl:w-3/5 rounded-lg overflow-auto @container" minSize={isLg ? 30 : 35} collapsible={false}>
         {/* <div className=" bg-card rounded-lg h-full overflow-auto">
-        </div> */}
+          </div> */}
         <MailItemSuspense />
       </ResizablePanel>
 
     </ResizablePanelGroup>
-
   );
 }
 
@@ -495,6 +506,7 @@ function Categories({
   const params = useParams<"mailboxId">();
   const searchParams = useSearchParams()[0];
   const search = searchParams.get("q") as string | null;
+  const categoryId = searchParams.get("category") as string | null;
   const mailboxId =
     params.mailboxId === "[mailboxId]" || !params.mailboxId ? "demo" : params.mailboxId;
   const baseUrl = `/mail/${mailboxId}${type === "inbox" ? "" : `/${type}`}`;
@@ -511,6 +523,8 @@ function Categories({
     return [emails, key];
   }, [mailboxId, type, search, key]);
 
+  const { selectionMode, selectAll, selectMultiple, clearSelection, getSelectedIds, getExcludedIds, getFilter } = useSelection();
+
   const isLoading = !(data || _data);
   if (isLoading) return <EmailListCategoryLoadingSkeleton />;
 
@@ -526,11 +540,9 @@ function Categories({
   if (data?.[1] !== key && _data?.[1] !== key) {
     return (
       <>
-        <input
-          type="checkbox"
-          disabled
+        <Checkbox
           id="select"
-          className="my-auto mr-2 size-4 shrink-0 self-start"
+          className="my-auto mr-2 size-4 shrink-0 self-start cursor-pointer border-muted-foreground"
         />
         <div className="flex h-10 w-full min-w-0 flex-row overflow-y-hidden text-nowrap">
           <CategoryItem
@@ -558,58 +570,187 @@ function Categories({
     ReturnType<typeof getEmailCategoriesList>
   >;
 
+  const isSelecting = selectionMode.type !== "none";
+  const isAllSelected = selectionMode.type === "all";
+  const isAllActuallySelected = isAllSelected && !selectionMode.filter.subFilter && selectionMode.excludedIds.size === 0;
+  const isSomeSelected = selectionMode.type === "some";
+  const checked = isSomeSelected ? "indeterminate" : isAllSelected ? isAllActuallySelected ? true : "indeterminate" : false
+
+  const handleSelectAllToggle = (e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+    if (isAllActuallySelected) {
+      clearSelection();
+    } else {
+      selectAll({
+        mailboxId,
+        type,
+        categoryId: categoryId ?? undefined,
+        search: search ?? undefined,
+      });
+    }
+  };
+
+  const handleSelectFilter = async (filterType: 'all' | 'none' | 'empty' | 'read' | 'unread' | 'starred' | 'unstarred') => {
+    if (filterType === 'none') {
+      clearSelection();
+      return;
+    }
+
+    if (filterType === 'empty') {
+      selectMultiple([]);
+      return;
+    }
+
+    if (filterType === 'all') {
+      selectAll({
+        mailboxId,
+        type,
+        categoryId: categoryId ?? undefined,
+        search: search ?? undefined,
+      });
+      return;
+    }
+
+    // For read/unread/starred/unstarred, use "all" mode with subFilter
+    // This way it stays lazy and updates as emails change
+    selectAll({
+      mailboxId,
+      type,
+      categoryId: categoryId ?? undefined,
+      search: search ?? undefined,
+      subFilter: filterType as 'read' | 'unread' | 'starred' | 'unstarred',
+    });
+  };
+
   return (
     <>
-      <input
-        type="checkbox"
-        disabled
-        id="select"
-        className="my-auto mr-2 size-4 shrink-0 self-start"
-      />
-      <div className="flex h-10 w-full min-w-0 flex-row gap-4 overflow-y-hidden text-nowrap">
-        <CategoryItem
-          circleColor={null}
-          name={search ? "Search results" : name || "All"}
-          count={allCount}
-          link={baseUrl}
-          category={null}
-          main
-        />
-        {type !== "drafts" && !search && (categories || []).map((category) => (
-          <CategoryItem
-            key={category.id}
-            circleColor={category.color || "grey"}
-            name={category.name}
-            count={category.count || 0}
-            link={baseUrl}
-            category={category.id}
+      {isSelecting ? (
+        <>
+          <div className="flex gap-2">
+            <div className="flex gap-1 -ms-1 p-1 hover:bg-accent hover:text-accent-foreground rounded-md">
+              <Checkbox
+                checked={checked}
+                onChange={handleSelectAllToggle}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectAllToggle(e);
+                }}
+                id="select"
+                className="my-auto mr-0 size-4 shrink-0 self-start cursor-pointer border-muted-foreground z-10"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <TooltipText text="Select filter">
+                    <Button
+                      variant="ghost"
+                      size="auto"
+                      className="h-auto z-0 p-0 cursor-pointer hover:bg-transparent"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ChevronDown className="size-3.5" />
+                    </Button>
+                  </TooltipText>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => handleSelectFilter('all')}>
+                    <ListChecksIcon className="mr-2 size-4" /> All
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSelectFilter('empty')}>
+                    <XIcon className="mr-2 size-4" />
+                    None
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleSelectFilter('read')}>
+                    <MailOpenIcon className="mr-2 size-4" />
+                    Read
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSelectFilter('unread')}>
+                    <MailUnreadIcon className="mr-2 size-4" />
+                    Unread
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSelectFilter('starred')}>
+                    <StarIcon className="mr-2 size-4" />
+                    Starred
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSelectFilter('unstarred')}>
+                    <StarOffIcon className="mr-2 size-4" />
+                    Unstarred
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          <BulkActions
+            mailboxId={mailboxId}
+            type={type}
+            selectedIds={getSelectedIds()}
+            excludedIds={getExcludedIds()}
+            filter={getFilter()}
+            categories={categories}
+            defaultFilter={{ categoryId, search }}
+            // onComplete={clearSelection}
+            onComplete={() => { }}
           />
-        ))}
-      </div>
-      {type === "temp" && (
-        <SmartDrawer>
-          <SmartDrawerTrigger asChild>
-            <Button
-              size="sm"
-              className="-my-1 h-auto py-1"
-              disabled={
-                // biome-ignore lint/complexity/useOptionalChain: <explanation>
-                ((categories && categories?.length) || 0) >=
-                tempEmailsLimit[mailboxPlan as keyof typeof tempEmailsLimit]
-              }
-            >
-              Create email
-            </Button>
-          </SmartDrawerTrigger>
-          <SmartDrawerContent className="sm:max-w-[425px]">
-            <CreateTempEmailForm mailboxId={mailboxId} />
-          </SmartDrawerContent>
-        </SmartDrawer>
+          <div className="h-10" />
+        </>
+      ) : (
+        <>
+          <Checkbox
+            onChange={handleSelectAllToggle}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSelectAllToggle(e);
+            }}
+            id="select"
+            className="my-auto mr-2 size-4 shrink-0 self-start cursor-pointer border-muted-foreground"
+          />
+          <div className="flex h-10 w-full min-w-0 flex-row gap-4 overflow-y-hidden text-nowrap">
+            <CategoryItem
+              circleColor={null}
+              name={search ? "Search results" : name || "All"}
+              count={allCount}
+              link={baseUrl}
+              category={null}
+              main
+            />
+            {type !== "drafts" && !search && (categories || []).map((category) => (
+              <CategoryItem
+                key={category.id}
+                circleColor={category.color || "grey"}
+                name={category.name}
+                count={category.count || 0}
+                link={baseUrl}
+                category={category.id}
+              />
+            ))}
+          </div>
+          {type === "temp" && (
+            <SmartDrawer>
+              <SmartDrawerTrigger asChild>
+                <Button
+                  size="sm"
+                  className="-my-1 h-auto py-1"
+                  disabled={
+                    // biome-ignore lint/complexity/useOptionalChain: <explanation>
+                    ((categories && categories?.length) || 0) >=
+                    tempEmailsLimit[mailboxPlan as keyof typeof tempEmailsLimit]
+                  }
+                >
+                  Create email
+                </Button>
+              </SmartDrawerTrigger>
+              <SmartDrawerContent className="sm:max-w-[425px]">
+                <CreateTempEmailForm mailboxId={mailboxId} />
+              </SmartDrawerContent>
+            </SmartDrawer>
+          )}
+        </>
       )}
       <div className="ms-auto flex h-6 shrink-0 items-center justify-center gap-2">
         {allCount > 25 && <DirectionButton />}
         <RefreshButton />
       </div>
+
     </>
   );
 }

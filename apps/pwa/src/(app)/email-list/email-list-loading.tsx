@@ -1,4 +1,5 @@
 import { StarIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Loading() {
   return (
@@ -60,7 +61,7 @@ export function EmailListLoadingSkeleton() {
 export function EmailListCategoryLoadingSkeleton() {
   return (
     <>
-      <input type="checkbox" disabled id="select" className="my-auto mr-2 size-4 self-start" />
+      <Checkbox disabled id="select" className="my-auto mr-2 size-4 self-start border-muted-foreground" />
       <div className="inline-flex h-10 w-auto max-w-fit animate-pulse items-center justify-center gap-1 border-transparent border-b-3 px-1 font-bold">
         <span className="h-5 w-36 self-center rounded bg-muted-foreground/25" />
       </div>

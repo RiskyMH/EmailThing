@@ -228,7 +228,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                   autoCapitalize="none"
                   autoComplete="new-password"
                   autoCorrect="off"
-                  className="w-full bg-transparent focus-visible:outline-none"
+                  className="w-full bg-transparent focus-visible:outline-none placeholder:text-muted-foreground"
                   disabled={isPending}
                   required
                 />

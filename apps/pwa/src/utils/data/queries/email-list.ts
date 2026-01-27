@@ -54,7 +54,7 @@ interface EmailCategoriesListResult {
   };
 }
 
-export async function getEmailList({
+export function getEmailListQuery({
   mailboxId,
   type,
   categoryId,
@@ -188,9 +188,19 @@ export async function getEmailList({
   if (direction === "desc") {
     emailQuery = emailQuery.reverse();
   }
+  return emailQuery.offset(skip).limit(take);
+}
 
-  // Apply pagination
-  const emails = await emailQuery.offset(skip).limit(take).toArray();
+export async function getEmailList({
+  mailboxId,
+  type,
+  categoryId,
+  search,
+  take = 100,
+  skip = 0,
+  direction = "desc",
+}: EmailListOptions) {
+  const emails = await getEmailListQuery({ mailboxId, type, categoryId, search, take, skip, direction }).toArray();
 
   return emails.map((email) => {
     if (type === "drafts") {

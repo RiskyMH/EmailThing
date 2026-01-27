@@ -57,7 +57,7 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
   // Get tables that have data to process
   const tablesToProcess = Object.keys(data).filter(
     (key) => key === "user" || key === "apiCustomisations" || data[key as keyof typeof data]?.length,
-  );
+  ) as Array<keyof typeof data>;
   const dbMap = {
     emails: db.emails,
     mailboxes: db.mailboxes,
@@ -128,19 +128,37 @@ export async function parseSync(data: Partial<ChangesResponse & { time: string }
 
     // Handle updates/inserts
     const updates = tablesToProcess
-      .map((key) => {
+      .map(async (key) => {
         const items = data[key as keyof typeof data];
         if (!items) return null;
 
         switch (key) {
           case "user":
             return db.user.put(parseValues(items));
+          // @ts-ignore
           case "apiCustomisations":
             return db.apiCustomisations.put(items);
           default:
-            if (!items?.length) return null;
+            if (!items?.length || typeof items !== "object") return null;
+            const itemsValues = parseValuesInArray(items)
             // @ts-ignore
-            return dbMap[key as keyof typeof data]?.bulkPut(parseValuesInArray(items));
+            const table = (dbMap[key as keyof typeof data]) as typeof dbMap[keyof typeof dbMap] | undefined;
+
+            // filter itemsValues by if its updated is more recent than local copy
+            const localItems = await table?.bulkGet(itemsValues.map((item: any) => item.id));
+            const finalItems = itemsValues?.filter((item: any, index: number) => {
+              const localItem = localItems?.[index];
+              if (localItem && 'updatedAt' in localItem && 'updatedAt' in item) {
+                const localUpdatedAt = localItem.updatedAt instanceof Date ? localItem.updatedAt : new Date(localItem.updatedAt);
+                const remoteUpdatedAt = item.updatedAt instanceof Date ? item.updatedAt : new Date(item.updatedAt);
+                return remoteUpdatedAt > localUpdatedAt;
+              }
+              return true;
+            });
+            if (!finalItems.length) return null;
+
+            // @ts-ignore
+            return table?.bulkPut(finalItems);
         }
       })
       .filter(Boolean);
