@@ -23,14 +23,16 @@ import { toast } from "sonner";
 import type { SelectionFilter } from "./selection-context";
 import type { EmailListType } from "@/utils/data/queries/email-list";
 import TooltipText from "@/components/tooltip-text";
-import { useState, useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { Collection } from "dexie";
+import { DBEmail } from "@/utils/data/types";
 
 interface BulkActionsProps {
   mailboxId: string;
   type: EmailListType;
   selectedIds: Set<string> | "all";
   excludedIds: Set<string>;
-  includedIds: Set<string>;
   filter: SelectionFilter | null;
   categories?: { id: string; name: string; color?: string | 0 }[];
   onComplete: () => void;
@@ -38,75 +40,71 @@ interface BulkActionsProps {
 
 async function bulkUpdateEmails(
   mailboxId: string,
-  emailIds: string[],
+  query: Collection<DBEmail, string, DBEmail>,
   updates: Parameters<typeof updateEmailProperties>[2],
-  sync = true
 ) {
   if (mailboxId === "demo") {
     toast("This is a demo - changes won't actually do anything", {
       description: "But you can see how it would work in the real app!",
     });
-    return;
-  }
-
-  if (!navigator.onLine) {
+  } else if (!navigator.onLine) {
     toast.info("You are offline - changes will be synced when you come back online");
   }
 
-  await db.transaction("rw", [db.emails], async () => {
-    if (updates.hardDelete) {
-      return db.emails.bulkUpdate(emailIds.map(id => ({
-        key: id,
-        changes: { isDeleted: 1, needsSync: 1, updatedAt: new Date() }
-      })));
+  if (updates.hardDelete) {
+    if (mailboxId === "demo") {
+      await query.delete();
     } else {
-      const modify: any = { needsSync: 1, updatedAt: new Date() };
-      if (updates.isStarred !== undefined) modify.isStarred = updates.isStarred === true ? 1 : 0;
-      if (updates.isRead !== undefined) modify.isRead = updates.isRead === true ? 1 : 0;
-      if (updates.categoryId !== undefined) modify.categoryId = updates.categoryId || 0;
-      if (updates.binnedAt !== undefined) modify.binnedAt = updates.binnedAt || 0;
-      console.log("modify", modify, emailIds);
-
-      return db.emails.bulkUpdate(emailIds.map(id => ({
-        key: id,
-        changes: modify
-      })));
+      await query.modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() });
     }
-  });
+  } else {
+    const modify: any = { needsSync: 1, updatedAt: new Date() };
+    if (updates.isStarred !== undefined) modify.isStarred = updates.isStarred === true ? 1 : 0;
+    if (updates.isRead !== undefined) modify.isRead = updates.isRead === true ? 1 : 0;
+    if (updates.categoryId !== undefined) modify.categoryId = updates.categoryId || 0;
+    if (updates.binnedAt !== undefined) modify.binnedAt = updates.binnedAt || 0;
 
-  if (mailboxId !== "demo" && sync) {
-    await db.sync();
+    await query.modify(modify);
   }
 }
 
-async function bulkDeleteDrafts(mailboxId: string, emailIds: string[]) {
+async function bulkDeleteDrafts(mailboxId: string, query: Collection<DBEmail, string, DBEmail>) {
   if (mailboxId === "demo") {
     toast("This is a demo - changes won't actually do anything", {
       description: "But you can see how it would work in the real app!",
     });
-    return;
-  }
-
-  if (!navigator.onLine) {
+  } else if (!navigator.onLine) {
     toast.info("You are offline - changes will be synced when you come back online");
   }
 
-  await db.transaction("rw", [db.draftEmails], async () => {
-    for (const emailId of emailIds) {
-      if (mailboxId === "demo") {
-        await db.draftEmails.where("[id+mailboxId]").equals([emailId, mailboxId]).delete();
-      } else {
-        await db.draftEmails
-          .where("[id+mailboxId]")
-          .equals([emailId, mailboxId])
-          .modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() });
-      }
-    }
-  });
+  if (mailboxId === "demo") {
+    await query.delete();
+  } else {
+    await query.modify({ isDeleted: 1, needsSync: 1, updatedAt: new Date() });
 
-  if (mailboxId !== "demo") {
-    await db.sync();
   }
+}
+
+const useHoldingShift = () => {
+  const [isHoldingShift, setIsHoldingShift] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setIsHoldingShift(true)
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Shift") setIsHoldingShift(false)
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  return isHoldingShift;
 }
 
 export function BulkActions({
@@ -114,14 +112,13 @@ export function BulkActions({
   type,
   selectedIds,
   excludedIds,
-  includedIds,
   filter,
   categories = [],
   onComplete
 }: BulkActionsProps) {
-  const [firstEmailState, setFirstEmailState] = useState<{ isRead?: boolean; isStarred?: boolean } | null>(null);
   const [isPending, startTransition_] = useTransition();
   const [pendingType, setPendingType] = useState<string | null>(null);
+  const isHoldingShift = useHoldingShift();
 
   const startTransition = async (callback: () => Promise<void>, type?: string) => {
     setPendingType(type || null);
@@ -129,102 +126,93 @@ export function BulkActions({
       await callback();
       setPendingType(null);
     });
+    if (mailboxId !== "demo") {
+      await db.sync();
+    }
   }
 
   // Get the state of the first selected email to determine toggle behavior
-  useEffect(() => {
-    const getFirstEmailState = async () => {
-      try {
-        let firstId: string | undefined;
+  const firstEmailState = useLiveQuery(async () => {
+    try {
+      let firstId: string | undefined;
 
-        if (selectedIds === "all" && filter) {
-          let allIdsQuery = getEmailListQuery({ mailboxId, type, take: 1, categoryId: filter.categoryId, search: filter.search });
-          if (type !== "drafts" && filter.subFilter) {
-            allIdsQuery = allIdsQuery.filter((item) => {
-              switch (filter.subFilter) {
-                case 'read':
-                  return item.isRead === 1;
-                case 'unread':
-                  return item.isRead === 0;
-                case 'starred':
-                  return item.isStarred === 1;
-                case 'unstarred':
-                  return item.isStarred === 0;
-                default:
-                  return true;
-              }
-            });
-          }
-          allIdsQuery = allIdsQuery.filter(({ id }) => !excludedIds.has(id));
-          firstId = (await allIdsQuery.first())?.id;
-        } else if (selectedIds instanceof Set) {
-          firstId = Array.from(selectedIds)[0];
-        }
-
-        if (!firstId) {
-          setFirstEmailState(null);
-          return;
-        }
-
-        const email = await db.emails.where("[id+mailboxId]").equals([firstId, mailboxId]).first();
-        if (email) {
-          setFirstEmailState({
-            isRead: email.isRead === 1,
-            isStarred: email.isStarred === 1,
+      if (selectedIds === "all" && filter) {
+        let allIdsQuery = getEmailListQuery({ mailboxId, type, take: 1, categoryId: filter.categoryId, search: filter.search });
+        const hasSubfilter = type !== "drafts" && filter.subFilter
+        const hasExcluded = excludedIds.size > 0;
+        if (hasSubfilter || hasExcluded) {
+          allIdsQuery = allIdsQuery.filter((item) => {
+            const matchesSubfilter = filter.subFilter ? {
+              read: item.isRead === 1,
+              unread: item.isRead === 0,
+              starred: item.isStarred === 1,
+              unstarred: item.isStarred === 0,
+            }[filter.subFilter] : true;
+            const notExcluded = !excludedIds.has(item.id);
+            return matchesSubfilter && notExcluded;
           });
         }
-      } catch (error) {
-        console.error("Error getting first email state:", error);
+        firstId = (await allIdsQuery.first())?.id;
+      } else if (selectedIds instanceof Set) {
+        firstId = Array.from(selectedIds)[0];
+      } else {
+        return null;
       }
-    };
 
-    getFirstEmailState();
-  }, [selectedIds, excludedIds, filter, mailboxId, pendingType === null]);
+      if (!firstId) {
+        return null;
+      }
+
+      const email = await db.emails.where("[id+mailboxId]").equals([firstId, mailboxId]).first();
+      if (email) {
+        return {
+          isRead: email.isRead === 1,
+          isStarred: email.isStarred === 1,
+        };
+      }
+    } catch (error) {
+      console.error("Error getting first email state:", error);
+    }
+
+  }, [selectedIds, excludedIds, filter, mailboxId]);
 
   const handleBulkAction = async (
-    action: (emailIds: string[]) => Promise<void>,
+    action: (query: Collection<DBEmail, string, DBEmail>) => Promise<void>,
     successMessage: string
   ) => {
     try {
-      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-      let emailIds: string[];
-      console.log("selectedIds", selectedIds, { filter, excludedIds, includedIds });
+      let query = null as null | Collection<DBEmail, string, DBEmail>;
 
       if (selectedIds === "all" && filter) {
         let allIdsQuery = getEmailListQuery({ mailboxId, type, take: Infinity, categoryId: filter.categoryId, search: filter.search });
-        if (type !== "drafts" && filter.subFilter) {
+        const hasSubfilter = type !== "drafts" && filter.subFilter
+        const hasExcluded = excludedIds.size > 0;
+        if (hasSubfilter || hasExcluded) {
           allIdsQuery = allIdsQuery.filter((item) => {
-            switch (filter.subFilter) {
-              case 'read':
-                return item.isRead === 1;
-              case 'unread':
-                return item.isRead === 0;
-              case 'starred':
-                return item.isStarred === 1;
-              case 'unstarred':
-                return item.isStarred === 0;
-              default:
-                return true;
-            }
+            const matchesSubfilter = filter.subFilter ? {
+              read: item.isRead === 1,
+              unread: item.isRead === 0,
+              starred: item.isStarred === 1,
+              unstarred: item.isStarred === 0,
+            }[filter.subFilter] : true;
+            const notExcluded = !excludedIds.has(item.id);
+            return matchesSubfilter && notExcluded;
           });
         }
-        allIdsQuery = allIdsQuery.filter(({ id }) => !excludedIds.has(id));
-        emailIds = (await allIdsQuery.primaryKeys()).map(id => id.toString());
+        query = allIdsQuery;
       } else if (selectedIds instanceof Set) {
-        emailIds = Array.from(selectedIds);
+        query = db.emails.where("[id+mailboxId]").anyOf(Array.from(selectedIds).map(id => [id, mailboxId]));
       } else {
         return;
       }
 
-      if (emailIds.length === 0) {
+      if (!await query.clone().first()) {
         toast.error("No emails selected");
         return;
       }
-      console.log("Performing bulk action on email IDs:", emailIds);
-      await action(emailIds);
+      await action(query);
       toast.success(successMessage);
       onComplete();
-      db.sync();
     } catch (error) {
       toast.error("Failed to perform bulk action");
       console.error(error);
@@ -232,59 +220,51 @@ export function BulkActions({
   };
 
   const markAsRead = () => handleBulkAction(
-    (ids) => bulkUpdateEmails(mailboxId, ids, { isRead: true }, false),
+    (query) => bulkUpdateEmails(mailboxId, query, { isRead: true }),
     "Marked as read"
   );
 
   const markAsUnread = () => handleBulkAction(
-    (ids) => bulkUpdateEmails(mailboxId, ids, { isRead: false }, false),
+    (query) => bulkUpdateEmails(mailboxId, query, { isRead: false }),
     "Marked as unread"
   );
 
   const moveToTrash = () => handleBulkAction(
-    (ids) => bulkUpdateEmails(mailboxId, ids, { binnedAt: new Date() }, false),
+    (query) => bulkUpdateEmails(mailboxId, query, { binnedAt: new Date() }),
     "Moved to trash"
   );
 
   const restoreFromTrash = () => handleBulkAction(
-    (ids) => bulkUpdateEmails(mailboxId, ids, { binnedAt: null }, false),
+    (query) => bulkUpdateEmails(mailboxId, query, { binnedAt: null }),
     "Restored from trash"
   );
 
   const deleteForever = () => handleBulkAction(
-    async (ids) => {
-      if (type === "drafts") {
-        await bulkDeleteDrafts(mailboxId, ids);
-      } else {
-        await bulkUpdateEmails(mailboxId, ids, { hardDelete: true }, false);
-      }
-    },
+    (query) => (type === "drafts")
+      ? bulkDeleteDrafts(mailboxId, query)
+      : bulkUpdateEmails(mailboxId, query, { hardDelete: true }),
     "Deleted forever"
   );
 
   const categorize = (categoryId: string | null) => handleBulkAction(
-    (ids) => bulkUpdateEmails(mailboxId, ids, { categoryId }, false),
+    (query) => bulkUpdateEmails(mailboxId, query, { categoryId }),
     categoryId ? "Categorized" : "Removed category"
   );
 
-  const toggleRead = () => {
-    if (firstEmailState?.isRead) {
-      return markAsUnread();
-    } else {
-      return markAsRead();
-    }
-  };
+  const readDefaultEnabled = (firstEmailState?.isRead && !isHoldingShift) || (!firstEmailState?.isRead && isHoldingShift);
+  const toggleRead = readDefaultEnabled ? markAsUnread : markAsRead
 
+  const starDefaultEnabled = (firstEmailState?.isStarred && !isHoldingShift) || (!firstEmailState?.isStarred && isHoldingShift);
   const toggleStar = () => handleBulkAction(
-    (ids) => bulkUpdateEmails(mailboxId, ids, { isStarred: !firstEmailState?.isStarred }, false),
-    firstEmailState?.isStarred ? "Unstarred" : "Starred"
+    (query) => bulkUpdateEmails(mailboxId, query, { isStarred: !starDefaultEnabled }),
+    starDefaultEnabled ? "Unstarred" : "Starred"
   );
 
   return (
     <div className="flex items-center gap-2">
       {type !== "drafts" && (
         <>
-          <TooltipText text={firstEmailState?.isRead ? "Mark as unread" : "Mark as read"}>
+          <TooltipText text={readDefaultEnabled ? "Mark as unread" : "Mark as read"}>
             <Button
               variant="ghost"
               size="icon-sm"
@@ -294,14 +274,14 @@ export function BulkActions({
             >
               {pendingType === "toggleRead" && isPending ? (
                 <Loader2 className="size-5 animate-spin" />
-              ) : firstEmailState?.isRead ? (
+              ) : readDefaultEnabled ? (
                 <MailUnreadIcon className="size-5" />
               ) : (
                 <MailOpenIcon className="size-5" />
               )}
             </Button>
           </TooltipText>
-          <TooltipText text={firstEmailState?.isStarred ? "Unstar" : "Star"}>
+          <TooltipText text={starDefaultEnabled ? "Unstar" : "Star"}>
             <Button
               variant="ghost"
               size="icon-sm"
@@ -314,7 +294,7 @@ export function BulkActions({
               ) : (
                 <StarIcon
                   className="size-5"
-                  fill={firstEmailState?.isStarred ? "currentColor" : "none"}
+                  fill={starDefaultEnabled ? "currentColor" : "none"}
                 />
               )}
             </Button>
@@ -323,58 +303,56 @@ export function BulkActions({
       )}
 
       {!["drafts", "temp"].includes(type) ? (
-        <>
-          {type !== "trash" ? (
-            <TooltipText text="Move to trash">
+        type !== "trash" ? (
+          <TooltipText text="Move to trash">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => startTransition(moveToTrash, "moveToTrash")}
+              className="text-muted-foreground hover:text-foreground rounded-full"
+              disabled={isPending}
+            >
+              {pendingType === "moveToTrash" && isPending ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : (
+                <Trash2Icon className="size-5" />
+              )}
+            </Button>
+          </TooltipText>
+        ) : (
+          <>
+            <TooltipText text="Restore from trash">
               <Button
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => startTransition(moveToTrash, "moveToTrash")}
+                onClick={() => startTransition(restoreFromTrash, "restoreFromTrash")}
                 className="text-muted-foreground hover:text-foreground rounded-full"
                 disabled={isPending}
               >
-                {pendingType === "moveToTrash" && isPending ? (
+                {pendingType === "restoreFromTrash" && isPending ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  <ArchiveRestoreIcon className="size-5" />
+                )}
+              </Button>
+            </TooltipText>
+            <TooltipText text="Delete forever">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => startTransition(deleteForever, "deleteForever")}
+                className="text-muted-foreground hover:text-foreground rounded-full"
+                disabled={isPending}
+              >
+                {pendingType === "deleteForever" && isPending ? (
                   <Loader2 className="size-5 animate-spin" />
                 ) : (
                   <Trash2Icon className="size-5" />
                 )}
               </Button>
             </TooltipText>
-          ) : (
-            <>
-              <TooltipText text="Restore from trash">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => startTransition(restoreFromTrash, "restoreFromTrash")}
-                  className="text-muted-foreground hover:text-foreground rounded-full"
-                  disabled={isPending}
-                >
-                  {pendingType === "restoreFromTrash" && isPending ? (
-                    <Loader2 className="size-5 animate-spin" />
-                  ) : (
-                    <ArchiveRestoreIcon className="size-5" />
-                  )}
-                </Button>
-              </TooltipText>
-              <TooltipText text="Delete forever">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => startTransition(deleteForever, "deleteForever")}
-                  className="text-muted-foreground hover:text-foreground rounded-full"
-                  disabled={isPending}
-                >
-                  {pendingType === "deleteForever" && isPending ? (
-                    <Loader2 className="size-5 animate-spin" />
-                  ) : (
-                    <Trash2Icon className="size-5" />
-                  )}
-                </Button>
-              </TooltipText>
-            </>
-          )}
-        </>
+          </>
+        )
       ) : (
         <TooltipText text="Delete forever">
           <Button

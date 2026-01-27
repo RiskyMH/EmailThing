@@ -525,15 +525,6 @@ function Categories({
 
   const { selectionMode, selectAll, selectMultiple, clearSelection, toggleSelection, getSelectedIds, getExcludedIds, getIncludedIds, getFilter } = useSelection();
 
-  const checkboxRef = useRef<Element>(null);
-
-  // Set indeterminate state for checkbox
-  useEffect(() => {
-    if (checkboxRef.current) {
-      checkboxRef.current.indeterminate = selectionMode.type === "some";
-    }
-  }, [selectionMode]);
-
   const isLoading = !(data || _data);
   if (isLoading) return <EmailListCategoryLoadingSkeleton />;
 
@@ -581,11 +572,13 @@ function Categories({
 
   const isSelecting = selectionMode.type !== "none";
   const isAllSelected = selectionMode.type === "all";
+  const isAllActuallySelected = isAllSelected && !selectionMode.filter.subFilter && selectionMode.excludedIds.size === 0;
   const isSomeSelected = selectionMode.type === "some";
+  const checked = isSomeSelected ? "indeterminate" : isAllSelected ? isAllActuallySelected ? true : "indeterminate" : false
 
-  const handleSelectAllToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAllToggle = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
-    if (isAllSelected) {
+    if (isAllActuallySelected) {
       clearSelection();
     } else {
       selectAll({
@@ -636,8 +629,7 @@ function Categories({
           <div className="flex gap-2">
             <div className="flex gap-1 -ms-1 p-1 hover:bg-accent hover:text-accent-foreground rounded-md">
               <Checkbox
-                ref={checkboxRef}
-                checked={isSomeSelected ? "indeterminate" : isAllSelected}
+                checked={checked}
                 onChange={handleSelectAllToggle}
                 onClick={(e) => {
                   e.stopPropagation();
