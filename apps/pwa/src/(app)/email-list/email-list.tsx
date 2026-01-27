@@ -29,7 +29,7 @@ import {
 } from "date-fns";
 import { type Observable, liveQuery } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowDown, ArrowUp, Loader2, ChevronDown, StarIcon, MailOpenIcon, XIcon, StarOffIcon, AsteriskIcon } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, ChevronDown, StarIcon, MailOpenIcon, XIcon, StarOffIcon, ScanIcon } from "lucide-react";
 import MailUnreadIcon from "@/components/icons/mail-unread";
 import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -661,7 +661,7 @@ function Categories({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem onClick={() => handleSelectFilter('all')}>
-                    <AsteriskIcon className="mr-2 size-4" /> All
+                    <ScanIcon className="mr-2 size-4" /> All
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleSelectFilter('empty')}>
                     <XIcon className="mr-2 size-4" />
@@ -697,7 +697,7 @@ function Categories({
             filter={getFilter()}
             categories={categories}
             // onComplete={clearSelection}
-            onComplete={() => {}}
+            onComplete={() => { }}
           />
           <div className="h-10" />
         </>
