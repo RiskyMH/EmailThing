@@ -29,6 +29,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ClientStar, ContextMenuAction } from "../components";
 import { useNavigate } from "react-router-dom";
+import { useSelection } from "./selection-context";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export interface EmailItemProps {
   email: {
@@ -91,6 +93,10 @@ function useInView() {
 export function EmailItem({ email: _email, mailboxId, type, categories, isSelected }: EmailItemProps) {
   const emailId = _email.id;
   const [email, setEmail] = useState(_email);
+  const { selectionMode, isSelected: isEmailSelected, toggleSelection } = useSelection();
+  const isSelectMode = selectionMode.type !== "none";
+  const checked = isEmailSelected(email);
+
   useEffect(() => {
     if (JSON.stringify(email) !== JSON.stringify(_email)) {
       setEmail(_email);
@@ -150,53 +156,82 @@ export function EmailItem({ email: _email, mailboxId, type, categories, isSelect
 
   if (type !== "trash" && email.isDeleted === 1) return null;
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey) {
+      // window.open(link, "_blank");
+      return;
+    }
+    if (e.shiftKey) {
+      // window.open(link, "_parent");
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isSelectMode) {
+      toggleSelection(emailId);
+      return;
+    }
+
+    const isEmailColumn = document.getElementById("app:root-layout")?.classList.contains("emailscolumn");
+    const isDesktop = window.innerWidth > 768;
+    if (isEmailColumn && isDesktop) {
+      if (type !== "drafts") {
+        if (!email.isRead) {
+          updateEmail({ isRead: true });
+        }
+        const search = new URLSearchParams(window.location.search);
+        search.set("mailId", emailId);
+        navigate({ search: search.toString() });
+      }
+      else {
+        navigate(link);
+      }
+    }
+    else {
+      navigate(link);
+    }
+  };
+
   const main = (
     <a
       ref={ref}
       href={link}
-      onClick={(e) => {
-        if (e.metaKey || e.ctrlKey) {
-          // window.open(link, "_blank");
-          return;
-        }
-        if (e.shiftKey) {
-          // window.open(link, "_parent");
-          return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        const isEmailColumn = document.getElementById("app:root-layout")?.classList.contains("emailscolumn");
-        const isDesktop = window.innerWidth > 768;
-        if (isEmailColumn && isDesktop) {
-          if (type !== "drafts") {
-            if (!email.isRead) {
-              updateEmail({ isRead: true });
-            }
-            const search = new URLSearchParams(window.location.search);
-            search.set("mailId", emailId);
-            navigate({ search: search.toString() });
-          }
-          else {
-            navigate(link);
-          }
-        }
-        else {
-          navigate(link);
-        }
-      }}
+      onClick={handleClick}
       className={cn(
         "group inline-flex h-10 gap-3 rounded-md mx-2 px-2 py-1.5 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all",
         email.isRead
           ? "hover:bg-card/60"
           : "bg-card/80 text-foreground hover:bg-card/60 md:[.emailscolumn_&]:px-4 md:[.emailscolumn_&]:mx-0 md:[.emailscolumn_&]:rounded-none",
         isSelected && "md:[.emailscolumn_&]:bg-card md:[.emailscolumn_&]:hover:bg-card md:[.emailscolumn_&]:shadow-lg md:[.emailscolumn_&]:dark:drop-shadow-zinc-200 md:[.emailscolumn_&]:text-foreground md:[.emailscolumn_&]:px-2 md:[.emailscolumn_&]:mx-2 md:[.emailscolumn_&]:rounded-md",
+        checked && "bg-card/60",
       )}
     >
-      {/* Category indicator */}
-      {isInView ? (
+      {/* Category indicator or Selection checkbox */}
+      {isSelectMode ? (
+        <Checkbox
+          checked={checked}
+          onCheckedChange={() => toggleSelection(emailId)}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleSelection(emailId);
+          }}
+          className="self-center shrink-0"
+          style={{
+            borderColor: category?.color || "grey",
+            backgroundColor: checked ? (category?.color || "grey") : "transparent",
+          }}
+        />
+      ) : isInView ? (
         <TooltipText text={category?.name ?? "No category"}>
           <span
-            className="inline-block size-4 shrink-0 self-center rounded-full"
+            className="inline-block size-4 shrink-0 self-center rounded-full cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleSelection(emailId);
+            }}
             style={{
               backgroundColor: category?.color || "grey",
             }}
@@ -204,7 +239,12 @@ export function EmailItem({ email: _email, mailboxId, type, categories, isSelect
         </TooltipText>
       ) : (
         <span
-          className="inline-block size-4 shrink-0 self-center rounded-full"
+          className="inline-block size-4 shrink-0 self-center rounded-full cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSelection(emailId);
+          }}
           style={{
             backgroundColor: category?.color || "grey",
           }}
