@@ -134,7 +134,7 @@ export function SelectionProvider({ children }: PropsWithChildren) {
 
   const selectMultiple = useCallback((ids: string[]) => {
     if (ids.length === 0) {
-      setSelectionMode({ type: "none" });
+      setSelectionMode({ type: "some", ids: new Set() });
     } else {
       setSelectionMode({ type: "some", ids: new Set(ids) });
     }

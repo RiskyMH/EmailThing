@@ -1,35 +1,29 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {
   ArchiveRestoreIcon,
   CheckIcon,
   MailOpenIcon,
-  MoreHorizontalIcon,
   TagIcon,
   Trash2Icon,
   StarIcon,
   Loader2
 } from "lucide-react";
 import MailUnreadIcon from "@/components/icons/mail-unread";
-import { updateEmailProperties, getEmailList, getEmailListQuery } from "@/utils/data/queries/email-list";
+import { updateEmailProperties, getEmailListQuery } from "@/utils/data/queries/email-list";
 import { db } from "@/utils/data/db";
 import { toast } from "sonner";
 import type { SelectionFilter } from "./selection-context";
 import type { EmailListType } from "@/utils/data/queries/email-list";
 import TooltipText from "@/components/tooltip-text";
 import { useState, useEffect, useTransition } from "react";
-import { VariantProps } from "class-variance-authority";
 
 interface BulkActionsProps {
   mailboxId: string;
@@ -115,26 +109,6 @@ async function bulkDeleteDrafts(mailboxId: string, emailIds: string[]) {
   }
 }
 
-function LoaderButton({ actionn, ...props }: (
-  React.ComponentProps<"button">
-  & VariantProps<typeof buttonVariants>
-  & { asChild?: boolean }
-  & { actionn: () => Promise<void> })
-) {
-  const [isPending, startTransition] = useTransition();
-  if (isPending) {
-    return (
-      <Button
-        disabled
-        {...props}
-      >
-        <Loader2 className="size-5 animate-spin" />
-      </Button>
-    );
-  }
-  return <Button {...props} onClick={() => startTransition(actionn)} />;
-}
-
 export function BulkActions({
   mailboxId,
   type,
@@ -146,6 +120,16 @@ export function BulkActions({
   onComplete
 }: BulkActionsProps) {
   const [firstEmailState, setFirstEmailState] = useState<{ isRead?: boolean; isStarred?: boolean } | null>(null);
+  const [isPending, startTransition_] = useTransition();
+  const [pendingType, setPendingType] = useState<string | null>(null);
+
+  const startTransition = async (callback: () => Promise<void>, type?: string) => {
+    setPendingType(type || null);
+    startTransition_(async () => {
+      await callback();
+      setPendingType(null);
+    });
+  }
 
   // Get the state of the first selected email to determine toggle behavior
   useEffect(() => {
@@ -195,13 +179,14 @@ export function BulkActions({
     };
 
     getFirstEmailState();
-  }, [selectedIds, excludedIds, filter, mailboxId]);
+  }, [selectedIds, excludedIds, filter, mailboxId, pendingType === null]);
 
   const handleBulkAction = async (
     action: (emailIds: string[]) => Promise<void>,
     successMessage: string
   ) => {
     try {
+      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
       let emailIds: string[];
       console.log("selectedIds", selectedIds, { filter, excludedIds, includedIds });
 
@@ -300,31 +285,39 @@ export function BulkActions({
       {type !== "drafts" && (
         <>
           <TooltipText text={firstEmailState?.isRead ? "Mark as unread" : "Mark as read"}>
-            <LoaderButton
+            <Button
               variant="ghost"
               size="icon-sm"
-              actionn={toggleRead}
+              onClick={() => startTransition(toggleRead, "toggleRead")}
               className="text-muted-foreground hover:text-foreground rounded-full"
+              disabled={isPending}
             >
-              {firstEmailState?.isRead ? (
+              {pendingType === "toggleRead" && isPending ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : firstEmailState?.isRead ? (
                 <MailUnreadIcon className="size-5" />
               ) : (
                 <MailOpenIcon className="size-5" />
               )}
-            </LoaderButton>
+            </Button>
           </TooltipText>
           <TooltipText text={firstEmailState?.isStarred ? "Unstar" : "Star"}>
-            <LoaderButton
+            <Button
               variant="ghost"
               size="icon-sm"
-              actionn={toggleStar}
+              onClick={() => startTransition(toggleStar, "toggleStar")}
               className="text-muted-foreground hover:text-foreground rounded-full"
+              disabled={isPending}
             >
-              <StarIcon
-                className="size-5"
-                fill={firstEmailState?.isStarred ? "currentColor" : "none"}
-              />
-            </LoaderButton>
+              {pendingType === "toggleStar" && isPending ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : (
+                <StarIcon
+                  className="size-5"
+                  fill={firstEmailState?.isStarred ? "currentColor" : "none"}
+                />
+              )}
+            </Button>
           </TooltipText>
         </>
       )}
@@ -333,50 +326,70 @@ export function BulkActions({
         <>
           {type !== "trash" ? (
             <TooltipText text="Move to trash">
-              <LoaderButton
+              <Button
                 variant="ghost"
                 size="icon-sm"
-                actionn={moveToTrash}
+                onClick={() => startTransition(moveToTrash, "moveToTrash")}
                 className="text-muted-foreground hover:text-foreground rounded-full"
+                disabled={isPending}
               >
-                <Trash2Icon className="size-5" />
-              </LoaderButton>
+                {pendingType === "moveToTrash" && isPending ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  <Trash2Icon className="size-5" />
+                )}
+              </Button>
             </TooltipText>
           ) : (
             <>
               <TooltipText text="Restore from trash">
-                <LoaderButton
+                <Button
                   variant="ghost"
                   size="icon-sm"
-                  actionn={restoreFromTrash}
+                  onClick={() => startTransition(restoreFromTrash, "restoreFromTrash")}
                   className="text-muted-foreground hover:text-foreground rounded-full"
+                  disabled={isPending}
                 >
-                  <ArchiveRestoreIcon className="size-5" />
-                </LoaderButton>
+                  {pendingType === "restoreFromTrash" && isPending ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    <ArchiveRestoreIcon className="size-5" />
+                  )}
+                </Button>
               </TooltipText>
               <TooltipText text="Delete forever">
-                <LoaderButton
+                <Button
                   variant="ghost"
                   size="icon-sm"
-                  actionn={deleteForever}
+                  onClick={() => startTransition(deleteForever, "deleteForever")}
                   className="text-muted-foreground hover:text-foreground rounded-full"
+                  disabled={isPending}
                 >
-                  <Trash2Icon className="size-5" />
-                </LoaderButton>
+                  {pendingType === "deleteForever" && isPending ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    <Trash2Icon className="size-5" />
+                  )}
+                </Button>
               </TooltipText>
             </>
           )}
         </>
       ) : (
         <TooltipText text="Delete forever">
-          <LoaderButton
+          <Button
             variant="ghost"
             size="icon-sm"
-            actionn={deleteForever}
+            onClick={() => startTransition(deleteForever, "deleteForever")}
             className="text-muted-foreground hover:text-foreground rounded-full"
+            disabled={isPending}
           >
-            <Trash2Icon className="size-5" />
-          </LoaderButton>
+            {pendingType === "deleteForever" && isPending ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <Trash2Icon className="size-5" />
+            )}
+          </Button>
         </TooltipText>
       )}
 
@@ -384,23 +397,31 @@ export function BulkActions({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <TooltipText text="Categorize">
-              <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground rounded-full">
-                <TagIcon className="size-5" />
+              <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground rounded-full" disabled={isPending}>
+                {pendingType === "categorize" && isPending ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  <TagIcon className="size-5" />
+                )}
               </Button>
             </TooltipText>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => categorize(null)}>
-              <CheckIcon className="mr-2 size-5 opacity-0" />
+            <DropdownMenuItem
+              onClick={() => startTransition(categorize.bind(null, null), "categorize")}
+              className="gap-2"
+            >
+              <CheckIcon className="size-5 opacity-0" />
               None
             </DropdownMenuItem>
             {categories.map((category) => (
               <DropdownMenuItem
                 key={category.id}
-                onClick={() => categorize(category.id)}
+                onClick={() => startTransition(categorize.bind(null, category.id), "categorize")}
+                className="gap-3"
               >
                 <div
-                  className="mr-2 size-4 rounded-full"
+                  className="size-4 rounded-full"
                   style={{ backgroundColor: category.color || "grey" }}
                 />
                 {category.name}

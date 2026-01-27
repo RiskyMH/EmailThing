@@ -8,7 +8,7 @@ import {
   getEmailCount,
   getEmailList,
 } from "@/utils/data/queries/email-list";
-import { getCategories, getMailbox, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
+import { getCategories, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
 import { tempEmailsLimit } from "@emailthing/const/limits";
 import { formatTimeAgo } from "@/utils/tools";
 import { cn } from "@/utils/tw";
@@ -31,7 +31,7 @@ import { type Observable, liveQuery } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowDown, ArrowUp, Loader2, ChevronDown, StarIcon, MailOpenIcon, XIcon, StarOffIcon, AsteriskIcon } from "lucide-react";
 import MailUnreadIcon from "@/components/icons/mail-unread";
-import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,9 +56,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { db } from "@/utils/data/db";
-import { SelectionProvider } from "./selection-context";
+import { SelectionProvider, useSelection } from "./selection-context";
 import { BulkActions } from "./bulk-actions";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -524,7 +523,7 @@ function Categories({
     return [emails, key];
   }, [mailboxId, type, search, key]);
 
-  const { selectionMode, selectAll, selectMultiple, clearSelection, toggleSelection, getSelectedIds, getExcludedIds, getIncludedIds, getFilter } = require("./selection-context").useSelection();
+  const { selectionMode, selectAll, selectMultiple, clearSelection, toggleSelection, getSelectedIds, getExcludedIds, getIncludedIds, getFilter } = useSelection();
 
   const checkboxRef = useRef<Element>(null);
 
@@ -598,9 +597,14 @@ function Categories({
     }
   };
 
-  const handleSelectFilter = async (filterType: 'all' | 'none' | 'read' | 'unread' | 'starred' | 'unstarred') => {
+  const handleSelectFilter = async (filterType: 'all' | 'none' | 'empty' | 'read' | 'unread' | 'starred' | 'unstarred') => {
     if (filterType === 'none') {
       clearSelection();
+      return;
+    }
+
+    if (filterType === 'empty') {
+      selectMultiple([]);
       return;
     }
 
@@ -659,7 +663,7 @@ function Categories({
                   <DropdownMenuItem onClick={() => handleSelectFilter('all')}>
                     <AsteriskIcon className="mr-2 size-4" /> All
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSelectFilter('none')}>
+                  <DropdownMenuItem onClick={() => handleSelectFilter('empty')}>
                     <XIcon className="mr-2 size-4" />
                     None
                   </DropdownMenuItem>
@@ -692,7 +696,8 @@ function Categories({
             includedIds={getIncludedIds()}
             filter={getFilter()}
             categories={categories}
-            onComplete={clearSelection}
+            // onComplete={clearSelection}
+            onComplete={() => {}}
           />
           <div className="h-10" />
         </>
