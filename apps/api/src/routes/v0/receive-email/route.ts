@@ -33,6 +33,8 @@ export async function POST(request: Request) {
 
     const parser = new PostalMime();
     const email = await parser.parse(rawEmail as string);
+    email.html = email.html?.replaceAll("\u0000", "");
+    email.text = email.text?.replaceAll("\u0000", "");
 
     const mailboxResult = await getMailbox({
         internal: searchParams.has("internal"),
