@@ -26,7 +26,7 @@ import TooltipText from "@/components/tooltip-text";
 import { useState, useTransition } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Collection } from "dexie";
-import { DBEmail } from "@/utils/data/types";
+import { DBEmail, DBEmailDraft } from "@/utils/data/types";
 import { useHoldingShift } from "@/utils/hooks";
 
 interface BulkActionsProps {
@@ -136,19 +136,34 @@ export function BulkActions({
         }
         firstId = (await allIdsQuery.first())?.id;
       } else if (selectedIds instanceof Set) {
-        let query = db.emails.where("[id+mailboxId]").anyOf(Array.from(selectedIds).map(id => [id, mailboxId]));
+        const table = type !== "drafts" ? db.emails : db.draftEmails;
+        let query = table.where("[id+mailboxId]").anyOf(Array.from(selectedIds).map(id => [id, mailboxId]));
         query = query.filter(item => {
           if (!selectedIds.has(item.id)) return false;
-          if (defaultFilter?.categoryId) {
-            if (item.categoryId !== defaultFilter.categoryId) return false;
+          if (type === "sent" && !item.isSender) return false;
+          if (type === "trash" && !item.binnedAt) return false;
+          if (type === "starred" && !item.isStarred) return false;
+          if (type === "temp" && !item.tempId) return false;
+          if (type === "inbox" && !!item.isSender) return false;
+          if (defaultFilter?.categoryId && type !== "drafts") {
+            if ((type === "temp" ? item.tempId : item.categoryId) !== defaultFilter.categoryId) return false;
           }
           if (defaultFilter?.search) {
             const searchLower = defaultFilter.search.toLowerCase();
-            if (!(
-              (item.subject && item.subject.toLowerCase().includes(searchLower)) ||
-              (item.snippet && item.snippet.toLowerCase().includes(searchLower)) ||
-              (item.body && item.body.toLowerCase().includes(searchLower))
-            )) {
+            const searchableFields = (type === "drafts")
+              ? [item.subject, item.body].filter(Boolean)
+              : [
+                item.subject,
+                item.body,
+                item.snippet,
+                item.sender.name,
+                item.sender.address,
+                item.recipients.map((r) => r.name).join(", "),
+                item.recipients.map((r) => r.address).join(", "),
+              ].filter(Boolean);
+
+            const matchesSearch = searchableFields.some((field) => (field || "")?.toLowerCase().includes(searchLower));
+            if (!matchesSearch) {
               return false;
             }
           }
@@ -164,25 +179,24 @@ export function BulkActions({
         return null;
       }
 
-      const email = await db.emails.where("[id+mailboxId]").equals([firstId, mailboxId]).first();
+      const email = await (type !== "drafts" ? db.emails : db.draftEmails).where("[id+mailboxId]").equals([firstId, mailboxId]).first();
       if (email) {
         return {
-          isRead: email.isRead === 1,
-          isStarred: email.isStarred === 1,
+          isRead: 'isRead' in email ? email.isRead === 1 : true,
+          isStarred: 'isStarred' in email ? email.isStarred === 1 : false,
         };
       }
     } catch (error) {
       console.error("Error getting first email state:", error);
     }
-
-  }, [selectedIds, excludedIds, filter, mailboxId]);
+  }, [selectedIds, excludedIds, filter, mailboxId, type, defaultFilter]);
 
   const handleBulkAction = async (
     action: (query: Collection<DBEmail, string, DBEmail>) => Promise<void>,
     successMessage: string
   ) => {
     try {
-      let query = null as null | Collection<DBEmail, string, DBEmail>;
+      let query = null as null | Collection<DBEmail, string, DBEmail> | Collection<DBEmailDraft, string, DBEmailDraft>;
 
       if (selectedIds === "all" && filter) {
         let allIdsQuery = getEmailListQuery({ mailboxId, type, take: Infinity, categoryId: filter?.categoryId, search: filter?.search });
@@ -202,25 +216,39 @@ export function BulkActions({
         }
         query = allIdsQuery;
       } else if (selectedIds instanceof Set) {
-        query = db.emails.where("[id+mailboxId]").anyOf(Array.from(selectedIds).map(id => [id, mailboxId]));
+        const table = type !== "drafts" ? db.emails : db.draftEmails;
+        query = table.where("[id+mailboxId]").anyOf(Array.from(selectedIds).map(id => [id, mailboxId]));
         query = query.filter(item => {
           if (!selectedIds.has(item.id)) return false;
-          if (defaultFilter?.categoryId) {
+          if (type === "sent" && !item.isSender) return false;
+          if (type === "trash" && !item.binnedAt) return false;
+          if (type === "starred" && !item.isStarred) return false;
+          if (type === "temp" && !item.tempId) return false;
+          if (type === "inbox" && !!item.isSender) return false;
+          if (defaultFilter?.categoryId && type !== "drafts") {
             if (item.categoryId !== defaultFilter.categoryId) return false;
           }
           if (defaultFilter?.search) {
             const searchLower = defaultFilter.search.toLowerCase();
-            if (!(
-              (item.subject && item.subject.toLowerCase().includes(searchLower)) ||
-              (item.snippet && item.snippet.toLowerCase().includes(searchLower)) ||
-              (item.body && item.body.toLowerCase().includes(searchLower))
-            )) {
+            const searchableFields = (type === "drafts")
+              ? [item.subject, item.body].filter(Boolean)
+              : [
+                item.subject,
+                item.body,
+                item.snippet,
+                item.sender.name,
+                item.sender.address,
+                item.recipients.map((r) => r.name).join(", "),
+                item.recipients.map((r) => r.address).join(", "),
+              ].filter(Boolean);
+
+            const matchesSearch = searchableFields.some((field) => (field || "")?.toLowerCase().includes(searchLower));
+            if (!matchesSearch) {
               return false;
             }
           }
           return true;
         });
-
       } else {
         return;
       }
