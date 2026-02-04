@@ -10,16 +10,13 @@ export interface LocalTimeProps {
     tooltip?: boolean;
 }
 
-export default function LocalTimeClient({
+export default function LocalTime({
     time,
     className,
     type = "date",
-    initialTimeZone,
     tooltip = true,
-}: LocalTimeProps & { initialTimeZone?: string }) {
-    const [timeZone, setTimeZone] = useState<string | undefined>(initialTimeZone);
-
-    useEffect(() => setTimeZone(undefined), []);
+}: LocalTimeProps) {
+    const timeZone = undefined;
     time ||= new Date();
     if (!tooltip)
         return (
