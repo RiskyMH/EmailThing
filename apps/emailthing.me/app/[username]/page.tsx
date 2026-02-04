@@ -57,7 +57,7 @@ export default async function ContactUserPage(props: { params: Promise<{ usernam
                     @{user.username}
                 </span>
             </h1>
-            <Form publicEmail={user.publicEmail || `${user.username}@emailthing.me`} username={user.username} />
+            <Form publicEmail={user.publicEmail || `${user.username}@emailthing.xyz`} username={user.username} />
         </main>
     );
 }
