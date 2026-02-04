@@ -199,7 +199,7 @@ ${
       new Mailbox({ addr: email, name: name ?? undefined })
     );
 
-  const e = await sendEmail(username, mail.toString());
+  const e = await sendEmail(username, mail.asRaw());
   if (!e) return { error: "Failed to notify user" };
 
   return { success: "Successfully sent your message!" };
