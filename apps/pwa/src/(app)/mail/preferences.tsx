@@ -13,6 +13,11 @@ export default function Preferences() {
             setEmailView(localStorage.getItem("email-view") ?? "column");
         }
         fn();
+        if ((localStorage.getItem("email-view") ?? "column") === "column") {
+            document.getElementById("app:root-layout")?.classList.add("emailscolumn");
+        } else {
+            document.getElementById("app:root-layout")?.classList.remove("emailscolumn");
+        }
         window.addEventListener("storage", fn);
         return () => {
             window.removeEventListener("storage", fn);

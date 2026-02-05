@@ -35,9 +35,11 @@ export default function MailLayout({ children }: { children: React.ReactNode }) 
             // on local storage change, run fn
             window.addEventListener("storage", fn);
             window.addEventListener("load", fn);
+            window.addEventListener("DOMContentLoaded", fn);
             /* return () => {*/
             /*   window.removeEventListener("storage", fn);*/
             /*   window.removeEventListener("load", fn);*/
+            /*   window.removeEventListener("DOMContentLoaded", fn);*/
             /* }*/
           }`)
         }} />
