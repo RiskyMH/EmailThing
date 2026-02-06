@@ -23,7 +23,7 @@ export function getSignedUrl({
     });
 }
 
-export function uploadFile({ key, buffer, contentType }: { key: string; buffer: Buffer; contentType?: string }) {
+export function uploadFile({ key, buffer, contentType }: { key: string; buffer: Buffer | ArrayBuffer; contentType?: string }) {
     return s3.PutObject(
         {
             key,
