@@ -1,7 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
-import { index, pgTable, varchar, timestamp, boolean, json, uniqueIndex } from "drizzle-orm/pg-core";
-import { nocaseText, caseSensitiveText } from "./custom-drizzle";
+import { boolean, index, json, pgTable, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { caseSensitiveText, nocaseText } from "./custom-drizzle";
 
 // The User
 export const User = pgTable(

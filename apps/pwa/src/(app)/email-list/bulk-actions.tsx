@@ -1,5 +1,7 @@
 "use client";
 
+import MailUnreadIcon from "@/components/icons/mail-unread";
+import TooltipText from "@/components/tooltip-text";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,27 +9,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {
-  ArchiveRestoreIcon,
-  CheckIcon,
-  MailOpenIcon,
-  TagIcon,
-  Trash2Icon,
-  StarIcon,
-  Loader2
-} from "lucide-react";
-import MailUnreadIcon from "@/components/icons/mail-unread";
-import { updateEmailProperties, getEmailListQuery } from "@/utils/data/queries/email-list";
 import { db } from "@/utils/data/db";
-import { toast } from "sonner";
-import type { SelectionFilter } from "./selection-context";
 import type { EmailListType } from "@/utils/data/queries/email-list";
-import TooltipText from "@/components/tooltip-text";
-import { useState, useTransition } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { Collection } from "dexie";
+import { getEmailListQuery, updateEmailProperties } from "@/utils/data/queries/email-list";
 import { DBEmail, DBEmailDraft } from "@/utils/data/types";
 import { useHoldingShift } from "@/utils/hooks";
+import { Collection } from "dexie";
+import { useLiveQuery } from "dexie-react-hooks";
+import {
+  ArchiveRestoreIcon,
+  CheckIcon, Loader2, MailOpenIcon, StarIcon, TagIcon,
+  Trash2Icon
+} from "lucide-react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import type { SelectionFilter } from "./selection-context";
 
 interface BulkActionsProps {
   mailboxId: string;

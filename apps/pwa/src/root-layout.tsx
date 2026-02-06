@@ -10,9 +10,9 @@
 // import "@fontsource-variable/inter/index.css";
 // import "";
 
-import "./index.css";
-import "./(app)/compose/tiptap.css";
 import React, { type PropsWithChildren } from "react";
+import "./(app)/compose/tiptap.css";
+import "./index.css";
 
 import ScrollToHashElement from "@/components/scroll-element-auto";
 import { Toaster as Sonner } from "@/components/ui/sonner";

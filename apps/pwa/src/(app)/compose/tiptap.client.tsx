@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Blockquote } from "@tiptap/extension-blockquote";
 import { Bold } from "@tiptap/extension-bold";
 import { BulletList } from "@tiptap/extension-bullet-list";
@@ -26,8 +27,6 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import { Loader2 } from "lucide-react";
 import { parse as markedParse } from "marked";
 import { BodyHeader } from "./tiptap-header";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 
 export default function EditorContent2({
   savedBody,

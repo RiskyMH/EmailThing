@@ -1,6 +1,6 @@
 import * as ReactDOM from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import type { RouteObject } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import AppRoutes from "./(app)/_routes";
 import ErrorPage from "./error";

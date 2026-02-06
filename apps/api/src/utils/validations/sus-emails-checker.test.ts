@@ -1,7 +1,7 @@
-import { describe, expect, it } from "bun:test";
-import { validateAlias } from "./sus-emails-checker";
-import { impersonatingEmails } from "./invalid-emails";
 import { createId } from "@paralleldrive/cuid2";
+import { describe, expect, it } from "bun:test";
+import { impersonatingEmails } from "./invalid-emails";
+import { validateAlias } from "./sus-emails-checker";
 
 describe("validateAlias", () => {
     it("should flag impersonating emails", () => {

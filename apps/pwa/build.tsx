@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 // @ts-nocheck
+import { build } from "bun";
+import twPlugin from "bun-plugin-tailwind";
 import { existsSync } from "node:fs";
 import { cp, readdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { build } from "bun";
-import twPlugin from "bun-plugin-tailwind";
 import { reactCompiler } from "./src/build-plugins/react-compiler";
 
 // Helper function to format file sizes
@@ -148,8 +148,8 @@ console.info(`\n✅ Build completed in ${buildTime}ms\n`);
 const start2 = performance.now();
 
 import { renderToStaticMarkup } from "react-dom/server";
-import { StaticRouterProvider, createStaticHandler, createStaticRouter } from "react-router-dom";
 import type { RouteObject } from "react-router-dom";
+import { createStaticHandler, createStaticRouter, StaticRouterProvider } from "react-router-dom";
 import type _routes from "./src/routes.js";
 const routes = (await import("./src/routes.js")).default as typeof _routes;
 

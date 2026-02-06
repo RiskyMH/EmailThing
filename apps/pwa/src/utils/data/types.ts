@@ -10,7 +10,7 @@ import type {
   MailboxCustomDomain,
   MailboxForUser,
   TempAlias,
-  User,
+  User
 } from "@emailthing/db";
 import type { InferSelectModel } from "drizzle-orm";
 

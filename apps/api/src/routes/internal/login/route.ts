@@ -1,12 +1,11 @@
-import { verifyPassword } from "@/utils/password";
-import { db, MailboxForUser, PasskeyCredentials, UserSession } from "@/db";
-import { User } from "@/db";
-import { and, eq, sql } from "drizzle-orm";
-import { userAuthSchema } from "@/utils/validations/auth";
-import { isValidOrigin } from "../tools";
-import { generateSessionToken, generateRefreshToken } from "@/utils/token";
+import { db, MailboxForUser, PasskeyCredentials, User, UserSession } from "@/db";
 import { verifyCredentialss } from "@/utils/passkeys";
-import { TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
+import { verifyPassword } from "@/utils/password";
+import { generateRefreshToken, generateSessionToken } from "@/utils/token";
+import { userAuthSchema } from "@/utils/validations/auth";
+import { REFRESH_TOKEN_EXPIRES_IN, TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
+import { and, eq, sql } from "drizzle-orm";
+import { isValidOrigin } from "../tools";
 
 const errorMsg = "Invalid username or password";
 

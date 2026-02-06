@@ -1,7 +1,7 @@
 import db from "@/db";
 import { sendEmail } from "@/utils/send-email";
 import { User } from "@emailthing/db";
-import { and, sql, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 // GET /api/internal/emailthing-me?username=<username>
 // POST /api/internal/emailthing-me?username=<username> (with json body)

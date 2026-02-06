@@ -1,8 +1,7 @@
+import { db, Email, EmailAttachments, Mailbox, MailboxForUser } from "@/db";
 import { getSession, isValidOrigin } from "@/routes/internal/tools";
-import { db, Email, EmailAttachments, MailboxForUser } from "@/db";
-import { and, eq } from "drizzle-orm";
-import { Mailbox } from "@/db";
 import { getSignedUrl } from "@/utils/s3";
+import { and, eq } from "drizzle-orm";
 
 
 export async function GET(request: Request, { params }: { params: Promise<{ mailbox: string, mail: string, attachment: string }> }) {

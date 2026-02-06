@@ -1,8 +1,8 @@
 import * as ReactDOM from "react-dom/client";
-import { type RouteObject, RouterProvider, createBrowserRouter } from "react-router-dom";
-import "./index.css";
+import { createBrowserRouter, RouterProvider, type RouteObject } from "react-router-dom";
 import DocsRoutes from "./(docs)/_routes";
 import ErrorPage from "./error";
+import "./index.css";
 import RootLayout from "./root-layout";
 
 const routes = (

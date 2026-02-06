@@ -1,14 +1,6 @@
 import Logo from "@/components/logo";
 // import Logo from "@/icons/Logo"
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/utils/tw";
-import { ChevronLeft, GlobeIcon, KeyRoundIcon, SettingsIcon } from "lucide-react";
-import Link from "next/link";
-import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
-import { useEffect, useState, type FormEvent, useTransition } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import {
   SmartDrawer,
   SmartDrawerClose,
@@ -17,8 +9,15 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
+import { cn } from "@/utils/tw";
+import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
+import { ChevronLeft, GlobeIcon, KeyRoundIcon, Loader2, SettingsIcon } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState, useTransition, type FormEvent } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 
 export const dynamic = "force-dynamic";
 

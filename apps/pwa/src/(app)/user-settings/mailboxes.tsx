@@ -1,4 +1,5 @@
 import { DeleteButton } from "@/(app)/mailbox-config/components.client";
+import { Title } from "@/components/title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
 import {
   Table,
@@ -18,15 +19,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { useGravatars } from "@/utils/fetching";
 import { useLiveQuery } from "dexie-react-hooks";
 import { PlusIcon, UserX2Icon } from "lucide-react";
-import { toast } from "sonner";
 import changeUserSettings from "./_api";
-import { Title } from "@/components/title";
 
 const leaveMailbox = async (mailboxId: string) => {
   // leaving and actually deleting data doesn't exist rn lol

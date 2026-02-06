@@ -1,5 +1,6 @@
 "use client";
 import LocalTime from "@/components/localtime.client";
+import { MailboxTitle } from "@/components/mailbox-title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,13 +13,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { db } from "@/utils/data/db";
 import { getEmailWithDetails, updateEmailProperties } from "@/utils/data/queries/email-list";
-import { getMailboxName } from "@/utils/data/queries/mailbox";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { DBEmail } from "@/utils/data/types";
 import { useEmailImage } from "@/utils/fetching";
 import { cn } from "@/utils/tw";
+import { API_URL } from "@emailthing/const/urls";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -30,10 +34,8 @@ import {
   FileArchiveIcon,
   FileTextIcon,
   ImageIcon,
-  Loader2,
-  type LucideIcon,
-  PaperclipIcon,
-  VideoIcon,
+  Loader2, PaperclipIcon,
+  VideoIcon, type LucideIcon
 } from "lucide-react";
 import { parse as markedParse } from "marked";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -42,11 +44,6 @@ import { toast } from "sonner";
 import Loading from "./loading";
 import TopButtons from "./mail-item-top-buttons";
 import { parseHTML } from "./parse-html";
-import { MailboxTitle } from "@/components/mailbox-title";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
-import { db } from "@/utils/data/db";
-import { DBEmail } from "@/utils/data/types";
-import { API_URL } from "@emailthing/const/urls";
 
 export default function MailItemSuspense({ mailId }: { mailId?: string }) {
   if (typeof window === "undefined") return <Loading />;

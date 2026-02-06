@@ -5,7 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   SmartDrawer,
@@ -24,7 +24,7 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
 import {
   Table,
@@ -32,17 +32,17 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { getCurrentUserMailbox, getMailbox, getMailboxUsers, getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Loader2, MoreHorizontalIcon, PlusIcon, UserRoundXIcon } from "lucide-react";
-import { type FormEvent, useTransition } from "react";
+import { useTransition, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import changeUserSettings from "../user-settings/_api";
 import { DeleteButton } from "./components.client";
 import changeMailboxSettings from "./_api";
-import changeUserSettings from "../user-settings/_api";
 
 const leaveMailbox = async (mailboxId: string) => {
   const res = await changeUserSettings("leave-mailbox", { mailboxId });

@@ -1,7 +1,6 @@
 import { createDraftEmail } from "@/utils/data/queries/email-list";
 import { useRef } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import useSWR from "swr";
 import Loading from "../email-item/loading";
 

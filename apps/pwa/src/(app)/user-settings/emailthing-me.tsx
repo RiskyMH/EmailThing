@@ -1,3 +1,4 @@
+import { Title } from "@/components/title";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -5,13 +6,12 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { getAllAliases, getMe } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
-import changeUserSettings from "./_api";
 import { CardForm, ClientSelect, ClientSwitch } from "./components";
-import { Title } from "@/components/title";
+import changeUserSettings from "./_api";
 
 const changePublicEmailStatus = (formData: FormData) => {
   return changeUserSettings("change-public-email-status", {

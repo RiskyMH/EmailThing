@@ -1,6 +1,6 @@
 import type {
   MappedPossibleData,
-  MappedPossibleDataResponse,
+  MappedPossibleDataResponse
 } from "@/../app/api/internal/mailbox/[mailbox]/settings/route";
 import { db } from "@/utils/data/db";
 import { getLogedInUserApi } from "@/utils/data/queries/user";

@@ -7,10 +7,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   SmartDrawer,
   SmartDrawerClose,
@@ -19,10 +20,12 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { db } from "@/utils/data/db";
 import { getMailbox, getMailboxAliases, getMailboxCustomDomains } from "@/utils/data/queries/mailbox";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { aliasLimit } from "@emailthing/const/limits";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -31,18 +34,15 @@ import {
   MoreHorizontalIcon,
   PencilIcon,
   PlusIcon,
-  Trash2Icon,
+  Trash2Icon
 } from "lucide-react";
-import { useTransition } from "react";
 import type { FormEvent } from "react";
+import { useTransition } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import useSWR from "swr";
 import { ContextMenuAction } from "../components";
 import changeMailboxSettings from "./_api";
-import useSWR from "swr";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
-import { db } from "@/utils/data/db";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const addAlias = async (mailboxId: string, alias: string, name: string) => {
   return changeMailboxSettings(mailboxId, "add-alias", { alias, name });

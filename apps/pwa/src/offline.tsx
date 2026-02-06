@@ -1,11 +1,10 @@
 import * as ReactDOM from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import type { RouteObject } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import AppRoutes from "./(app)/_routes";
 import DocsRoutes from "./(docs)/_routes";
-import ErrorPage from "./error";
 import HomeRoutes from "./(home)/_routes";
+import ErrorPage from "./error";
 import RootLayout from "./root-layout";
 
 // Right now its the same as `app.tsx`, but seperate here just because

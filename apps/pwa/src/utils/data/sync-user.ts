@@ -1,9 +1,9 @@
+import { db } from "@/utils/data/db";
 import type {
   ChangesRequest,
   ChangesResponse,
-  MinimalChangesResponse,
+  MinimalChangesResponse
 } from "@emailthing/api/src/routes/internal/sync/route";
-import { db } from "@/utils/data/db";
 import { API_URL } from "@emailthing/const/urls";
 
 export const getApiUrl = ({

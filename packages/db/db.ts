@@ -36,6 +36,6 @@ db.batchUpdate = batchUpdate;
 db.batchFetch = batchFetch;
 
 export default db;
-export { relations, db };
 export * from "./schema";
 export * as schema from "./schema";
+export { relations, db };

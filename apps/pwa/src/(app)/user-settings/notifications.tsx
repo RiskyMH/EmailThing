@@ -16,17 +16,17 @@ export default function UserSettingsNotifications() {
 
 ("use client");
 
+import { Title } from "@/components/title";
 import { Button } from "@/components/ui/button";
+import { db } from "@/utils/data/db";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { registerServiceWorker } from "@/utils/service-worker";
+import { useLiveQuery } from "dexie-react-hooks";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { sha } from "../layout";
 import changeUserSettings from "./_api";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/utils/data/db";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
-import { Title } from "@/components/title";
 
 const deleteSubscription = async (endpoint: string) => {
   return changeUserSettings("delete-notification", {

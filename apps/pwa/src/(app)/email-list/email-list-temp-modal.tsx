@@ -9,23 +9,20 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   SmartDrawerClose,
   SmartDrawerDescription,
   SmartDrawerFooter,
   SmartDrawerHeader,
-  SmartDrawerTitle,
+  SmartDrawerTitle
 } from "@/components/ui/smart-drawer";
-import { db } from "@/utils/data/db";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { CopyIcon, Loader2 } from "lucide-react";
-import { type FormEvent, useState, useTransition } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { toast } from "sonner";
-import useSWR from "swr";
-import changeMailboxSettings from "../mailbox-config/_api";
 import { useDefaultDomains } from "../mailbox-config/aliases";
+import changeMailboxSettings from "../mailbox-config/_api";
 
 const makeTempEmail = async (mailboxId: string, domain: string, name: string) => {
   return changeMailboxSettings(mailboxId, "create-temp-alias", { domain, name });

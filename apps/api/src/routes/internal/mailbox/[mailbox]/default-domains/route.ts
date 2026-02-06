@@ -1,7 +1,6 @@
+import { db, DefaultDomain, Mailbox, MailboxForUser } from "@/db";
 import { getSession, isValidOrigin } from "@/routes/internal/tools";
-import { db, MailboxForUser } from "@/db";
-import { and, eq, asc } from "drizzle-orm";
-import { DefaultDomain, Mailbox } from "@/db";
+import { and, asc, eq } from "drizzle-orm";
 
 
 // right now there isn't much point for it mailbox scoped, but in future may have mailbox custom alias domains so just make my life easier

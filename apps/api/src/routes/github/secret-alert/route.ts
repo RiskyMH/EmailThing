@@ -1,8 +1,8 @@
-import { createVerify } from "node:crypto";
 import db, { MailboxAlias, MailboxTokens } from "@/db";
 import { sendEmail } from "@/utils/send-email";
 import { asc, eq } from "drizzle-orm";
 import { createMimeMessage } from "mimetext";
+import { createVerify } from "node:crypto";
 
 const GITHUB_KEYS_URI = "https://api.github.com/meta/public_keys/secret_scanning";
 

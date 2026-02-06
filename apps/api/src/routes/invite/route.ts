@@ -1,5 +1,5 @@
-import { db } from "@emailthing/db/connect";
 import { InviteCode } from "@emailthing/db";
+import { db } from "@emailthing/db/connect";
 import { createId } from "@paralleldrive/cuid2";
 
 process.env.SECRET_SPECIAL_TOKEN_YAY ||= Bun.randomUUIDv7();

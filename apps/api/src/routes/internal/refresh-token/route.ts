@@ -1,8 +1,8 @@
 import { db, UserSession } from "@/db";
-import { eq, and, gt } from "drizzle-orm";
-import { generateSessionToken, generateRefreshToken } from "@/utils/token";
-import { extractUserInfoHeader, isValidOrigin } from "../tools";
+import { generateRefreshToken, generateSessionToken } from "@/utils/token";
 import { TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
+import { and, eq, gt } from "drizzle-orm";
+import { extractUserInfoHeader, isValidOrigin } from "../tools";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");

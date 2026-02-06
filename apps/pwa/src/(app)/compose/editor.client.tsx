@@ -9,7 +9,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 // import "./tiptap.css";
 import {
@@ -20,28 +20,25 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
 import { Textarea } from "@/components/ui/textarea";
-import useMX from "@/utils/use-dns";
 import { cn } from "@/utils/tw";
+import useMX from "@/utils/use-dns";
 import {
   CircleAlertIcon,
   ExternalLinkIcon,
   Loader2,
   PaperclipIcon,
-  Trash2Icon,
+  Trash2Icon
 } from "lucide-react";
 import {
-  type FormEvent,
-  Fragment,
-  type MouseEvent,
-  Suspense,
+  Fragment, Suspense,
   useEffect,
   useId,
   useRef,
   useState,
-  useTransition,
+  useTransition, type FormEvent, type MouseEvent
 } from "react";
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";
 import { lazy } from "react";
@@ -49,9 +46,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import Turndown from "turndown";
 import { parseHTML } from "../email-item/parse-html";
+import type { sendEmailAction } from "./draft";
 import { BodyHeader } from "./tiptap-header";
 import { makeHtml } from "./tools";
-import type { sendEmailAction } from "./draft";
 
 const EditorContent2 = lazy(() => import("./tiptap.client"));
 

@@ -1,4 +1,3 @@
-import type { DocsSidebarNavProps } from "./components.client";
 
 export const docsNav = [
     {

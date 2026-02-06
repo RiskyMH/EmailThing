@@ -1,17 +1,31 @@
 "use client";
+import MailUnreadIcon from "@/components/icons/mail-unread";
 import Link from "@/components/link";
 import TooltipText from "@/components/tooltip-text";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup
+} from "@/components/ui/resizable";
 import { SmartDrawer, SmartDrawerContent, SmartDrawerTrigger } from "@/components/ui/smart-drawer";
+import { db } from "@/utils/data/db";
 import {
   getEmailCategoriesList,
   getEmailCount,
-  getEmailList,
+  getEmailList
 } from "@/utils/data/queries/email-list";
 import { getCategories, getMailboxName, getTempAliases } from "@/utils/data/queries/mailbox";
-import { tempEmailsLimit } from "@emailthing/const/limits";
 import { formatTimeAgo } from "@/utils/tools";
 import { cn } from "@/utils/tw";
+import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
+import { tempEmailsLimit } from "@emailthing/const/limits";
 import {
   format,
   isSameMonth,
@@ -25,41 +39,24 @@ import {
   startOfYesterday,
   subMonths,
   subWeeks,
-  subYears,
+  subYears
 } from "date-fns";
-import { type Observable, liveQuery } from "dexie";
+import { liveQuery, type Observable } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowDown, ArrowUp, Loader2, ChevronDown, StarIcon, MailOpenIcon, XIcon, StarOffIcon, ListChecksIcon } from "lucide-react";
-import MailUnreadIcon from "@/components/icons/mail-unread";
+import { ArrowDown, ArrowUp, ChevronDown, ListChecksIcon, Loader2, MailOpenIcon, StarIcon, StarOffIcon, XIcon } from "lucide-react";
 import { Fragment, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useParams, useSearchParams } from "react-router-dom";
+import MailItemSuspense from "../email-item/mail-item";
+import OnboardingWelcome from "../user-settings/onboarding-welcome";
+import { BulkActions } from "./bulk-actions";
 import { EmailItem } from "./email-list-item";
 import Loading, {
-  EmailListLoadingSkeleton,
-  EmailListCategoryLoadingSkeleton,
+  EmailListCategoryLoadingSkeleton, EmailListLoadingSkeleton
 } from "./email-list-loading";
 import { CreateTempEmailForm } from "./email-list-temp-modal";
 import RefreshButton from "./refresh-button";
-import OnboardingWelcome from "../user-settings/onboarding-welcome";
-import MailItemSuspense from "../email-item/mail-item";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable"
-import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
-import { db } from "@/utils/data/db";
 import { SelectionProvider, useSelection } from "./selection-context";
-import { BulkActions } from "./bulk-actions";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export default function EmailListSuspenced({
   filter,

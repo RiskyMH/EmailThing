@@ -1,6 +1,7 @@
 import MailUnreadIcon from "@/components/icons/mail-unread";
 import LocalTime from "@/components/localtime.client";
 import TooltipText from "@/components/tooltip-text";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -9,7 +10,7 @@ import {
   ContextMenuSub,
   ContextMenuSubContent,
   ContextMenuSubTrigger,
-  ContextMenuTrigger,
+  ContextMenuTrigger
 } from "@/components/ui/context-menu";
 import { deleteDraftEmail, updateEmailProperties } from "@/utils/data/queries/email-list";
 import { cn } from "@/utils/tw";
@@ -22,15 +23,14 @@ import {
   ReplyAllIcon,
   ReplyIcon,
   TagIcon,
-  Trash2Icon,
+  Trash2Icon
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ClientStar, ContextMenuAction } from "../components";
-import { useNavigate } from "react-router-dom";
 import { useSelection } from "./selection-context";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export interface EmailItemProps {
   email: {

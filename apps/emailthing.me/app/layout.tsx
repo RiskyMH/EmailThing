@@ -1,14 +1,14 @@
-import { cn } from "@/utils/tw";
 import { Header, MainNavItem } from "@/components/header";
 import Logo, { EmailthingText } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import { buttonVariants } from "@/components/ui/button";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { cn } from "@/utils/tw";
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
 import { Inter as FontSans } from "next/font/google";
+import localFont from "next/font/local";
 import Link from "next/link";
 import "./globals.css";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 
 
 interface DocsLayoutProps {

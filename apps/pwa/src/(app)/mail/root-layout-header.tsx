@@ -1,15 +1,15 @@
-import { Search } from "./nav.search";
 import Logo, { EmailThing } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import UserNav from "@/components/user-navbar";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
-import { type PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState, type PropsWithChildren } from "react";
 import { useParams } from "react-router-dom";
 import { useWindowSize } from "usehooks-ts";
-import Sidebar from "./root-layout-sidebar";
+import { Search } from "./nav.search";
 import Preferences from "./preferences";
+import Sidebar from "./root-layout-sidebar";
 
 export default function Header() {
   const params = useParams<"mailboxId" | "mailId">();

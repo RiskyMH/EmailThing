@@ -4,7 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
 import {
   Table,
@@ -25,15 +25,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   createCategory,
-  deleteCategory,
-  getMailbox,
-  updateCategory,
+  deleteCategory, getCategories, getMailbox,
+  updateCategory
 } from "@/utils/data/queries/mailbox";
-import { getCategories } from "@/utils/data/queries/mailbox";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   ChevronDownIcon,
@@ -41,9 +39,9 @@ import {
   MoreHorizontalIcon,
   PencilIcon,
   PlusIcon,
-  Trash2Icon,
+  Trash2Icon
 } from "lucide-react";
-import { type FormEvent, useState, useTransition } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { DeleteButton } from "./components.client";

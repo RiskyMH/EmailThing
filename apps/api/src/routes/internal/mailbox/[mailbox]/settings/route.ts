@@ -1,23 +1,23 @@
-import { getSession, isValidOrigin } from "@/routes/internal/tools";
 import { db, MailboxForUser, TempAlias } from "@/db";
-import { and, eq, gte, or, getTableColumns, type InferSelectModel } from "drizzle-orm";
+import { getSession, isValidOrigin } from "@/routes/internal/tools";
+import { and, eq, getColumns, gte, or, type InferSelectModel } from "drizzle-orm";
 // import { revalidateTag } from "next/cache";
 import {
-    DefaultDomain,
-    Mailbox,
-    MailboxAlias,
-    MailboxCategory,
-    MailboxCustomDomain,
-    MailboxTokens,
-    User,
+  DefaultDomain,
+  Mailbox,
+  MailboxAlias,
+  MailboxCategory,
+  MailboxCustomDomain,
+  MailboxTokens,
+  User
 } from "@/db";
-import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@emailthing/const/limits";
 import { generateToken } from "@/utils/token";
 import { emailSchema } from "@/utils/validations/auth";
 import { validateAlias } from "@/utils/validations/sus-emails-checker";
-import { count, like, not, sql } from "drizzle-orm";
-import { createId, init } from "@paralleldrive/cuid2";
 import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
+import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@emailthing/const/limits";
+import { createId, init } from "@paralleldrive/cuid2";
+import { count, like, not, sql } from "drizzle-orm";
 
 const createSmallId = init({ length: 7 });
 
@@ -108,7 +108,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
                 .from(TempAlias)
                 .where(and(eq(TempAlias.mailboxId, mailboxId), gte(TempAlias.updatedAt, date))),
             db.select({
-                ...getTableColumns(MailboxForUser),
+                ...getColumns(MailboxForUser),
                 username: User.username,
             })
                 .from(MailboxForUser)

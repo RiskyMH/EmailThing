@@ -1,9 +1,9 @@
+import { MainNavItem } from "@/(home)/layout";
 import Link from "@/components/link";
 import { EmailThing } from "@/components/logo";
 import UserNav from "@/components/user-navbar";
-import { MainNavItem } from "@/(home)/layout";
-import { useEffect, useState } from "react";
 import { cn } from "@/utils/tw";
+import { useEffect, useState } from "react";
 
 interface DocsLayoutProps {
   children: React.ReactNode;

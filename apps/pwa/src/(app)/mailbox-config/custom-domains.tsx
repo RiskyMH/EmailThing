@@ -1,44 +1,33 @@
+import CopyButton from "@/components/copy-button.client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenu, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  SmartDrawer,
-  SmartDrawerTrigger,
-  SmartDrawerContent,
-  SmartDrawerHeader,
-  SmartDrawerTitle,
-  SmartDrawerDescription,
-  SmartDrawerFooter,
-  SmartDrawerClose,
+  SmartDrawer, SmartDrawerClose, SmartDrawerContent, SmartDrawerDescription,
+  SmartDrawerFooter, SmartDrawerHeader,
+  SmartDrawerTitle, SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { getMailbox, getMailboxCustomDomains, getMailboxAliases } from "@/utils/data/queries/mailbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getMailbox, getMailboxAliases, getMailboxCustomDomains } from "@/utils/data/queries/mailbox";
 import { customDomainLimit } from "@emailthing/const/limits";
 import { DISCORD_URL } from "@emailthing/const/urls";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
-  PlusIcon,
-  MoreHorizontalIcon,
-  Trash2Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CopyIcon,
-  Loader2,
-  ClipboardIcon,
+  Loader2, MoreHorizontalIcon, PlusIcon, Trash2Icon
 } from "lucide-react";
+import { lazy, Suspense, useState, useTransition } from "react";
 import { useParams } from "react-router-dom";
-import { DeleteButton } from "./components.client";
 import { toast } from "sonner";
-import CopyButton from "@/components/copy-button.client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState, useTransition, Suspense, lazy } from "react";
-import changeMailboxSettings from "./_api";
 import { useSWRConfig } from "swr";
+import { DeleteButton } from "./components.client";
+import changeMailboxSettings from "./_api";
 
 const CfWorkerCode = lazy(() => import("./custom-domain-dyn"));
 

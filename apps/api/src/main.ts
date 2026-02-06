@@ -9,9 +9,9 @@
 //     routes[routeName] = "default" in imp ? imp.default : imp;
 // }
 
-import routes from "./routes.ts";
 import db from "@emailthing/db/connect";
 import { sql } from "drizzle-orm";
+import routes from "./routes.ts";
 
 const httpExports = [
     "GET",

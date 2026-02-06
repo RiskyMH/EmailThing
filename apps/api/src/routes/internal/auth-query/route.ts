@@ -1,7 +1,7 @@
-import { db, UserSession, PasskeyCredentials, MailboxForUser, MailboxTokens } from "@/db";
-import { eq, and } from "drizzle-orm";
-import { isValidOrigin, getSession } from "../tools";
+import { db, MailboxForUser, MailboxTokens, PasskeyCredentials, UserSession } from "@/db";
+import { and, eq } from "drizzle-orm";
 import { UAParser } from "ua-parser-js";
+import { getSession, isValidOrigin } from "../tools";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");

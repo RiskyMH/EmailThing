@@ -1,9 +1,5 @@
 import type {
-  DBDefaultDomain,
-  DBMailboxForUser,
-  DBPasskeyCredentials,
-  DBUser,
-  DBUserNotification,
+  DBPasskeyCredentials, DBUserNotification
 } from "../types";
 
 export const demoUser = {

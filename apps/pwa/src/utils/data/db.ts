@@ -1,7 +1,7 @@
 import Dexie, { type Table } from "dexie";
 import { fetchSync, refreshToken, syncLocal } from "./sync-user";
 import type {
-  DBEmail,
+  ApiCustomisations, DBEmail,
   DBEmailDraft,
   DBMailbox,
   DBMailboxAlias,
@@ -10,8 +10,7 @@ import type {
   DBMailboxForUser,
   DBTempAlias,
   DBUser,
-  LocalSyncData,
-  ApiCustomisations,
+  LocalSyncData
 } from "./types";
 
 export class EmailDB extends Dexie {

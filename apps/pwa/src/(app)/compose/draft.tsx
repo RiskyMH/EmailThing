@@ -1,5 +1,6 @@
 import DisableFormReset from "@/components/disable-reset.client";
 import LocalTime from "@/components/localtime.client";
+import { MailboxTitle } from "@/components/mailbox-title";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,21 +11,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { db } from "@/utils/data/db";
 import {
   deleteDraftEmail,
   getDraftEmail,
   getEmail,
-  updateDraftEmail,
+  updateDraftEmail
 } from "@/utils/data/queries/email-list";
-import { getMailboxAliases, getMailboxName } from "@/utils/data/queries/mailbox";
+import { getMailboxAliases } from "@/utils/data/queries/mailbox";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
+import { parseSync } from "@/utils/data/sync-user";
+import type { SaveActionProps, SendEmailResponse } from "@emailthing/api/src/routes/internal/send-draft/route";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronRight, EllipsisIcon } from "lucide-react";
-import { Fragment, useEffect, useRef } from "react";
-import { data, Navigate, NavigateFunction, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Fragment, useRef } from "react";
+import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import Turndown from "turndown";
 import { useDebouncedCallback } from "use-debounce";
 import {
   BodyEditor,
@@ -34,16 +40,10 @@ import {
   RecipientInput,
   SendButton,
   Subject,
-  UploadAttachment,
+  UploadAttachment
 } from "./editor.client";
 import Loading from "./loading";
 import { getData, makeHtml } from "./tools";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
-import { db } from "@/utils/data/db";
-import type { SaveActionProps, SendEmailResponse } from "@emailthing/api/src/routes/internal/send-draft/route";
-import { parseSync } from "@/utils/data/sync-user";
-import Turndown from "turndown";
-import { MailboxTitle } from "@/components/mailbox-title";
 
 export default function DraftPage() {
   const params = useParams<{ mailboxId: string; draftId: string }>();

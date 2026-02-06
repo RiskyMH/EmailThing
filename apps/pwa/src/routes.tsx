@@ -2,8 +2,8 @@ import type { RouteObject } from "react-router-dom";
 
 import AppRoutes from "./(app)/_routes";
 import DocsRoutes from "./(docs)/_routes";
-import ErrorPage from "./error";
 import HomeRoutes from "./(home)/_routes";
+import ErrorPage from "./error";
 
 export const routes = (
   [

@@ -1,19 +1,18 @@
+import { db, MailboxForUser, PasskeyCredentials, ResetPasswordToken, User, UserNotification, UserSession } from "@/db";
 import { createPasswordHash, verifyPassword } from "@/utils/password";
-import { db, MailboxForUser, PasskeyCredentials, ResetPasswordToken, UserNotification, UserSession } from "@/db";
-import { User } from "@/db";
-import { and, eq, gte, inArray, not, sql, type InferSelectModel } from "drizzle-orm";
 import { userAuthSchema } from "@/utils/validations/auth";
-import { isValidOrigin, getSession } from "../tools";
+import { and, eq, gte, inArray, not, sql, type InferSelectModel } from "drizzle-orm";
+import { getSession, isValidOrigin } from "../tools";
 // import { revalidatePath, revalidateTag } from "next/cache";
-import { makeHtml } from "@emailthing/web-pwa/src/(app)/compose/tools";
 import { verifyCredentials } from "@/utils/passkeys";
 import { sendEmail } from "@/utils/send-email";
 import { validateAlias } from "@/utils/validations/sus-emails-checker";
+import { sendNotification } from "@/utils/web-push";
+import { makeHtml } from "@emailthing/web-pwa/src/(app)/compose/tools";
 import { createId } from "@paralleldrive/cuid2";
 import { marked } from "marked";
-import { Mailbox as MimeMailbox, createMimeMessage } from "mimetext";
+import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext";
 import { UAParser } from "ua-parser-js";
-import { sendNotification } from "@/utils/web-push";
 
 export async function POST(request: Request) {
     const origin = request.headers.get("origin");

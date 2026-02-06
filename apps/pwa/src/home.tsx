@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { type RouteObject, RouterProvider, createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, type RouteObject } from "react-router-dom";
 import ErrorPage from "./error";
 // import "./index.css";
 import HomeRoutes from "./(home)/_routes";

@@ -1,15 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
 import {
-    index,
-    integer,
-    primaryKey,
-    pgTable,
-    unique,
-    varchar,
-    timestamp,
-    boolean,
-    uniqueIndex,
+  boolean, index,
+  integer, pgTable, primaryKey, timestamp, unique, uniqueIndex, varchar
 } from "drizzle-orm/pg-core";
 import { caseSensitiveText, nocaseText } from "./custom-drizzle";
 

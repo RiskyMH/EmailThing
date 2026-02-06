@@ -1,22 +1,21 @@
 import {
-    DefaultDomain,
-    Email,
-    EmailAttachments,
-    EmailRecipient,
-    EmailSender,
-    Mailbox,
-    MailboxAlias,
-    Stats,
-    TempAlias,
-    db,
+  db, 
+  DefaultDomain,
+  Email,
+  EmailAttachments,
+  EmailRecipient,
+  EmailSender,
+  Mailbox,
+  MailboxAlias,
+  Stats,
+  TempAlias
 } from "@/db";
-import { storageLimit } from "@emailthing/const/limits";
 import { notifyMailbox } from "@/utils/notifications";
 import { uploadFile } from "@/utils/s3";
 import { todayDate } from "@/utils/tools";
+import { storageLimit } from "@emailthing/const/limits";
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq, gt, sql } from "drizzle-orm";
-import { JSDOM } from "jsdom";
 import PostalMime from "postal-mime";
 import Turndown from "turndown";
 import { getTokenMailbox } from "../tools";

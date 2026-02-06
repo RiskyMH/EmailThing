@@ -3,8 +3,8 @@ import Logo from "@/components/logo";
 // import Logo from "@/icons/Logo"
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
-import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon, GlobeIcon } from "lucide-react";
 import { API_URL, DISCORD_URL } from "@emailthing/const/urls";
+import { ArrowRightIcon, ChevronLeft, ExternalLinkIcon, GlobeIcon } from "lucide-react";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams()[0];
@@ -106,9 +106,9 @@ import { Label } from "@/components/ui/label";
 // import { cn } from "@/utils/tw";
 import { Loader2 } from "lucide-react";
 // import { useRouter } from "react-router-dom";
-import { type FormEvent, useEffect, useTransition } from "react";
+import { useEffect, useTransition, type FormEvent } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { ApiUrlButton } from "./login";
 // import signUp from "./action";
 // import catchRedirectError from "@/utils/no-throw-on-redirect.client";

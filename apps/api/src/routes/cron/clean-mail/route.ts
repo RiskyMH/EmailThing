@@ -1,16 +1,6 @@
-import {
-  Email,
-  EmailSender,
-  EmailRecipient,
-  EmailAttachments,
-  Mailbox,
-  TempAlias,
-  UserSession,
-  db,
-} from "@/db";
+import { db, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, TempAlias, UserSession } from "@/db";
 import { deleteFile } from "@/utils/s3";
-import { eq, inArray, lt, not, or, sql } from "drizzle-orm";
-import { and } from "drizzle-orm";
+import { and, eq, inArray, lt, not, or, sql } from "drizzle-orm";
 
 // TODO: do this "cron" better instead of still having the old vercel remains
 const every24hr = 1000 * 60 * 60 * 24;

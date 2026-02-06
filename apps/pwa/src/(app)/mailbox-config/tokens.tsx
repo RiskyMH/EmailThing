@@ -12,18 +12,17 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
-import { Table } from "@/components/ui/table";
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/utils/data/db";
-import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { getMailbox } from "@/utils/data/queries/mailbox";
+import { getLogedInUserApi } from "@/utils/data/queries/user";
 import type { MailboxTokens } from "@emailthing/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { InferSelectModel } from "drizzle-orm";
-import { CopyIcon, Loader2, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
-import { type FormEvent, useState, useTransition } from "react";
+import { CopyIcon, Loader2, PlusIcon, XIcon } from "lucide-react";
+import { useState, useTransition, type FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR, { useSWRConfig } from "swr";

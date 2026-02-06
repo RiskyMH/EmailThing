@@ -5,8 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { DemoLinkButton, UserNavLogin } from "@/components/user-navbar.static";
 import { cn } from "@/utils/tw";
 import { ExternalLinkIcon } from "lucide-react";
-import { type PropsWithChildren, Suspense, useEffect, useState } from "react";
-import { lazy } from "react";
+import { lazy, Suspense, useEffect, useState, type PropsWithChildren } from "react";
 import { useMatch } from "react-router-dom";
 
 const UserNav = lazy(() => import("@/components/user-navbar"));

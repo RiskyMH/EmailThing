@@ -1,33 +1,25 @@
 import db, {
-    DraftEmail,
-    Email,
-    EmailAttachments,
-    EmailRecipient,
-    EmailSender,
-    Mailbox,
-    MailboxAlias,
-    MailboxCategory,
-    MailboxCustomDomain,
-    MailboxForUser,
-    TempAlias,
-    User,
+  DraftEmail,
+  Email,
+  EmailAttachments,
+  EmailRecipient,
+  EmailSender,
+  Mailbox,
+  MailboxAlias,
+  MailboxCategory,
+  MailboxCustomDomain,
+  MailboxForUser,
+  TempAlias,
+  User
 } from "@/db";
 import {
-    inArray,
-    desc,
-    and,
-    gte,
-    eq,
-    type InferSelectModel,
-    getTableColumns,
-    sql,
-    lte,
-    or,
+  and, desc, eq, getTableColumns, gte, inArray, lte,
+  or, sql, type InferSelectModel
 } from "drizzle-orm";
 // import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
-import { getSession, isValidOrigin } from "../tools";
-import { deleteFile } from "@/utils/s3";
 import { env } from "@/utils/env";
+import { deleteFile } from "@/utils/s3";
+import { getSession, isValidOrigin } from "../tools";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");

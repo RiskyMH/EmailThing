@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, integer, pgTable, varchar, boolean, timestamp, json, text } from "drizzle-orm/pg-core";
+import { boolean, index, integer, json, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { Mailbox, MailboxCategory, TempAlias } from "./mailbox";
 
 // The Email

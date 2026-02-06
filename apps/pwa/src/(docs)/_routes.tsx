@@ -1,8 +1,8 @@
 import { Title } from "@/components/title";
-import DocsLayout from "./layout";
-import { Outlet, type RouteObject } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import AboutPage from "./1.1-introduction";
 import CustomDomainPage from "./1.2-custom-domain";
+import DocsLayout from "./layout";
 
 export const routes = [
   {

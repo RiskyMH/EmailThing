@@ -10,29 +10,22 @@ import { Button, buttonVariants } from "@/components/ui/button";
 //     DialogTrigger,
 // } from "@/components/ui/dialog"
 import {
-    SmartDrawer,
-    SmartDrawerTrigger,
-    SmartDrawerContent,
-    SmartDrawerHeader,
-    SmartDrawerTitle,
-    SmartDrawerDescription,
-    SmartDrawerFooter,
-    SmartDrawerClose,
+  SmartDrawer, SmartDrawerContent, SmartDrawerDescription, SmartDrawerHeader,
+  SmartDrawerTitle
 } from "@/components/ui/smart-drawer";
 
-import { useEffect, useState, useTransition } from "react";
-import changeUserSettings from "./_api";
-import { toast } from "sonner";
 import { defaultStars } from "@/(home)/home";
-import { Input } from "@/components/ui/input";
-import { ChevronRight, Loader2 } from "lucide-react";
 import GitHubIcon from "@/components/icons/github";
-import { cn } from "@/utils/tw";
-import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router-dom";
 import Link from "@/components/link";
-import { useLiveQuery } from "dexie-react-hooks";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { getMe } from "@/utils/data/queries/user";
+import { useLiveQuery } from "dexie-react-hooks";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import changeUserSettings from "./_api";
 
 export default function OnboardingWelcome() {
     // a modal that shows a welcome message and a button to continue

@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import { type DateStyle, formatDate } from "../utils/tools";
+import { formatDate, type DateStyle } from "../utils/tools";
 import TooltipText from "./tooltip-text";
 
 export interface LocalTimeProps {

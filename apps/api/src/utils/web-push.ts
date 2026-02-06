@@ -1,4 +1,4 @@
-import { type PushMessage, type PushSubscription, type VapidKeys, buildPushPayload } from "@block65/webcrypto-web-push";
+import { buildPushPayload, type PushMessage, type PushSubscription, type VapidKeys } from "@block65/webcrypto-web-push";
 import { env } from "./env";
 
 const vapid: VapidKeys = {

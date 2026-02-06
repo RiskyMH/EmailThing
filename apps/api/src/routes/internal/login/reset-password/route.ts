@@ -1,14 +1,14 @@
-import { ResetPasswordToken, User, UserSession, db } from "@/db";
-import { createId } from "@paralleldrive/cuid2";
-import { and, eq, gt, not, sql } from "drizzle-orm";
-import { createMimeMessage } from "mimetext";
-import { sendEmail } from "@/utils/send-email";
-import { isValidOrigin } from "../../tools";
+import { db, ResetPasswordToken, User, UserSession } from "@/db";
 import { createPasswordHash } from "@/utils/password";
+import { sendEmail } from "@/utils/send-email";
 import { userAuthSchema } from "@/utils/validations/auth";
-import { marked } from "marked";
 import { RESET_PASSWORD_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 import { API_URL } from "@emailthing/const/urls";
+import { createId } from "@paralleldrive/cuid2";
+import { and, eq, gt, sql } from "drizzle-orm";
+import { marked } from "marked";
+import { createMimeMessage } from "mimetext";
+import { isValidOrigin } from "../../tools";
 
 // Rate limiting for password reset request phase (stricter)
 const requestAttempts = new Map<string, number>();

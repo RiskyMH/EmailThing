@@ -3,11 +3,11 @@ import Link from "@/components/link";
 import { EmailThing } from "@/components/logo";
 import { SiteFooter } from "@/components/site-footer";
 import { UserNavLogin } from "@/components/user-navbar.static";
-import { MenuIcon } from "lucide-react";
-import { Suspense, lazy, useEffect, useState } from "react";
-import { docsNav } from "./pages";
-import { DocsSidebarNav } from "./components.client";
 import { cn } from "@/utils/tw";
+import { MenuIcon } from "lucide-react";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { DocsSidebarNav } from "./components.client";
+import { docsNav } from "./pages";
 
 const UserNav = lazy(() => import("@/components/user-navbar"));
 const DemoLink = lazy(() =>

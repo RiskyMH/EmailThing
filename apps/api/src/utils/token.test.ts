@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { generateToken, generateSessionToken, generateRefreshToken, verifyTokenChecksum } from "./token";
+import { generateRefreshToken, generateSessionToken, generateToken, verifyTokenChecksum } from "./token";
 
 describe("token generation", () => {
 	test("generateToken should return token with correct format", () => {

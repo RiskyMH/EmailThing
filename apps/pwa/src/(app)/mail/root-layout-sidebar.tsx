@@ -6,11 +6,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/tw";
 
 import Link from "@/components/link";
+import { db } from "@/utils/data/db";
 import { getEmailCount } from "@/utils/data/queries/email-list";
 import { getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { useGravatar } from "@/utils/fetching";
@@ -29,11 +30,10 @@ import {
   StarIcon,
   TimerIcon,
   Trash2Icon,
-  UserCircle2,
+  UserCircle2
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useParams } from "react-router-dom";
-import { db } from "@/utils/data/db";
 
 export const Sidebar = ({ className }: { className?: string }) => {
   const params = useParams<"mailboxId" | "mailId">();

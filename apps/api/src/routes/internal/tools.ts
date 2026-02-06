@@ -1,5 +1,5 @@
 import { db, UserSession } from "@/db";
-import { and, eq, gte, lt } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 
 export const allowedOrigins = [
     "https://emailthing.app",

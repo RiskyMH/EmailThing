@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type PropsWithChildren, useEffect } from "react";
 import type { EmailListType } from "@/utils/data/queries/email-list";
 import { DBEmail } from "@/utils/data/types";
+import { createContext, useCallback, useContext, useEffect, useState, type PropsWithChildren } from "react";
 import { useLocation } from "react-router-dom";
 
 export interface SelectionFilter {

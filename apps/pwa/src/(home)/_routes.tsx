@@ -1,11 +1,11 @@
-import { Outlet, type RouteObject } from "react-router-dom";
+import { Title } from "@/components/title";
+import { Outlet } from "react-router-dom";
 import Home from "./home";
 import HomeLayout from "./layout";
 import LoginPage from "./login";
 import Pricing from "./pricing";
 import RegisterPage from "./register";
 import ResetPasswordPage from "./reset-password";
-import { Title } from "@/components/title";
 export const routes = [
   {
     path: "/",

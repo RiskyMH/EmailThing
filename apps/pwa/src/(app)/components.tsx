@@ -4,15 +4,15 @@ import MailUnreadIcon from "@/components/icons/mail-unread";
 import TooltipText from "@/components/tooltip-text";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/tw";
+import type { LucideIcon } from "lucide-react";
 import {
   ArchiveRestoreIcon,
   BellDotIcon,
   CheckIcon,
   MailOpenIcon,
   StarIcon,
-  Trash2Icon,
+  Trash2Icon
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import type { MouseEvent, PropsWithChildren } from "react";
 

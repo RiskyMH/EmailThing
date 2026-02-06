@@ -1,7 +1,7 @@
 import Link from "@/components/link";
 import { db } from "@/utils/data/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import { type ReactNode, Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { Navigate, useLocation, useMatch } from "react-router-dom";
 import RootLayout from "../layout";
 

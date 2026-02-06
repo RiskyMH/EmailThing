@@ -1,5 +1,5 @@
-import { StarIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { StarIcon } from "lucide-react";
 
 export default function Loading() {
   return (

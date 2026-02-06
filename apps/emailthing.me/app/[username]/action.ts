@@ -1,10 +1,10 @@
 "use server";
 
-import { makeHtml } from "@emailthing/web-pwa/src/(app)/compose/tools";
-import { Mailbox, createMimeMessage } from "mimetext";
-import { headers } from "next/headers";
-import { parse as markedParse } from "marked";
 import { API_URL } from "@emailthing/const";
+import { makeHtml } from "@emailthing/web-pwa/src/(app)/compose/tools";
+import { parse as markedParse } from "marked";
+import { createMimeMessage, Mailbox } from "mimetext";
+import { headers } from "next/headers";
 
 const MAX_REQUESTS_PER_WINDOW = 5;
 const WINDOW_DURATION_MS = 60 * 1000;

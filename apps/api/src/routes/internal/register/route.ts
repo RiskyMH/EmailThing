@@ -1,14 +1,13 @@
+import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User, UserSession } from "@/db";
 import { createPasswordHash } from "@/utils/password";
-import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, UserSession } from "@/db";
-import { User } from "@/db";
-import { and, eq, gte, isNull, sql } from "drizzle-orm";
+import { generateRefreshToken, generateSessionToken } from "@/utils/token";
 import { userAuthSchema } from "@/utils/validations/auth";
-import { isValidOrigin } from "../tools";
-import { generateSessionToken, generateRefreshToken } from "@/utils/token";
-import { emailUser } from "./tools";
-import { createId } from "@paralleldrive/cuid2";
 import { validateAlias } from "@/utils/validations/sus-emails-checker";
-import { TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
+import { REFRESH_TOKEN_EXPIRES_IN, TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
+import { createId } from "@paralleldrive/cuid2";
+import { and, eq, gte, isNull, sql } from "drizzle-orm";
+import { isValidOrigin } from "../tools";
+import { emailUser } from "./tools";
 
 // Rate limiting
 const attempts = new Map<string, number>();

@@ -10,7 +10,6 @@ import CustomDomains from "./custom-domains";
 import StorageUsed from "./storage-used";
 import APITokens from "./tokens";
 import Users from "./users";
-import { MailboxTitle } from "@/components/mailbox-title";
 
 export default function ConfigPage() {
   return (

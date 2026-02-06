@@ -1,17 +1,17 @@
+import { Title } from "@/components/title";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { getUserMailboxes } from "@/utils/data/queries/mailbox";
 import { getMe } from "@/utils/data/queries/user";
 import { useLiveQuery } from "dexie-react-hooks";
-import changeUserSettings from "./_api";
 import { CardForm, ClientInput, ClientSelect } from "./components";
-import { Title } from "@/components/title";
+import changeUserSettings from "./_api";
 
 function changeEmail(_: any, formData: FormData) {
   return changeUserSettings("change-email", {

@@ -1,7 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, integer, primaryKey, pgTable, varchar, timestamp, boolean, uniqueIndex } from "drizzle-orm/pg-core";
-import { nocaseText } from "./custom-drizzle";
 import { sql } from "drizzle-orm";
+import { boolean, index, integer, pgTable, primaryKey, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { nocaseText } from "./custom-drizzle";
 
 // Default Domains
 export const DefaultDomain = pgTable(

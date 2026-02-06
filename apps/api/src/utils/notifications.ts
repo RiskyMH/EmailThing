@@ -1,7 +1,6 @@
-import db, { UserNotification, MailboxForUser } from "@/db";
-import { eq, and } from "drizzle-orm";
+import db, { MailboxForUser, UserNotification } from "@/db";
+import { and, eq } from "drizzle-orm";
 import { sendNotification } from "./web-push";
-import { createId } from "@paralleldrive/cuid2";
 
 export async function notifyMailbox(
     mailboxId: string,

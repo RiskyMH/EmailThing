@@ -1,8 +1,8 @@
 "use client";
 import { cn } from "@/utils/tw";
 import { ExternalLinkIcon } from "lucide-react";
-import { type PropsWithChildren, useState, useEffect } from "react";
 import Link from "next/link";
+import { useEffect, useState, type PropsWithChildren } from "react";
 
 export function MainNavItem({
     href,

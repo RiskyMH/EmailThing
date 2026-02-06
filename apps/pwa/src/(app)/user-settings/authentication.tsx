@@ -6,13 +6,13 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +23,7 @@ import {
   SmartDrawerFooter,
   SmartDrawerHeader,
   SmartDrawerTitle,
-  SmartDrawerTrigger,
+  SmartDrawerTrigger
 } from "@/components/ui/smart-drawer";
 import {
   Table,
@@ -31,7 +31,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { getLogedInUserApi, getMe } from "@/utils/data/queries/user";
 import type { PasskeyCredentials, UserSession } from "@emailthing/db";
@@ -41,8 +41,8 @@ import { Loader2Icon, LogOutIcon, MoreHorizontalIcon, Trash2Icon, XIcon } from "
 import { toast } from "sonner";
 import useSWR, { useSWRConfig } from "swr";
 import { DeleteButton } from "../mailbox-config/components.client";
-import changeUserSettings from "./_api";
 import { CardForm, ClientInput } from "./components";
+import changeUserSettings from "./_api";
 
 const changePassword = (_: any, formData: FormData) => {
   return changeUserSettings("change-password", {
@@ -435,15 +435,15 @@ export default function UserSettingsAuthentication() {
 ("use client");
 
 // import { UAParser } from "ua-parser-js";
+import { Title } from "@/components/title";
 import { db } from "@/utils/data/db";
 import {
   create,
   parseCreationOptionsFromJSON,
-  supported,
+  supported
 } from "@github/webauthn-json/browser-ponyfill";
 import { KeyRoundIcon } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
-import { Title } from "@/components/title";
 
 export function PasskeysSetup({ userId, username }: { userId: string; username: string }) {
   const [isPending, startTransition] = useTransition();

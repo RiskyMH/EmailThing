@@ -4,15 +4,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { getCategories } from "@/utils/data/queries/mailbox";
+import { cn } from "@/utils/tw";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowLeftIcon, ExternalLinkIcon, ForwardIcon, MoveDiagonalIcon, ReplyAllIcon, ReplyIcon, TagIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, ForwardIcon, MoveDiagonalIcon, ReplyAllIcon, ReplyIcon, TagIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useNavigate } from "react-router-dom";
 import { ContextMenuAction } from "../components";
-import { cn } from "@/utils/tw";
 
 interface TopButtonsProps {
   mailboxId: string;

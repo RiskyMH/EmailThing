@@ -1,11 +1,10 @@
-import { getSession, isValidOrigin } from "../tools";
-import { DraftEmail, Email, EmailSender, EmailRecipient, MailboxAlias, EmailAttachments } from "@emailthing/db/connect";
-import { eq, sql } from "drizzle-orm";
-import { and } from "drizzle-orm";
 import db, { Mailbox, MailboxForUser } from "@/db";
-import { createMimeMessage } from "mimetext";
 import { sendEmail } from "@/utils/send-email";
+import { DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, MailboxAlias } from "@emailthing/db/connect";
+import { and, eq, sql } from "drizzle-orm";
+import { createMimeMessage } from "mimetext";
 import type { ChangesResponse } from "../sync/route";
+import { getSession, isValidOrigin } from "../tools";
 
 
 export interface Data extends SaveActionProps {

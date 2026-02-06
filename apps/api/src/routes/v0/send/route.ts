@@ -2,7 +2,7 @@ import db, { Email, EmailRecipient, EmailSender, Mailbox, MailboxAlias } from "@
 import { sendEmail } from "@/utils/send-email";
 import { createId } from "@paralleldrive/cuid2";
 import { and, eq, sql } from "drizzle-orm";
-import { Mailbox as MimeMailbox, createMimeMessage } from "mimetext";
+import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext";
 import { getTokenMailbox } from "../tools";
 
 interface EmailPostOptions {
