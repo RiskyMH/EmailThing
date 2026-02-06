@@ -3,7 +3,6 @@ services:
     image: ghcr.io/riskymh/emailthing-api:latest
     restart: always
     init: true
-    env_file: ./.env
     environment:
       DATABASE_URL: ${DATABASE_URL}
       NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: ${NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY}
@@ -17,37 +16,38 @@ services:
       - "3000:3000"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/sitemap.json"]
-      interval: 1s
+      interval: 10s
       timeout: 2s
       retries: 5
       start_period: 5s
     deploy:
       update_config:
-        # order: start-first
-        # failure_action: rollback
-        order: stop-first
+        order: start-first
+        # order: stop-first
         failure_action: rollback
         max_failure_ratio: 0
-        monitor: 10s
+        monitor: 5s
+      restart_policy:
+        condition: any
 
   pwa:
     image: ghcr.io/riskymh/emailthing-pwa:latest
     restart: always
     init: true
-    env_file: ./.env
     ports:
       - "3010:3000"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/robots.txt"]
-      interval: 1s
+      interval: 10s
       timeout: 2s
       retries: 5
       start_period: 5s
     deploy:
       update_config:
-        # order: start-first
-        # failure_action: rollback
-        order: stop-first
+        order: start-first
+        # order: stop-first
         failure_action: rollback
         max_failure_ratio: 0
-        monitor: 10s
+        monitor: 5s
+      restart_policy:
+        condition: any
