@@ -151,8 +151,8 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ env.OWNER_LOWER }}/emailthing-api:${{ env.SHORT_SHA }}-${{ matrix.platform_suffix }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
 
       - name: Build & push PWA image (per-arch)
         uses: docker/build-push-action@v6
@@ -165,8 +165,8 @@ jobs:
             ghcr.io/${{ env.OWNER_LOWER }}/emailthing-pwa:${{ env.SHORT_SHA }}-${{ matrix.platform_suffix }}
           build-args: |
             GIT_SHA=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
 
   merge-docker-manifest:
     name: Deploy Docker
