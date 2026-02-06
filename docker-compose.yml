@@ -4,6 +4,15 @@ services:
     restart: always
     init: true
     env_file: ./.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: ${NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY}
+      WEB_NOTIFICATIONS_PRIVATE_KEY: ${WEB_NOTIFICATIONS_PRIVATE_KEY}
+      EMAIL_AUTH_TOKEN: ${EMAIL_AUTH_TOKEN}
+      EMAIL_DKIM_PRIVATE_KEY: ${EMAIL_DKIM_PRIVATE_KEY}
+      S3_KEY_ID: ${S3_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_URL: ${S3_URL}
     ports:
       - "3000:3000"
     healthcheck:
