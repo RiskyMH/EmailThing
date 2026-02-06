@@ -92,15 +92,15 @@ jobs:
         working-directory: packages/emailthing
         if: always()
 
-      # - name: Build PWA (docker)
-      #   run: bun run docker:build
-      #   working-directory: apps/pwa
-      #   if: always()
+      - name: Build PWA (docker)
+        run: bun run docker:build
+        working-directory: apps/pwa
+        if: always() && github.ref != 'refs/heads/main'
 
-      # - name: Build API (docker)
-      #   run: bun run docker:build
-      #   working-directory: apps/api
-      #   if: always()
+      - name: Build API (docker)
+        run: bun run docker:build
+        working-directory: apps/api
+        if: always() && github.ref != 'refs/heads/main'
 
       - name: Assert no changes
         run: |

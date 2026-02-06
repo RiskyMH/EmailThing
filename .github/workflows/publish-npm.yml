@@ -12,6 +12,7 @@ jobs:
   permissions:
    contents: read
    id-token: write
+   packages: write
   if: github.repository_owner == 'RiskyMH'
 
   steps:
@@ -41,3 +42,15 @@ jobs:
      working-directory: packages/emailthing
      env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+   - uses: actions/setup-node@v4
+     with:
+      node-version: "*"
+      registry-url: "https://npm.pkg.github.com"
+   - run: |
+       bun pm pkg set name=@riskymh/emailthing
+       bun pm pack
+       npm publish riskymh-emailthing-*.tgz --provenance --access public || true
+     name: Publish to github packages
+     working-directory: packages/emailthing
+     env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
