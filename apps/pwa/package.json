@@ -9,7 +9,9 @@
     "build": "NODE_ENV=production bun build.tsx",
     "lint": "eslint .",
     "preview": "bun serve-dist.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docker:build": "cd ../.. && docker build --build-arg GIT_SHA=$(git rev-parse --short HEAD) -t emailthing-pwa -f apps/pwa/Dockerfile .",
+    "docker:start": "cd ../.. && docker run -p 3000:3000 --env-file=apps/pwa/.env emailthing-pwa"
   },
   "dependencies": {
     "@babel/core": "^7.29.0",

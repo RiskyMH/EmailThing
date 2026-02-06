@@ -1,0 +1,44 @@
+services:
+  api:
+    image: ghcr.io/riskymh/emailthing-api:latest
+    restart: always
+    init: true
+    env_file: ./.env
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/sitemap.json"]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
+    deploy:
+      update_config:
+        # order: start-first
+        # failure_action: rollback
+        order: stop-first
+        failure_action: rollback
+        max_failure_ratio: 0
+        monitor: 10s
+
+  pwa:
+    image: ghcr.io/riskymh/emailthing-pwa:latest
+    restart: always
+    init: true
+    env_file: ./.env
+    ports:
+      - "3010:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/robots.txt"]
+      interval: 1s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
+    deploy:
+      update_config:
+        # order: start-first
+        # failure_action: rollback
+        order: stop-first
+        failure_action: rollback
+        max_failure_ratio: 0
+        monitor: 10s

@@ -3,7 +3,7 @@ import { drizzle as drizzleNode } from "drizzle-orm/node-postgres";
 import type { BatchItem, BatchResponse } from "drizzle-orm/batch";
 import { relations } from "./relations";
 
-const _db = process.versions.bun
+const _db = process.isBun
     ? drizzleNode(process.env.DATABASE_URL as string, { relations, logger: false })
     : drizzleNode(process.env.DATABASE_URL as string, { relations, logger: false });
 

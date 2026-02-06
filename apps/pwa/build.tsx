@@ -327,7 +327,7 @@ const generateServiceWorkerAssets = async () => {
     `const STATIC_ASSETS = ${assetsArray};`,
   );
 
-  const gitsha = await Bun.$`git rev-parse HEAD`.text();
+  const gitsha = process.env.GIT_SHA || (await Bun.$`git rev-parse HEAD`.text());
   serviceWorkerContent = serviceWorkerContent.replace(
     "const CACHE_NAME = \"emailthing-offline-v1\";",
     `const CACHE_NAME = "emailthing-${gitsha.trim()}";`,

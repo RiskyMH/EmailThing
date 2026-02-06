@@ -92,6 +92,16 @@ jobs:
         working-directory: packages/emailthing
         if: always()
 
+      # - name: Build PWA (docker)
+      #   run: bun run docker:build
+      #   working-directory: apps/pwa
+      #   if: always()
+
+      # - name: Build API (docker)
+      #   run: bun run docker:build
+      #   working-directory: apps/api
+      #   if: always()
+
       - name: Assert no changes
         run: |
           if git diff --exit-code; then
@@ -101,3 +111,92 @@ jobs:
             exit 1
           fi
         if: always()
+
+  docker-build:
+    name: Build Docker (${{ matrix.platform_suffix }})
+    runs-on: ${{ matrix.runner }}
+    needs: [test, typecheck, build-all]
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux/amd64
+            platform_suffix: x64
+          - runner: ubuntu-24.04-arm
+            platform: linux/arm64
+            platform_suffix: arm64
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Prepare lowercase owner
+        run: |
+          echo "OWNER_LOWER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push API image (per-arch)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./apps/api/Dockerfile
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER_LOWER }}/emailthing-api:${{ env.SHORT_SHA }}-${{ matrix.platform_suffix }}
+
+      - name: Build & push PWA image (per-arch)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./apps/pwa/Dockerfile
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER_LOWER }}/emailthing-pwa:${{ env.SHORT_SHA }}-${{ matrix.platform_suffix }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+
+  merge-docker-manifest:
+    name: Deploy Docker
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create and Push API Multi-arch Manifest
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          OWNER_LOWER="${GITHUB_REPOSITORY_OWNER,,}"
+          docker buildx imagetools create \
+            -t ghcr.io/$OWNER_LOWER/emailthing-api:$SHORT_SHA \
+            -t ghcr.io/$OWNER_LOWER/emailthing-api:main \
+            -t ghcr.io/$OWNER_LOWER/emailthing-api:latest \
+            ghcr.io/$OWNER_LOWER/emailthing-api:${SHORT_SHA}-x64 \
+            ghcr.io/$OWNER_LOWER/emailthing-api:${SHORT_SHA}-arm64
+      - name: Create and Push PWA Multi-arch Manifest
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          OWNER_LOWER="${GITHUB_REPOSITORY_OWNER,,}"
+          docker buildx imagetools create \
+            -t ghcr.io/$OWNER_LOWER/emailthing-pwa:$SHORT_SHA \
+            -t ghcr.io/$OWNER_LOWER/emailthing-pwa:main \
+            -t ghcr.io/$OWNER_LOWER/emailthing-pwa:latest \
+            ghcr.io/$OWNER_LOWER/emailthing-pwa:${SHORT_SHA}-x64 \
+            ghcr.io/$OWNER_LOWER/emailthing-pwa:${SHORT_SHA}-arm64
+

@@ -297,7 +297,7 @@ function emailContent({ text, html }: { text?: string; html?: string }) {
         .replace(/<(head|style|script|title)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
         .replace(/<(meta|link)\b[^>]*\/?>/gi, "");
 
-    const _text = new Turndown().turndown(JSDOM.fragment(h)).replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, "$1");
+    const _text = new Turndown().turndown((h)).replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, "$1");
 
     return `<!-- Converted markdown from HTML -->\n${_text}`;
 }

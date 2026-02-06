@@ -1,9 +1,9 @@
 
 export async function GET() {
     const [sha, bunVersion, gitCommit] = await Promise.all([
-        Bun.$`git rev-parse HEAD`.text().then(text => text.trim()),
-        Bun.$`bun --version`.text().then(text => text.trim()),
-        Bun.$`git show -s --format="%s [%ci]" HEAD`.text().then(text => text.trim()),
+        Bun.$`git rev-parse HEAD`.text().then(text => text.trim()).catch(() => "unknown"),
+        Bun.$`bun --version`.text().then(text => text.trim()).catch(() => Bun.version),
+        Bun.$`git show -s --format="%s [%ci]" HEAD`.text().then(text => text.trim()).catch(() => "unknown"),
     ]);
 
     // if (bunVersion !== Bun.version) {

@@ -4,12 +4,17 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "NODE_ENV=production bun run --conditions=react-server src/main.ts",
-    "dev": "bun gen-routes && NODE_ENV=development bun run --hot --conditions=react-server src/main.ts",
+    "start": "NODE_ENV=production bun run --conditions=react-server --define process.isBun:true src/main.ts",
+    "dev": "bun --silent gen-routes && NODE_ENV=development bun run --hot --conditions=react-server --define process.isBun:true src/main.ts",
     "gen-routes": "bun run --conditions=react-server src/gen-routes.ts",
-    "build": "bun gen-routes && NODE_ENV=production bun build src/main.ts --outdir=dist --target=bun --conditions=react-server --minify-syntax --sourcemap",
+    "build:base": "bun --silent gen-routes && NODE_ENV=production bun build src/main.ts --target=bun --conditions=react-server --minify-syntax --sourcemap --define process.isBun:true --format=esm",
+    "build": "bun build:base --outdir=dist",
+    "build:standalone": "bun build:base --compile --outfile=dist/main --bytecode --production",
+    "postbuild": "(chmod +x dist/main.js || true)",
     "start:built": "NODE_ENV=production bun run dist/main.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docker:build": "cd ../.. && docker build --build-arg GIT_SHA=$(git rev-parse --short HEAD) -t emailthing-api -f apps/api/Dockerfile .",
+    "docker:start": "cd ../.. && docker run -p 3000:3000 --env-file=apps/api/.env emailthing-api"
   },
   "dependencies": {
     "@block65/webcrypto-web-push": "^1.0.2",
@@ -24,7 +29,7 @@
     "aws4fetch": "^1.0.20",
     "drizzle-orm": "beta",
     "jose": "^6.1.3",
-    "jsdom": "^27.4.0",
+    "jsdom": "^28.0.0",
     "mailauth": "^4.12.0",
     "marked": "^17.0.1",
     "mimetext": "^3.0.28",

@@ -1,10 +1,8 @@
-import { Database, type Statement } from "bun:sqlite";
+import { type Statement, Database } from "bun:sqlite";
 import { impersonatingEmails } from "./invalid-emails";
 // @ts-expect-error
-import dbFile from "./sus-emails-checker.db" with {type: "file"}
-
-if (import.meta.main) Bun.file(dbFile).write("")
-const db = new Database(dbFile, { readonly: !import.meta.main, readwrite: import.meta.main });
+import _db from "./sus-emails-checker.db" with { type: "sqlite", embed: "true" };
+const db = _db as Database;
 
 let impersonatingStmt: Statement | undefined
 let wordStmt: Statement | undefined
@@ -16,13 +14,13 @@ export function validateAlias(
     const lowerEmailPart = emailPart.toLowerCase();
 
     // Check impersonating terms
-    impersonatingStmt ||= db.prepare("SELECT 1 FROM impersonating WHERE ? LIKE '%' || name || '%' LIMIT 1");
+    impersonatingStmt ||= db.query("SELECT 1 FROM impersonating WHERE ? LIKE '%' || name || '%' LIMIT 1");
     if (impersonatingStmt.get(lowerEmailPart)) {
         return { error: "Email already taken" };
     }
 
     // Check if a generic word
-    wordStmt ||= db.prepare("SELECT 1 FROM words WHERE word = ? LIMIT 1");
+    wordStmt ||= db.query("SELECT 1 FROM words WHERE word = ? LIMIT 1");
     if (wordStmt.get(lowerEmailPart)) {
         return {
             error: "Be more creative! If this is an error or its critical to your brand, please contact me (RiskyMH)",
@@ -30,7 +28,7 @@ export function validateAlias(
     }
 
     // Check brands
-    brandStmt ||= db.prepare(
+    brandStmt ||= db.query(
         `SELECT 1 FROM brands
          WHERE (direct_only = 1 AND brand = ?)
             OR (direct_only = 0 AND ? LIKE '%' || brand || '%')
@@ -116,7 +114,7 @@ if (import.meta.main) {
             const words = wordsText.split("\n").map(e => e.split(" ").at(0) || e)
 
             const insertWord = db.transaction((wordsToInsert: string[]) => {
-                const query = db.prepare(
+                const query = db.query(
                     "INSERT OR IGNORE INTO words (word) VALUES (?)"
                 );
                 for (const word of wordsToInsert) {
@@ -134,7 +132,7 @@ if (import.meta.main) {
 
             const insertBrand = db.transaction(
                 (allBrands: string[], allGenericBrandWords: string[]) => {
-                    const query = db.prepare(
+                    const query = db.query(
                         "INSERT OR IGNORE INTO brands (brand, direct_only) VALUES (?, ?)"
                     );
                     for (const brand of allBrands) {
@@ -149,7 +147,7 @@ if (import.meta.main) {
         {
             const insertImpersonatingEmail = db.transaction(
                 (emailsToInsert: string[]) => {
-                    const query = db.prepare(
+                    const query = db.query(
                         "INSERT OR IGNORE INTO impersonating (name) VALUES (?)"
                     );
                     for (const email of emailsToInsert) {

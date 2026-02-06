@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 // todo: prob hard code the imports so its faster to load lol
 
 
@@ -65,3 +66,4 @@ const server = Bun.serve({
 console.log(`Server is running on ${server.url}api/v0`);
 
 await db.execute(sql`SELECT 1`);
+// process.exit()
