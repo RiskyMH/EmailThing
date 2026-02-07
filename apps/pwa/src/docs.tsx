@@ -12,8 +12,12 @@ const routes = (
   ...e,
 }));
 
+const isPwaBase = typeof window !== "undefined" && window.location.pathname.startsWith('/pwa');
+
 const router = createBrowserRouter(routes, {
   patchRoutesOnNavigation: async ({ matches, patch, path, signal }) => {
+    if (isPwaBase && path.startsWith("/pwa")) path = path.slice('/pwa'.length) || '/';
+
     if (path === "/docs/api") return void (window.location.href = "/docs/api");
     if (["/", "/pricing", "/home", "/login", "/register"].includes(path)) {
       const { routes } = await import("./(home)/_routes");
@@ -31,6 +35,7 @@ const router = createBrowserRouter(routes, {
       }
     }
   },
+  basename: isPwaBase ? "/pwa" : undefined,
 });
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>

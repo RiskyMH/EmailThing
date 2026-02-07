@@ -12,8 +12,12 @@ const routes = (
   ...e,
 }));
 
+const isPwaBase = typeof window !== "undefined" && window.location.pathname.startsWith('/pwa');
+
 const router = createBrowserRouter(routes, {
   patchRoutesOnNavigation: async ({ matches, patch, path, signal }) => {
+    if (isPwaBase && path.startsWith("/pwa")) path = path.slice('/pwa'.length) || '/';
+
     if (path.startsWith("/docs")) {
       if (path === "/docs/api") return void (window.location.href = "/docs/api");
       const { routes } = await import("./(docs)/_routes");
@@ -31,6 +35,7 @@ const router = createBrowserRouter(routes, {
       }
     }
   },
+  basename: isPwaBase ? '/pwa' : undefined,
 });
 
 const elem = document.getElementById("root")!;

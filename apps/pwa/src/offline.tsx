@@ -1,5 +1,5 @@
 import * as ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, type RouteObject, RouterProvider } from "react-router-dom";
 
 import AppRoutes from "./(app)/_routes";
 import DocsRoutes from "./(docs)/_routes";
@@ -19,7 +19,9 @@ function OfflineApp() {
     ] satisfies RouteObject[]
   ).map((e) => ({ errorElement: <ErrorPage />, ...e }));
 
-  const router = createBrowserRouter(routes);
+  const router = createBrowserRouter(routes, {
+    basename: (typeof window !== "undefined" && window.location.pathname.startsWith('/pwa') && '/pwa') || undefined
+  });
 
   return (
     <RootLayout>

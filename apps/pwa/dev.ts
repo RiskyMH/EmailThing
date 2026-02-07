@@ -4,6 +4,7 @@ import service from "./public/service.js" with { type: "text" };
 import app from "./src/app.html";
 import docs from "./src/docs.html";
 import home from "./src/home.html";
+import notFound from "./src/404.html";
 
 const publicFiles: Record<string, BunFile> = {};
 for await (const file of new Bun.Glob("**").scan({ cwd: "./public" })) {
@@ -17,6 +18,7 @@ const server = serve({
     "/pricing": home,
     "/login": home,
     "/register": home,
+    // "/pwa": home,
 
     "/mail/*": app,
     "/mail": app,
@@ -26,15 +28,17 @@ const server = serve({
     "/docs": docs,
     "/docs/*": docs,
 
+    "/404": notFound,
+
     // public files
     ...publicFiles,
     "/service.js": new Response(service, { headers: { "Content-Type": "text/javascript" } }),
+    "/*": new Response("404 :(", { status: 404 }),
   },
   development: {
     console: true,
     hmr: true,
   },
-  fetch: () => new Response("404", { status: 404 }),
 });
 
 console.info(`🚀 Server running at ${server.url}`);

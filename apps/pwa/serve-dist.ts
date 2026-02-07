@@ -22,11 +22,15 @@ async function getRoutes() {
       console.error(e);
     }
   }
+  const notFoundFile = Bun.file(`${DIST_PATH}/404.html`);
+  if (await notFoundFile.exists()) {
+    routes["/*"] = new Response(notFoundFile, { status: 404 });
+  }
   const redirects = await Bun.file(`${DIST_PATH}/_redirects`).text();
   for (const redirect of redirects.split("\n")) {
     if (redirect.startsWith("#")) continue;
     const [from, to, status] = redirect.split(" ");
-    if (status === "200") continue;
+    if (status === "200" || !to) continue;
     routes[from] = Response.redirect(to, Number(status) || 301);
   }
   return routes;
