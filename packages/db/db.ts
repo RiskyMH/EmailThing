@@ -1,10 +1,10 @@
 import { drizzle as drizzleNode } from "drizzle-orm/node-postgres";
-// import { drizzle as drizzleBun } from "drizzle-orm/bun-sql";
+import { drizzle as drizzleBun } from "drizzle-orm/bun-sql";
 import type { BatchItem, BatchResponse } from "drizzle-orm/batch";
 import { relations } from "./relations";
 
 const _db = process.isBun
-    ? drizzleNode(process.env.DATABASE_URL as string, { relations, logger: false })
+    ? drizzleBun(process.env.DATABASE_URL as string, { relations, logger: false })
     : drizzleNode(process.env.DATABASE_URL as string, { relations, logger: false });
 
 
@@ -36,6 +36,6 @@ db.batchUpdate = batchUpdate;
 db.batchFetch = batchFetch;
 
 export default db;
+export { relations, db };
 export * from "./schema";
 export * as schema from "./schema";
-export { relations, db };

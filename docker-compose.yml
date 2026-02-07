@@ -1,55 +1,76 @@
 services:
-  api:
-    image: ghcr.io/riskymh/emailthing-api:latest
-    restart: always
-    init: true
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-      NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: ${NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY}
-      WEB_NOTIFICATIONS_PRIVATE_KEY: ${WEB_NOTIFICATIONS_PRIVATE_KEY}
-      EMAIL_AUTH_TOKEN: ${EMAIL_AUTH_TOKEN}
-      EMAIL_DKIM_PRIVATE_KEY: ${EMAIL_DKIM_PRIVATE_KEY}
-      S3_KEY_ID: ${S3_KEY_ID}
-      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
-      S3_URL: ${S3_URL}
-    ports:
-      - "3000:3000"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/sitemap.json"]
-      interval: 10s
-      timeout: 2s
-      retries: 5
-      start_period: 5s
-    deploy:
-      update_config:
-        order: start-first
-        # order: stop-first
-        failure_action: rollback
-        max_failure_ratio: 0
-        monitor: 5s
-      restart_policy:
-        condition: any
+   api:
+     image: ghcr.io/riskymh/emailthing-api:latest
+     restart: always
+     init: true
+     extra_hosts:
+       - "host.docker.internal:host-gateway"
+     environment:
+       DATABASE_URL: ${DATABASE_URL}
+       NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: ${NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY}
+       WEB_NOTIFICATIONS_PRIVATE_KEY: ${WEB_NOTIFICATIONS_PRIVATE_KEY}
+       EMAIL_AUTH_TOKEN: ${EMAIL_AUTH_TOKEN}
+       EMAIL_DKIM_PRIVATE_KEY: ${EMAIL_DKIM_PRIVATE_KEY}
+       S3_KEY_ID: ${S3_KEY_ID}
+       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+       S3_URL: ${S3_URL}
 
-  pwa:
-    image: ghcr.io/riskymh/emailthing-pwa:latest
-    restart: always
-    init: true
-    ports:
-      - "3010:3000"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/robots.txt"]
-      interval: 10s
-      timeout: 2s
-      retries: 5
-      start_period: 5s
-    deploy:
-      update_config:
-        order: start-first
-        # order: stop-first
-        failure_action: rollback
-        max_failure_ratio: 0
-        monitor: 5s
-      restart_policy:
-        condition: any
+       # optional ones
+       EMAILTHING_ME_TOKEN: ${EMAILTHING_ME_TOKEN}
+       SECRET_SPECIAL_TOKEN_YAY: ${SECRET_SPECIAL_TOKEN_YAY}
+       RPID: ${RPID}
+       RPID_ORIGIN: ${RPID_ORIGIN}
+       NODE_ENV: production
+       PORT: 3000
+     ports:
+       - "3000:3000"
+     healthcheck:
+       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/sitemap.json"]
+       interval: 10s
+       timeout: 2s
+       retries: 5
+       start_period: 5s
+     deploy:
+       resources:
+         limits:
+           memory: 512M
+         reservations:
+           memory: 128M
+       update_config:
+         order: start-first
+         # order: stop-first
+         failure_action: rollback
+         max_failure_ratio: 0
+         monitor: 5s
+       restart_policy:
+         condition: any
+
+   pwa:
+     image: ghcr.io/riskymh/emailthing-pwa:latest
+     restart: always
+     init: true
+     environment:
+       NODE_ENV: production
+       PORT: 3000
+     ports:
+       - "3010:3000"
+     healthcheck:
+       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/robots.txt"]
+       interval: 10s
+       timeout: 2s
+       retries: 5
+       start_period: 5s
+     deploy:
+       resources:
+         limits:
+           memory: 50M
+         reservations:
+           memory: 15M
+       update_config:
+         order: start-first
+         # order: stop-first
+         failure_action: rollback
+         max_failure_ratio: 0
+         monitor: 5s
+       restart_policy:
+         condition: any

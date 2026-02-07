@@ -1,7 +1,7 @@
 import { verifyAuthenticationResponse, verifyRegistrationResponse } from "@simplewebauthn/server";
 
 const HOST_SETTINGS = {
-    expectedOrigin: [process.env.VERCEL_URL, "http://localhost:3000", "https://emailthing.app", "https://pwa.emailthing.app", "https://deps-update-dependencies.emailthing.pages.dev"].filter(Boolean) as string[],
+    expectedOrigin: [process.env.RPID_ORIGIN, "http://localhost:3000", "https://emailthing.app", "https://pwa.emailthing.app", "https://deps-update-dependencies.emailthing.pages.dev"].filter(Boolean) as string[],
     expectedRPID: [process.env.RPID, "localhost", "emailthing.app", "pwa.emailthing.app", "deps-update-dependencies.emailthing.pages.dev"].filter(Boolean) as string[],
 };
 
