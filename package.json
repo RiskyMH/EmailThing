@@ -29,5 +29,8 @@
   ],
   "overrides": {
     "bun": "npm:@riskymh/bun"
+  },
+  "patchedDependencies": {
+    "mailauth@4.12.0": "patches/mailauth@4.12.0.patch"
   }
 }

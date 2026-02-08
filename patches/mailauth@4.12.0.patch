@@ -1,0 +1,108 @@
+diff --git a/lib/tools.js b/lib/tools.js
+index 3b8aff60d8b4e3fead16e67a86095466ab66e03a..515c3b0a7e19f1eaf37ea6adf40e0181cb99b35b 100644
+--- a/lib/tools.js
++++ b/lib/tools.js
+@@ -4,15 +4,18 @@
+ 
+ const { Buffer } = require('node:buffer');
+ const punycode = require('punycode.js');
+-const libmime = require('libmime');
++// const libmime = require('libmime');
+ const dns = require('node:dns').promises;
+ const crypto = require('node:crypto');
+ const https = require('node:https');
+ const packageData = require('../package');
+ const parseDkimHeaders = require('./parse-dkim-headers');
+ const tldts = require('tldts');
+-const Joi = require('joi');
+-const base64Schema = Joi.string().base64({ paddingRequired: false });
++// const Joi = require('joi');
++// const base64Schema = Joi.string().base64({ paddingRequired: false });
++
++// same regex that ^Joi does
++const isBase64 = str => /^(?:[A-Za-z0-9+\/]{2}[A-Za-z0-9+\/]{2})*(?:[A-Za-z0-9+\/]{2}(==)?|[A-Za-z0-9+\/]{3}=?)?$/.test(str);
+ 
+ const defaultDKIMFieldNames =
+     'From:Sender:Reply-To:Subject:Date:Message-ID:To:' +
+@@ -228,7 +231,7 @@ const formatSignatureHeaderLine = (type, values, folded) => {
+             .join('; ');
+ 
+     if (folded) {
+-        return libmime.foldLines(header);
++        return foldLines(header);
+     }
+ 
+     return header;
+@@ -258,12 +261,12 @@ const getPublicKey = async (type, name, minBitLength, resolver) => {
+             throw err;
+         }
+ 
+-        let validation = base64Schema.validate(publicKeyValue);
+-        if (validation.error) {
++        let validation = isBase64(publicKeyValue);
++        if (!validation) {
+             let err = new Error('Invalid base64 format for public key');
+             err.code = 'EINVALIDVAL';
+             err.rr = rr;
+-            err.details = validation.error;
++            // err.details = validation.error;
+             throw err;
+         }
+ 
+@@ -735,6 +738,44 @@ function validateTagValueRecord(record, recordType) {
+     return parsed;
+ }
+ 
++function    foldLines(str, lineLength, afterSpace) {
++        str = (str || '').toString();
++        lineLength = lineLength || 76;
++
++        let pos = 0,
++            len = str.length,
++            result = '',
++            line,
++            match;
++
++        while (pos < len) {
++            line = str.substr(pos, lineLength);
++            if (line.length < lineLength) {
++                result += line;
++                break;
++            }
++            if ((match = line.match(/^[^\n\r]*(\r?\n|\r)/))) {
++                line = match[0];
++                result += line;
++                pos += line.length;
++                continue;
++            } else if ((match = line.match(/(\s+)[^\s]*$/)) && match[0].length - (afterSpace ? (match[1] || '').length : 0) < line.length) {
++                line = line.substr(0, line.length - (match[0].length - (afterSpace ? (match[1] || '').length : 0)));
++            } else if ((match = str.substr(pos + line.length).match(/^[^\s]+(\s*)/))) {
++                line = line + match[0].substr(0, match[0].length - (!afterSpace ? (match[1] || '').length : 0));
++            }
++
++            result += line;
++            pos += line.length;
++            if (pos < len) {
++                result += '\r\n';
++            }
++        }
++
++        return result;
++    }
++
++
+ module.exports = {
+     writeToStream,
+     parseHeaders,
+diff --git a/package.json b/package.json
+index 20d7be96d02fea2e690ec2f4922977cf4139b3f4..9e2c4e61955b83ec2261fdcd1e3f2276d101745b 100644
+--- a/package.json
++++ b/package.json
+@@ -4,6 +4,7 @@
+     "description": "Email authentication library for Node.js",
+     "main": "lib/mailauth.js",
+     "types": "index.d.ts",
++    "sideEffects": false,
+     "scripts": {
+         "test": "eslint \"lib/**/*.js\" \"test/**/*.js\" && mocha --recursive \"./test/**/*.js\" --reporter spec",
+         "format": "prettier --write .",
