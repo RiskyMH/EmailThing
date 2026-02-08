@@ -1,18 +1,18 @@
-import * as z from "zod";
+import * as z from "zod/mini";
 
 export const userAuthSchema = z.object({
-    username: z
-        .string()
-        .min(4, "Username needs to be at least 4 characters")
-        .max(20, "Username can't be longer than 20 characters")
-        .regex(/^[a-zA-Z0-9]+$/, "Username can only contain letters and numbers"),
-
-    password: z.string().min(8, "Password needs to be at least 8 characters"),
+  username: z.string().check(
+    z.minLength(4, { error: "Username must be at least 4 characters long" }),
+    z.maxLength(20, { error: "Username must be at most 20 characters long" }),
+    z.regex(/^[a-zA-Z0-9]+$/, { error: "Username can only contain letters and numbers" })
+  ),
+  password: z.string().check(z.minLength(8, { error: "Password must at least 8 characters long" })),
 });
+
 export const emailSchema = z.object({
-    email: z
-        .email("Invalid email")
-        .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, { error: "Email can only contain letters and numbers" })
-        .max(64, "Email can't be longer than 64 characters")
-        .min(5, "Email must be at least 5 characters"),
+  email: z.email({ error: "Invalid email address" }).check(
+    z.regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, { error: "Invalid email format" }),
+    z.maxLength(64, { error: "Email must be at most 64 characters long" }),
+    z.minLength(5, { error: "Email must be at least 5 characters long" })
+  ),
 });
