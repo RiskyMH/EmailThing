@@ -18,6 +18,7 @@ services:
        # optional ones
        EMAILTHING_ME_TOKEN: ${EMAILTHING_ME_TOKEN}
        SECRET_SPECIAL_TOKEN_YAY: ${SECRET_SPECIAL_TOKEN_YAY}
+       S3_BUCKET: ${S3_BUCKET:-email}
        RPID: ${RPID}
        RPID_ORIGIN: ${RPID_ORIGIN}
        NODE_ENV: production

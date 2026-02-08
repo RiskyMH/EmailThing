@@ -1,13 +1,11 @@
-import { S3Client } from "@riskymh/aws/s3";
 import { env } from "./env";
 
-// TODO: Bun.s3 instead
-const s3 = new S3Client({
+const s3 = new Bun.S3Client({
     accessKeyId: env.S3_KEY_ID,
     secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-    // include bucket name in key (i should probably change this to be manually set)
-    url: env.S3_URL.includes("email") ? env.S3_URL : env.S3_URL.replace("https://", "https://email."),
-});
+    endpoint: env.S3_URL,
+    bucket: env.S3_BUCKET,
+})
 
 export function getSignedUrl({
     key,
@@ -15,26 +13,21 @@ export function getSignedUrl({
     expiresIn = 3600,
     filename,
 }: { key: string; responseContentType?: string; expiresIn?: number; filename?: string }) {
-    return s3.presign.GetObject({
-        key,
-        "X-Amz-Expires": expiresIn,
-        "response-content-type": responseContentType,
-        ...(filename ? { "response-content-disposition": `attachment; filename="${filename}"` } : {}),
-    });
-}
-
-export function uploadFile({ key, buffer, contentType }: { key: string; buffer: Buffer | ArrayBuffer; contentType?: string }) {
-    return s3.PutObject(
+    return s3.presign(key,
         {
-            key,
-            "Content-Type": contentType,
-            // @ts-expect-error - me being sus with some types
-            "Content-Length": buffer.byteLength,
-        },
-        buffer,
+            expiresIn,
+            contentDisposition: filename ? `attachment; filename="${filename}"` : undefined,
+            type: responseContentType,
+            acl: "authenticated-read",
+            method: "GET",
+        }
     );
 }
 
+export function uploadFile({ key, buffer, contentType }: { key: string; buffer: Buffer | ArrayBuffer; contentType?: string }) {
+    return s3.write(key, buffer, { type: contentType });
+}
+
 export function deleteFile(key: string) {
-    return s3.DeleteObject({ key });
+    return s3.delete(key);
 }

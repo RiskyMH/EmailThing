@@ -3,9 +3,13 @@ import { drizzle as drizzleBun } from "drizzle-orm/bun-sql";
 import type { BatchItem, BatchResponse } from "drizzle-orm/batch";
 import { relations } from "./relations";
 
-const _db = process.isBun
+const getDb = () => process.isBun
     ? drizzleBun(process.env.DATABASE_URL as string, { relations, logger: false })
     : drizzleNode(process.env.DATABASE_URL as string, { relations, logger: false });
+
+declare global { var _db: ReturnType<typeof getDb> | undefined }
+
+const _db = process.env.NODE_ENV === "production" ? getDb() : (globalThis._db ||= getDb());
 
 
 // SOME POLLYFILL FUNCTIONS TO MAKE SQLITE -> POSTGRES EASIER

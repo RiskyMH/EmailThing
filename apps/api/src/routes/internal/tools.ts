@@ -4,6 +4,7 @@ import { and, eq, gte } from "drizzle-orm";
 export const allowedOrigins = [
     "https://emailthing.app",
     "https://pwa.emailthing.app",
+    "https://api.emailthing.app",
     "https://*.emailthing.app",
     "http://localhost:3000",
     "http://localhost:3001",

@@ -14,7 +14,7 @@ export const getApiUrl = ({
   const params = new URLSearchParams();
   if (lastSync) {
     // params.append("last_sync", lastSync.getTime().toString());
-    params.set("last_sync_", "");
+    params.set("last_sync_", "use-header");
   }
   if (minimal) {
     params.append("minimal", "true");
