@@ -126,71 +126,75 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     startTransition(async () => {
+      try {
+        if (!inviteCode) {
+          return void toast.error("You need an invite code to signup. Join the Discord to get!", {
+            action: (
+              <a
+                href={DISCORD_URL}
+                target="blank"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
+              >
+                Get Invite <ExternalLinkIcon className="size-4 text-muted-foreground" />
+              </a>
+            ),
+          });
+        }
 
-      if (!inviteCode) {
-        return void toast.error("You need an invite code to signup. Join the Discord to get!", {
-          action: (
-            <a
-              href={DISCORD_URL}
-              target="blank"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
-            >
-              Get Invite <ExternalLinkIcon className="size-4 text-muted-foreground" />
-            </a>
-          ),
+        const res = await fetch(`${apiUrl}/api/internal/register`, {
+          method: "POST",
+          body: JSON.stringify({
+            username: (event.target as HTMLFormElement).username.value,
+            password: (event.target as HTMLFormElement).password.value,
+            invite: inviteCode,
+          }),
         });
-      }
 
-      const res = await fetch(`${apiUrl}/api/internal/register`, {
-        method: "POST",
-        body: JSON.stringify({
-          username: (event.target as HTMLFormElement).username.value,
-          password: (event.target as HTMLFormElement).password.value,
-          invite: inviteCode,
-        }),
-      });
+        if (!res.ok) {
+          if (res.headers.get("content-type")?.includes("application/json")) {
+            const data = await res.json();
+            return void toast.error(data.error);
+          }
+          return void toast.error(await res.text());
+        }
 
-      if (!res.ok) {
-        if (res.headers.get("content-type")?.includes("application/json")) {
-          const data = await res.json();
+        const data = await res.json();
+        if (data.error) {
           return void toast.error(data.error);
         }
-        return void toast.error(await res.text());
+
+        const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes } = data;
+
+        const { db, initializeDB } = await import("@/utils/data/db");
+        await initializeDB();
+
+        await db.localSyncData.clear();
+        await db.mailboxForUser.clear();
+        await db.localSyncData.put(
+          {
+            token,
+            refreshToken,
+            tokenExpiresAt,
+            refreshTokenExpiresAt,
+            lastSync: 0,
+            isSyncing: true,
+            userId: data.userId,
+            apiUrl,
+          },
+          data.userId,
+        );
+
+        const selectedMailbox = mailboxes[0];
+        document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
+        navigate(`/mail/${selectedMailbox}?onboarding`);
+
+        toast.success("Welcome!");
+
+        db.initialFetchSync();
+      } catch (error) {
+        console.error("Registration error:", error);
+        toast.error("Registration failed", { description: error instanceof Error ? error.message : undefined });
       }
-
-      const data = await res.json();
-      if (data.error) {
-        return void toast.error(data.error);
-      }
-
-      const { token, refreshToken, tokenExpiresAt, refreshTokenExpiresAt, mailboxes } = data;
-
-      const { db, initializeDB } = await import("@/utils/data/db");
-      await initializeDB();
-
-      await db.localSyncData.clear();
-      await db.mailboxForUser.clear();
-      await db.localSyncData.put(
-        {
-          token,
-          refreshToken,
-          tokenExpiresAt,
-          refreshTokenExpiresAt,
-          lastSync: 0,
-          isSyncing: true,
-          userId: data.userId,
-          apiUrl,
-        },
-        data.userId,
-      );
-
-      const selectedMailbox = mailboxes[0];
-      document.cookie = `mailboxId=${selectedMailbox}; path=/; Expires=Fri, 31 Dec 9999 23:59:59 GMT;`;
-      navigate(`/mail/${selectedMailbox}?onboarding`);
-
-      toast.success("Welcome!");
-
-      db.initialFetchSync();
     });
   }
 

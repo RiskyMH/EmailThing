@@ -170,21 +170,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     event.preventDefault();
     setLoading(true);
     startTransition(async () => {
-      const res = await fetch(`${apiUrl}/api/internal/login?type=password`, {
-        method: "POST",
-        body: JSON.stringify({
-          username: (event.target as HTMLFormElement).username.value,
-          password: (event.target as HTMLFormElement).password.value,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
+      try {
+        const res = await fetch(`${apiUrl}/api/internal/login?type=password`, {
+          method: "POST",
+          body: JSON.stringify({
+            username: (event.target as HTMLFormElement).username.value,
+            password: (event.target as HTMLFormElement).password.value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          setHadAnError((event.target as HTMLFormElement).username.value ?? "unknown");
+          setLoading(false);
+          return void toast.error(data.error || JSON.stringify(data));
+        }
+        await handleLoginResponse({ data, navigate, username, apiUrl, from });
+        setLoading(false);
+      } catch (err) {
+        console.error("Login error:", err);
         setHadAnError((event.target as HTMLFormElement).username.value ?? "unknown");
         setLoading(false);
-        return void toast.error(data.error || JSON.stringify(data));
+        toast.error("Login failed", { description: err instanceof Error ? err.message : undefined, duration: Infinity });
       }
-      await handleLoginResponse({ data, navigate, username, apiUrl, from });
-      setLoading(false);
     });
   }
 
