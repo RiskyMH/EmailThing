@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     alias: TempAlias.alias
   })
     .from(TempAlias)
-    .where(lt(TempAlias.expiresAt, new Date()))
+    .where(and(lt(TempAlias.expiresAt, new Date()), eq(TempAlias.isDeleted, false)))
     .execute();
 
   const emailWhere = and(
@@ -82,19 +82,17 @@ export async function GET(request: Request) {
     `would delete ${emailsWithAttachments.length} emails and ${tempAliases.length} temp aliases`
   );
 
-  await Promise.all(
-    emailsWithAttachments.map(async (email) => {
-      await deleteFile(`${email.mailboxId}/${email.id}`);
-      await deleteFile(`${email.mailboxId}/${email.id}/email.eml`);
-      await Promise.all(
-        email.attachments.map(async (attachment) => {
-          await deleteFile(
-            `${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`
-          );
-        })
+  const s3FilesToDelete = [];
+  for (const email of emailsWithAttachments) {
+    s3FilesToDelete.push(`${email.mailboxId}/${email.id}`);
+    s3FilesToDelete.push(`${email.mailboxId}/${email.id}/email.eml`);
+    for (const attachment of email.attachments) {
+      s3FilesToDelete.push(
+        `${email.mailboxId}/${email.id}/${attachment.id}/${attachment.filename}`
       );
-    })
-  );
+    }
+  }
+  await Promise.all(s3FilesToDelete.map((key) => deleteFile(key)));
 
   await db.batchUpdate([
     // delete from db
