@@ -193,6 +193,7 @@ export async function composeScreen(): Promise<{
 
   try {
     renderCompose();
+    renderer.watchResize(renderCompose);
 
     for await (const key of readKeys()) {
       if (key === Key.CTRL_C) {
@@ -276,37 +277,37 @@ export async function composeScreen(): Promise<{
       }
 
 
-       else if ((key === Key.PAGEUP || key === Key.CTRL_UP) && state.focusedField === "body") {
-         // Move up by FAST_SCROLL_AMOUNT logical lines
-         state.bodyCursor = Math.max(0, state.bodyCursor - FAST_SCROLL_AMOUNT);
-         const newLine = state.bodyLines[state.bodyCursor] || "";
-         state.bodyCol = Math.min(state.bodyCol, newLine.length);
-         ensureBodyCursorVisible();
-       }
+      else if ((key === Key.PAGEUP || key === Key.CTRL_UP) && state.focusedField === "body") {
+        // Move up by FAST_SCROLL_AMOUNT logical lines
+        state.bodyCursor = Math.max(0, state.bodyCursor - FAST_SCROLL_AMOUNT);
+        const newLine = state.bodyLines[state.bodyCursor] || "";
+        state.bodyCol = Math.min(state.bodyCol, newLine.length);
+        ensureBodyCursorVisible();
+      }
 
-       else if ((key === Key.PAGEDOWN || key === Key.CTRL_DOWN) && state.focusedField === "body") {
-         // Move down by FAST_SCROLL_AMOUNT logical lines
-         state.bodyCursor = Math.min(state.bodyLines.length - 1, state.bodyCursor + FAST_SCROLL_AMOUNT);
-         const newLine = state.bodyLines[state.bodyCursor] || "";
-         state.bodyCol = Math.min(state.bodyCol, newLine.length);
-         ensureBodyCursorVisible();
-       }
+      else if ((key === Key.PAGEDOWN || key === Key.CTRL_DOWN) && state.focusedField === "body") {
+        // Move down by FAST_SCROLL_AMOUNT logical lines
+        state.bodyCursor = Math.min(state.bodyLines.length - 1, state.bodyCursor + FAST_SCROLL_AMOUNT);
+        const newLine = state.bodyLines[state.bodyCursor] || "";
+        state.bodyCol = Math.min(state.bodyCol, newLine.length);
+        ensureBodyCursorVisible();
+      }
 
-       else if (key === Key.HOME && state.focusedField === "body") {
-         // Move to very start of buffer
-         state.bodyCursor = 0;
-         state.bodyCol = 0;
-         ensureBodyCursorVisible();
-       }
+      else if (key === Key.HOME && state.focusedField === "body") {
+        // Move to very start of buffer
+        state.bodyCursor = 0;
+        state.bodyCol = 0;
+        ensureBodyCursorVisible();
+      }
 
-       else if (key === Key.END && state.focusedField === "body") {
-         // Move to very end of buffer
-         state.bodyCursor = state.bodyLines.length - 1;
-         state.bodyCol = (state.bodyLines[state.bodyCursor] || "").length;
-         ensureBodyCursorVisible();
-       }
+      else if (key === Key.END && state.focusedField === "body") {
+        // Move to very end of buffer
+        state.bodyCursor = state.bodyLines.length - 1;
+        state.bodyCol = (state.bodyLines[state.bodyCursor] || "").length;
+        ensureBodyCursorVisible();
+      }
 
-       else if (key === Key.UP && state.focusedField === "body") {
+      else if (key === Key.UP && state.focusedField === "body") {
         // --- ENHANCED: Up arrow moves up through visual soft-wrapped lines ---
         const { width } = renderer.getSize();
         const prefixWidth = 2;
@@ -393,54 +394,54 @@ export async function composeScreen(): Promise<{
             break;
           }
         }
-         // Special fast path: if current logical line is empty and not last, always go to next logical line
-         if (state.bodyLines[state.bodyCursor].length === 0 && state.bodyCursor < state.bodyLines.length - 1) {
-           state.bodyCursor++;
-           state.bodyCol = 0;
-           ensureBodyCursorVisible();
-         }
-         // Find robustly: even for empty lines and col weirdness, always match a visual row
-         cursorVisualRow = -1; cursorVisualCol = 0;
-         for (let vi = 0; vi < visualLines.length; ++vi) {
-           const meta = visualLines[vi];
-           if (meta.logicalLine === state.bodyCursor &&
-               ((meta.charsStart <= state.bodyCol && state.bodyCol <= meta.charsEnd) ||
-                (meta.charsStart === 0 && meta.charsEnd === 0))) {
-             cursorVisualRow = vi;
-             cursorVisualCol = state.bodyCol - meta.charsStart;
-             break;
-           }
-         }
-         if (cursorVisualRow === -1) {
-           cursorVisualRow = visualLines.findIndex(
-             meta => meta.logicalLine === state.bodyCursor && meta.wrapRow === 0
-           );
-           cursorVisualCol = 0;
-         }
-         //--- KEY PART: always permit jump to next logical line if on last wrap (even for empties)
-         const isLastWrapOfLogical =
-           cursorVisualRow === visualLines.length - 1 ||
-           (visualLines[cursorVisualRow + 1] && visualLines[cursorVisualRow + 1].logicalLine !== state.bodyCursor);
+        // Special fast path: if current logical line is empty and not last, always go to next logical line
+        if (state.bodyLines[state.bodyCursor].length === 0 && state.bodyCursor < state.bodyLines.length - 1) {
+          state.bodyCursor++;
+          state.bodyCol = 0;
+          ensureBodyCursorVisible();
+        }
+        // Find robustly: even for empty lines and col weirdness, always match a visual row
+        cursorVisualRow = -1; cursorVisualCol = 0;
+        for (let vi = 0; vi < visualLines.length; ++vi) {
+          const meta = visualLines[vi];
+          if (meta.logicalLine === state.bodyCursor &&
+            ((meta.charsStart <= state.bodyCol && state.bodyCol <= meta.charsEnd) ||
+              (meta.charsStart === 0 && meta.charsEnd === 0))) {
+            cursorVisualRow = vi;
+            cursorVisualCol = state.bodyCol - meta.charsStart;
+            break;
+          }
+        }
+        if (cursorVisualRow === -1) {
+          cursorVisualRow = visualLines.findIndex(
+            meta => meta.logicalLine === state.bodyCursor && meta.wrapRow === 0
+          );
+          cursorVisualCol = 0;
+        }
+        //--- KEY PART: always permit jump to next logical line if on last wrap (even for empties)
+        const isLastWrapOfLogical =
+          cursorVisualRow === visualLines.length - 1 ||
+          (visualLines[cursorVisualRow + 1] && visualLines[cursorVisualRow + 1].logicalLine !== state.bodyCursor);
 
-         if (isLastWrapOfLogical) {
-           if (state.bodyCursor < state.bodyLines.length - 1) {
-             state.bodyCursor++;
-             state.bodyCol = 0;
-           } else {
-             state.bodyCursor = state.bodyLines.length - 1;
-             state.bodyCol = (state.bodyLines[state.bodyCursor] || '').length;
-           }
-           ensureBodyCursorVisible();
-         } else {
-           // Move to next visual wrap row in same logical line
-           const nextVisual = visualLines[cursorVisualRow + 1];
-           state.bodyCursor = nextVisual.logicalLine;
-           state.bodyCol = Math.min(
-             nextVisual.charsStart + cursorVisualCol,
-             nextVisual.charsEnd
-           );
-           ensureBodyCursorVisible();
-         }
+        if (isLastWrapOfLogical) {
+          if (state.bodyCursor < state.bodyLines.length - 1) {
+            state.bodyCursor++;
+            state.bodyCol = 0;
+          } else {
+            state.bodyCursor = state.bodyLines.length - 1;
+            state.bodyCol = (state.bodyLines[state.bodyCursor] || '').length;
+          }
+          ensureBodyCursorVisible();
+        } else {
+          // Move to next visual wrap row in same logical line
+          const nextVisual = visualLines[cursorVisualRow + 1];
+          state.bodyCursor = nextVisual.logicalLine;
+          state.bodyCol = Math.min(
+            nextVisual.charsStart + cursorVisualCol,
+            nextVisual.charsEnd
+          );
+          ensureBodyCursorVisible();
+        }
 
       }
 
@@ -479,7 +480,6 @@ export async function composeScreen(): Promise<{
       }
 
       renderCompose();
-      renderer.watchResize(renderCompose);
     }
   } finally {
     renderer.cleanup();

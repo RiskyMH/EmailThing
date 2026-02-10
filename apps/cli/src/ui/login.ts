@@ -107,9 +107,10 @@ export async function loginScreen(): Promise<{ username: string; password: strin
 
   try {
     renderLogin();
+    renderer.watchResize(renderLogin);
 
     for await (const key of readKeys()) {
-      
+
       if (key === Key.CTRL_C) {
         renderer.cleanup();
         return null;
@@ -146,7 +147,6 @@ export async function loginScreen(): Promise<{ username: string; password: strin
       }
 
       renderLogin();
-      renderer.watchResize(renderLogin);
     }
   } finally {
     renderer.cleanup();
