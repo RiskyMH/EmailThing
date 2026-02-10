@@ -18,19 +18,9 @@ permissions: {}
 jobs:
   build:
     runs-on: ubuntu-slim
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # - dir: packages/emailthing
-          #   name: emailthing
-          - dir: apps/cli
-            name: "@emailthing/cli"
-    name: Build ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
 
-      - run: bun run build && bunx pkg-pr-new publish --comment=off
-        working-directory: ${{ matrix.dir }}
+      - run: bunx pkg-pr-new publish ./packages/emailthing ./apps/cli  --comment=off
