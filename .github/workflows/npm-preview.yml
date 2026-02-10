@@ -1,0 +1,30 @@
+name: NPM Preview
+on: 
+  push:
+    paths: 
+      - packages/emailthing/**
+      - apps/cli/**
+      - .github/workflows/npm-preview.yml
+    branches: main
+  pull_request:
+    paths: 
+      - packages/emailthing/**
+      - apps/cli/**
+      - .github/workflows/npm-preview.yml
+    branches: main
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+  steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - run: bun install --frozen-lockfile
+
+    - run: bun run build && bunx pkg-pr-new publish --comment=off
+      working-directory: packages/emailthing
+    - run: bun run build && bunx pkg-pr-new publish --comment=off
+      working-directory: apps/cli

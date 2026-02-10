@@ -48,6 +48,19 @@
         "@types/bun": "latest",
       },
     },
+    "apps/cli": {
+      "name": "@emailthing/cli",
+      "version": "0.1.0",
+      "bin": {
+        "@emailthing/cli": "./src/index.ts",
+        "emailthing": "./src/index.ts",
+      },
+      "devDependencies": {
+        "@emailthing/cli": "workspace:^",
+        "@emailthing/const": "workspace:^",
+        "@types/bun": "latest",
+      },
+    },
     "apps/emailthing.me": {
       "name": "@emailthing/emailthing-me",
       "version": "0.2.0",
@@ -337,6 +350,8 @@
     "@emailthing/api": ["@emailthing/api@workspace:apps/api"],
 
     "@emailthing/backup": ["@emailthing/backup@workspace:apps/backup"],
+
+    "@emailthing/cli": ["@emailthing/cli@workspace:apps/cli"],
 
     "@emailthing/const": ["@emailthing/const@workspace:packages/const"],
 
