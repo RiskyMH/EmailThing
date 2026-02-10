@@ -3,8 +3,8 @@
   "version": "0.0.0-alpha.0",
   "type": "module",
   "bin": {
-    "@emailthing/cli": "./src/index.ts",
-    "emailthing": "./src/index.ts"
+    "@emailthing/cli": "./dist/index.js",
+    "emailthing": "./dist/index.js"
   },
   "scripts": {
     "dev": "bun run --hot src/index.ts",
@@ -22,6 +22,6 @@
     "@types/bun": "latest"
   },
   "files": [
-    "src"
+    "dist"
   ]
 }
