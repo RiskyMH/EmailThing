@@ -19,10 +19,11 @@ jobs:
   build:
     runs-on: ubuntu-slim
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - dir: packages/emailthing
-            name: emailthing
+          # - dir: packages/emailthing
+          #   name: emailthing
           - dir: apps/cli
             name: "@emailthing/cli"
     name: Build ${{ matrix.name }}
