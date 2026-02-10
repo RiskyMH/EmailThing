@@ -16,6 +16,10 @@ else if (
   (process.env.CLAUDECODE || process.env.OPENCODE || process.env.AGENT) === "1"
 ) {
   await import("./agent");
+} else if (!process.stdin.isTTY || !process.stdout.isTTY) {
+  console.error("This application is meant to be run in an interactive terminal.");
+  console.log("Use `bunx @emailthing/cli agent` flag to run in agent mode instead.");
+  process.exit(1);
 } else {
   await import("./main");
 }
