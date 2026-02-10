@@ -20,6 +20,7 @@ with multiple lines
 
 1. hi
 2. hello
+   HIII
 
 lol
 
@@ -52,12 +53,13 @@ hi
     \x1B[36mwith multiple lines
     \x1B[36m\x1B[0m\x1B[2m\`\`\`
 
-    \x1B[0m\x1B[2m1. \x1B[0mhi
-    \x1B[2m2. \x1B[0mhello
+    \x1B[0m\x1B[2m1.\x1B[0m hi
+    \x1B[2m2.\x1B[0m hello
+       HIII
 
     lol
 
-    \x1B[2m* \x1B[0mabc
+    \x1B[2m•\x1B[0m abc
 
     \x1B[1m## hi\x1B[0m
 
