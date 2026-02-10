@@ -7,7 +7,7 @@ interface Mailbox {
 }
 
 export async function mailboxSwitcher(db: Database, currentMailboxId: string): Promise<string | null> {
-  const renderer = new TerminalRenderer();
+  using renderer = new TerminalRenderer();
 
   const mailboxes = db.query(`
     SELECT mailboxId as id, mailbox_aliases.alias AS default_alias

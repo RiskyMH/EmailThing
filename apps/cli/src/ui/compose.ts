@@ -16,7 +16,7 @@ export async function composeScreen(): Promise<{
   subject: string;
   body: string;
 } | null> {
-  const renderer = new TerminalRenderer();
+  using renderer = new TerminalRenderer();
 
   const state: ComposeState = {
     to: "",

@@ -80,6 +80,8 @@ export class TerminalRenderer {
     this.watchListeners.forEach((fn) => this.unwatchResize(fn));
   }
 
+  [Symbol.dispose]() { this.cleanup() }
+
   private watchListeners: Array<() => void> = [];
   watchResize(fn: () => void) {
     stdout?.on("resize", fn);

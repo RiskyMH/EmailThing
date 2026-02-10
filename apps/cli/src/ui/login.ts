@@ -7,7 +7,7 @@ interface LoginFormData {
 }
 
 export async function loginScreen(): Promise<{ username: string; password: string } | null> {
-  const renderer = new TerminalRenderer();
+  using renderer = new TerminalRenderer();
   const state: LoginFormData = {
     username: "",
     password: "",

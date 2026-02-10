@@ -35,7 +35,7 @@ export async function emailListScreen(
   restoreId?: string,
   modifyEmail?: (updates: { id: string; mailboxId: string; isRead?: boolean; isStarred?: boolean }) => Promise<void>
 ): Promise<{ action: "view" | "compose" | "refresh" | "quit" | "switch"; emailId?: string }> {
-  const renderer = new TerminalRenderer();
+  using renderer = new TerminalRenderer();
 
   const loadEmails = (): Email[] => {
     return (db

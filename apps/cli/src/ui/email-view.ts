@@ -22,7 +22,7 @@ export async function emailViewScreen(
   modifyEmail?: (updates: { id: string; mailboxId: string; isRead?: boolean; isStarred?: boolean }) => Promise<void>
 ): Promise<"back" | "quit" | "next" | "prev"> {
 
-  const renderer = new TerminalRenderer();
+  using renderer = new TerminalRenderer();
 
   const _rawEmail = db
     .query("SELECT * FROM emails WHERE id = ? AND mailboxId = ?")
