@@ -34,7 +34,7 @@ export async function emailListScreen(
   syncCallback: (() => Promise<void>) | null = null,
   restoreId?: string,
   modifyEmail?: (updates: { id: string; mailboxId: string; isRead?: boolean; isStarred?: boolean }) => Promise<void>
-): Promise<{ action: "view" | "compose" | "refresh" | "quit" | "switch"; emailId?: string }> {
+): Promise<{ action: "view" | "compose" | "refresh" | "quit" | "switch"; emailId?: string, emailIds?: string[] }> {
   using renderer = new TerminalRenderer();
 
   const loadEmails = (): Email[] => {
@@ -350,7 +350,8 @@ export async function emailListScreen(
       if (key === Key.ENTER && state.emails.length > 0 && state.selectedEmailId) {
         return {
           action: "view",
-          emailId: state.selectedEmailId
+          emailId: state.selectedEmailId,
+          emailIds: state.emails.map(e => e.id),
         };
       }
 

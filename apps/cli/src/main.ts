@@ -22,7 +22,7 @@ const usingProcess = (key: string, fn: () => Promise<void> | void) => {
 // Typed route definition for central router
 type Route =
   | { route: 'list'; mailboxId: string; restoreId?: string }
-  | { route: 'view'; mailboxId: string; emailId: string }
+  | { route: 'view'; mailboxId: string; emailId: string, _emailListCache?: Array<string> }
   | { route: 'compose'; mailboxId: string }
   | { route: 'switch'; mailboxId?: string }
   | { route: 'login' }
@@ -149,6 +149,7 @@ async function main() {
             route: 'view',
             mailboxId: route.mailboxId,
             emailId: result.emailId,
+            _emailListCache: result.emailIds || undefined
           };
         } else {
           route = { route: 'quit' };
@@ -192,37 +193,37 @@ async function main() {
         break;
       }
       case 'view': {
-        const emails = db
+        const emails = route._emailListCache || (db
           .query(
             "SELECT id FROM emails WHERE mailboxId = ? AND isDeleted = FALSE ORDER BY createdAt DESC"
           )
-          .all(route.mailboxId) as Array<{ id: string }>;
+          .all(route.mailboxId)).map(e => e.id);
 
         while (route.route === 'view') {
-          const idx = emails.findIndex(e => e.id === route.emailId);
+          const idx = emails.findIndex(e => e === route.emailId);
           if (idx === -1) break;
           const currentEmail = emails[idx];
 
           const viewResult = await emailViewScreen(
             db,
             route.mailboxId,
-            currentEmail.id,
+            currentEmail,
             modifyEmailFn
           );
 
           if (viewResult === "quit") {
             route = { route: 'quit' };
           } else if (viewResult === "back") {
-            route = { route: 'list', mailboxId: route.mailboxId, restoreId: currentEmail.id };
+            route = { route: 'list', mailboxId: route.mailboxId, restoreId: currentEmail };
           } else if (
             viewResult === "next" &&
             idx < emails.length - 1
           ) {
-            route = { route: 'view', mailboxId: route.mailboxId, emailId: emails[idx + 1].id };
+            route = { route: 'view', mailboxId: route.mailboxId, emailId: emails[idx + 1], _emailListCache: emails };
           } else if (viewResult === "prev" && idx > 0) {
-            route = { route: 'view', mailboxId: route.mailboxId, emailId: emails[idx - 1].id };
+            route = { route: 'view', mailboxId: route.mailboxId, emailId: emails[idx - 1], _emailListCache: emails };
           } else {
-            route = { route: 'list', mailboxId: route.mailboxId, restoreId: currentEmail.id };
+            route = { route: 'list', mailboxId: route.mailboxId, restoreId: currentEmail };
           }
         }
         break;
