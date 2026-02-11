@@ -199,9 +199,10 @@ async function main() {
           )
           .all(route.mailboxId)).map(e => e.id);
 
+        let currentEmailIndex = emails.indexOf(route.emailId);
         while (route.route === 'view') {
-          const idx = emails.findIndex(e => e === route.emailId);
-          if (idx === -1) break;
+          globalThis.routeCache = route;
+          const idx = currentEmailIndex;
           const currentEmail = emails[idx];
 
           const viewResult = await emailViewScreen(
@@ -220,8 +221,10 @@ async function main() {
             idx < emails.length - 1
           ) {
             route = { route: 'view', mailboxId: route.mailboxId, emailId: emails[idx + 1], _emailListCache: emails };
+            currentEmailIndex = idx + 1;
           } else if (viewResult === "prev" && idx > 0) {
             route = { route: 'view', mailboxId: route.mailboxId, emailId: emails[idx - 1], _emailListCache: emails };
+            currentEmailIndex = idx - 1;
           } else {
             route = { route: 'list', mailboxId: route.mailboxId, restoreId: currentEmail };
           }
