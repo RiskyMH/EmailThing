@@ -1,0 +1,46 @@
+{
+  "name": "@emailthing/cli",
+  "version": "0.0.0-alpha.1",
+  "description": "An interactive command-line interface for managing your EmailThing emails!",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RiskyMH/EmailThing.git",
+    "directory": "apps/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/RiskyMH/EmailThing/issues"
+  },
+  "keywords": [
+    "cli",
+    "email",
+    "tui",
+    "interactive",
+    "terminal",
+    "bun"
+  ],
+  "bin": {
+    "@emailthing/cli": "./dist/index.js",
+    "emailthing": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "build": "rm -rf dist && bun build src/index.ts src/main.ts src/agent.ts --outdir=dist --target=bun --format=esm --minify-syntax --splitting",
+    "start": "bun run src/index.ts",
+    "test": "bun test",
+    "prepack": "bun run build"
+  },
+  "devDependencies": {
+    "@emailthing/const": "workspace:^",
+    "@types/bun": "latest"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "homepage": "https://emailthing.app/home",
+  "author": "RiskyMH (https://riskymh.dev)",
+  "engines": {
+    "bun": ">=1.3.9"
+  }
+}

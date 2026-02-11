@@ -11,7 +11,7 @@
     "lint": "echo idk",
     "typecheck": "bun run --filter=\"*\" --elide-lines=0 typecheck",
     "db:push": "drizzle-kit push --config=./packages/db/drizzle.config.ts",
-    "db:studio": "drizzle-kit studio --config=./packages/db/drizzle.config.ts",
+    "db:studio": "cd packages/db && bunx drizzle-kit studio --config=drizzle.config.ts",
     "docker:deploy": "(docker swarm init || true) && bun --env-file=.env run docker stack deploy -c docker-compose.yml emailthing --detach=false",
     "docker:logs:api": "docker service logs -tf emailthing_api",
     "docker:logs:pwa": "docker service logs -tf emailthing_pwa"

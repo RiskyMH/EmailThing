@@ -40,3 +40,4 @@ next-env.d.ts
 *.sqlite
 dist/
 .cache/
+*.tgz

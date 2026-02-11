@@ -56,10 +56,20 @@ await emailthing.send({
 
 ## CLI
 
-A visual terminal interface for the [EmailThing](https://emailthing.app/home) site.
+An in-progress visual terminal interface for the [EmailThing](https://emailthing.app/home) site.
 
-> **Not done yet** - *It will have a CLI version so you can view your emails and send them from the terminal.*
+Modes provided by [`@emailthing/cli`](https://www.npmjs.com/package/@emailthing/cli):
+* Normal interactive: navigate mailboxes, read and compose emails from your terminal
+* Agent mode: let your agent interact with your emails via command line
+
+> Note: This requires [Bun](https://bun.com/) as its runtime.
 
 ```sh
 $ bunx emailthing
+$ bunx @emailthing/cli
+# Welcome to EmailThing CLI!
+# <interactive terminal UI starts here>
+
+$ bunx @emailthing/cli agent list # see your email list
+$ bunx @emailthing/cli agent email id12345 # see that email
 ```

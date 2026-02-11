@@ -87,9 +87,14 @@ jobs:
         working-directory: apps/emailthing.me
         if: always()
 
-      - name: Build EmailThing (cli)
+      - name: Build EmailThing (package)
         run: bun run build
         working-directory: packages/emailthing
+        if: always()
+
+      - name: Build @emailthing/cli
+        run: bun run build
+        working-directory: apps/cli
         if: always()
 
       - name: Build PWA (docker)

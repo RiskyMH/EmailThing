@@ -42,6 +42,11 @@ jobs:
      working-directory: packages/emailthing
      env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+   - run: bun pm pack && npm publish emailthing-cli-*.tgz --provenance --access public --tag=latest || true
+     name: Publish CLI to npm
+     working-directory: apps/cli
+     env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
    - uses: actions/setup-node@v4
      with:
       node-version: "*"
