@@ -50,8 +50,8 @@ async function main() {
 
   const auth = loadAuth(db);
 
+  console.log("Welcome to EmailThing CLI!\n");
   if (!auth) {
-    console.log("Welcome to EmailThing CLI!\n");
     const credentials = await loginScreen();
 
     if (!credentials) {
@@ -241,7 +241,7 @@ async function main() {
 
 
   process.stdout.write(`${AnsiCtrl.SHOW_CURSOR}${AnsiCtrl.ALT_SCREEN_OFF}`);
-  console.log("Goodbye!");
+  // console.log("Goodbye!");
   db.close();
   process.exit(0);
 }

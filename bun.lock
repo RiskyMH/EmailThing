@@ -197,6 +197,7 @@
     },
     "packages/const": {
       "name": "@emailthing/const",
+      "version": "0.0.0",
     },
     "packages/db": {
       "name": "@emailthing/db",

@@ -26,8 +26,9 @@
   "types": "./src/sdk.ts",
   "sideEffects": false,
   "scripts": {
-    "build": "bun build src/cli.ts src/sdk.ts --outdir dist --sourcemap",
-    "prepack": "bun exec \"rm -rf dist && bun run build\"",
+    "build": "rm -rf dist && bun build src/sdk.ts src/cli.ts --outdir dist --sourcemap # && bun run --silent build:cli",
+    "build:cli": "bun --cwd=../../apps/cli run build && cp -r ../../apps/cli/dist dist/cli && (find dist/cli -type f -name '*.js' -exec sed -i '' 's/\\@emailthing\\/cli/emailthing/g' {} +) && cp -r ../../apps/cli/README.md dist/cli",
+    "prepack": "bun run build",
     "typecheck": "tsc --noEmit"
   },
   "homepage": "https://emailthing.app/home",

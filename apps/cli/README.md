@@ -1,9 +1,15 @@
-# EmailThing CLI
+<h1 align="center">
+  <a href="https://emailthing.app/home" target="_blank">
+    <img src="https://emailthing.app/logo.png" alt="EmailThing Logo" width="84">
+  </a>
+  <br>
+  EmailThing (CLI)
+</h1>
 
-A terminal email client with AI agent mode for email automation.
+An interactive terminal email client with AI agent mode for email automation.
 
 Modes:
-* Normal interactive one: navigate mailboxes, read and compose emails from your terminal
+* Normal interactive: navigate mailboxes, read and compose emails from your terminal
 * Agent mode: let your agent interact with your emails via command line
 
 Note: This package requires [Bun](https://bun.sh/) as its runtime.
