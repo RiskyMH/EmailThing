@@ -1,6 +1,6 @@
 {
   "name": "@emailthing/cli",
-  "version": "0.0.0-alpha.4",
+  "version": "0.0.0-alpha.5",
   "description": "An interactive command-line interface for managing your EmailThing emails!",
   "type": "module",
   "repository": {
