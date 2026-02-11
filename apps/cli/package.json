@@ -9,9 +9,6 @@
   "main": "./dist/index.js",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "agent": "bun run src/index.ts --agent",
-    "agent:help": "bun run src/index.ts --agent --help",
-    "logout": "bun run src/index.ts --logout",
     "build": "rm -rf dist && bun build src/index.ts src/main.ts src/agent.ts --outdir=dist --target=bun --format=esm --minify-syntax --splitting",
     "start": "bun run src/index.ts",
     "test": "bun test",

@@ -212,7 +212,7 @@
     },
     "packages/emailthing": {
       "name": "emailthing",
-      "version": "0.0.9",
+      "version": "0.0.10",
       "bin": {
         "emailthing": "./dist/cli.js",
       },

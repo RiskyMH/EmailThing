@@ -1,6 +1,6 @@
 {
   "name": "emailthing",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "A web app for receiving and sending your emails!",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
     "url": "https://github.com/RiskyMH/EmailThing/issues"
   },
   "bin": {
-    "emailthing": "./dist/cli/cli.js"
+    "emailthing": "./dist/cli.js"
   },
   "type": "module",
   "exports": {
@@ -26,8 +26,7 @@
   "types": "./src/sdk.ts",
   "sideEffects": false,
   "scripts": {
-    "build": "rm -rf dist && bun build src/sdk.ts --outdir dist --sourcemap && bun build src/cli.ts --outdir dist/cli --target=bun --splitting && bun run --silent build:cli",
-    "build:cli": "(find dist/cli -type f -name '*.js' -exec sed -i '' 's/\\@emailthing\\/cli/emailthing/g' {} +) && cp -r ../../apps/cli/README.md dist/cli",
+    "build": "rm -rf dist && bun build src/sdk.ts --outdir dist --sourcemap && bun build src/cli.ts --outdir dist --target=bun --minify-syntax",
     "prepack": "bun run build",
     "typecheck": "tsc --noEmit"
   },

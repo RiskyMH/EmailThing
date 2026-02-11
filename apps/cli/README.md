@@ -12,7 +12,7 @@ Modes:
 * Normal interactive: navigate mailboxes, read and compose emails from your terminal
 * Agent mode: let your agent interact with your emails via command line
 
-Note: This package requires [Bun](https://bun.sh/) as its runtime.
+> Note: This package requires [Bun](https://bun.com/) as its runtime.
 
 ```sh
 $ bunx @emailthing/cli
