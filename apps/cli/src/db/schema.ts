@@ -22,6 +22,7 @@ export interface Email {
   html: string | null;
   snippet: string | null;
   isRead: boolean;
+  isSender: boolean;
   isStarred: boolean;
   createdAt: string;
   headers: string | null;
@@ -101,6 +102,7 @@ export function initDB(dbPath: string) {
       snippet TEXT,
       isRead BOOLEAN DEFAULT FALSE,
       isStarred BOOLEAN DEFAULT FALSE,
+      isSender BOOLEAN DEFAULT FALSE,
       createdAt TEXT NOT NULL,
       headers TEXT,
       raw TEXT,
@@ -158,12 +160,10 @@ export function initDB(dbPath: string) {
     CREATE INDEX IF NOT EXISTS idx_categories_mailbox ON categories(mailboxId);
   `);
 
-  if (currentVersion < 1) {
-    try {
-      db.run("ALTER TABLE emails ADD COLUMN categoryId TEXT");
-    } catch (e) {
-    }
-    db.run("PRAGMA user_version = 1");
+  if (currentVersion < 2) {
+    try { db.run("ALTER TABLE emails ADD COLUMN categoryId TEXT") } catch (e) { }
+    try { db.run("ALTER TABLE emails ADD COLUMN isSender BOOLEAN DEFAULT FALSE") } catch (e) { }
+    db.run("PRAGMA user_version = 2");
   }
 
   return db;

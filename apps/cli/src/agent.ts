@@ -513,11 +513,12 @@ Output Format:
                 from: values.from,
                 to
             });
-            console.log(`Send successful! Email sent from ${values.from} to ${to.join(", ")}`);
+            console.log(`Send successful! Email sent from ${values.from} to ${to.map(t => t.type === "cc" ? `${t.address} (cc)` : t.type === "bcc" ? `${t.address} (bcc)` : t.address).join(", ")}`);
+            console.log(sendResult)
             // @ts-expect-error im sus
             if (sendResult && sendResult.sync.draftSync) {
                 // @ts-expect-error im sus
-                console.log(`Draft/email id: ${sendResult.sync.draftSync}`);
+                console.log(`  Email id: ${sendResult.sync.emails[0].id} (should appear as sent email shortly)`);
             }
         } catch (err) {
             // @ts-expect-error im sus

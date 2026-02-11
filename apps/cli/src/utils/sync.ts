@@ -29,8 +29,8 @@ export async function syncData(client: EmailThingCLI, db: Database, silent = fal
 
     if (!silent) console.error("Inserting emails...");
     const emailStmt = db.prepare(`
-      INSERT OR REPLACE INTO emails (id, mailboxId, subject, from_addr, to_addr, cc, bcc, replyTo, body, html, snippet, isRead, isStarred, createdAt, headers, categoryId, isDeleted)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO emails (id, mailboxId, subject, from_addr, to_addr, cc, bcc, replyTo, body, html, snippet, isRead, isStarred, createdAt, headers, categoryId, isDeleted, isSender)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     for (const email of syncData.emails) {
@@ -55,7 +55,8 @@ export async function syncData(client: EmailThingCLI, db: Database, silent = fal
         email.createdAt,
         email.headers ? JSON.stringify(email.headers) : null,
         email.categoryId || null,
-        email.isDeleted ? true : false
+        email.isDeleted ? true : false,
+        email.isSender ? true : false
       );
     }
 
