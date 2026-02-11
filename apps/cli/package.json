@@ -6,6 +6,7 @@
     "@emailthing/cli": "./dist/index.js",
     "emailthing": "./dist/index.js"
   },
+  "main": "./dist/index.js",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "agent": "bun run src/index.ts --agent",
@@ -18,7 +19,6 @@
   },
   "devDependencies": {
     "@emailthing/const": "workspace:^",
-    "@emailthing/cli": "workspace:^",
     "@types/bun": "latest"
   },
   "files": [

@@ -3,7 +3,9 @@
 
 console.info("EmailThing!");
 console.info(" - Not much yet, use the website for now: https://emailthing.app");
-console.info(" - Or try the experimental CLI with `bunx @emailthing/cli`");
+console.info(` - Or try the experimental CLI with \`bunx @emailthing/${"cli"}}\``);
+
+// import "@emailthing/cli"
 
 // if (process.env.EMAILTHING_TOKEN) {
 //     const emailthing = new EmailThing(process.env.EMAILTHING_TOKEN);
