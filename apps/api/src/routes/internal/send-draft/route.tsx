@@ -6,6 +6,7 @@ import { createMimeMessage } from "mimetext";
 import type { ChangesResponse } from "../sync/route";
 import { getSession, isValidOrigin } from "../tools";
 import { createId } from "@paralleldrive/cuid2";
+import { MAX_REQUESTS_PER_WINDOW, ratelimit, WINDOW_DURATION_MS } from "@/routes/v0/send/route";
 
 
 export interface Data extends SaveActionProps {
@@ -65,6 +66,32 @@ export async function POST(request: Request) {
     ]);
 
     if (!mailbox || !userAccess) return Response.json({ error: "Access denied to mailbox" } as SendEmailResponse, { status: 403, headers: responseHeaders });
+
+
+    const key = mailbox.id;
+    const rate = ratelimit.get(key);
+
+    if (!rate || rate.resetAt < new Date()) {
+        // Reset the rate limit if it's expired
+        ratelimit.set(key, {
+            count: 1,
+            resetAt: new Date(Date.now() + WINDOW_DURATION_MS),
+        });
+    } else {
+        // Increment the request count if within the window
+        rate.count++;
+        if (rate.count > MAX_REQUESTS_PER_WINDOW) {
+            const timeUntilReset = rate.resetAt.getTime() - Date.now();
+            return Response.json(
+                { error: "rate limited" },
+                {
+                    status: 429,
+                    headers: { "Retry-After": timeUntilReset.toString() },
+                },
+            );
+        }
+    }
+
 
     if (data.draftId !== "new") {
         const [draft] = await db.select({ id: DraftEmail.id })

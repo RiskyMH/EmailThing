@@ -18,11 +18,11 @@ interface EmailPostOptions {
     headers?: Record<string, string>;
 }
 
-// 30 requests per 60 seconds
-const MAX_REQUESTS_PER_WINDOW = 30;
-const WINDOW_DURATION_MS = 60 * 1000;
+// 15 requests per 60 seconds
+export const MAX_REQUESTS_PER_WINDOW = 15;
+export const WINDOW_DURATION_MS = 60 * 1000;
 
-const ratelimit = new Map<string, { count: number; resetAt: Date }>();
+export const ratelimit = new Map<string, { count: number; resetAt: Date }>();
 
 export async function POST(request: Request) {
     const mailboxId = await getTokenMailbox(request.headers);
