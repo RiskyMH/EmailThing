@@ -41,13 +41,14 @@ const server = Bun.serve({
             Response.redirect(url.pathname, 308);
         },
         "/alive": () => new Response("OK"),
-        "/sitemap.json": () => Response.json(
-            Object.entries(routes).flatMap(([route, handlers]) =>
-                Object.keys(handlers)
-                    .filter(key => httpExports.includes(key))
-                    .map(method => `${method.padEnd(8)} ${route}`)
-            )
-        ),
+        "/sitemap.json": new Response(
+            JSON.stringify(
+                Object.entries(routes).flatMap(([route, handlers]) =>
+                    Object.keys(handlers)
+                        .filter(key => httpExports.includes(key))
+                        .map(method => `${method.padEnd(8)} ${route}`)
+                ), null, 2)
+            , { headers: { "Content-Type": "application/json" } }),
         // old routes that had misspellings
         "/recieve-email": Response.redirect("/api/v0/receive-email", 308),
         "/api/recieve-email": Response.redirect("/api/v0/receive-email", 308),
