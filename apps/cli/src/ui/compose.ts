@@ -1,4 +1,4 @@
-import { TerminalRenderer, readKey, colors, Key, readKeys, defaultKeys } from "./renderer";
+import { TerminalRenderer, colors, Key, readKeys, defaultKeys } from "./renderer";
 
 interface ComposeState {
   to: string;
@@ -137,7 +137,6 @@ export async function composeScreen(): Promise<{
         continue;
       }
       const meta = visualLines[visIdx];
-      const isCursorRow = bodyFocused && visIdx === cursorVisualRow;
       let scrollbarChar = " ";
       if (showScrollbar) {
         if (i >= scrollbarThumbPosition && i < scrollbarThumbPosition + scrollbarThumbSize) {
@@ -481,6 +480,7 @@ export async function composeScreen(): Promise<{
 
       renderCompose();
     }
+    throw new Error("Unexpected end of input");
   } finally {
     renderer.cleanup();
   }

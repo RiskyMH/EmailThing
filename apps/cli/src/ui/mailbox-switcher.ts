@@ -1,4 +1,4 @@
-import { TerminalRenderer, readKey, colors, Key, readKeys } from "./renderer";
+import { TerminalRenderer, colors, Key, readKeys } from "./renderer";
 import type { Database } from "bun:sqlite";
 
 interface Mailbox {
@@ -83,6 +83,7 @@ export async function mailboxSwitcher(db: Database, currentMailboxId: string): P
 
       renderMailboxes();
     }
+    throw new Error("Unexpected end of input");
   } finally {
     renderer.cleanup();
   }

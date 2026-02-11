@@ -1,4 +1,4 @@
-import { TerminalRenderer, readKey, colors, Key, readKeys } from "./renderer";
+import { TerminalRenderer, colors, Key, readKeys } from "./renderer";
 import { markdownHighlight } from "./markdown-highlight";
 import type { Database } from "bun:sqlite";
 
@@ -231,6 +231,7 @@ export async function emailViewScreen(
 
       renderEmail();
     }
+    throw new Error("Unexpected end of input");
   } finally {
     renderer.cleanup();
   }

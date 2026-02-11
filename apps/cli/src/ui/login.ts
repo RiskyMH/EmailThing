@@ -1,4 +1,4 @@
-import { TerminalRenderer, readKey, colors, truncate, Key, readKeys, defaultKeys } from "./renderer";
+import { TerminalRenderer, colors, Key, readKeys, defaultKeys } from "./renderer";
 
 interface LoginFormData {
   username: string;
@@ -110,7 +110,6 @@ export async function loginScreen(): Promise<{ username: string; password: strin
     renderer.watchResize(renderLogin);
 
     for await (const key of readKeys()) {
-
       if (key === Key.CTRL_C) {
         renderer.cleanup();
         return null;
@@ -148,6 +147,7 @@ export async function loginScreen(): Promise<{ username: string; password: strin
 
       renderLogin();
     }
+    throw new Error("Unexpected end of input");
   } finally {
     renderer.cleanup();
   }

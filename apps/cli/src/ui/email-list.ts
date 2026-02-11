@@ -1,5 +1,5 @@
-import { TerminalRenderer, readKey, colors, truncate, formatDate, Key, readKeys } from "./renderer";
-import { AnsiCode, AnsiFg } from "@/utils/colors";
+import { TerminalRenderer, colors, truncate, formatDate, Key, readKeys } from "./renderer";
+import { AnsiFg } from "@/utils/colors";
 import type { Database } from "bun:sqlite";
 
 interface Email {
@@ -357,6 +357,7 @@ export async function emailListScreen(
 
       renderEmailList();
     }
+    throw new Error("Unexpected end of input");
   } finally {
     clearInterval(animInterval);
     renderer.cleanup();

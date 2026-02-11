@@ -1,6 +1,4 @@
 #!/usr/bin/env bun
-
-
 import { parseArgs } from "node:util";
 import { EmailThingCLI } from "@/api/client";
 import { getDB, loadAuth } from "@/utils/config";
@@ -224,7 +222,7 @@ Output Format:
             let output = emailData;
             if (fields) {
                 output = fields.reduce((acc, f) => {
-                    if (f in emailData) acc[f] = emailData[f];
+                    if (f in emailData) acc[f] = (emailData as Record<string, any>)[f];
                     return acc;
                 }, {} as any);
             }
@@ -244,13 +242,13 @@ Output Format:
                     "",
                 `  Body:`,
             ];
-            const body = (email.body || email.html || "(empty)").split("\n").map(line => "    " + line).join("\n");
+            const body = ((email.body || email.html || "(empty)") as string).split("\n").map(line => "    " + line).join("\n");
             lines.push(body);
             if (fields) {
                 lines = [`Email Details:`];
                 fields.forEach(f => {
                     if (f === "body") lines.push(`Body:\n${body}`);
-                    else if (f in email) lines.push(`  ${f}: ${email[f]}`);
+                    else if (f in email) lines.push(`  ${f}: ${(email as Record<string, any>)[f]}`);
                 });
             }
             console.log(lines.join("\n"));

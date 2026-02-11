@@ -38,8 +38,6 @@ export function markdownHighlight(text: string): string {
     hardSoftBreaks: true,
     // collapseWhitespace: false,
     tables: false, // im too lazy
-
-
   });
   return bodyMarkdowned;
 }

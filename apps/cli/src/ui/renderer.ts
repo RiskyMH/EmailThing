@@ -1,5 +1,3 @@
-import { resolve } from "bun";
-
 const { stdout, stdin } = process;
 
 export const enum AnsiCtrl {

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
-import {  markdownHighlight } from "./markdown-highlight";
+import { markdownHighlight } from "./markdown-highlight";
 
-test("new renderer should handle complex markdown", () => {
+test("markdown ansi highligher", () => {
   const demo = `# Header 1
 
 **Bold text** and *italic text* and ~~strikethrough~~.

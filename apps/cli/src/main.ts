@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-
 import { EmailThingCLI } from "@/api/client";
 import { getDB, loadAuth, saveAuth } from "@/utils/config";
 import { syncData } from "@/utils/sync";
@@ -28,8 +27,8 @@ type Route =
   | { route: 'login' }
   | { route: 'quit' };
 
-
-if (globalThis.routeCache) {
+declare global { var _cli_route_cache: Route | undefined }
+if (globalThis._cli_route_cache) {
   // clear all event listeners on hot reload to prevent duplicates
   process.removeAllListeners("SIGINT");
   process.stdin.removeAllListeners("data");
@@ -125,10 +124,10 @@ async function main() {
   }
 
   // Central router dispatcher
-  let route: Route = globalThis.routeCache || { route: 'list', mailboxId: currentMailboxId };
+  let route: Route = globalThis._cli_route_cache || { route: 'list', mailboxId: currentMailboxId };
 
   while (route.route !== 'quit') {
-    globalThis.routeCache = route; 
+    globalThis._cli_route_cache = route;
     switch (route.route) {
       case 'list': {
         const result = await emailListScreen(
@@ -197,11 +196,11 @@ async function main() {
           .query(
             "SELECT id FROM emails WHERE mailboxId = ? AND isDeleted = FALSE ORDER BY createdAt DESC"
           )
-          .all(route.mailboxId)).map(e => e.id);
+          .all(route.mailboxId)).map((e: any) => e.id);
 
         let currentEmailIndex = emails.indexOf(route.emailId);
         while (route.route === 'view') {
-          globalThis.routeCache = route;
+          globalThis._cli_route_cache = route;
           const idx = currentEmailIndex;
           const currentEmail = emails[idx];
 
@@ -231,6 +230,7 @@ async function main() {
         }
         break;
       }
+      // @ts-expect-error - should never be possible tbh
       case 'quit':
       default: {
         route = { route: 'quit' };
