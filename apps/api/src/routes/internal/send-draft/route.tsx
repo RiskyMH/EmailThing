@@ -5,6 +5,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { createMimeMessage } from "mimetext";
 import type { ChangesResponse } from "../sync/route";
 import { getSession, isValidOrigin } from "../tools";
+import { createId } from "@paralleldrive/cuid2";
 
 
 export interface Data extends SaveActionProps {
@@ -65,16 +66,18 @@ export async function POST(request: Request) {
 
     if (!mailbox || !userAccess) return Response.json({ error: "Access denied to mailbox" } as SendEmailResponse, { status: 403, headers: responseHeaders });
 
-    const [draft] = await db.select({ id: DraftEmail.id })
-        .from(DraftEmail)
-        .where(and(
-            eq(DraftEmail.id, data.draftId),
-            eq(DraftEmail.mailboxId, data.mailboxId),
-            eq(DraftEmail.isDeleted, false),
-        ))
-        .limit(1)
+    if (data.draftId !== "new") {
+        const [draft] = await db.select({ id: DraftEmail.id })
+            .from(DraftEmail)
+            .where(and(
+                eq(DraftEmail.id, data.draftId),
+                eq(DraftEmail.mailboxId, data.mailboxId),
+                eq(DraftEmail.isDeleted, false),
+            ))
+            .limit(1)
 
-    if (!draft) return Response.json({ error: "Draft not found" } as SendEmailResponse, { status: 404, headers: responseHeaders });
+        if (!draft) return Response.json({ error: "Draft not found" } as SendEmailResponse, { status: 404, headers: responseHeaders });
+    }
 
     const { body, subject, from, to, html, headers, mailboxId, draftId } = data;
 
@@ -84,7 +87,7 @@ export async function POST(request: Request) {
         //     return { error: "Body is required" };
     }
 
-    if (!html || !body) {
+    if (!html && !body) {
         return Response.json({ error: "Body is required" } as SendEmailResponse, { status: 400, headers: responseHeaders });
     }
 
@@ -124,7 +127,7 @@ export async function POST(request: Request) {
         ),
     );
     email.setSubject(subject || "(no subject)");
-    email.addMessage({
+    if (body) email.addMessage({
         contentType: "text/plain",
         data: body,
     });
@@ -156,7 +159,7 @@ export async function POST(request: Request) {
     if (e?.error) return Response.json(e, { status: 400, headers: responseHeaders });
 
     // const emailId = createId()
-    const emailId = draftId; // could also make new id here
+    const emailId = draftId === "new" ? createId() : draftId; // could also make new id here
 
     // add to sent folder
     await db.batchUpdate([

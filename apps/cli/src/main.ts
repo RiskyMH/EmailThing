@@ -175,7 +175,6 @@ async function main() {
           try {
             console.log("Sending email...");
             await client.sendDraft({
-              draftId: crypto.randomUUID(),
               mailboxId: route.mailboxId,
               body: composeData.body,
               subject: composeData.subject,

@@ -22,7 +22,7 @@ async function main() {
     // Stage 2: Subcommand-specific option parsing
 
     // Show help if global help or no valid subcommand
-    if (globalValues.help || !subcmd || !["list", "email", "sync"].includes(subcmd)) {
+    if (globalValues.help || !subcmd || !["list", "email", "mailboxes", "send", "sync"].includes(subcmd)) {
         const nowIso = new Date().toISOString();
         console.log(`
 EmailThing CLI - Agent Mode
@@ -35,6 +35,8 @@ Usage:
 Subcommands:
   list          List recent emails (default: 25)
   email <id>    Show full email by ID (body, etc)
+  mailboxes     List mailboxes with their aliases
+  send          Send an email from an alias
   sync          Force fresh sync from server
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -61,6 +63,19 @@ agent email <id>:
   --fields=a,b,c    Show only those fields
   --sync            Force sync before showing email details
 
+agent mailboxes:
+  Lists your available mailboxes and their aliases.
+  (No options)
+
+agent send:
+  Send an email. Reads body from stdin (e.g. pipe from echo or file).
+  --from=<alias@domain.com>    Alias email you control (see \`agent mailboxes\` for valid aliases)
+  --to=<email@domain.com>...   Recipient email address (multiple supported)
+  --cc=<email@domain.com>...   CC Recipient email address
+  --bcc=<email@domain.com>...  BCC Recipient email address
+  --subject=<text>             Subject line
+  --html                       Treat stdin as HTML
+
 agent sync:
   Triggers sync with server to update local cache
   (No other options needed)
@@ -73,6 +88,7 @@ Examples:
   bunx @emailthing/cli agent list --unread --limit=10 --sync
   bunx @emailthing/cli agent email abc123xyz789example456id --json --sync
   bunx @emailthing/cli agent sync
+  echo "The text/plain body" | bunx @emailthing/cli agent send --from=me@myalias.com --to=friend@site.com --to=another@friend.com --subject="Hello"
 
 Output Format:
   List mode:
@@ -97,6 +113,10 @@ Output Format:
       Body:
         Your verification code is: 123456
         This code expires in 10 minutes.
+   Mailboxes mode:
+    Mailbox: abcd123
+      Alias: Someone@emailthing.xyz (default)  Name: My Personal Email
+      Alias: Custom@domain.com
 `);
         process.exit(0);
     }
@@ -419,6 +439,126 @@ Output Format:
             }
             const categoryInfo = email.categoryName ? `\n  Category: ${email.categoryName} (${email.categoryId})` : "";
             console.log(`Email ${absoluteNumber}:\n  ID: ${email.id}\n  From: ${email.from_addr}\n  Subject: ${email.subject || "(no subject)"}\n  Date: ${email.createdAt}\n  Read: ${email.isRead === 1 ? "Yes" : "No"}\n  Starred: ${email.isStarred === 1 ? "Yes" : "No"}${categoryInfo}\n  Snippet: ${email.snippet?.replaceAll("\n", " ")?.trim() || "(no preview)"}\n\n`);
+        });
+        db.close();
+        return;
+    }
+
+    if (subcmd === "send") {
+        // agent send: send email
+        const parseResult = parseArgs({
+            options: {
+                from: { type: "string" },
+                to: { type: "string", multiple: true },
+                cc: { type: "string", multiple: true },
+                bcc: { type: "string", multiple: true },
+                subject: { type: "string" },
+                html: { type: "boolean", default: false },
+            },
+            allowPositionals: true,
+            strict: true,
+            allowNegative: true,
+        });
+        const values = { ...parseResult.values };
+
+        if (!values.from || typeof values.from !== "string" || !values.to || !Array.isArray(values.to) || values.to.length === 0) {
+            console.error("Error: --from and --to are required.\nRun 'bunx @emailthing/cli agent mailboxes' to see available aliases.");
+            process.exit(1);
+        }
+        async function readStdin(): Promise<string | null> {
+            if (process.stdin.isTTY) {
+                return null;
+            }
+
+            try {
+                const text = await Bun.stdin.text();
+                return text.trim() || null;
+            } catch {
+                return null;
+            }
+        }
+        const stdin = await readStdin();
+        if (!stdin || !stdin.trim()) {
+            console.error("Error: No message body detected from stdin. Pipe body or use echo.");
+            process.exit(1);
+        }
+        const db = getDB();
+        // Validate alias, get mailboxId
+        const aliasRow = db.query(`SELECT mailboxId, alias FROM mailbox_aliases WHERE alias = ? AND isDeleted = 0`).get(values.from);
+        if (!aliasRow) {
+            console.error(`Error: Alias '${values.from}' not found or not valid for sending.\nRun 'bunx @emailthing/cli agent mailboxes' to see your aliases.`);
+            db.close();
+            process.exit(1);
+        }
+        const mailboxId = (aliasRow as { mailboxId: string }).mailboxId;
+        const client = new EmailThingCLI();
+        const auth = loadAuth(db);
+        if (!auth) {
+            console.error("Error: Not authenticated. Please run the CLI first to login.");
+            db.close();
+            process.exit(1);
+        }
+        client.setAuth(auth.token, auth.refreshToken, auth.tokenExpiresAt);
+        try {
+            let to = [
+                ...(values.to as string[]).map((address: string) => ({ address, type: "to" })),
+                ...(values.cc as string[] || []).map((address: string) => ({ address, type: "cc" })),
+                ...(values.bcc as string[] || []).map((address: string) => ({ address, type: "bcc" })),
+            ]
+            const sendResult = await client.sendDraft({
+                mailboxId,
+                body: values.html ? undefined : stdin,
+                html: values.html ? stdin : undefined,
+                subject: (values.subject as string) || "(no subject)",
+                from: values.from,
+                to
+            });
+            console.log(`Send successful! Email sent from ${values.from} to ${to.join(", ")}`);
+            // @ts-expect-error im sus
+            if (sendResult && sendResult.sync.draftSync) {
+                // @ts-expect-error im sus
+                console.log(`Draft/email id: ${sendResult.sync.draftSync}`);
+            }
+        } catch (err) {
+            // @ts-expect-error im sus
+            console.error("Email sending failed:", err?.message || err);
+        }
+        db.close();
+        return;
+    }
+
+    if (subcmd === "mailboxes") {
+        // agent mailboxes
+        const db = getDB();
+        const client = new EmailThingCLI();
+        const auth = loadAuth(db);
+        if (!auth) {
+            console.error("Error: Not authenticated. Please run the CLI first to login.");
+            process.exit(1);
+        }
+        client.setAuth(auth.token, auth.refreshToken, auth.tokenExpiresAt);
+        const mailboxes = db.query(`SELECT m.id, a.alias, a.name, a.\`default\` FROM mailboxes m
+                                 INNER JOIN mailbox_aliases a ON m.id = a.mailboxId
+                                 WHERE m.isDeleted = 0 AND a.isDeleted = 0
+                                 ORDER BY m.id, a.\`default\` DESC, a.alias`).all() as any[];
+        if (mailboxes.length === 0) {
+            console.log("No mailboxes found.");
+            db.close();
+            return;
+        }
+        // Group by mailboxId
+        const grouped = {} as Record<string, Array<any>>;
+        mailboxes.forEach(row => {
+            if (!grouped[row.id]) grouped[row.id] = [];
+            grouped[row.id].push(row);
+        });
+        Object.entries(grouped).forEach(([mbId, aliases]) => {
+            const mbInfo = aliases[0];
+            console.log(`Mailbox: ${mbId}`);
+            aliases.forEach(a => {
+                console.log(`  Alias: ${a.alias}${a.default ? " (default)" : ""}${a.name ? "   Name: " + a.name : ""}`);
+            });
+            console.log("");
         });
         db.close();
         return;

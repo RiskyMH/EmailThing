@@ -139,9 +139,9 @@ export class EmailThingCLI {
   }
 
   async sendDraft(draft: {
-    draftId: string;
+    draftId?: string;
     mailboxId: string;
-    body: string;
+    body?: string;
     subject: string;
     from: string;
     to: Array<{ address: string; name?: string; cc?: boolean }>;
@@ -149,6 +149,7 @@ export class EmailThingCLI {
     headers?: Array<{ key: string; value: string }>;
   }) {
     await this.refreshTokenIfNeeded();
+    draft.draftId ||= "new";
 
     const res = await this.internalFetch("/send-draft", "POST", draft);
 
