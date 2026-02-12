@@ -71,13 +71,19 @@ export async function GET(request: Request) {
 
         const uaParser = new UAParser();
 
+        function getBrowserInfo(uaString: string) {
+            if (uaString.startsWith("EmailThing/cli")) return "EmailThing CLI";
+            const browser = uaParser.setUA(uaString).getBrowser();
+            const os = uaParser.getOS();
+            return `${os.name} - ${browser.name}`;
+        }
+
         return Response.json(
             sessions.map((s, index) => {
                 const lastUsed = lastUsedSessions[index];
-                const browser = lastUsed?.ua ? uaParser.setUA(lastUsed.ua) : undefined;
                 return {
                     ...s,
-                    browser: browser ? `${browser.getOS().name} - ${browser.getBrowser().name}` : undefined,
+                    browser: lastUsed?.ua ? getBrowserInfo(lastUsed.ua) : undefined,
                     location: lastUsed?.location,
                     lastUsed: undefined, // mainly so the ip doesn't leak to user... at least rn
                     lastUsedDate: lastUsed?.date,

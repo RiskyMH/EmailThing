@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
+import { engines } from "../package.json"
 
 // throw nice warning if they are using an old version of Bun that doesn't support some features we use
-if (!Bun.semver.satisfies(Bun.version, ">=1.3.9")) {
-  console.error(`EmailThing CLI requires Bun v1.3.9 or higher. You are running ${Bun.version}. Please update Bun to continue.`);
+if (!Bun.semver.satisfies(Bun.version, engines.bun)) {
+  console.error(`EmailThing CLI requires Bun v${engines.bun.replace(">=", "")}. You are running ${Bun.version}. Please update Bun to continue.`);
   if (process.stdin.isTTY && confirm("Upgrade bun?")) {
     Bun.spawnSync(
       [process.execPath, "upgrade"],

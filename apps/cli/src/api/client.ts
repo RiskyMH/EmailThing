@@ -1,4 +1,5 @@
 import { API_URL } from "@emailthing/const/urls";
+import { version } from "../../package.json";
 
 interface LoginResponse {
   token: string;
@@ -55,6 +56,7 @@ export class EmailThingCLI {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "Origin": "https://emailthing.app",
+      "User-Agent": `EmailThing/cli/${version}`,
       ...extraHeaders,
     };
 
@@ -106,6 +108,7 @@ export class EmailThingCLI {
       headers: {
         Authorization: `refresh ${this.refreshToken}`,
         Origin: "https://emailthing.app",
+        "User-Agent": `EmailThing/cli/${version}`,
       },
     });
 
