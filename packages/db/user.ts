@@ -47,9 +47,6 @@ export const UserSession = pgTable(
         createdAt: timestamp("created_at")
             .notNull()
             .$defaultFn(() => new Date()),
-        lastUsed: json("last_used")
-            .$type<{ date: Date; ip: string; ua: string; location: string }>()
-            .$defaultFn(() => ({ date: new Date(), ip: "", ua: "", location: "" })),
         token: caseSensitiveText("token", { length: 100 })
             .notNull()
             .unique()

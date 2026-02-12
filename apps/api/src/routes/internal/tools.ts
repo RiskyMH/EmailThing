@@ -1,4 +1,5 @@
 import { db, UserSession } from "@/db";
+import { setSessionTokenLastUse } from "@/utils/redis-minor";
 import { and, eq, gte } from "drizzle-orm";
 
 export const allowedOrigins = [
@@ -31,10 +32,8 @@ export const getSession = async (request: Request, sudo = false, allowSearchPara
     const token = authHeader.split(" ")[1];
     if (!token) return null;
 
-    const sessionInfo = extractUserInfoHeader(request);
-
     const [sessionToken] = await db
-        .select()
+        .select({ id: UserSession.id, userId: UserSession.userId, tokenExpiresAt: UserSession.tokenExpiresAt })
         .from(UserSession)
         .where(and(
             eq(UserSession.token, token),
@@ -44,18 +43,15 @@ export const getSession = async (request: Request, sudo = false, allowSearchPara
         .limit(1);
 
     if (sessionToken) {
+        const sessionInfo = extractUserInfoHeader(request);
+        const newLastUse = {
+            date: new Date().toISOString(),
+            ip: sessionInfo.ip,
+            ua: sessionInfo.ua,
+            location: sessionInfo.location,
+        }
         // Fire and forget the update
-        db.update(UserSession)
-            .set({
-                lastUsed: {
-                    date: new Date(),
-                    ip: sessionInfo.ip,
-                    ua: sessionInfo.ua,
-                    location: sessionInfo.location,
-                },
-            })
-            .where(eq(UserSession.token, token))
-            .execute()
+        setSessionTokenLastUse(sessionToken.id, newLastUse, sessionToken.tokenExpiresAt)
             .then(() => { })
             .catch((err) => {
                 // Silently handle any errors since this is non-critical

@@ -3,6 +3,7 @@ import { generateRefreshToken, generateSessionToken } from "@/utils/token";
 import { TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 import { and, eq, gt } from "drizzle-orm";
 import { extractUserInfoHeader, isValidOrigin } from "../tools";
+import { setSessionTokenLastUse } from "@/utils/redis-minor";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -98,14 +99,15 @@ export async function POST(request: Request) {
                 token: newToken,
                 refreshToken: newRefreshToken,
                 tokenExpiresAt,
-                lastUsed: {
-                    date: new Date(),
-                    ip: sessionInfo.ip,
-                    ua: sessionInfo.ua,
-                    location: sessionInfo.location,
-                },
             })
             .where(eq(UserSession.id, user.id));
+
+        await setSessionTokenLastUse(user.id, {
+            date: new Date().toISOString(),
+            ip: sessionInfo.ip,
+            ua: sessionInfo.ua,
+            location: sessionInfo.location,
+        }, tokenExpiresAt);
 
         return Response.json(
             {

@@ -120,13 +120,13 @@ export default function UserSettingsAuthentication() {
     if (!response.ok) {
       return [];
     }
-    const sessions = (await response.json()) as Promise<
+    const sessions = (await response.json()) as
       (Omit<InferSelectModel<typeof UserSession>, "token" | "refreshToken" | "lastUsed"> & {
         browser?: string;
         location?: string;
         lastUsedDate?: string; // of date
       })[]
-    >;
+      ;
     return sessions.sort(
       (a, b) => new Date(b.lastUsedDate || 0).getTime() - new Date(a.lastUsedDate || 0).getTime(),
     );

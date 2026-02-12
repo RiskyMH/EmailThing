@@ -1,4 +1,5 @@
 import { db, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, TempAlias, UserSession } from "@/db";
+import { deleteSessionTokenLastUse } from "@/utils/redis-minor";
 import { deleteFile } from "@/utils/s3";
 import { and, eq, inArray, lt, not, or, sql } from "drizzle-orm";
 
@@ -176,12 +177,15 @@ export async function GET(request: Request) {
           storageUsed: sql`${Mailbox.storageUsed} - ${email.size}`,
         })
         .where(eq(Mailbox.id, email.mailboxId))
-    ),
-
-    db
-      .delete(UserSession)
-      .where(lt(UserSession.refreshTokenExpiresAt, new Date())),
+    )
   ]);
+
+  const deletedSessions = await db
+    .delete(UserSession)
+    .where(lt(UserSession.refreshTokenExpiresAt, new Date()))
+    .returning();
+  await Promise.all(deletedSessions.map((r) => deleteSessionTokenLastUse(r.id)));
+
 
   return Response.json({
     success: true,
