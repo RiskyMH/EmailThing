@@ -40,6 +40,15 @@ export function validateAlias(
         };
     }
 
+    // check slurs
+    const slurStmt = db.query(`SELECT 1 FROM slurs
+         WHERE (direct_only = 1 AND text = ?)
+            OR (direct_only = 0 AND ? LIKE '%' || text || '%')
+         LIMIT 1`);
+    if (slurStmt.get(lowerEmailPart, lowerEmailPart)) {
+        return { error: "Contains inappropriate content. If this is an error, please contact me (RiskyMH)", };
+    }
+
 }
 
 const genericBrandWords = [
@@ -97,14 +106,18 @@ if (import.meta.main) {
         db.run("DROP TABLE IF EXISTS impersonating")
         db.run("DROP TABLE IF EXISTS words")
         db.run("DROP TABLE IF EXISTS brands")
+        db.run("DROP TABLE IF EXISTS slurs")
         db.run(
-            "CREATE TABLE IF NOT EXISTS impersonating (name TEXT PRIMARY KEY COLLATE NOCASE)"
+            "CREATE TABLE impersonating (name TEXT PRIMARY KEY COLLATE NOCASE)"
         );
         db.run(
             "CREATE TABLE words (word TEXT PRIMARY KEY COLLATE NOCASE)"
         );
         db.run(
-            "CREATE TABLE IF NOT EXISTS brands (brand TEXT PRIMARY KEY COLLATE NOCASE, direct_only BOOLEAN)"
+            "CREATE TABLE brands (brand TEXT PRIMARY KEY COLLATE NOCASE, direct_only BOOLEAN)"
+        );
+        db.run(
+            "CREATE TABLE slurs (text TEXT PRIMARY KEY COLLATE NOCASE, direct_only BOOLEAN)"
         );
 
         // fetch and insert words 
@@ -141,6 +154,32 @@ if (import.meta.main) {
                 }
             );
             insertBrand(svglBrands, genericBrandWords);
+        }
+
+        // fetch and insert slurs
+        {
+            const slursRes = await fetch("https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en");
+            const slursText = await slursRes.text();
+            const slurs = slursText.split("\n")
+                .map(e => e.trim())
+                .filter(e => !!e && !e.includes(" ") && e.length > 1)
+
+            // fetch and insert impersonating emails
+            {
+                const insertSlurs = db.transaction(
+                    (slurs: string[]) => {
+                        const query = db.query(
+                            "INSERT OR IGNORE INTO slurs (text, direct_only) VALUES (?, ?)"
+                        );
+                        for (const slur of slurs) {
+                            query.run(slur, slur.length <= 3);
+                        }
+                    }
+                );
+                insertSlurs(slurs);
+            }
+
+            db.run("VACUUM")
         }
 
         // fetch and insert impersonating emails
