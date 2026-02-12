@@ -1,4 +1,4 @@
-import { db, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, TempAlias, UserSession } from "@/db";
+import { db, Email, EmailAttachments, EmailRecipient, EmailSender, Mailbox, TempAlias } from "@/db";
 import { deleteFile } from "@/utils/s3";
 import { and, eq, inArray, lt, not, or, sql } from "drizzle-orm";
 
@@ -177,10 +177,6 @@ export async function GET(request: Request) {
         })
         .where(eq(Mailbox.id, email.mailboxId))
     ),
-
-    db
-      .delete(UserSession)
-      .where(lt(UserSession.refreshTokenExpiresAt, new Date())),
   ]);
 
   return Response.json({

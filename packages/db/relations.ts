@@ -6,21 +6,13 @@ export const relations = defineRelations(schema, (r) => ({
   User: {
     notifications: r.many.UserNotification({ from: r.User.id, to: r.UserNotification.userId }),
     mailboxes: r.many.MailboxForUser({ from: r.User.id, to: r.MailboxForUser.userId }),
-    passwordResets: r.many.ResetPasswordToken({ from: r.User.id, to: r.ResetPasswordToken.userId }),
     passkeys: r.many.PasskeyCredentials({ from: r.User.id, to: r.PasskeyCredentials.userId }),
-    sessions: r.many.UserSession({ from: r.User.id, to: r.UserSession.userId }),
-  },
-  UserSession: {
-    user: r.one.User({ from: r.UserSession.userId, to: r.User.id }),
   },
   PasskeyCredentials: {
     user: r.one.User({ from: r.PasskeyCredentials.userId, to: r.User.id }),
   },
   UserNotification: {
     user: r.one.User({ from: r.UserNotification.userId, to: r.User.id }),
-  },
-  ResetPasswordToken: {
-    user: r.one.User({ from: r.ResetPasswordToken.userId, to: r.User.id }),
   },
 
   // =============== MAILBOX

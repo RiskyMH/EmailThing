@@ -1,7 +1,8 @@
-import { db, MailboxForUser, MailboxTokens, PasskeyCredentials, UserSession } from "@/db";
+import { db, MailboxForUser, MailboxTokens, PasskeyCredentials } from "@/db";
 import { and, eq } from "drizzle-orm";
 import { UAParser } from "ua-parser-js";
 import { getSession, isValidOrigin } from "../tools";
+import { getSessionsByUserId } from "@/utils/redis-session";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -39,34 +40,21 @@ export async function GET(request: Request) {
     if (!currentUserid) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });
 
     if (type === "passkeys") {
-const passkeys = await db
-    .select({
-        id: PasskeyCredentials.id,
-        userId: PasskeyCredentials.userId,
-        createdAt: PasskeyCredentials.createdAt,
-        name: PasskeyCredentials.name,
-        isDeleted: PasskeyCredentials.isDeleted,
-    })
-    .from(PasskeyCredentials)
-    .where(
-        and(eq(PasskeyCredentials.userId, currentUserid), eq(PasskeyCredentials.isDeleted, false))
-    );
+        const passkeys = await db
+            .select({
+                id: PasskeyCredentials.id,
+                userId: PasskeyCredentials.userId,
+                createdAt: PasskeyCredentials.createdAt,
+                name: PasskeyCredentials.name,
+                isDeleted: PasskeyCredentials.isDeleted,
+            })
+            .from(PasskeyCredentials)
+            .where(
+                and(eq(PasskeyCredentials.userId, currentUserid), eq(PasskeyCredentials.isDeleted, false))
+            );
         return Response.json(passkeys, { status: 200, headers });
     } else if (type === "sessions") {
-const sessions = await db
-    .select({
-        id: UserSession.id,
-        userId: UserSession.userId,
-        createdAt: UserSession.createdAt,
-        tokenExpiresAt: UserSession.tokenExpiresAt,
-        method: UserSession.method,
-        sudoExpiresAt: UserSession.sudoExpiresAt,
-        lastUsed: UserSession.lastUsed,
-        refreshTokenExpiresAt: UserSession.refreshTokenExpiresAt,
-    })
-    .from(UserSession)
-    .where(eq(UserSession.userId, currentUserid));
-
+        const sessions = await getSessionsByUserId(currentUserid);
         const uaParser = new UAParser();
 
         return Response.json(
@@ -77,6 +65,8 @@ const sessions = await db
                     browser: browser ? `${browser.getOS().name} - ${browser.getBrowser().name}` : undefined,
                     location: s.lastUsed?.location,
                     lastUsed: undefined, // mainly so the ip doesn't leak to user... at least rn
+                    token: undefined,
+                    refreshToken: undefined,
                     lastUsedDate: s.lastUsed?.date,
                 };
             }),
@@ -84,35 +74,35 @@ const sessions = await db
         );
     } else if (type.startsWith("mailbox-token:")) {
         const mailboxId = type.slice("mailbox-token:".length);
-const [mailbox] = await db
-    .select()
-    .from(MailboxForUser)
-    .where(
-        and(
-            eq(MailboxForUser.mailboxId, mailboxId),
-            eq(MailboxForUser.userId, currentUserid),
-            eq(MailboxForUser.isDeleted, false)
-        )
-    )
-    .limit(1);
+        const [mailbox] = await db
+            .select()
+            .from(MailboxForUser)
+            .where(
+                and(
+                    eq(MailboxForUser.mailboxId, mailboxId),
+                    eq(MailboxForUser.userId, currentUserid),
+                    eq(MailboxForUser.isDeleted, false)
+                )
+            )
+            .limit(1);
         if (!mailbox) return Response.json({ message: { error: "Mailbox not found" } }, { status: 404, headers });
 
-const tokens = await db
-    .select({
-        id: MailboxTokens.id,
-        mailboxId: MailboxTokens.mailboxId,
-        createdAt: MailboxTokens.createdAt,
-        expiresAt: MailboxTokens.expiresAt,
-        token: MailboxTokens.token,
-        name: MailboxTokens.name,
-    })
-    .from(MailboxTokens)
-    .where(
-        and(
-            eq(MailboxTokens.mailboxId, mailboxId),
-            eq(MailboxTokens.isDeleted, false)
-        )
-    );
+        const tokens = await db
+            .select({
+                id: MailboxTokens.id,
+                mailboxId: MailboxTokens.mailboxId,
+                createdAt: MailboxTokens.createdAt,
+                expiresAt: MailboxTokens.expiresAt,
+                token: MailboxTokens.token,
+                name: MailboxTokens.name,
+            })
+            .from(MailboxTokens)
+            .where(
+                and(
+                    eq(MailboxTokens.mailboxId, mailboxId),
+                    eq(MailboxTokens.isDeleted, false)
+                )
+            );
 
         return Response.json(
             tokens.map((t) => ({ ...t, token: hideToken(t.token) })),

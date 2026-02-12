@@ -1,5 +1,4 @@
-import { db, UserSession } from "@/db";
-import { and, eq, gte } from "drizzle-orm";
+import { getSessionByToken, updateSessionLastUsed } from "@/utils/redis-session";
 
 export const allowedOrigins = [
     "https://emailthing.app",
@@ -31,38 +30,19 @@ export const getSession = async (request: Request, sudo = false, allowSearchPara
     const token = authHeader.split(" ")[1];
     if (!token) return null;
 
-    const sessionInfo = extractUserInfoHeader(request);
+    const session = await getSessionByToken(token);
 
-    const [sessionToken] = await db
-        .select()
-        .from(UserSession)
-        .where(and(
-            eq(UserSession.token, token),
-            gte(UserSession.tokenExpiresAt, new Date()),
-            ...(sudo ? [gte(UserSession.sudoExpiresAt, new Date())] : []),
-        ))
-        .limit(1);
-
-    if (sessionToken) {
+    if (session) {
+        const sessionInfo = extractUserInfoHeader(request);
         // Fire and forget the update
-        db.update(UserSession)
-            .set({
-                lastUsed: {
-                    date: new Date(),
-                    ip: sessionInfo.ip,
-                    ua: sessionInfo.ua,
-                    location: sessionInfo.location,
-                },
-            })
-            .where(eq(UserSession.token, token))
-            .execute()
+        updateSessionLastUsed(token, sessionInfo)
             .then(() => { })
             .catch((err) => {
                 // Silently handle any errors since this is non-critical
                 console.error("Failed to update session:", err);
             });
 
-        return sessionToken.userId;
+        return session.userId;
     }
 
     return null;

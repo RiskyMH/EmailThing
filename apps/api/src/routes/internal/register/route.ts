@@ -1,4 +1,4 @@
-import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User, UserSession } from "@/db";
+import { db, InviteCode, Mailbox, MailboxAlias, MailboxForUser, User } from "@/db";
 import { createPasswordHash } from "@/utils/password";
 import { generateRefreshToken, generateSessionToken } from "@/utils/token";
 import { userAuthSchema } from "@/utils/validations/auth";
@@ -8,6 +8,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { isValidOrigin } from "../tools";
 import { emailUser } from "./tools";
+import { storeSession } from "@/utils/redis-session";
 
 // Rate limiting
 const attempts = new Map<string, number>();
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
             attempts.set(ip, (attempts.get(ip) || 0) + 1);
             timestamps.set(ip, now);
 
-            return ResponseJson({ error: parsedData.error.issues[0]?.message ||"failed to parse data" }, { status: 400 });
+            return ResponseJson({ error: parsedData.error.issues[0]?.message || "failed to parse data" }, { status: 400 });
         }
 
         const { username, password } = parsedData.data;
@@ -142,12 +143,6 @@ export async function POST(request: Request) {
         const userId = createId();
         const mailboxId = createId();
 
-        const token = generateSessionToken();
-        const refreshToken = generateRefreshToken();
-
-        const tokenExpiresAt = new Date(Date.now() + TOKEN_EXPIRES_IN);
-        const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN);
-
         await db.batchUpdate([
             db.insert(User).values({
                 id: userId,
@@ -183,16 +178,21 @@ export async function POST(request: Request) {
                 .where(eq(InviteCode.code, inviteCode)),
 
             ...emailUser({ userId, mailboxId, username: parsedData.data.username }),
-
-            db.insert(UserSession).values({
-                userId: userId,
-                token,
-                method: "password",
-                refreshToken,
-                tokenExpiresAt,
-                refreshTokenExpiresAt,
-            }),
         ]);
+
+        const token = generateSessionToken();
+        const refreshToken = generateRefreshToken();
+
+        const sess = await storeSession({
+            session: {
+                id: createId(),
+                userId,
+                lastUsed: { date: new Date().toISOString(), ip, ua: request.headers.get("user-agent") || "", location: "" },
+                method: "password",
+            },
+            token,
+            refreshToken,
+        })
 
         // // Success - reset rate limiting
         // attempts.delete(ip);
@@ -202,8 +202,8 @@ export async function POST(request: Request) {
         return ResponseJson({
             token,
             refreshToken,
-            tokenExpiresAt,
-            refreshTokenExpiresAt,
+            tokenExpiresAt: sess.tokenExpiresAt,
+            refreshTokenExpiresAt: sess.refreshTokenExpiresAt,
             mailboxes: [mailboxId],
             userId: userId,
         });

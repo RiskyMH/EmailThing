@@ -1,4 +1,4 @@
-import { db, MailboxForUser, PasskeyCredentials, User, UserNotification, UserSession } from "@/db";
+import { db, MailboxForUser, PasskeyCredentials, User, UserNotification } from "@/db";
 import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { userAuthSchema } from "@/utils/validations/auth";
 import { and, eq, gte, inArray, not, sql, type InferSelectModel } from "drizzle-orm";
@@ -14,6 +14,7 @@ import { marked } from "marked";
 import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext";
 import { UAParser } from "ua-parser-js";
 import { invalidateAllResetPasswordTokensForUser } from "@/utils/redis-minor";
+import { deleteAllSessionsForUser, deleteSessionById, getSessionsByUserId } from "@/utils/redis-session";
 
 export async function POST(request: Request) {
     const origin = request.headers.get("origin");
@@ -231,19 +232,14 @@ async function changePassword(session: string, userId: string, data: ChangePassw
     if (newPassword.length < 8) return { error: "Password needs to be at least 8 characters" };
 
     // update password
-    await db.batchUpdate([
-        db
-            .update(User)
-            .set({
-                password: await createPasswordHash(newPassword),
-            })
-            .where(eq(User.id, userId)),
-
-        // invalidate sessions, but maybe the current one is fine to keep
-        db
-            .delete(UserSession)
-            .where(and(eq(UserSession.userId, userId), not(eq(UserSession.token, session)))),
-    ]);
+    await db
+        .update(User)
+        .set({
+            password: await createPasswordHash(newPassword),
+        })
+        .where(eq(User.id, userId))
+    // invalidate sessions, but maybe the current one is fine to keep
+    await deleteAllSessionsForUser(userId);
     await invalidateAllResetPasswordTokensForUser(userId);
 
     // revalidatePath("/settings");
@@ -484,11 +480,13 @@ async function leaveMailbox(userId: string, data: LeaveMailboxData) {
 type RevokeSessionData = ({ sessionIds: string[] } | { all: true })
 async function revokeSession(userId: string, data: RevokeSessionData) {
     if ("all" in data) {
-        await db.delete(UserSession).where(eq(UserSession.userId, userId)).execute();
+        await deleteAllSessionsForUser(userId);
         return { success: "All sessions revoked", description: "This includes this one" };
     }
 
-    await db.delete(UserSession).where(and(eq(UserSession.userId, userId), inArray(UserSession.id, data.sessionIds))).execute();
+    const sessionIds = (await getSessionsByUserId(userId)).map(s => s.id);
+    const validSessionIds = sessionIds.filter(id => data.sessionIds.includes(id));
+    await Promise.all(validSessionIds.map(id => deleteSessionById(id)));
     return { success: data.sessionIds.length > 1 ? "Sessions revoked" : "Session revoked" };
 }
 

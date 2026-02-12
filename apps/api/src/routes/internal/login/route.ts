@@ -1,4 +1,4 @@
-import { db, MailboxForUser, PasskeyCredentials, User, UserSession } from "@/db";
+import { db, MailboxForUser, PasskeyCredentials, User } from "@/db";
 import { verifyCredentialss } from "@/utils/passkeys";
 import { verifyPassword } from "@/utils/password";
 import { generateRefreshToken, generateSessionToken } from "@/utils/token";
@@ -7,6 +7,8 @@ import { REFRESH_TOKEN_EXPIRES_IN, TOKEN_EXPIRES_IN } from "@emailthing/const/ex
 import { and, eq, sql } from "drizzle-orm";
 import { isValidOrigin } from "../tools";
 import { authRatelimit, authRatelimitLogFailed, authRatelimitSucceeded } from "@/utils/redis-ratelimit";
+import { storeSession } from "@/utils/redis-session";
+import { createId } from "@paralleldrive/cuid2";
 
 const errorMsg = "Invalid username or password";
 
@@ -159,30 +161,27 @@ export async function POST(request: Request) {
         const token = generateSessionToken();
         const refreshToken = generateRefreshToken();
 
-        const tokenExpiresAt = new Date(Date.now() + TOKEN_EXPIRES_IN);
-        const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN);
+        const mailboxes = await db
+            .select({ mailboxId: MailboxForUser.mailboxId })
+            .from(MailboxForUser)
+            .where(and(eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false)))
 
-        const [mailboxes,] = await db.batchFetch([
-            db
-                .select({ mailboxId: MailboxForUser.mailboxId })
-                .from(MailboxForUser)
-                .where(and(eq(MailboxForUser.userId, userId), eq(MailboxForUser.isDeleted, false))),
-
-            db.insert(UserSession).values({
-                userId: userId,
-                token,
-                method: type,
-                refreshToken,
-                tokenExpiresAt,
-                refreshTokenExpiresAt,
-            }),
-        ]);
+       const sess = await storeSession({
+            session: {
+                id: createId(),
+                userId,
+                lastUsed: {date: new Date().toISOString(), ip, ua: request.headers.get("user-agent") || "", location: "" },
+                method: type === "password" ? "password" : "passkey",
+            },
+            token,
+            refreshToken,
+        })
 
         return ResponseJson({
             token,
             refreshToken,
-            tokenExpiresAt,
-            refreshTokenExpiresAt,
+            tokenExpiresAt: sess.tokenExpiresAt,
+            refreshTokenExpiresAt: sess.refreshTokenExpiresAt,
             mailboxes: mailboxes.map(({ mailboxId }) => mailboxId),
             userId: userId,
             userOnboarding,

@@ -123,27 +123,6 @@ export const UserNotification = pgTable(
     },
 );
 
-// Reset password tokens
-export const ResetPasswordToken = pgTable(
-    "reset_password_tokens",
-    {
-        token: caseSensitiveText("token", { length: 25 })
-            .primaryKey()
-            .unique()
-            .$defaultFn(() => createId()),
-        userId: varchar("user_id", { length: 25 })
-            .notNull()
-            .references(() => User.id, { onDelete: "cascade" }),
-        createdAt: timestamp("created_at")
-            .notNull()
-            .$defaultFn(() => new Date()),
-        expiresAt: timestamp("expires_at"),
-    },
-    (table) => ({
-        userIdx: index("reset_password_user_id").on(table.userId),
-    }),
-);
-
 // Invite codes
 export const InviteCode = pgTable("invite_codes", {
     code: varchar("code", { length: 25 })

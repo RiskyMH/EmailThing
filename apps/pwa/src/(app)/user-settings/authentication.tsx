@@ -34,7 +34,7 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { getLogedInUserApi, getMe } from "@/utils/data/queries/user";
-import type { PasskeyCredentials, UserSession } from "@emailthing/db";
+import type { PasskeyCredentials } from "@emailthing/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { InferSelectModel } from "drizzle-orm";
 import { Loader2Icon, LogOutIcon, MoreHorizontalIcon, Trash2Icon, XIcon } from "lucide-react";
@@ -43,6 +43,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { DeleteButton } from "../mailbox-config/components.client";
 import { CardForm, ClientInput } from "./components";
 import changeUserSettings from "./_api";
+import type { RedisUserSession } from "@emailthing/api/src/utils/redis-session";
 
 const changePassword = (_: any, formData: FormData) => {
   return changeUserSettings("change-password", {
@@ -120,13 +121,13 @@ export default function UserSettingsAuthentication() {
     if (!response.ok) {
       return [];
     }
-    const sessions = (await response.json()) as Promise<
-      (Omit<InferSelectModel<typeof UserSession>, "token" | "refreshToken" | "lastUsed"> & {
+    const sessions = (await response.json()) as
+      (Omit<RedisUserSession, "token" | "refreshToken" | "lastUsed"> & {
         browser?: string;
         location?: string;
         lastUsedDate?: string; // of date
-      })[]
-    >;
+      })[];
+
     return sessions.sort(
       (a, b) => new Date(b.lastUsedDate || 0).getTime() - new Date(a.lastUsedDate || 0).getTime(),
     );

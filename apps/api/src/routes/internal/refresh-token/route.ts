@@ -1,8 +1,9 @@
-import { db, UserSession } from "@/db";
+import { db } from "@/db";
 import { generateRefreshToken, generateSessionToken } from "@/utils/token";
 import { TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 import { and, eq, gt } from "drizzle-orm";
 import { extractUserInfoHeader, isValidOrigin } from "../tools";
+import { getSessionByRefreshToken, getSessionIdByRefreshToken, renewSessionTokens } from "@/utils/redis-session";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -62,13 +63,9 @@ export async function POST(request: Request) {
 
     try {
         // Get user from database
-        const [user] = await db
-            .select({ userId: UserSession.userId, id: UserSession.id })
-            .from(UserSession)
-            .where(and(eq(UserSession.refreshToken, refreshToken), gt(UserSession.refreshTokenExpiresAt, new Date())))
-            .limit(1);
+        const sessionId = await getSessionIdByRefreshToken(refreshToken);
 
-        if (!user) {
+        if (!sessionId) {
             return Response.json(
                 { error: "User not found" },
                 {
@@ -87,32 +84,17 @@ export async function POST(request: Request) {
         // Generate new tokens
         const newToken = generateSessionToken();
         const newRefreshToken = generateRefreshToken();
-
-        const tokenExpiresAt = new Date(Date.now() + TOKEN_EXPIRES_IN);
-
         const sessionInfo = extractUserInfoHeader(request);
+        const session = await renewSessionTokens(sessionId, newToken, newRefreshToken, sessionInfo);
 
-        await db
-            .update(UserSession)
-            .set({
-                token: newToken,
-                refreshToken: newRefreshToken,
-                tokenExpiresAt,
-                lastUsed: {
-                    date: new Date(),
-                    ip: sessionInfo.ip,
-                    ua: sessionInfo.ua,
-                    location: sessionInfo.location,
-                },
-            })
-            .where(eq(UserSession.id, user.id));
+
 
         return Response.json(
             {
                 token: newToken,
                 refreshToken: newRefreshToken,
-                tokenExpiresAt,
-                userId: user.userId,
+                tokenExpiresAt: session.tokenExpiresAt,
+                userId: session.userId,
             },
             {
                 status: 200,

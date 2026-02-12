@@ -1,6 +1,7 @@
-import { db, UserSession } from "@/db";
+import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import { isValidOrigin } from "../tools";
+import { deleteSessionByRefreshToken } from "@/utils/redis-session";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -40,7 +41,7 @@ export async function DELETE(request: Request) {
             },
         );
     } else if (authHeader.startsWith("refresh ")) {
-        await db.delete(UserSession).where(eq(UserSession.refreshToken, authHeader.slice("refresh ".length)));
+        await deleteSessionByRefreshToken(authHeader.slice("refresh ".length));
         return Response.json(
             { error: "Removed refresh token if it was found" },
             {
@@ -55,7 +56,7 @@ export async function DELETE(request: Request) {
             },
         );
     } else if (authHeader.startsWith("session ")) {
-        await db.delete(UserSession).where(eq(UserSession.token, authHeader.slice("session ".length)));
+        await deleteSessionByRefreshToken(authHeader.slice("session ".length));
         return Response.json(
             { error: "Removed session token if it was found" },
             {
