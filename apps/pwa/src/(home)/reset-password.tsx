@@ -73,6 +73,7 @@ function ResetPasswordForm({ token }: { token: string }) {
   const searchParams = useSearchParams()[0];
   const apiUrl = searchParams.get("api") || API_URL;
   const username = searchParams.get("username");
+  const showUsername = !!username || typeof window === "undefined";
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -121,8 +122,8 @@ function ResetPasswordForm({ token }: { token: string }) {
     <div className={cn("grid gap-6")}>
       <form onSubmit={onSubmit} className="grid gap-2">
         <div className="grid gap-1">
-          {username && <Label className="sr-only" htmlFor="username" />}
-          {username && <Input
+          {showUsername && <Label className="sr-only" htmlFor="username" />}
+          {showUsername && <Input
             className="border-none bg-secondary"
             id="username"
             name="username"
