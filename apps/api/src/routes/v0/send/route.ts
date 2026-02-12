@@ -4,6 +4,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { and, eq, sql } from "drizzle-orm";
 import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext";
 import { getTokenMailbox } from "../tools";
+import { emailSendRatelimit } from "@/utils/redis";
 
 interface EmailPostOptions {
     html?: string;
@@ -18,11 +19,6 @@ interface EmailPostOptions {
     headers?: Record<string, string>;
 }
 
-// 15 requests per 60 seconds
-export const MAX_REQUESTS_PER_WINDOW = 15;
-export const WINDOW_DURATION_MS = 60 * 1000;
-
-export const ratelimit = new Map<string, { count: number; resetAt: Date }>();
 
 export async function POST(request: Request) {
     const mailboxId = await getTokenMailbox(request.headers);
@@ -30,29 +26,14 @@ export async function POST(request: Request) {
         return new Response("Unauthorized", { status: 401 });
     }
 
-    const key = mailboxId;
-    const rate = ratelimit.get(key);
-
-    if (!rate || rate.resetAt < new Date()) {
-        // Reset the rate limit if it's expired
-        ratelimit.set(key, {
-            count: 1,
-            resetAt: new Date(Date.now() + WINDOW_DURATION_MS),
-        });
-    } else {
-        // Increment the request count if within the window
-        rate.count++;
-        if (rate.count > MAX_REQUESTS_PER_WINDOW) {
-            const timeUntilReset = rate.resetAt.getTime() - Date.now();
-            return Response.json(
-                { error: "rate limited" },
-                {
-                    status: 429,
-                    headers: { "Retry-After": timeUntilReset.toString() },
-                },
-            );
-        }
+    const ratelimit = await emailSendRatelimit(mailboxId);
+    if (!ratelimit.allowed) {
+        return Response.json(
+            { error: "Too many emails sent. Please try again later." },
+            { status: 429, headers: { "Retry-After": (ratelimit.retryAfter / 1000).toString() } }
+        );
     }
+
     const data = (await request.json()) as Partial<EmailPostOptions>;
     if (!(data.to?.length && data.from && data.subject))
         return Response.json({ error: "missing required fields" }, { status: 400 });

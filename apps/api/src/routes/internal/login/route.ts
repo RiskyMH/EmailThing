@@ -6,15 +6,9 @@ import { userAuthSchema } from "@/utils/validations/auth";
 import { REFRESH_TOKEN_EXPIRES_IN, TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 import { and, eq, sql } from "drizzle-orm";
 import { isValidOrigin } from "../tools";
+import { authRatelimit, authRatelimitLogFailed, authRatelimitSucceeded } from "@/utils/redis";
 
 const errorMsg = "Invalid username or password";
-
-// Rate limiting
-const attempts = new Map<string, number>();
-const timestamps = new Map<string, number>();
-const MAX_ATTEMPTS = 10;
-const WINDOW_MS = 1.5 * 60 * 1000; // 1.5 minutes
-const LOCKOUT_MS = 1 * 60 * 1000; // 1 minute
 
 export async function POST(request: Request) {
     const origin = request.headers.get("origin");
@@ -36,26 +30,20 @@ export async function POST(request: Request) {
     };
 
     try {
-        // Get IP for rate limiting
-        const ip = request.headers.get("x-forwarded-for") || "unknown";
-        const now = Date.now();
-
-        // Check if IP is in lockout
-        const lastAttempt = timestamps.get(ip) || 0;
-        if (lastAttempt && now - lastAttempt < LOCKOUT_MS && (attempts.get(ip) || 0) >= MAX_ATTEMPTS) {
-            return ResponseJson({ error: "Too many login attempts. Please try again later." }, { status: 429 });
-        }
-
-        // Reset attempts if window expired
-        if (lastAttempt && now - lastAttempt > WINDOW_MS) {
-            attempts.delete(ip);
-            timestamps.delete(ip);
-        }
-
         const url = new URL(request.url);
         const type = url.searchParams.get("type") || "password" as "password" | "passkey";
 
         const body = await request.json();
+
+        // ratelimiting!!
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        const ratelimit = await authRatelimit(ip, body.username || body.credential?.id || undefined);
+        if (!ratelimit.allowed) {
+            return ResponseJson(
+                { error: "Too many login attempts. Please try again later." },
+                { status: 429, headers: { "Retry-After": (ratelimit.retryAfter / 1000).toString() } }
+            );
+        }
 
         if (body.honeypot) {
             await Bun.sleep(Math.random() * 1500);
@@ -75,20 +63,14 @@ export async function POST(request: Request) {
         if (type === "password") {
             const parsedData = userAuthSchema.safeParse(body);
             if (!parsedData.success) {
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip);
                 return ResponseJson({ error: errorMsg }, { status: 401 });
             }
 
             const { username, password } = parsedData.data;
 
             if (!username || !password) {
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip);
                 return ResponseJson({ error: errorMsg }, { status: 400 });
             }
 
@@ -105,10 +87,7 @@ export async function POST(request: Request) {
                 .limit(1);
 
             if (!user) {
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip, username);
                 return ResponseJson({ error: errorMsg }, { status: 401 });
             }
 
@@ -118,10 +97,7 @@ export async function POST(request: Request) {
             // Verify password
             const valid = await verifyPassword(password, user.password);
             if (!valid) {
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip, username);
                 return ResponseJson({ error: errorMsg }, { status: 401 });
             }
 
@@ -137,10 +113,7 @@ export async function POST(request: Request) {
                 .where(eq(PasskeyCredentials.credentialId, credential.id))
                 .limit(1);
             if (cred == null) {
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip, credential.id);
                 return ResponseJson({ error: "Passkey not found" }, { status: 401 });
             }
 
@@ -149,18 +122,12 @@ export async function POST(request: Request) {
                 verification = await verifyCredentialss("login", credential, cred);
             } catch (error) {
                 console.error(error);
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip, cred.userId);
                 return ResponseJson({ error: "Failed to verify passkey :(" }, { status: 401 });
             }
 
             if (!verification.userVerified) {
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip, cred.userId);
                 return ResponseJson({ error: "Failed to verify passkey" }, { status: 401 });
             }
 
@@ -171,34 +138,22 @@ export async function POST(request: Request) {
                 .limit(1);
 
             if (!user) {
-                // Increment failed attempts
-                attempts.set(ip, (attempts.get(ip) || 0) + 1);
-                timestamps.set(ip, now);
-
+                await authRatelimitLogFailed(ip, cred.userId);
                 return ResponseJson({ error: "Can't find user" }, { status: 401 });
             }
 
             userId = user.id;
             userOnboarding = user.onboardingStatus?.initial === true;
         } else {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
+            await authRatelimitLogFailed(ip);
             return ResponseJson({ error: "Invalid login type" }, { status: 400 });
         }
 
         if (!userId) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
+            await authRatelimitLogFailed(ip);
             return ResponseJson({ error: "Invalid login type" }, { status: 400 });
         }
-
-        // Success - reset rate limiting
-        attempts.delete(ip);
-        timestamps.delete(ip);
+        await authRatelimitSucceeded(ip, body.username || body.credential?.id || undefined);
 
         // const token = await createUserToken(user);
         const token = generateSessionToken();

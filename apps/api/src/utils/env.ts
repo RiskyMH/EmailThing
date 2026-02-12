@@ -2,6 +2,7 @@ import * as z from "zod/mini";
 
 const envSchema = z.object({
     DATABASE_URL: z.string(),
+    REDIS_URL: z.string(),
     EMAIL_AUTH_TOKEN: z.string().check(z.minLength(1)),
     EMAIL_DKIM_PRIVATE_KEY: z.optional(z.string()),
     WEB_NOTIFICATIONS_PRIVATE_KEY: z.string().check(z.minLength(1)),
@@ -14,6 +15,7 @@ const envSchema = z.object({
 
 const _env = envSchema.safeParse({
     DATABASE_URL: process.env.DATABASE_URL,
+    REDIS_URL: process.env.REDIS_URL,
     EMAIL_AUTH_TOKEN: process.env.EMAIL_AUTH_TOKEN,
     EMAIL_DKIM_PRIVATE_KEY: process.env.EMAIL_DKIM_PRIVATE_KEY?.replaceAll(/(\r\n|\r|\n)/g, "\r\n"),
     WEB_NOTIFICATIONS_PRIVATE_KEY: process.env.WEB_NOTIFICATIONS_PRIVATE_KEY,

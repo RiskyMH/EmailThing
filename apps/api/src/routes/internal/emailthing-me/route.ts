@@ -1,4 +1,5 @@
 import db from "@/db";
+import { emailMeRatelimit } from "@/utils/redis";
 import { sendEmail } from "@/utils/send-email";
 import { User } from "@emailthing/db";
 import { and, eq, sql } from "drizzle-orm";
@@ -60,6 +61,12 @@ export async function POST(request: Request) {
 
   const user = await fetchUser(username);
   if (!user) return new Response("User not found", { status: 404 });
+
+  // there are checks on the emailthing.me site itself, but just as backup
+  const ratelimit = await emailMeRatelimit(username);
+  if (!ratelimit.allowed) {
+    return new Response("user ratelimited", { status: 429, headers: { "Retry-After": (ratelimit.retryAfter / 1000).toString() } });
+  }
 
   const rawEmail = await request.text();
   const e = await sendEmail({

@@ -40,7 +40,7 @@ export async function fetchUser(username: string): Promise<User | null> {
 export async function sendEmail(
   username: string,
   rawEmail: string
-): Promise<boolean> {
+): Promise<boolean | "ratelimited"> {
   const res = await fetch(
     `${API_URL}/api/internal/emailthing-me?username=${username}`,
     {
@@ -52,7 +52,9 @@ export async function sendEmail(
     }
   );
   if (!res.ok) {
-    console.error(await res.text());
+    const text = await res.text();
+    if (text === "user ratelimited") return "ratelimited";
+    console.error(text);
     return false;
   }
   return true;
@@ -200,6 +202,9 @@ ${
     );
 
   const e = await sendEmail(username, mail.asRaw());
+  if (e === "ratelimited") {
+    return { error: "Too many requests. Please try again later." };
+  }
   if (!e) return { error: "Failed to notify user" };
 
   return { success: "Successfully sent your message!" };
