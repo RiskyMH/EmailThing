@@ -4,7 +4,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { and, eq, sql } from "drizzle-orm";
 import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext";
 import { getTokenMailbox } from "../tools";
-import { emailSendRatelimit } from "@/utils/redis";
+import { emailSendRatelimit } from "@/utils/redis-ratelimit";
 
 interface EmailPostOptions {
     html?: string;

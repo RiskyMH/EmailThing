@@ -6,7 +6,7 @@ import { createMimeMessage } from "mimetext";
 import type { ChangesResponse } from "../sync/route";
 import { getSession, isValidOrigin } from "../tools";
 import { createId } from "@paralleldrive/cuid2";
-import { emailSendRatelimit } from "@/utils/redis";
+import { emailSendRatelimit } from "@/utils/redis-ratelimit";
 
 export interface Data extends SaveActionProps {
     draftId: string;

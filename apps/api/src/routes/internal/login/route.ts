@@ -6,7 +6,7 @@ import { userAuthSchema } from "@/utils/validations/auth";
 import { REFRESH_TOKEN_EXPIRES_IN, TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 import { and, eq, sql } from "drizzle-orm";
 import { isValidOrigin } from "../tools";
-import { authRatelimit, authRatelimitLogFailed, authRatelimitSucceeded } from "@/utils/redis";
+import { authRatelimit, authRatelimitLogFailed, authRatelimitSucceeded } from "@/utils/redis-ratelimit";
 
 const errorMsg = "Invalid username or password";
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         const body = await request.json();
 
         // ratelimiting!!
-        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        const ip = (request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()) || "unknown";
         const ratelimit = await authRatelimit(ip, body.username || body.credential?.id || undefined);
         if (!ratelimit.allowed) {
             return ResponseJson(

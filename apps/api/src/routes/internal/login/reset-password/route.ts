@@ -1,15 +1,15 @@
-import { db, ResetPasswordToken, User, UserSession } from "@/db";
+import { db, User } from "@/db";
 import { createPasswordHash } from "@/utils/password";
 import { sendEmail } from "@/utils/send-email";
 import { userAuthSchema } from "@/utils/validations/auth";
-import { RESET_PASSWORD_TOKEN_EXPIRES_IN } from "@emailthing/const/expiry";
 import { API_URL } from "@emailthing/const/urls";
 import { createId } from "@paralleldrive/cuid2";
-import { and, eq, gt, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { marked } from "marked";
 import { createMimeMessage } from "mimetext";
 import { isValidOrigin } from "../../tools";
-import { logResetPasswordChangeFailed, logResetPasswordRequestFailed, resetPasswordRatelimitChange, resetPasswordRatelimitRequest } from "@/utils/redis";
+import { logResetPasswordChangeFailed, logResetPasswordRequestFailed, resetPasswordRatelimitChange, resetPasswordRatelimitRequest } from "@/utils/redis-ratelimit";
+import { getResetPasswordToken, invalidateAllResetPasswordTokensForUser, setResetPasswordToken } from "@/utils/redis-minor";
 
 type ResponseBody = Record<string, unknown>;
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     try {
         // Get IP for rate limiting
-        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        const ip = (request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()) || "unknown";
         const now = Date.now();
 
         const body = await request.json();
@@ -70,15 +70,7 @@ export async function POST(request: Request) {
 
             // Generate token and store in database
             const token = createId();
-            await db
-                .insert(ResetPasswordToken)
-                .values({
-                    token,
-                    userId: user.id,
-                    expiresAt: new Date(Date.now() + RESET_PASSWORD_TOKEN_EXPIRES_IN),
-                    createdAt: new Date(),
-                })
-                .execute();
+            await setResetPasswordToken(user.id, token);
 
             // Send email
             const body = `Hello @${user.username},
@@ -128,13 +120,8 @@ If you did not request this, please ignore this email.`
             }
 
             // Verify token is valid and not expired
-            const [reset] = await db
-                .select({ userId: ResetPasswordToken.userId })
-                .from(ResetPasswordToken)
-                .where(and(eq(ResetPasswordToken.token, token), gt(ResetPasswordToken.expiresAt, new Date())))
-                .limit(1);
-
-            if (!reset) {
+            const userId = await getResetPasswordToken(token);
+            if (!userId) {
                 // Increment failed attempts
                 await logResetPasswordChangeFailed(ip);
                 return ResponseJson({ error: "Invalid or expired token" }, { status: 400 });
@@ -150,20 +137,13 @@ If you did not request this, please ignore this email.`
             }
 
             // Update password and delete token
-            await db.batchUpdate([
-                db
-                    .update(User)
-                    .set({
-                        password: await createPasswordHash(password),
-                    })
-                    .where(eq(User.id, reset.userId)),
-
-                db.delete(ResetPasswordToken).where(eq(ResetPasswordToken.token, token)),
-                db.delete(ResetPasswordToken).where(eq(ResetPasswordToken.userId, reset.userId)),
-
-                // Invalidate all sessions except the current one
-                db.delete(UserSession).where(eq(UserSession.userId, reset.userId)),
-            ]);
+            await db
+                .update(User)
+                .set({
+                    password: await createPasswordHash(password),
+                })
+                .where(eq(User.id, userId));
+            await invalidateAllResetPasswordTokensForUser(userId);
 
             return ResponseJson({ success: true });
         }

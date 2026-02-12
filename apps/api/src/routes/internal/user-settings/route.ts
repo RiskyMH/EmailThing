@@ -1,4 +1,4 @@
-import { db, MailboxForUser, PasskeyCredentials, ResetPasswordToken, User, UserNotification, UserSession } from "@/db";
+import { db, MailboxForUser, PasskeyCredentials, User, UserNotification, UserSession } from "@/db";
 import { createPasswordHash, verifyPassword } from "@/utils/password";
 import { userAuthSchema } from "@/utils/validations/auth";
 import { and, eq, gte, inArray, not, sql, type InferSelectModel } from "drizzle-orm";
@@ -13,6 +13,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { marked } from "marked";
 import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext";
 import { UAParser } from "ua-parser-js";
+import { invalidateAllResetPasswordTokensForUser } from "@/utils/redis-minor";
 
 export async function POST(request: Request) {
     const origin = request.headers.get("origin");
@@ -242,9 +243,8 @@ async function changePassword(session: string, userId: string, data: ChangePassw
         db
             .delete(UserSession)
             .where(and(eq(UserSession.userId, userId), not(eq(UserSession.token, session)))),
-
-        db.delete(ResetPasswordToken).where(eq(ResetPasswordToken.userId, userId)),
     ]);
+    await invalidateAllResetPasswordTokensForUser(userId);
 
     // revalidatePath("/settings");
     return { success: "Your password has been updated." };

@@ -1,5 +1,5 @@
 import db from "@/db";
-import { emailMeRatelimit } from "@/utils/redis";
+import { emailMeRatelimit } from "@/utils/redis-ratelimit";
 import { sendEmail } from "@/utils/send-email";
 import { User } from "@emailthing/db";
 import { and, eq, sql } from "drizzle-orm";

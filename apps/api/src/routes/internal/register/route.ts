@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     try {
         // Get IP for rate limiting
-        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        const ip = (request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()) || "unknown";
         const now = Date.now();
 
         // Check if IP is in lockout
