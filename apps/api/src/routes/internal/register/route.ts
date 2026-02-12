@@ -8,13 +8,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { isValidOrigin } from "../tools";
 import { emailUser } from "./tools";
+import { registerCreateRatelimit, registerRatelimit, registerRatelimitLogFailed } from "@/utils/redis-ratelimit";
 
-// Rate limiting
-const attempts = new Map<string, number>();
-const timestamps = new Map<string, number>();
-const MAX_ATTEMPTS = 10;
-const WINDOW_MS = 1.5 * 60 * 1000; // 1.5 minutes
-const LOCKOUT_MS = 1 * 60 * 1000; // 1 minute
 
 export async function POST(request: Request) {
     const origin = request.headers.get("origin");
@@ -38,18 +33,12 @@ export async function POST(request: Request) {
     try {
         // Get IP for rate limiting
         const ip = (request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()) || "unknown";
-        const now = Date.now();
-
-        // Check if IP is in lockout
-        const lastAttempt = timestamps.get(ip) || 0;
-        if (lastAttempt && now - lastAttempt < LOCKOUT_MS && (attempts.get(ip) || 0) >= MAX_ATTEMPTS) {
-            return ResponseJson({ error: "Too many register attempts. Please try again later." }, { status: 429 });
-        }
-
-        // Reset attempts if window expired
-        if (lastAttempt && now - lastAttempt > WINDOW_MS) {
-            attempts.delete(ip);
-            timestamps.delete(ip);
+        const ratelimit = await registerRatelimit(ip);
+        if (!ratelimit.allowed) {
+            return ResponseJson(
+                { error: "Too many login attempts. Please try again later." },
+                { status: 429, headers: { "Retry-After": (ratelimit.retryAfter / 1000).toString() } }
+            );
         }
 
         const body = await request.json();
@@ -68,21 +57,15 @@ export async function POST(request: Request) {
 
         const parsedData = userAuthSchema.safeParse(body);
         if (!parsedData.success) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
-            return ResponseJson({ error: parsedData.error.issues[0]?.message ||"failed to parse data" }, { status: 400 });
+            registerRatelimitLogFailed(ip);
+            return ResponseJson({ error: parsedData.error.issues[0]?.message || "failed to parse data" }, { status: 400 });
         }
 
         const { username, password } = parsedData.data;
         const inviteCode = body.invite;
 
         if (!username || !password || !inviteCode) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
+            registerRatelimitLogFailed(ip);
             return ResponseJson({ error: "uh? missing data" }, { status: 400 });
         }
 
@@ -94,10 +77,7 @@ export async function POST(request: Request) {
             .limit(1);
 
         if (!invite) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
+            registerRatelimitLogFailed(ip);
             return ResponseJson({ error: "Invalid invite code" }, { status: 401 });
         }
 
@@ -108,18 +88,13 @@ export async function POST(request: Request) {
             .limit(1);
 
         if (existingUser) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
+            registerRatelimitLogFailed(ip);
             return ResponseJson({ error: "Username already taken" }, { status: 401 });
         }
 
         const validationError = validateAlias(parsedData.data.username);
         if (validationError) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
+            registerRatelimitLogFailed(ip);
             return ResponseJson(validationError, { status: 401 });
         }
 
@@ -131,11 +106,16 @@ export async function POST(request: Request) {
             .limit(1);
 
         if (existingEmail) {
-            // Increment failed attempts
-            attempts.set(ip, (attempts.get(ip) || 0) + 1);
-            timestamps.set(ip, now);
-
+            registerRatelimitLogFailed(ip);
             return ResponseJson({ error: "Email already taken" }, { status: 401 });
+        }
+
+        const ratelimit2 = await registerCreateRatelimit(ip);
+        if (!ratelimit2.allowed) {
+            return ResponseJson(
+                { error: "Too many login attempts. Please try again later." },
+                { status: 429, headers: { "Retry-After": (ratelimit2.retryAfter / 1000).toString() } }
+            );
         }
 
         // create user and their mailbox

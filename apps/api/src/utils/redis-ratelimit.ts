@@ -100,10 +100,21 @@ export async function authRatelimitSucceeded(ip: string, username?: string) {
 
 // Register rate limiter
 export async function registerRatelimit(ip: string) {
-    const windowSeconds = 60 * 60; // 1 hour
-    const maxAttemptsIp = 5;
+    const windowSeconds = 60;
+    const maxAttemptsIp = 10;
 
     return rateLimitCheck({ key: ip, namespace: "register:ip", windowSeconds, maxInWindow: maxAttemptsIp });
+}
+export async function registerCreateRatelimit(ip: string) {
+    // Separate limiter for account creation step, to prevent abuse while allowing some leniency in initial validation steps
+    const windowSeconds = 60 * 60; // 1 hour
+    const maxAttemptsIp = 10;
+
+    return rateLimitCheck({ key: ip, namespace: "register:ip", windowSeconds, maxInWindow: maxAttemptsIp });
+}
+export async function registerRatelimitLogFailed(ip: string) {
+    const incBy = 1;
+    await rateLimitIncrement({ key: ip, namespace: "register:ip", incBy });
 }
 
 // Reset password rate limiters
@@ -150,4 +161,11 @@ export async function emailMeRatelimit(username: string) {
     const windowSeconds = 60; // 1 minute
     const maxEmails = 5;
     return rateLimitCheck({ key: username, namespace: "emailthing-me:username", windowSeconds, maxInWindow: maxEmails });
+}
+
+// backup email sending rate limiter
+export async function backupEmailSendRatelimit(userId: string) {
+    const windowSeconds = 60; // 1 minute
+    const maxEmails = 3;
+    return rateLimitCheck({ key: userId, namespace: "backup-email-send:user", windowSeconds, maxInWindow: maxEmails });
 }

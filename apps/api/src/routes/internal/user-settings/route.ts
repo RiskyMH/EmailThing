@@ -14,6 +14,7 @@ import { marked } from "marked";
 import { createMimeMessage, Mailbox as MimeMailbox } from "mimetext";
 import { UAParser } from "ua-parser-js";
 import { invalidateAllResetPasswordTokensForUser } from "@/utils/redis-minor";
+import { backupEmailSendRatelimit } from "@/utils/redis-ratelimit";
 
 export async function POST(request: Request) {
     const origin = request.headers.get("origin");
@@ -255,6 +256,9 @@ export interface ChangeBackupEmailData {
 }
 async function changeBackupEmail(userId: string, data: ChangeBackupEmailData) {
     const email = data.email;
+
+    const ratelimit = await backupEmailSendRatelimit(userId);
+    if (!ratelimit.allowed) { return { error: `Too many attempts. Please try again in ${Math.round(ratelimit.retryAfter / 1000)} seconds.`, }; }
 
     const [user] = await db
         .select({
