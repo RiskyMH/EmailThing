@@ -67,7 +67,7 @@ export const getSession = async (request: Request, sudo = false, allowSearchPara
 export const extractUserInfoHeader = (request: Request) => {
     // get IP, User-Agent, and location (note, using cloudflare proxy)
     // location should be detailed as possible (city, region, country)
-    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
     const ua = request.headers.get("user-agent") || "unknown";
     const city = request.headers.get("cf-ipcity") || "unknown";
     const region = request.headers.get("cf-region") || "unknown";
