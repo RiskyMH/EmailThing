@@ -9,6 +9,7 @@ import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { isValidOrigin } from "../tools";
 import { emailUser } from "./tools";
 import { registerCreateRatelimit, registerRatelimit, registerRatelimitLogFailed } from "@/utils/redis-ratelimit";
+import { getSimplifiedIp } from "@/utils/ip";
 
 
 export async function POST(request: Request) {
@@ -32,8 +33,7 @@ export async function POST(request: Request) {
 
     try {
         // Get IP for rate limiting
-        const ip = (request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()) || "unknown";
-        const ratelimit = await registerRatelimit(ip);
+        const ratelimit = await registerRatelimit(getSimplifiedIp(request));
         if (!ratelimit.allowed) {
             return ResponseJson(
                 { error: "Too many login attempts. Please try again later." },
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
         const parsedData = userAuthSchema.safeParse(body);
         if (!parsedData.success) {
-            registerRatelimitLogFailed(ip);
+            registerRatelimitLogFailed(getSimplifiedIp(request));
             return ResponseJson({ error: parsedData.error.issues[0]?.message || "failed to parse data" }, { status: 400 });
         }
 

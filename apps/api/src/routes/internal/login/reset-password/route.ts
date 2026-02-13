@@ -10,6 +10,7 @@ import { createMimeMessage } from "mimetext";
 import { isValidOrigin } from "../../tools";
 import { logResetPasswordChangeFailed, logResetPasswordRequestFailed, resetPasswordRatelimitChange, resetPasswordRatelimitRequest } from "@/utils/redis-ratelimit";
 import { getResetPasswordToken, invalidateAllResetPasswordTokensForUser, setResetPasswordToken } from "@/utils/redis-minor";
+import { getSimplifiedIp } from "@/utils/ip";
 
 type ResponseBody = Record<string, unknown>;
 
@@ -34,9 +35,7 @@ export async function POST(request: Request) {
 
     try {
         // Get IP for rate limiting
-        const ip = (request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()) || "unknown";
-        const now = Date.now();
-
+        const ip = getSimplifiedIp(request);
         const body = await request.json();
         const { type = "request", username, token, password } = body;
 
