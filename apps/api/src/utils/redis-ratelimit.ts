@@ -74,19 +74,21 @@ export async function authRatelimit(ip: string, username?: string) {
     const maxAttemptsIp = 20;
     const maxAttemptsUser = 10;
 
-    const [ipCheck, userCheck] = await Promise.all([
+    const [ipCheck, ipCheck2, userCheck] = await Promise.all([
         rateLimitCheck({ key: ip, namespace: "auth:ip", windowSeconds, maxInWindow: maxAttemptsIp }),
+        rateLimitCheck({ key: ip, namespace: "auth:ip2", windowSeconds: windowSeconds * 20, maxInWindow: maxAttemptsIp * 2 }),
         username ? rateLimitCheck({ key: username, namespace: "auth:user", windowSeconds, maxInWindow: maxAttemptsUser }) : null,
     ]);
 
-    if (userCheck) return combineChecks(ipCheck, userCheck);
-    return ipCheck;
+    if (userCheck) return combineChecks(ipCheck, ipCheck2, userCheck);
+    return combineChecks(ipCheck, ipCheck2);
 
 }
 export async function authRatelimitLogFailed(ip: string, username?: string) {
     const incBy = 1;
     await Promise.all([
         rateLimitIncrement({ key: ip, namespace: "auth:ip", incBy }),
+        rateLimitIncrement({ key: ip, namespace: "auth:ip2", incBy }),
         username ? rateLimitIncrement({ key: username, namespace: "auth:user", incBy }) : null,
     ]);
 }
@@ -94,6 +96,7 @@ export async function authRatelimitSucceeded(ip: string, username?: string) {
     const incBy = -1;
     await Promise.all([
         rateLimitIncrement({ key: ip, namespace: "auth:ip", incBy }),
+        rateLimitIncrement({ key: ip, namespace: "auth:ip2", incBy }),
         username ? rateLimitIncrement({ key: username, namespace: "auth:user", incBy }) : null,
     ]);
 }
@@ -110,7 +113,13 @@ export async function registerCreateRatelimit(ip: string) {
     const windowSeconds = 60 * 60; // 1 hour
     const maxAttemptsIp = 10;
 
-    return rateLimitCheck({ key: ip, namespace: "register:ip", windowSeconds, maxInWindow: maxAttemptsIp });
+    const windowSeconds2 = 60 * 60 * 24; // one day
+    const maxAttemptsIp2 = 50;
+
+    return combineChecks(...await Promise.all([
+        rateLimitCheck({ key: ip, namespace: "register:ip", windowSeconds, maxInWindow: maxAttemptsIp }),
+        rateLimitCheck({ key: ip, namespace: "register:ip2", windowSeconds: windowSeconds2, maxInWindow: maxAttemptsIp2 }),
+    ]));
 }
 export async function registerRatelimitLogFailed(ip: string) {
     const incBy = 1;
@@ -123,9 +132,16 @@ export async function resetPasswordRatelimitRequest(ip: string, username: string
     const maxAttemptsIp = 3;
     const maxAttemptsUser = 3;
 
+    const windowSeconds2 = 24 * 60 * 60; // 24 hours
+    const maxAttemptsIp2 = 15;
+    const maxAttemptsUser2 = 10;
+
     const [ipCheck, userCheck] = await Promise.all([
         rateLimitCheck({ key: ip, namespace: "reset:ip", windowSeconds, maxInWindow: maxAttemptsIp }),
         rateLimitCheck({ key: username, namespace: "reset:user", windowSeconds, maxInWindow: maxAttemptsUser }),
+
+        rateLimitCheck({ key: ip, namespace: "reset:ip2", windowSeconds: windowSeconds2, maxInWindow: maxAttemptsIp2 }),
+        rateLimitCheck({ key: username, namespace: "reset:user2", windowSeconds: windowSeconds2, maxInWindow: maxAttemptsUser2 }),
     ]);
     return combineChecks(ipCheck, userCheck);
 }
@@ -133,7 +149,9 @@ export async function logResetPasswordRequestFailed(ip: string, username?: strin
     const incBy = 1;
     await Promise.all([
         rateLimitIncrement({ key: ip, namespace: "reset:ip", incBy }),
+        rateLimitIncrement({ key: ip, namespace: "reset:ip2", incBy }),
         username ? rateLimitIncrement({ key: username, namespace: "reset:user", incBy }) : null,
+        username ? rateLimitIncrement({ key: username, namespace: "reset:user2", incBy }) : null,
     ]);
 }
 
@@ -150,10 +168,16 @@ export async function logResetPasswordChangeFailed(ip: string) {
 
 // email sending rate limiter
 export async function emailSendRatelimit(mailboxId: string) {
-    const windowSeconds = 60; // 1 minute
+    const windowSeconds = 20 * 60; // 20 minutes
     const maxEmails = 15;
 
-    return rateLimitCheck({ key: mailboxId, namespace: "email-send:mailbox", windowSeconds, maxInWindow: maxEmails });
+    const windowSeconds2 = 60 * 60 * 24; // 1 day
+    const maxEmails2 = 100;
+
+    return combineChecks(...await Promise.all([
+        rateLimitCheck({ key: mailboxId, namespace: "email-send:mailbox", windowSeconds, maxInWindow: maxEmails }),
+        rateLimitCheck({ key: mailboxId, namespace: "email-send:mailbox2", windowSeconds: windowSeconds2, maxInWindow: maxEmails2 }),
+    ]));
 }
 
 // emailthing.me ratelimiter
@@ -167,5 +191,12 @@ export async function emailMeRatelimit(username: string) {
 export async function backupEmailSendRatelimit(userId: string) {
     const windowSeconds = 60; // 1 minute
     const maxEmails = 3;
-    return rateLimitCheck({ key: userId, namespace: "backup-email-send:user", windowSeconds, maxInWindow: maxEmails });
+
+    const windowSeconds2 = 60 * 60; // 1 hour
+    const maxEmails2 = 10;
+
+    return combineChecks(
+        await rateLimitCheck({ key: userId, namespace: "backup-email-send:user", windowSeconds, maxInWindow: maxEmails }),
+        await rateLimitCheck({ key: userId, namespace: "backup-email-send:user2", windowSeconds: windowSeconds2, maxInWindow: maxEmails2 }),
+    );
 }
