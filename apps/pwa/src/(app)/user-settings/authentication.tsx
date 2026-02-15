@@ -442,8 +442,8 @@ import {
   parseCreationOptionsFromJSON,
   supported
 } from "@github/webauthn-json/browser-ponyfill";
-import { KeyRoundIcon } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
+import PasskeyIcon from "@/components/icons/passkey";
 
 export function PasskeysSetup({ userId, username }: { userId: string; username: string }) {
   const [isPending, startTransition] = useTransition();
@@ -525,7 +525,7 @@ export function PasskeysSetup({ userId, username }: { userId: string; username: 
       {isPending ? (
         <Loader2Icon className="mr-2 size-4 animate-spin" />
       ) : (
-        <KeyRoundIcon className="mr-2 size-4" />
+        <PasskeyIcon className="mr-2 size-4" />
       )}
       Create new
     </Button>

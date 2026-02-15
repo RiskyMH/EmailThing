@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/smart-drawer";
 import { cn } from "@/utils/tw";
 import { get, parseRequestOptionsFromJSON, supported } from "@github/webauthn-json/browser-ponyfill";
-import { ChevronLeft, GlobeIcon, KeyRoundIcon, Loader2, SettingsIcon } from "lucide-react";
+import { ChevronLeft, GlobeIcon, Loader2, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useTransition, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -80,6 +80,7 @@ export default function LoginPage() {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { API_URL } from "@emailthing/const/urls";
+import PasskeyIcon from "@/components/icons/passkey";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -441,7 +442,7 @@ function PasskeysLogin({ transition }: { transition: [boolean, React.TransitionS
       onClick={handleLogin}
       disabled={isPending || !support}
     >
-      {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <KeyRoundIcon className="mr-2 size-4" />}
+      {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <PasskeyIcon className="mr-2 size-4" />}
       Passkey
     </button>
   );
