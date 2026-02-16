@@ -33,7 +33,8 @@ export async function POST(request: Request) {
 
     try {
         // Get IP for rate limiting
-        const ratelimit = await registerRatelimit(getSimplifiedIp(request));
+        const ip = getSimplifiedIp(request);
+        const ratelimit = await registerRatelimit(ip);
         if (!ratelimit.allowed) {
             return ResponseJson(
                 { error: "Too many login attempts. Please try again later." },
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
 
         const parsedData = userAuthSchema.safeParse(body);
         if (!parsedData.success) {
-            registerRatelimitLogFailed(getSimplifiedIp(request));
+            registerRatelimitLogFailed(ip);
             return ResponseJson({ error: parsedData.error.issues[0]?.message || "failed to parse data" }, { status: 400 });
         }
 
