@@ -8,7 +8,7 @@ COPY apps ./apps
 COPY packages ./packages
 COPY patches ./patches
 
-RUN --mount=type=cache,target=/root/.bun/install/cache bun install
+RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
 
 
 RUN cd apps/api && bun run build:standalone

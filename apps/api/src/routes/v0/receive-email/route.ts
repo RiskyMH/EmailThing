@@ -1,14 +1,14 @@
 import {
-  db, 
-  DefaultDomain,
-  Email,
-  EmailAttachments,
-  EmailRecipient,
-  EmailSender,
-  Mailbox,
-  MailboxAlias,
-  Stats,
-  TempAlias
+    db,
+    DefaultDomain,
+    Email,
+    EmailAttachments,
+    EmailRecipient,
+    EmailSender,
+    Mailbox,
+    MailboxAlias,
+    Stats,
+    TempAlias
 } from "@/db";
 import { notifyMailbox } from "@/utils/notifications";
 import { uploadFile } from "@/utils/s3";
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
             categoryId,
         }),
 
-        db.insert(EmailRecipient).values([
+        (email.to?.length || email.cc?.length) ? db.insert(EmailRecipient).values([
             ...(email.to?.map((to) => ({
                 emailId: emailId,
                 address: to.address!,
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
                 name: cc.name,
                 cc: true,
             })) ?? []),
-        ]),
+        ]) : db.select({ id: sql`1` }).from(Mailbox).where(eq(Mailbox.id, mailboxId)), // dummy query to keep batchUpdate happy when there are no recipients
 
         db.insert(EmailSender).values({
             emailId: emailId,
