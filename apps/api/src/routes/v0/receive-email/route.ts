@@ -7,6 +7,7 @@ import {
     EmailSender,
     Mailbox,
     MailboxAlias,
+    MailboxCategory,
     Stats,
     TempAlias
 } from "@/db";
@@ -106,9 +107,9 @@ export async function POST(request: Request) {
     let categoryId = null;
     if (_categoryId) {
         const [category] = await db
-            .select({ id: Mailbox.id })
-            .from(Mailbox)
-            .where(and(eq(Mailbox.id, _categoryId), eq(Mailbox.isDeleted, false)))
+            .select({ id: MailboxCategory.id })
+            .from(MailboxCategory)
+            .where(and(eq(MailboxCategory.id, _categoryId), eq(MailboxCategory.mailboxId, mailboxId), eq(MailboxCategory.isDeleted, false)))
             .limit(1);
         if (category) categoryId = category.id;
     }
