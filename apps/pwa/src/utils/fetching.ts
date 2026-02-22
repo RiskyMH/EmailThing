@@ -56,6 +56,7 @@ const forceIndividual = {
 
 export const useEmailImage = (email: string) => {
   const domain = email.split("@")[1];
+  if (!domain) return undefined;
   let match = svgl[domain] as string | null | undefined;
   if (!match) {
     // maybe try to match if ending with (like abc.emailthing.xyz should match emailthing.xyz)

@@ -185,7 +185,7 @@ function MailItem({ mailId }: { mailId?: string }) {
 
             <div className="flex flex-col overflow-hidden">
               <div className="flex gap-2 text-ellipsis whitespace-nowrap">
-                <b className="font-bold">{email.sender?.name || email.sender?.address}</b>
+                <b className="font-bold">{email.sender?.name || email.sender?.address || "<unknown sender>"}</b>
                 {email.sender?.name && (
                   <p className="text-muted-foreground text-sm">{`<${email.sender.address}>`}</p>
                 )}
@@ -308,7 +308,7 @@ function MailItem({ mailId }: { mailId?: string }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="min-w-[10rem] ">
                 <ViewSelect htmlValid={!!email.html} />
-                {email.raw !== "draft" && (
+                {email.raw === "s3" && (
                   <DownloadEmailButtons emailId={email.id} mailboxId={mailboxId} raw={email.raw} />
                 )}
               </DropdownMenuContent>
@@ -560,7 +560,7 @@ function GetAttachmentIcon(extension: string) {
 }
 
 function EmailPicture({ email, fallback }: { email: string; fallback?: string }) {
-  const img = useEmailImage(email);
+  const img = email && useEmailImage(email);
   const isGravatar = !img || img.startsWith("https://www.gravatar.com/avatar/");
 
   return (

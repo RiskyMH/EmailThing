@@ -23,7 +23,7 @@ export const Email = pgTable(
         snippet: varchar("snippet", { length: 255 }),
         body: text("text_body", {}).notNull(),
         html: text("html", {}),
-        raw: varchar("raw", { length: 10, enum: ["s3", "draft"] }),
+        raw: varchar("raw", { length: 10, enum: ["s3", "draft", "system"] }),
         size: integer("size").default(0),
 
         replyTo: varchar("reply_to"),

@@ -95,6 +95,16 @@ export async function POST(request: Request) {
     if ((mailbox?.storageUsed ?? 0) > limit) {
         // todo: send email to user to warn them about unreceived emails
         // (and they can upgrade to pro to get more storage or delete some emails to free up space)
+        const [mainAlias] = await db
+            .select({ address: MailboxAlias.alias, name: MailboxAlias.name })
+            .from(MailboxAlias)
+            .where(and(
+                eq(MailboxAlias.mailboxId, mailboxId),
+                eq(MailboxAlias.default, true),
+                eq(MailboxAlias.isDeleted, false)
+            ))
+            .limit(1)
+        await emailOverLimit(mailboxId, limit, mainAlias, email.from?.address);
         return new Response("Mailbox over storage limit", { status: 400 });
     }
 
@@ -300,6 +310,58 @@ function emailContent({ text, html }: { text?: string; html?: string }) {
     const _text = new Turndown().turndown((h)).replaceAll(/\[(https?:\/\/[^\]]+)\]\(\1\)/g, "$1");
 
     return `<!-- Converted markdown from HTML -->\n${_text}`;
+}
+
+const bytesInMb = (bytes: number) => (Math.ceil((bytes / 1e6) * 10) / 10).toLocaleString() + "MB";
+async function emailOverLimit(mailboxId: string, maxPlanStorage: number, mainAlias: { address: string, name: string | null } | null = null, senderAddress: string = "(unknown sender)") {
+    const emailId = createId();
+
+    const title = "Mailbox Full: Incoming email blocked";
+    const body = `
+### Hi ${mainAlias?.name || mainAlias?.address.split("@")[0] || "there"},
+
+You've reached your storage limit of **${bytesInMb(maxPlanStorage)}**. Because of this, a new message from **${senderAddress}** was just bounced back to the sender and was not saved.
+
+To resume service, please:
+1. **Delete** large attachments or old threads.
+2. ~~**Upgrade** to a higher tier for a larger limit.~~ 
+   (this isn't implemented yet, but if you need more storage, please reach out to support!)
+
+[View your storage →](https://emailthing.app/mail/${mailboxId}/config#storage)
+
+Best regards,
+EmailThing System
+`.trim();
+    const preview = `Your mailbox is full. A new message from ${senderAddress} was blocked. Please free up some space to receive new emails.`;
+
+    await db.batchUpdate([
+        db.insert(Email).values({
+            id: emailId,
+            subject: title,
+            body,
+            snippet: preview,
+            mailboxId,
+            size: 0,
+            raw: "system"
+        }),
+        db.insert(EmailSender).values({
+            emailId: emailId,
+            address: "system@emailthing.app",
+            name: "EmailThing",
+        }),
+        mainAlias ? db.insert(EmailRecipient).values({
+            emailId: emailId,
+            address: mainAlias.address,
+            name: mainAlias.name,
+            cc: false,
+        }) : db.select({ id: sql`1` }).from(Mailbox).where(eq(Mailbox.id, mailboxId)), // dummy query to keep batchUpdate happy when there are no recipients
+    ])
+
+    await notifyMailbox(mailboxId, {
+        title,
+        body: preview,
+        url: `/mail/${mailboxId}/${emailId}`,
+    });
 }
 
 export const GET = new Response("GET method not allowed. Use POST instead.", { status: 405 });
