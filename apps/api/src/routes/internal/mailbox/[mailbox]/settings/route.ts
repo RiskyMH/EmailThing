@@ -219,7 +219,7 @@ async function verifyDomain(mailboxId: string, data: VerifyDomainData) {
     const { customDomain } = data;
 
     // check if mailbox plan allows for more than 1 custom domain
-    const [[mailbox], customDomains, [exists]] = await db.batchFetch([
+    const [[mailbox], [customDomainsCount], [exists]] = await db.batchFetch([
         db
             .select({ plan: Mailbox.plan })
             .from(Mailbox)
@@ -231,11 +231,11 @@ async function verifyDomain(mailboxId: string, data: VerifyDomainData) {
             .from(MailboxCustomDomain)
             .where(and(eq(MailboxCustomDomain.mailboxId, mailboxId), eq(MailboxCustomDomain.isDeleted, false))),
         db
-            .select({ id: MailboxCustomDomain.id })
+            .select({ id: MailboxCustomDomain.id, mailboxId: MailboxCustomDomain.mailboxId })
             .from(MailboxCustomDomain)
             .where(and(
                 eq(sql`lower(${MailboxCustomDomain.domain})`, sql`lower(${customDomain})`),
-                eq(MailboxCustomDomain.mailboxId, mailboxId),
+                // eq(MailboxCustomDomain.mailboxId, mailboxId),
                 eq(MailboxCustomDomain.isDeleted, false),
             ))
             .limit(1),
@@ -245,7 +245,7 @@ async function verifyDomain(mailboxId: string, data: VerifyDomainData) {
         throw new Error("Mailbox not found");
     }
 
-    if (!customDomains[0] || customDomainLimit[mailbox.plan] <= customDomains[0].count) {
+    if (!customDomainsCount || customDomainLimit[mailbox.plan] <= customDomainsCount.count) {
         return { error: "Custom domain limit reached" };
     }
 
@@ -253,9 +253,11 @@ async function verifyDomain(mailboxId: string, data: VerifyDomainData) {
         return { error: "Custom domain not found" }
     }
 
-    if (exists) {
+    if (exists && exists.mailboxId === mailboxId) {
         // return { error: "You have already verified this domain" }
         return { success: "Domain already verified" }
+    } else if (exists) {
+        return { error: "This domain is already in use by another mailbox" }
     }
 
     // verify domain by checking txt records on _emailthing.<domain> and check if one of the txt records has their mailbox id
