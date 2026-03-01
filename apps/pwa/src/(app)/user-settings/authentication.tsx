@@ -43,6 +43,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { DeleteButton } from "../mailbox-config/components.client";
 import { CardForm, ClientInput } from "./components";
 import changeUserSettings from "./_api";
+import { API_URL } from "@emailthing/const/urls";
 
 const changePassword = (_: any, formData: FormData) => {
   return changeUserSettings("change-password", {
@@ -83,17 +84,25 @@ const revokeAllSessions = async () => {
 };
 
 export default function UserSettingsAuthentication() {
+  const { mutate } = useSWRConfig();
+
   const user = useLiveQuery(getMe);
 
-  const { mutate } = useSWRConfig()
+  const syncData = useLiveQuery(async () => {
+    const sync = await getLogedInUserApi();
+    if (sync?.tokenNeedsRefresh) {
+      await db.refreshToken();
+      return getLogedInUserApi();
+    }
+    return sync;
+  }, [])
 
-  const { data: passkeys } = useSWR("/api/internal/auth-query?type=passkeys", async () => {
-    const sync = (await db.localSyncData.toArray())[0];
-
-    const response = await fetch(`${sync?.apiUrl || ""}/api/internal/auth-query?type=passkeys`, {
+  const { data: passkeys } = useSWR(`/api/internal/auth-query?type=passkeys&api=${syncData?.apiUrl || ""}`, async () => {
+    if (!syncData) return undefined;
+    const response = await fetch(`${syncData?.apiUrl || ""}/api/internal/auth-query?type=passkeys`, {
       method: "GET",
       headers: {
-        Authorization: `session ${sync?.token}`,
+        Authorization: `session ${syncData?.token}`,
       },
     });
     if (!response.ok) {
@@ -104,17 +113,12 @@ export default function UserSettingsAuthentication() {
     >;
   });
 
-  const { data: sessions } = useSWR("/api/internal/auth-query?type=sessions", async () => {
-    let sync = await getLogedInUserApi();
-    if (sync?.tokenNeedsRefresh) {
-      await db.refreshToken();
-      sync = await getLogedInUserApi();
-    }
-
-    const response = await fetch(`${sync?.apiUrl || ""}/api/internal/auth-query?type=sessions`, {
+  const { data: sessions } = useSWR(`/api/internal/auth-query?type=sessions&api=${syncData?.apiUrl || ""}`, async () => {
+    if (!syncData) return undefined;
+    const response = await fetch(`${syncData?.apiUrl || ""}/api/internal/auth-query?type=sessions`, {
       method: "GET",
       headers: {
-        Authorization: `session ${sync?.token}`,
+        Authorization: `session ${syncData?.token}`,
       },
     });
     if (!response.ok) {
@@ -390,7 +394,12 @@ export default function UserSettingsAuthentication() {
                 </SmartDrawerClose>
                 <DeleteButton action={async () => {
                   await revokeAllSessions();
-                  mutate("/api/internal/auth-query?type=sessions");
+                  // mutate("/api/internal/auth-query?type=sessions");
+                  if (!syncData || API_URL === syncData?.apiUrl) {
+                    window.location.href = "/login";
+                  } else {
+                    window.location.href = `/login?api=${syncData.apiUrl}`;
+                  }
                 }} />
               </SmartDrawerFooter>
             </SmartDrawerContent>
