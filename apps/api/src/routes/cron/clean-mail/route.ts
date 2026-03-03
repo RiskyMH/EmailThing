@@ -4,18 +4,20 @@ import { deleteFile } from "@/utils/s3";
 import { and, eq, inArray, lt, not, or, sql } from "drizzle-orm";
 
 // TODO: do this "cron" better instead of still having the old vercel remains
-const every24hr = 1000 * 60 * 60 * 24;
+const everyHr = 1000 * 60 * 60;
 process.env.CRON_SECRET ||= Bun.randomUUIDv7();
 
-setInterval(() => {
-  GET(
-    new Request("https://api.emailthing.app/api/cron/clean-mail", {
-      headers: {
-        authorization: `Bearer ${process.env.CRON_SECRET}`,
-      },
-    })
-  );
-}, every24hr);
+if (!process.env.REPLICA_ID || process.env.REPLICA_ID === "1") {
+  setInterval(() => {
+    GET(
+      new Request("https://api.emailthing.app/api/cron/clean-mail", {
+        headers: {
+          authorization: `Bearer ${process.env.CRON_SECRET}`,
+        },
+      })
+    );
+  }, everyHr);
+}
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");

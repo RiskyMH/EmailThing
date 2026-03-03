@@ -27,6 +27,7 @@ services:
        RPID_ORIGIN: ${RPID_ORIGIN}
        NODE_ENV: production
        PORT: 3000
+       REPLICA_ID: '{{.Task.Slot}}' 
      ports:
        - "3000:3000"
      healthcheck:
@@ -63,6 +64,7 @@ services:
      environment:
        NODE_ENV: production
        PORT: 3000
+       REPLICA_ID: '{{.Task.Slot}}' 
      ports:
        - "3010:3000"
      healthcheck:
