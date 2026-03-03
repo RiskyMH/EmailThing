@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@emailthing/const": "workspace:^",
-    "@types/bun": "latest"
+    "@types/bun": "catalog:"
   },
   "files": [
     "dist",

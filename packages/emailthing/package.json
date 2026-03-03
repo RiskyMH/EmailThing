@@ -37,7 +37,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "@types/bun": "latest",
+    "@types/bun": "catalog:",
     "@emailthing/cli": "workspace:^"
   }
 }
