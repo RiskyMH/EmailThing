@@ -40,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         })();
 
+        await db.refreshToken(true);
         const res = await db.fetchSync();
         if (res?.error) {
           if (res.error === "Token expired") {

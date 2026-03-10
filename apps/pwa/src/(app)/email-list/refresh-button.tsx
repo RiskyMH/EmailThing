@@ -4,7 +4,7 @@ import { useOnline } from "@/utils/hooks";
 import { cn } from "@/utils/tw";
 import { useLiveQuery } from "dexie-react-hooks";
 import { CloudOff, RotateCcwIcon } from "lucide-react";
-import { useEffect, useMemo, useTransition } from "react";
+import { type MouseEvent, useEffect, useMemo, useTransition } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -17,7 +17,7 @@ export default function RefreshButton({ className }: { className?: string }) {
 
   const isSyncing = useMemo(() => syncing?.some((s) => s.isSyncing), [syncing]);
 
-  const reload = () => {
+  const reload = (event?: { shiftKey: boolean }) => {
     if (params.mailboxId === "demo") {
       // TODO: do something more useful here
       toast.success("Would refresh!");
@@ -28,7 +28,8 @@ export default function RefreshButton({ className }: { className?: string }) {
       }
       if (isSyncing || isPending) return;
       startTransition(async () => {
-        await db.fetchSync();
+        const force = /* is holding shift */ event?.shiftKey || false;
+        await db.fetchSync({ force });
       });
     }
   };
@@ -62,8 +63,8 @@ export default function RefreshButton({ className }: { className?: string }) {
         "-m-2 shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground",
         className,
       )}
-      onClick={() => {
-        isPending ? void 0 : online ? reload() : void toast.warning("Offline");
+      onClick={(event) => {
+        isPending ? void 0 : online ? reload(event) : void toast.warning("Offline");
       }}
       disabled={!online}
     >

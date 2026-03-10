@@ -402,8 +402,7 @@ async function getChanges(
                     forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined,
                 ),
             ),
-        )
-        .limit(500);
+        );
     const emailIds = emails.filter((e) => !e.isDeleted).map((e) => e.id);
 
     const b = await db.batchFetch([
@@ -491,8 +490,7 @@ async function getChanges(
                         forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined,
                     ),
                 ),
-            )
-            .limit(500),
+            ),
 
         db
             .select({
@@ -535,80 +533,6 @@ async function getChanges(
         // passkeyCredentials,
         // userNotifications,
     ] = b;
-
-    let getMoreEmails = emails.length >= 500;
-    while (getMoreEmails) {
-        // get the rest of emails - just in 500 chunks
-        const restOfEmails = await db
-            .select()
-            .from(Email)
-            .where(
-                and(
-                    inArray(Email.mailboxId, mailboxIds),
-                    gte(Email.updatedAt, lastSyncDate),
-                    forceIncludeMailboxes ? inArray(Email.mailboxId, forceIncludeMailboxes) : undefined,
-                ),
-            )
-            .limit(500)
-            .offset(emails.length);
-        const [emailSenders2, emailRecipients2, emailAttachments2] = await db.batchFetch([
-            db
-                .select()
-                .from(EmailSender)
-                .where(
-                    inArray(
-                        EmailSender.emailId,
-                        restOfEmails.map((e) => e.id),
-                    ),
-                ),
-            db
-                .select()
-                .from(EmailRecipient)
-                .where(
-                    inArray(
-                        EmailRecipient.emailId,
-                        restOfEmails.map((e) => e.id),
-                    ),
-                ),
-            db
-                .select()
-                .from(EmailAttachments)
-                .where(
-                    inArray(
-                        EmailAttachments.emailId,
-                        restOfEmails.map((e) => e.id),
-                    ),
-                ),
-        ]);
-        emailSenders.push.apply(emailSenders, emailSenders2);
-        emailRecipients.push.apply(emailRecipients, emailRecipients2);
-        emailAttachments.push.apply(emailAttachments, emailAttachments2);
-        emails.push.apply(emails, restOfEmails);
-
-        if (restOfEmails.length < 500) {
-            getMoreEmails = false;
-        }
-    }
-
-    let getMoreDraftEmails = draftEmails.length >= 500;
-    while (getMoreDraftEmails) {
-        const restOfDraftEmails = await db
-            .select()
-            .from(DraftEmail)
-            .where(
-                and(
-                    inArray(DraftEmail.mailboxId, mailboxIds),
-                    gte(DraftEmail.updatedAt, lastSyncDate),
-                    forceIncludeMailboxes ? inArray(DraftEmail.mailboxId, forceIncludeMailboxes) : undefined,
-                ),
-            )
-            .limit(500)
-            .offset(draftEmails.length);
-        draftEmails.push.apply(draftEmails, restOfDraftEmails);
-        if (restOfDraftEmails.length < 500) {
-            getMoreDraftEmails = false;
-        }
-    }
 
     // anonomyse user pwd, token, passkey publickey, notitification endpoint and p256dh
 

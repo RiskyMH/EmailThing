@@ -141,10 +141,11 @@ export class EmailDB extends Dexie {
   /** just check with server for outdated data */
   async fetchSync({
     alreadyRefreshed = false,
-  }: { alreadyRefreshed?: boolean } = {}): Promise<{ error?: string } | undefined> {
+    force = false, // don't use any prev sync data and just get all & dont wait for existing sync
+  }: { alreadyRefreshed?: boolean, force?: boolean } = {}): Promise<{ error?: string } | undefined> {
     const localSyncDatas = await this.localSyncData.toArray();
     if (!localSyncDatas.length) return;
-    if (isSyncing) {
+    if (isSyncing && !force) {
       // wait 200ms and try again (prob better to not do double and instead do more batching)
       await new Promise((resolve) => setTimeout(resolve, 200));
       return this.fetchSync();
@@ -155,7 +156,7 @@ export class EmailDB extends Dexie {
         this.localSyncData.update(localSyncData.userId, { isSyncing: true });
         isSyncing = true;
 
-        const res = await fetchSync(localSyncData);
+        const res = await fetchSync(force ? { ...localSyncData, lastSync: undefined } : localSyncData);
         if (res === "401") {
           if (alreadyRefreshed) {
             return { error: "Token expired" };
@@ -197,12 +198,15 @@ export class EmailDB extends Dexie {
     }
   }
 
-  async refreshToken() {
+  async refreshToken(checkExpired = false) {
     const localSyncDatas = await this.localSyncData.toArray();
     if (!localSyncDatas.length) return;
 
     try {
       for (const localSyncData of localSyncDatas) {
+        if (checkExpired && new Date(localSyncData.tokenExpiresAt) > new Date()) {
+          continue;
+        }
         const data = await refreshToken(localSyncData.refreshToken, localSyncData.apiUrl);
         if (data === "401") {
           return { error: "Token expired" };
