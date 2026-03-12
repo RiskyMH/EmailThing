@@ -72,7 +72,7 @@ export async function sendEmail(data: {
     }
 
     const signedData = await withDKIM(data.data, data.dkim);
-    const e = await fetch(`https://vps${data.important ? "1" : "2"}.riskymh.dev/api/send-email`, {
+    const e = await fetch((data.important && env.EMAIL_SEND_URL_IMPORTANT) ? env.EMAIL_SEND_URL_IMPORTANT : env.EMAIL_SEND_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
