@@ -26,18 +26,18 @@
     "@riskymh/aws": "^0.0.9",
     "@simplewebauthn/server": "13.2.2",
     "drizzle-orm": "beta",
-    "jsdom": "^28.1.0",
-    "mailauth": "^4.13.0",
-    "marked": "^17.0.3",
+    "jsdom": "^29.0.1",
+    "mailauth": "^4.13.1",
+    "marked": "^17.0.5",
     "mimetext": "^3.0.28",
-    "postal-mime": "^2.7.3",
+    "postal-mime": "^2.7.4",
     "turndown": "^7.2.2",
     "ua-parser-js": "^2.0.9",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
-    "@types/jsdom": "^27.0.0",
+    "@types/jsdom": "^28.0.1",
     "@types/turndown": "^5.0.6",
     "@types/ua-parser-js": "^0.7.39",
     "drizzle-kit": "beta"
