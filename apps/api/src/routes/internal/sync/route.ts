@@ -20,6 +20,7 @@ import {
 import { env } from "@/utils/env";
 import { deleteFile } from "@/utils/s3";
 import { getSession, isValidOrigin } from "../tools";
+import { API_URL } from "@emailthing/const/urls";
 
 export function OPTIONS(request: Request) {
     const origin = request.headers.get("origin");
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
     if (!currentUser) return new Response("User not found", { status: 404 });
 
     const apiCustomisations = {
-        apiUrl: typeof Bun !== "undefined" ? "https://api.emailthing.app" : "https://emailthing.app",
+        apiUrl: API_URL,
         notificationsPublicKey: env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
     }
 

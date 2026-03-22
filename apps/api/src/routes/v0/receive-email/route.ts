@@ -20,6 +20,7 @@ import { and, eq, gt, sql } from "drizzle-orm";
 import PostalMime from "postal-mime";
 import Turndown from "turndown";
 import { getTokenMailbox } from "../tools";
+import { WEB_URL } from "@emailthing/const/urls";
 
 export async function POST(request: Request) {
     console.log("receive-email!");
@@ -236,8 +237,10 @@ export async function POST(request: Request) {
         id: emailId,
         emailId,
         email_id: emailId,
+        mailbox_id: mailboxId,
         alreadyExists: false,
         already_exists: false,
+        url: `${WEB_URL}/mail/${mailboxId}/${emailId}`,
     });
 }
 
