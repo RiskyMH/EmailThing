@@ -10,10 +10,10 @@ export default {
         if (!message.raw)
             throw new Error(
                 "Raw email content not present.\n" +
-                    "Make sure this email was sent correctly (and not using the demo one)",
+                "Make sure this email was sent correctly (and not using the demo one)",
             );
-        const rawEmail = await streamToArrayBuffer(message.raw, Number(message.rawSize));
-        const raw = new TextDecoder("utf-8").decode(rawEmail);
+
+        const raw = await new Response(message.raw).text()
 
         if (env.forward) await message.forward(env.forward);
 
@@ -38,23 +38,3 @@ export default {
         }
     },
 };
-
-/**
- *
- * @param {ReadableStream<any>} stream
- * @param {number} streamSize
- */
-async function streamToArrayBuffer(stream, streamSize) {
-    const result = new Uint8Array(streamSize);
-    let bytesRead = 0;
-    const reader = stream.getReader();
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-            break;
-        }
-        result.set(value, bytesRead);
-        bytesRead += value.length;
-    }
-    return result;
-}
