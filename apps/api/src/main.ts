@@ -68,3 +68,18 @@ console.log(`Server is running on ${server.url}api/v0`);
 
 await db.execute(sql`SELECT 1`);
 // process.exit()
+
+process.on("uncaughtException", (err) => {
+    console.error("Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("SIGTERM", async () => {
+    console.log("Received SIGTERM. Shutting down gracefully...");
+    await server.stop();
+    console.log("Server stopped. Exiting process.");
+    process.exit(0);
+});
