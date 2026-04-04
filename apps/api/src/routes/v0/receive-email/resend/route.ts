@@ -52,7 +52,7 @@ export async function POST(request: Bun.BunRequest) {
                 ...request.headers,
             },
             body: JSON.stringify({
-                raw: rawEmail,
+                email: rawEmail,
                 from: emailData.from,
                 to: emailData.to[0],
                 category_id: categoryId,
