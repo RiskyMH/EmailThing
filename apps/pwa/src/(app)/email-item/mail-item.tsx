@@ -417,7 +417,7 @@ function EmailContent({
           ref={ref}
           className="w-full rounded-b-lg [.emailslist_&]:rounded-b-none overflow-auto bg-background dark:bg-card border-card border-2 border-t-0 dark:border-0 [.emailslist_&]:border-0!"
           style={{ height: heights.current[id] ? `${heights.current[id]}px` : "0px", maxHeight: "100%" }}
-          sandbox="allow-popups allow-same-origin"
+          sandbox="allow-popups allow-same-origin allow-popups-to-escape-sandbox allow-downloads"
           srcDoc={genericHtml(parseHTML(html || body, true), sender)}
           title={subject || "The Email"}
           referrerPolicy="no-referrer"
