@@ -8,6 +8,7 @@ import type {
   MailboxAlias,
   MailboxCategory,
   MailboxCustomDomain,
+  MailboxCustomDomainCustomSend,
   MailboxForUser,
   TempAlias,
   User
@@ -16,24 +17,24 @@ import type { InferSelectModel } from "drizzle-orm";
 
 type T<Obj> = {
   [K in keyof Obj]: null extends Obj[K]
-    ?
-        | 0
-        | (Obj[K] extends null | infer U
-            ? U extends false
-              ? 0
-              : U extends true
-                ? 1
-                : U extends boolean
-                  ? 1 | 0
-                  : U
-            : any)
-    : Obj[K] extends false
-      ? 0
-      : Obj[K] extends true
-        ? 1
-        : Obj[K] extends boolean
-          ? 1 | 0
-          : Obj[K];
+  ?
+  | 0
+  | (Obj[K] extends null | infer U
+    ? U extends false
+    ? 0
+    : U extends true
+    ? 1
+    : U extends boolean
+    ? 1 | 0
+    : U
+    : any)
+  : Obj[K] extends false
+  ? 0
+  : Obj[K] extends true
+  ? 1
+  : Obj[K] extends boolean
+  ? 1 | 0
+  : Obj[K];
 };
 
 type Updatable<T> = T & {
@@ -56,7 +57,7 @@ export type DBMailboxAlias = T<InferSelectModel<typeof MailboxAlias>>;
 export type DBMailboxCategory = Updatable<T<InferSelectModel<typeof MailboxCategory>>> & {
   isNew?: boolean;
 };
-export type DBMailboxCustomDomain = T<InferSelectModel<typeof MailboxCustomDomain>>;
+export type DBMailboxCustomDomain = T<Omit<InferSelectModel<typeof MailboxCustomDomain>, 'dkimPrivateKey'> & { customSend: T<Pick<InferSelectModel<typeof MailboxCustomDomainCustomSend>, 'url' | 'type'> | null> }>;
 export type DBTempAlias = T<InferSelectModel<typeof TempAlias>>;
 export type DBMailboxForUser = T<InferSelectModel<typeof MailboxForUser>> & { username: string };
 export type DBUser = T<Omit<InferSelectModel<typeof User>, "password">>;

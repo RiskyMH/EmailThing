@@ -1,8 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
 import {
-  boolean, index,
-  integer, pgTable, primaryKey, timestamp, unique, uniqueIndex, varchar
+    boolean, index,
+    integer, pgTable, primaryKey, timestamp, unique, uniqueIndex, varchar
 } from "drizzle-orm/pg-core";
 import { caseSensitiveText, nocaseText } from "./custom-drizzle";
 
@@ -109,6 +109,8 @@ export const MailboxCustomDomain = pgTable(
             .defaultNow()
             .$onUpdateFn(() => new Date()),
         domain: nocaseText("domain").notNull(),
+        dkimPrivateKey: varchar("dkim_private_key") /* ENCRYPTED */,
+        dkimSelector: varchar("dkim_selector"),
         // anonymous data - but here for syncing
         isDeleted: boolean("is_deleted").default(false),
     },
@@ -120,6 +122,22 @@ export const MailboxCustomDomain = pgTable(
             uniqueDomain: uniqueIndex("mailbox_domain_domain_unique").on(sql`lower(${table.domain})`),
         };
     },
+);
+export const MailboxCustomDomainCustomSend = pgTable(
+    "mailbox_custom_domain_custom_send",
+    {
+        id: varchar("id", { length: 25 })
+            .notNull()
+            .primaryKey()
+            .references(() => MailboxCustomDomain.id, { onDelete: "cascade" }),
+        addedAt: timestamp("created_at").notNull().defaultNow(),
+        updatedAt: timestamp("updated_at")
+            .defaultNow()
+            .$onUpdateFn(() => new Date()),
+        type: varchar("type", { enum: ["RESEND", "EMAILTHING"] }).notNull(),
+        url: varchar("url").notNull(),
+        key: varchar("key").notNull() /* ENCRYPTED */,
+    }
 );
 
 // API Tokens

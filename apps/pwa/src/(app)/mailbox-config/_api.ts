@@ -1,7 +1,7 @@
 import type {
   MappedPossibleData,
   MappedPossibleDataResponse
-} from "@/../app/api/internal/mailbox/[mailbox]/settings/route";
+} from "@/../../apps/api/src/routes/internal/mailbox/[mailbox]/settings/route";
 import { db } from "@/utils/data/db";
 import { getLogedInUserApi } from "@/utils/data/queries/user";
 import { parseSync } from "@/utils/data/sync-user";

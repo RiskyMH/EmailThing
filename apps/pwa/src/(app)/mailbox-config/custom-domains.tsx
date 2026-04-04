@@ -2,7 +2,8 @@ import CopyButton from "@/components/copy-button.client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuTrigger
+  DropdownMenuGroup,
+  DropdownMenuItem, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,12 +23,16 @@ import {
   CopyIcon,
   Loader2, MoreHorizontalIcon, PlusIcon, Trash2Icon
 } from "lucide-react";
-import { lazy, Suspense, useState, useTransition } from "react";
+import { FormEvent, lazy, Suspense, useEffect, useState, useTransition } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { DeleteButton } from "./components.client";
 import changeMailboxSettings from "./_api";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { getTXT } from "@/utils/use-dns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const CfWorkerCode = lazy(() => import("./custom-domain-dyn"));
 
@@ -51,6 +56,17 @@ const verifyDomain = async (mailboxId: string, domain: string) => {
 const deleteCustomDomain = async (mailboxId: string, domainId: string) => {
   return changeMailboxSettings(mailboxId, "delete-custom-domain", { domainId });
 };
+
+const setCustomSend = async (mailboxId: string, domainId: string, url: string, key: string, type: "RESEND" | "EMAILTHING" | "DISABLED") => {
+  return changeMailboxSettings(mailboxId, "set-custom-domain-send", { domainId, url, key, type });
+}
+
+const setDKIM = async (mailboxId: string, domainId: string, selector: string, privateKey: string) => {
+  return changeMailboxSettings(mailboxId, "set-custom-domain-dkim", { domainId, selector, privateKey });
+}
+const deleteDKIM = async (mailboxId: string, domainId: string) => {
+  return changeMailboxSettings(mailboxId, "set-custom-domain-dkim", { domainId, deleteDKIM: true });
+}
 
 export default function CustomDomains() {
   const { mailboxId } = useParams<{ mailboxId: string }>();
@@ -148,6 +164,34 @@ export default function CustomDomains() {
                             <AddCustomDomainForm mailboxId={mailboxId!} initialDomain={row.domain} />
                           </SmartDrawerContent>
                         </SmartDrawer>
+
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem asChild>
+                          </DropdownMenuItem>
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Advanced</DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                              <DropdownMenuSubContent>
+                                <SmartDrawer repositionInputs={false}>
+                                  <DropdownMenuItem asChild>
+                                    <SmartDrawerTrigger className="w-full">Custom Send API</SmartDrawerTrigger>
+                                  </DropdownMenuItem>
+                                  <SmartDrawerContent className="sm:max-w-[425px]">
+                                    <SetCustomSend mailboxId={mailboxId!} id={row.id} existingType={row.customSend ? row.customSend.type : undefined} existingURL={row.customSend ? row.customSend.url : undefined} />
+                                  </SmartDrawerContent>
+                                </SmartDrawer>
+                                <SmartDrawer repositionInputs={false}>
+                                  <DropdownMenuItem asChild>
+                                    <SmartDrawerTrigger className="w-full">DKIM Settings</SmartDrawerTrigger>
+                                  </DropdownMenuItem>
+                                  <SmartDrawerContent className="sm:max-w-[425px]">
+                                    <CustomDomainDKIMSettings mailboxId={mailboxId!} domainId={row.id} domain={row.domain} existingSelector={row.dkimSelector || undefined} />
+                                  </SmartDrawerContent>
+                                </SmartDrawer>
+                              </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                          </DropdownMenuSub>
+                        </DropdownMenuGroup>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -163,7 +207,7 @@ export default function CustomDomains() {
           </TableBody>
         </Table>
       </div>
-    </div>
+    </div >
   );
 }
 
@@ -483,3 +527,365 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
     // </>
   );
 }
+
+export function SetCustomSend({
+  mailboxId,
+  id,
+  existingType,
+  existingURL,
+  // secrent key not sent anywhere
+}: { mailboxId: string; id: string; existingType?: "RESEND" | "EMAILTHING", existingURL?: string }) {
+  const [isPending, startTransition] = useTransition();
+
+  const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isPending) return;
+
+    startTransition(async () => {
+      const res = await setCustomSend(mailboxId, id, event.currentTarget.url.value, event.currentTarget.secretKey.value, event.currentTarget.type.value);
+      if ('error' in res) {
+        toast.error(res.error);
+      } else {
+        toast.success("Custom send API configuration updated!", { description: "Try to send an email to validate if it works" });
+        document.getElementById("smart-drawer:close")?.click();
+      }
+    });
+  };
+
+  return (
+    <>
+      <SmartDrawerHeader>
+        <SmartDrawerTitle>
+          Set Custom Send API
+        </SmartDrawerTitle>
+        <SmartDrawerDescription>
+          Instead of using EmailThing's sending infrastructure, you can use your own sending provider using this feature.
+        </SmartDrawerDescription>
+      </SmartDrawerHeader>
+
+
+      <form className="grid items-start gap-4 px-4 sm:px-0" onSubmit={formSubmit}>
+        <input type="text" name="fake_user" style={{ display: "none" }} />
+        <input type="password" name="fake_pass" style={{ display: "none" }} />
+
+        <div className="grid gap-2">
+          <Label htmlFor="type">Type</Label>
+          <Select
+            name="type"
+            disabled={isPending}
+            defaultValue={existingType || "RESEND"}
+          >
+            <SelectTrigger className="w-full border-none bg-secondary">
+              <SelectValue placeholder="Theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="EMAILTHING" disabled>EmailThing API (schema)</SelectItem>
+                <SelectItem value="RESEND">Resend API (schema)</SelectItem>
+                {existingType && <SelectItem value="DISABLED">None (aka disabled)</SelectItem>}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <Label htmlFor="url">URL</Label>
+          <Input
+            className="border-none bg-secondary"
+            name="url"
+            placeholder="https://api.resend.com"
+            id="url"
+            type="url"
+            disabled={isPending}
+            defaultValue={existingURL}
+            autoFocus
+            autoComplete="off"
+          />
+
+          <Label htmlFor="secretKey">Secret key</Label>
+          <Input
+            className="border-none bg-secondary"
+            name="secretKey"
+            placeholder="*****"
+            id="secretKey"
+            type="password"
+            autoComplete="off"
+            disabled={isPending}
+          />
+        </div>
+        <Button type="submit" disabled={isPending} className="gap-2">
+          {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+          {existingType ? "Update" : "Create"} custom send configuration
+        </Button>
+      </form>
+      <SmartDrawerFooter className="sm:hidden"><SmartDrawerClose /></SmartDrawerFooter>
+
+    </>
+  );
+}
+
+
+// Helper to turn ArrayBuffer to base64
+function ab2b64(buf: ArrayBuffer): string {
+  return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(buf))));
+}
+
+function pkcs8ToPem(b64: string) {
+  const lines = ["-----BEGIN PRIVATE KEY-----"];
+  for (let i = 0; i < b64.length; i += 64) lines.push(b64.slice(i, i + 64));
+  // lines.push(b64);
+  lines.push("-----END PRIVATE KEY-----");
+  return lines.join("\n");
+}
+
+const pemToArrayBuffer = (value: string): ArrayBuffer => {
+  const clean = value
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/\s+/g, "");
+  const bin = atob(clean);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+};
+
+// DKIM Settings UI
+export function CustomDomainDKIMSettings({ domain, mailboxId, domainId, existingSelector }: { domain: string; mailboxId: string; domainId: string; existingSelector?: string }) {
+  const [pubB64, setPubB64] = useState<string>("");
+  const [privPKCS8, setPrivPKCS8] = useState<ArrayBuffer | null>(null);
+  const [dkimSelector, setDkimSelector] = useState<string>(existingSelector || "emailthing");
+
+  const pem = pkcs8ToPem(ab2b64(privPKCS8!));
+  const dkimValue = `v=DKIM1; k=rsa; p=${pubB64}`;
+
+  async function handleGenerate(providedPem?: string) {
+    try {
+      if (providedPem?.trim()) {
+        const pkcs8Raw = pemToArrayBuffer(providedPem);
+
+        const privateKey = await window.crypto.subtle.importKey(
+          "pkcs8",
+          pkcs8Raw,
+          { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+          true,
+          ["sign"]
+        );
+
+        const privateJwk = await window.crypto.subtle.exportKey("jwk", privateKey);
+        if (!privateJwk.n || !privateJwk.e) throw new Error("Invalid private key");
+
+        const publicKey = await window.crypto.subtle.importKey(
+          "jwk",
+          {
+            kty: "RSA",
+            n: privateJwk.n,
+            e: privateJwk.e,
+            alg: "RS256",
+            ext: true,
+            key_ops: ["verify"],
+          },
+          { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+          true,
+          ["verify"]
+        );
+
+        const pubRaw = await window.crypto.subtle.exportKey("spki", publicKey);
+        setPubB64(ab2b64(pubRaw));
+        setPrivPKCS8(pkcs8Raw);
+        return;
+      }
+    } catch {
+      toast.error("Invalid PEM provided. Generated a new key pair instead.");
+    }
+
+    const pair = await window.crypto.subtle.generateKey(
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: "SHA-256",
+      },
+      true,
+      ["sign", "verify"]
+    );
+
+    const pubRaw = await window.crypto.subtle.exportKey("spki", (pair as CryptoKeyPair).publicKey);
+    setPubB64(ab2b64(pubRaw));
+
+    const privRaw = await window.crypto.subtle.exportKey("pkcs8", (pair as CryptoKeyPair).privateKey);
+    setPrivPKCS8(privRaw);
+  }
+
+  useEffect(() => {
+    handleGenerate();
+  }, []);
+
+  const [isPending, startTransition] = useTransition();
+
+  const formSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isPending) return;
+
+    startTransition(async () => {
+      const dnsRes = await getTXT(`${dkimSelector}._domainkey.${domain}`);
+      if (!dnsRes?.length) {
+        toast.error("DNS record not set yet.", { description: "Please add the TXT record shown in the form and wait for it to propagate before saving." });
+        return;
+      }
+      if (dnsRes.length > 1) {
+        toast.error("Multiple TXT records found for this selector.", { description: "Please make sure there is only one TXT record for this selector and it matches the value shown in the form." });
+        return;
+      }
+      if (dnsRes[0].replace(/\\?" ?/g, "") !== dkimValue) {
+        toast.error("DNS record value is incorrect.", { description: "Please make sure the TXT record value matches the one shown in the form." });
+        return;
+      }
+
+      const res = await setDKIM(mailboxId, domainId, dkimSelector, pkcs8ToPem(ab2b64(privPKCS8!)));
+      if ('error' in res) {
+        toast.error(res.error);
+      } else {
+        toast.success("Custom DKIM configuration saved!", { description: "Try to send an email to validate if it works" });
+        document.getElementById("smart-drawer:close")?.click();
+      }
+    });
+  };
+
+  const formSubmitDelete = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isPending) return;
+
+    startTransition(async () => {
+      const res = await deleteDKIM(mailboxId, domainId);
+      if ('error' in res) {
+        toast.error(res.error);
+      } else {
+        toast.success("DKIM configuration deleted!");
+        document.getElementById("smart-drawer:close")?.click();
+      }
+    });
+  };
+
+
+  return (
+    <>
+      <SmartDrawerHeader>
+        <SmartDrawerTitle>
+          Custom DKIM
+        </SmartDrawerTitle>
+        <SmartDrawerDescription>
+          Sign your emails with DKIM by adding the folowing DNS record and saving this!
+        </SmartDrawerDescription>
+      </SmartDrawerHeader>
+      <Tabs defaultValue="easy" className="px-4 sm:px-0">
+        <TabsList className="w-full">
+          <TabsTrigger value="easy" className="border-none">Easy</TabsTrigger>
+          <TabsTrigger value="custom" className="border-none">Custom</TabsTrigger>
+          {existingSelector && <TabsTrigger value="remove" className="border-none">Remove</TabsTrigger>}
+        </TabsList>
+        <TabsContent value="easy" asChild className="grid items-start gap-4">
+          <form onSubmit={formSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="dkim">
+                <code className="font-semibold text-muted-foreground">TXT</code>
+                <span className="flex items-center gap-0">
+                  {dkimSelector}
+                  <span className="text-muted-foreground">._domainkey.</span>
+                  {domain}
+                </span>
+              </Label>
+
+              <div className="flex items-center gap-2">
+                <Input
+                  className="border-none bg-secondary font-mono"
+                  value={dkimValue}
+                  id="dkim"
+                  readOnly
+                  autoFocus
+                />
+                <Button size="sm" className="px-3" asChild>
+                  <CopyButton text={dkimValue}>
+                    <span className="sr-only">Copy</span>
+                    <CopyIcon className="size-4" />
+                  </CopyButton>
+                </Button>
+              </div>
+            </div>
+
+            <Button type="submit" disabled={!privPKCS8} className="w-full gap-2">
+              {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+              Save DKIM
+            </Button>
+          </form>
+        </TabsContent>
+        <TabsContent value="custom" asChild className="grid items-start gap-4">
+          <form onSubmit={formSubmit} >
+
+            <div className="grid gap-2">
+              <Label htmlFor="Private Key">
+                Private Key
+                <span className="text-muted-foreground"> (don't ever share this)</span>
+              </Label>
+              <Textarea
+                className="border-none bg-secondary font-mono whitespace-nowrap overflow-x-auto"
+                value={pem}
+                onChange={(e) => handleGenerate(e.currentTarget.value)}
+                id="dkim"
+              />
+              <Label htmlFor="Private Key">Selector</Label>
+              <Input
+                className="border-none bg-secondary font-mono"
+                value={dkimSelector}
+                onChange={(e) => setDkimSelector(e.target.value)}
+                onBlur={() => dkimSelector.trim() === "" && setDkimSelector("emailthing")}
+                id="dkim"
+              />
+
+              <SmartDrawerDescription className="mt-4">
+                Now set the following value for that record (this is your public key, you can share it safely):
+              </SmartDrawerDescription>
+
+              <Label htmlFor="dkim">
+                <code className="font-semibold text-muted-foreground">TXT</code>
+                <span className="flex items-center gap-0">
+                  {dkimSelector}
+                  <span className="text-muted-foreground">._domainkey.</span>
+                  {domain}
+                </span>
+              </Label>
+
+              <div className="flex items-center gap-2">
+                <Input
+                  className="border-none bg-secondary font-mono"
+                  value={dkimValue}
+                  id="dkim"
+                  readOnly
+                  autoFocus
+                />
+                <Button size="sm" className="px-3" asChild>
+                  <CopyButton text={dkimValue}>
+                    <span className="sr-only">Copy</span>
+                    <CopyIcon className="size-4" />
+                  </CopyButton>
+                </Button>
+              </div>
+            </div>
+
+            <Button type="submit" disabled={!privPKCS8} className="w-full gap-2">
+              {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+              Save DKIM
+            </Button>
+          </form>
+        </TabsContent>
+        <TabsContent value="remove" asChild className="grid items-start gap-4">
+          <form onSubmit={formSubmitDelete}>
+            <Button type="submit" variant="destructive" className="w-full gap-2 mt-4">
+              {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+              Delete DKIM configuration
+            </Button>
+          </form>
+        </TabsContent>
+      </Tabs>
+      <SmartDrawerFooter className="sm:hidden"><SmartDrawerClose /></SmartDrawerFooter>
+    </>
+  );
+}
+

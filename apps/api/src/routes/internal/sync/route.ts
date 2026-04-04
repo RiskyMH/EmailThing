@@ -1,20 +1,21 @@
 import db, {
-  DraftEmail,
-  Email,
-  EmailAttachments,
-  EmailRecipient,
-  EmailSender,
-  Mailbox,
-  MailboxAlias,
-  MailboxCategory,
-  MailboxCustomDomain,
-  MailboxForUser,
-  TempAlias,
-  User
+    DraftEmail,
+    Email,
+    EmailAttachments,
+    EmailRecipient,
+    EmailSender,
+    Mailbox,
+    MailboxAlias,
+    MailboxCategory,
+    MailboxCustomDomain,
+    MailboxCustomDomainCustomSend,
+    MailboxForUser,
+    TempAlias,
+    User
 } from "@/db";
 import {
-  and, desc, eq, getTableColumns, gte, inArray, lte,
-  or, sql, type InferSelectModel
+    and, desc, eq, getTableColumns, gte, inArray, lte,
+    or, sql, type InferSelectModel
 } from "drizzle-orm";
 // import { hideToken } from "@/(email)/mail/[mailbox]/config/page";
 import { env } from "@/utils/env";
@@ -467,6 +468,10 @@ async function getChanges(
         db
             .select()
             .from(MailboxCustomDomain)
+            .leftJoin(
+                MailboxCustomDomainCustomSend,
+                eq(MailboxCustomDomainCustomSend.id, MailboxCustomDomain.id),
+            )
             .where(
                 and(
                     inArray(MailboxCustomDomain.mailboxId, mailboxIds),
@@ -564,7 +569,21 @@ async function getChanges(
         //     ...t,
         //     token: hideToken(t.token),
         // })),
-        mailboxCustomDomains,
+        mailboxCustomDomains: mailboxCustomDomains.map(({ mailbox_custom_domain: customDomain, mailbox_custom_domain_custom_send: customSend }) => ({
+            id: customDomain.id,
+            mailboxId: customDomain.mailboxId,
+            addedAt: customDomain.addedAt,
+            updatedAt: customDomain.updatedAt,
+            domain: customDomain.domain,
+            // dkimPrivateKey: customDomain.dkimPrivateKey,
+            dkimSelector: customDomain.dkimSelector,
+            isDeleted: customDomain.isDeleted,
+            customSend: customSend ? {
+                url: customSend.url,
+                type: customSend.type,
+                // key: customSend.key,
+            }: null,
+        })),
         // defaultDomains: defaultDomains.map((d) => ({
         //     ...d,
         //     authKey: undefined as never,
