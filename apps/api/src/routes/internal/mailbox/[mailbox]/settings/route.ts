@@ -899,6 +899,10 @@ async function setCustomDomainCustomSend(mailboxId: string, data: SetCustomDomai
     if (!data.url || !data.key) {
         return { error: "URL and key are required for RESEND and EMAILTHING types" };
     }
+    const validTypes = ["RESEND", "EMAILTHING"];
+    if (!validTypes.includes(data.type)) {
+        return { error: `Invalid type "${data.type}"` };
+    }
 
     const encryptedKey = await encryptString(data.key, env.ENCRYPT_SECRET!);
     await db.insert(MailboxCustomDomainCustomSend)
@@ -917,6 +921,13 @@ async function setCustomDomainCustomSend(mailboxId: string, data: SetCustomDomai
                 updatedAt: new Date(),
             }
         })
+        .execute();
+
+    await db.update(MailboxCustomDomain)
+        .set({
+            updatedAt: new Date(),
+        })
+        .where(eq(MailboxCustomDomain.id, domainId))
         .execute();
 
     return { success: "Custom API Set! Try to send an email to validate if it works." }

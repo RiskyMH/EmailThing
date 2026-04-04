@@ -207,7 +207,7 @@ export default function CustomDomains() {
           </TableBody>
         </Table>
       </div>
-    </div >
+    </div>
   );
 }
 
@@ -568,56 +568,69 @@ export function SetCustomSend({
         <input type="text" name="fake_user" style={{ display: "none" }} />
         <input type="password" name="fake_pass" style={{ display: "none" }} />
 
-        <div className="grid gap-2">
-          <Label htmlFor="type">Type</Label>
-          <Select
-            name="type"
-            disabled={isPending}
-            defaultValue={existingType || "RESEND"}
-          >
-            <SelectTrigger className="w-full border-none bg-secondary">
-              <SelectValue placeholder="Theme" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="EMAILTHING" disabled>EmailThing API (schema)</SelectItem>
-                <SelectItem value="RESEND">Resend API (schema)</SelectItem>
-                {existingType && <SelectItem value="DISABLED">None (aka disabled)</SelectItem>}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <Tabs defaultValue="create">
+          <TabsList className="w-full">
+            <TabsTrigger value="create" className="border-none">{existingType ? "Edit" : "Create"}</TabsTrigger>
+            <TabsTrigger value="remove" className="border-none" disabled={!existingType}>Remove</TabsTrigger>
+          </TabsList>
+          <TabsContent value="create" className="grid items-start gap-4">
+            <Label htmlFor="type">Type</Label>
+            <Select
+              name="type"
+              disabled={isPending}
+              defaultValue={existingType || "RESEND"}
+            >
+              <SelectTrigger className="w-full border-none bg-secondary">
+                <SelectValue placeholder="Theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="EMAILTHING" disabled>EmailThing API (schema)</SelectItem>
+                  <SelectItem value="RESEND">Resend API (schema)</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
-          <Label htmlFor="url">URL</Label>
-          <Input
-            className="border-none bg-secondary"
-            name="url"
-            placeholder="https://api.resend.com"
-            id="url"
-            type="url"
-            disabled={isPending}
-            defaultValue={existingURL}
-            autoFocus
-            autoComplete="off"
-          />
+            <Label htmlFor="url">URL</Label>
+            <Input
+              className="border-none bg-secondary"
+              name="url"
+              placeholder="https://api.resend.com"
+              id="url"
+              type="url"
+              disabled={isPending}
+              defaultValue={existingURL || "https://api.resend.com"}
+              autoFocus
+              autoComplete="off"
+              required
+            />
 
-          <Label htmlFor="secretKey">Secret key</Label>
-          <Input
-            className="border-none bg-secondary"
-            name="secretKey"
-            placeholder="*****"
-            id="secretKey"
-            type="password"
-            autoComplete="off"
-            disabled={isPending}
-          />
-        </div>
-        <Button type="submit" disabled={isPending} className="gap-2">
-          {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
-          {existingType ? "Update" : "Create"} custom send configuration
-        </Button>
+            <Label htmlFor="secretKey">Secret key</Label>
+            <Input
+              className="border-none bg-secondary"
+              name="secretKey"
+              placeholder="*****"
+              id="secretKey"
+              type="password"
+              autoComplete="off"
+              disabled={isPending}
+              required
+            />
+            <Button type="submit" disabled={isPending} className="gap-2">
+              {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+              {existingType ? "Update" : "Create"} custom send configuration
+            </Button>
+            <SmartDrawerFooter className="sm:hidden"><SmartDrawerClose /></SmartDrawerFooter>
+          </TabsContent>
+          <TabsContent value="remove" className="grid items-start gap-4">
+            <input name="type" type="hidden" value={"DISABLED"} />
+            <Button type="submit" disabled={isPending} className="gap-2 mt-4" variant="destructive">
+              {isPending && <Loader2 className="size-5 animate-spin text-muted-foreground" />}
+              Delete existing configuration
+            </Button>
+          </TabsContent>
+        </Tabs>
       </form>
-      <SmartDrawerFooter className="sm:hidden"><SmartDrawerClose /></SmartDrawerFooter>
-
     </>
   );
 }
@@ -800,6 +813,7 @@ export function CustomDomainDKIMSettings({ domain, mailboxId, domainId, existing
                   id="dkim"
                   readOnly
                   autoFocus
+                  required
                 />
                 <Button size="sm" className="px-3" asChild>
                   <CopyButton text={dkimValue}>
@@ -818,9 +832,8 @@ export function CustomDomainDKIMSettings({ domain, mailboxId, domainId, existing
         </TabsContent>
         <TabsContent value="custom" asChild className="grid items-start gap-4">
           <form onSubmit={formSubmit} >
-
             <div className="grid gap-2">
-              <Label htmlFor="Private Key">
+              <Label htmlFor="privateKey">
                 Private Key
                 <span className="text-muted-foreground"> (don't ever share this)</span>
               </Label>
@@ -828,15 +841,17 @@ export function CustomDomainDKIMSettings({ domain, mailboxId, domainId, existing
                 className="border-none bg-secondary font-mono whitespace-nowrap overflow-x-auto"
                 value={pem}
                 onChange={(e) => handleGenerate(e.currentTarget.value)}
-                id="dkim"
+                id="privateKey"
+                required
               />
-              <Label htmlFor="Private Key">Selector</Label>
+              <Label htmlFor="selector">Selector</Label>
               <Input
                 className="border-none bg-secondary font-mono"
                 value={dkimSelector}
                 onChange={(e) => setDkimSelector(e.target.value)}
                 onBlur={() => dkimSelector.trim() === "" && setDkimSelector("emailthing")}
-                id="dkim"
+                id="selector"
+                required
               />
 
               <SmartDrawerDescription className="mt-4">
@@ -859,6 +874,7 @@ export function CustomDomainDKIMSettings({ domain, mailboxId, domainId, existing
                   id="dkim"
                   readOnly
                   autoFocus
+                  required
                 />
                 <Button size="sm" className="px-3" asChild>
                   <CopyButton text={dkimValue}>
