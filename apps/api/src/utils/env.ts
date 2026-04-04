@@ -13,6 +13,7 @@ const envSchema = z.object({
     S3_URL: z.string(),
     S3_BUCKET: z.string(),
     NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: z.string().check(z.minLength(1)),
+    ENCRYPT_SECRET: z.string().check(z.minLength(1)),
 });
 
 const _env = envSchema.safeParse({
@@ -28,6 +29,7 @@ const _env = envSchema.safeParse({
     S3_URL: process.env.S3_URL,
     S3_BUCKET: process.env.S3_BUCKET || "email",
     NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY: process.env.NEXT_PUBLIC_NOTIFICATIONS_PUBLIC_KEY,
+    ENCRYPT_SECRET: process.env.ENCRYPT_SECRET,
 });
 
 if (!_env.success) {

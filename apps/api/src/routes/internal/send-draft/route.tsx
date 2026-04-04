@@ -1,12 +1,15 @@
 import db, { Mailbox, MailboxForUser } from "@/db";
 import { sendEmail } from "@/utils/send-email";
-import { DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, MailboxAlias } from "@emailthing/db/connect";
+import { DraftEmail, Email, EmailAttachments, EmailRecipient, EmailSender, MailboxAlias, MailboxCustomDomain, MailboxCustomDomainCustomSend } from "@emailthing/db/connect";
 import { and, eq, sql } from "drizzle-orm";
 import { createMimeMessage } from "mimetext";
 import type { ChangesResponse } from "../sync/route";
 import { getSession, isValidOrigin } from "../tools";
 import { createId } from "@paralleldrive/cuid2";
 import { emailSendRatelimit } from "@/utils/redis-ratelimit";
+import { sendResendEmail } from "./send-resend";
+import { decryptString } from "@/utils/encrypt";
+import { env } from "@/utils/env";
 
 export interface Data extends SaveActionProps {
     draftId: string;
@@ -49,17 +52,34 @@ export async function POST(request: Request) {
     const currentUserId = await getSession(request);
     if (!currentUserId) return Response.json({ error: "Unauthorized" } as SendEmailResponse, { status: 401, headers: responseHeaders });
 
-    const [[mailbox], [userAccess]] = await db.batchFetch([
+    const [[mailbox], [userAccess], [customDomain]] = await db.batchFetch([
         db.select({ id: Mailbox.id })
             .from(Mailbox)
             .where(eq(Mailbox.id, data.mailboxId))
             .limit(1),
+
         db.select()
             .from(MailboxForUser)
             .where(and(
                 eq(MailboxForUser.mailboxId, data.mailboxId),
                 eq(MailboxForUser.userId, currentUserId),
-                eq(MailboxForUser.isDeleted, false)
+                eq(MailboxForUser.isDeleted, false),
+            ))
+            .limit(1),
+
+        db.select({
+            customDomain: MailboxCustomDomain,
+            customSend: MailboxCustomDomainCustomSend,
+        })
+            .from(MailboxCustomDomain)
+            .leftJoin(
+                MailboxCustomDomainCustomSend,
+                eq(MailboxCustomDomainCustomSend.id, MailboxCustomDomain.id),
+            )
+            .where(and(
+                eq(MailboxCustomDomain.mailboxId, data.mailboxId),
+                eq(MailboxCustomDomain.domain, data.from?.split("@")[1] ?? ""),
+                eq(MailboxCustomDomain.isDeleted, false),
             ))
             .limit(1),
     ]);
@@ -157,14 +177,53 @@ export async function POST(request: Request) {
     email.setHeader("X-UserId", currentUserId);
     email.setHeader("X-MailboxId", mailboxId);
 
-    const e = await sendEmail({
-        from: alias.alias,
-        to: to.map((e) => e.address),
-        data: email,
-        important: true,
-    });
+    if (customDomain?.customSend?.type === "RESEND") {
+        const _headers = headers?.reduce(
+            (acc: Record<string, string>, { key, value }) => {
+                acc[key] = value;
+                return acc;
+            },
+            {} as Record<string, string>,
+        ) ?? {};
+        _headers["X-UserId"] = currentUserId;
+        _headers["X-MailboxId"] = mailboxId;
+        _headers["X-EmailThing"] = "true";
 
-    if (e?.error) return Response.json(e, { status: 400, headers: responseHeaders });
+        const res = await sendResendEmail(
+            {
+                from: alias.name ? `${alias.name} <${alias.alias}>` : alias.alias,
+                to: to.filter((e) => !e.cc).map((e) => e.name ? `${e.name} <${e.address}>` : e.address),
+                bcc: to.filter((e) => e.cc === "bcc").map((e) => e.name ? `${e.name} <${e.address}>` : e.address),
+                cc: to.filter((e) => e.cc === "cc").map((e) => e.name ? `${e.name} <${e.address}>` : e.address),
+                subject,
+                html,
+                text: body,
+                headers: _headers,
+            },
+            await decryptString(customDomain.customSend.key, env.ENCRYPT_SECRET),
+            customDomain.customSend.url,
+        );
+
+        if ("error" in res && res.error) {
+            return Response.json({ error: `Failed to send via Resend: ${res.error}` } as SendEmailResponse, { status: 500, headers: responseHeaders });
+        }
+    } else if (customDomain?.customSend?.type === "EMAILTHING") {
+        return Response.json({ error: "Custom EmailThing sending not implemented yet" } as SendEmailResponse, { status: 500, headers: responseHeaders });
+    } else {
+        const e = await sendEmail({
+            from: alias.alias,
+            to: to.map((e) => e.address),
+            data: email,
+            important: true,
+            dkim: customDomain?.customDomain.dkimPrivateKey ? {
+                privateKey: await decryptString(customDomain.customDomain.dkimPrivateKey ?? "", env.ENCRYPT_SECRET),
+                selector: customDomain.customDomain.dkimSelector ?? "default",
+                domain: customDomain.customDomain.domain,
+            } : undefined,
+        });
+
+        if (e?.error) return Response.json(e, { status: 400, headers: responseHeaders });
+    }
 
     // const emailId = createId()
     const emailId = draftId === "new" ? createId() : draftId; // could also make new id here

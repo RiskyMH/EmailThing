@@ -1,15 +1,15 @@
-import { db, MailboxForUser, TempAlias } from "@/db";
+import { db, MailboxCustomDomainCustomSend, MailboxForUser, TempAlias } from "@/db";
 import { getSession, isValidOrigin } from "@/routes/internal/tools";
 import { and, eq, getColumns, gte, or, type InferSelectModel } from "drizzle-orm";
 // import { revalidateTag } from "next/cache";
 import {
-  DefaultDomain,
-  Mailbox,
-  MailboxAlias,
-  MailboxCategory,
-  MailboxCustomDomain,
-  MailboxTokens,
-  User
+    DefaultDomain,
+    Mailbox,
+    MailboxAlias,
+    MailboxCategory,
+    MailboxCustomDomain,
+    MailboxTokens,
+    User
 } from "@/db";
 import { generateToken } from "@/utils/token";
 import { emailSchema } from "@/utils/validations/auth";
@@ -18,6 +18,8 @@ import { TEMP_EMAIL_EXPIRES_IN } from "@emailthing/const/expiry";
 import { aliasLimit, customDomainLimit, mailboxUsersLimit } from "@emailthing/const/limits";
 import { createId, init } from "@paralleldrive/cuid2";
 import { count, like, not, sql } from "drizzle-orm";
+import { env } from "@/utils/env";
+import { encryptString } from "@/utils/encrypt";
 
 const createSmallId = init({ length: 7 });
 
@@ -76,10 +78,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
         "add-user": addUserToMailbox.bind(null, userAccess.role),
         "remove-user": removeUserFromMailbox.bind(null, userAccess.role),
         "create-temp-alias": createTempAlias,
+        "set-custom-domain-send": setCustomDomainCustomSend,
+        "set-custom-domain-dkim": setCustomDomainDKIM,
     } as const;
 
 
     try {
+        if (!(type in results)) return new Response("Not allowed", { status: 403 });
         const result = await results[type as keyof typeof results](mailboxId, data);
         if (!result) return new Response("Not allowed", { status: 403 });
 
@@ -98,6 +103,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
             db
                 .select()
                 .from(MailboxCustomDomain)
+                .leftJoin(
+                    MailboxCustomDomainCustomSend,
+                    eq(MailboxCustomDomainCustomSend.id, MailboxCustomDomain.id),
+                )
                 .where(and(eq(MailboxCustomDomain.mailboxId, mailboxId), gte(MailboxCustomDomain.updatedAt, date))),
             db
                 .select()
@@ -130,10 +139,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
             sync: {
                 mailboxes: mailbox ? [mailbox] : [],
                 mailboxAliases: mailboxAliases,
-                mailboxCustomDomains: mailboxCustomDomains,
                 mailboxCategories: mailboxCategories,
                 tempAliases: tempAliases,
                 mailboxesForUser: mailboxesForUser,
+                mailboxCustomDomains: mailboxCustomDomains.map(({ mailbox_custom_domain: customDomain, mailbox_custom_domain_custom_send: customSend }) => ({
+                    id: customDomain.id,
+                    mailboxId: customDomain.mailboxId,
+                    addedAt: customDomain.addedAt,
+                    updatedAt: customDomain.updatedAt,
+                    domain: customDomain.domain,
+                    // dkimPrivateKey: customDomain.dkimPrivateKey,
+                    dkimSelector: customDomain.dkimSelector,
+                    isDeleted: customDomain.isDeleted,
+                    customSend: customSend ? {
+                        url: customSend.url,
+                        type: customSend.type,
+                        // key: customSend.key,
+                    } : null,
+                })),
             }
         } satisfies MappedPossibleDataResponse, { status: 200, headers });
     } catch (error) {
@@ -172,6 +195,8 @@ export type PossibleData =
     | AddUserData
     | RemoveUserData
     | CreateTempAliasData
+    | SetCustomDomainCustomSendApiData
+    | SetCustomDomainDKIMData;
 
 export type MappedPossibleData = {
     "verify-domain": VerifyDomainData;
@@ -185,6 +210,8 @@ export type MappedPossibleData = {
     "add-user": AddUserData;
     "remove-user": RemoveUserData;
     "create-temp-alias": CreateTempAliasData;
+    "set-custom-domain-send": SetCustomDomainCustomSendApiData;
+    "set-custom-domain-dkim": SetCustomDomainDKIMData;
 }
 
 export type MappedPossibleDataResponse =
@@ -198,7 +225,7 @@ export type MappedPossibleDataResponse =
         sync: {
             mailboxes: InferSelectModel<typeof Mailbox>[];
             mailboxAliases: InferSelectModel<typeof MailboxAlias>[];
-            mailboxCustomDomains: InferSelectModel<typeof MailboxCustomDomain>[];
+            mailboxCustomDomains: (Omit<InferSelectModel<typeof MailboxCustomDomain>, 'dkimPrivateKey'> & { customSend: Pick<InferSelectModel<typeof MailboxCustomDomainCustomSend>, 'url' | 'type'> | null })[];
             mailboxCategories: InferSelectModel<typeof MailboxCategory>[];
             tempAliases: InferSelectModel<typeof TempAlias>[];
             mailboxesForUser: InferSelectModel<typeof MailboxForUser>[];
@@ -836,4 +863,113 @@ async function removeUserFromMailbox(currentUserRole: "OWNER" | "ADMIN" | "NONE"
     // revalidateTag(`user-mailbox-access-${mailboxId}-${userId}`);
     // revalidateTag(`user-mailboxes-${userId}`);
     return { success: `Removed @${proposedUser.username} from this mailbox` }
+}
+
+export interface SetCustomDomainCustomSendApiData {
+    domainId: string;
+    url: string;
+    key: string;
+    type: "RESEND" | "EMAILTHING" | "DISABLED";
+}
+async function setCustomDomainCustomSend(mailboxId: string, data: SetCustomDomainCustomSendApiData) {
+    const { domainId } = data;
+
+    const [domain] = await db
+        .select()
+        .from(MailboxCustomDomain)
+        .where(and(
+            eq(MailboxCustomDomain.id, domainId),
+            eq(MailboxCustomDomain.mailboxId, mailboxId),
+            eq(MailboxCustomDomain.isDeleted, false),
+        ))
+        .limit(1);
+
+    if (!domain) {
+        return { error: "Domain not found" };
+    }
+
+    if (data.type === "DISABLED") {
+        await db.delete(MailboxCustomDomainCustomSend)
+            .where(eq(MailboxCustomDomainCustomSend.id, domainId))
+            .execute();
+
+        return { success: "Custom API disabled for this domain" }
+
+    }
+    if (!data.url || !data.key) {
+        return { error: "URL and key are required for RESEND and EMAILTHING types" };
+    }
+
+    const encryptedKey = await encryptString(data.key, env.ENCRYPT_SECRET!);
+    await db.insert(MailboxCustomDomainCustomSend)
+        .values({
+            id: domainId,
+            url: data.url,
+            key: encryptedKey,
+            type: data.type,
+        })
+        .onConflictDoUpdate({
+            target: MailboxCustomDomainCustomSend.id,
+            set: {
+                url: data.url,
+                key: encryptedKey,
+                type: data.type,
+                updatedAt: new Date(),
+            }
+        })
+        .execute();
+
+    return { success: "Custom API Set! Try to send an email to validate if it works." }
+}
+
+export interface SetCustomDomainDKIMData {
+    domainId: string;
+    selector?: string;
+    privateKey?: string;
+    deleteDKIM?: boolean;
+}
+async function setCustomDomainDKIM(mailboxId: string, data: SetCustomDomainDKIMData) {
+    const { domainId } = data;
+
+    const [domain] = await db
+        .select()
+        .from(MailboxCustomDomain)
+        .where(and(
+            eq(MailboxCustomDomain.id, domainId),
+            eq(MailboxCustomDomain.mailboxId, mailboxId),
+            eq(MailboxCustomDomain.isDeleted, false),
+        ))
+        .limit(1);
+
+    if (!domain) {
+        return { error: "Domain not found" };
+    }
+
+    if (data.deleteDKIM) {
+        await db.update(MailboxCustomDomain)
+            .set({
+                dkimSelector: null,
+                dkimPrivateKey: null,
+                updatedAt: new Date(),
+            })
+            .where(eq(MailboxCustomDomain.id, domainId))
+            .execute();
+
+        return { success: "DKIM settings deleted for this domain" }
+    }
+
+    if (!data.selector || !data.privateKey) {
+        return { error: "Selector and private key are required" };
+    }
+
+    await db.update(MailboxCustomDomain)
+        .set({
+            dkimSelector: data.selector,
+            dkimPrivateKey: await encryptString(data.privateKey, env.ENCRYPT_SECRET!),
+            updatedAt: new Date(),
+        })
+        .where(eq(MailboxCustomDomain.id, domainId))
+        .execute();
+
+    return { success: "DKIM settings updated!" }
 }

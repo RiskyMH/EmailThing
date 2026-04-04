@@ -37,6 +37,7 @@ export const relations = defineRelations(schema, (r) => ({
   },
   MailboxCustomDomain: {
     mailbox: r.one.Mailbox({ from: r.MailboxCustomDomain.mailboxId, to: r.Mailbox.id }),
+    customSends: r.one.MailboxCustomDomainCustomSend({ from: r.MailboxCustomDomain.id, to: r.MailboxCustomDomainCustomSend.id }),
   },
   MailboxTokens: {
     mailbox: r.one.Mailbox({ from: r.MailboxTokens.mailboxId, to: r.Mailbox.id }),

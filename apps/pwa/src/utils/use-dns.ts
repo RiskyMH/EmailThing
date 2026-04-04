@@ -36,3 +36,11 @@ export default function useMX(domain: string) {
         shouldRetryOnError: false,
     });
 }
+
+export const getTXT = async (name: string): Promise<string[] | null> => {
+    const txt = await dns(name, "txt");
+    const txtRecords = txt?.filter((a: any) => a.type === 16).map((a: any) => a.data) || [];
+    if (txtRecords.length) return txtRecords;
+
+    return null;
+}
