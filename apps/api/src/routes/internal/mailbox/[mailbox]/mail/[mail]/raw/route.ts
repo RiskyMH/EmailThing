@@ -5,7 +5,7 @@ import { getSignedUrl } from "@/utils/s3";
 import { and, eq } from "drizzle-orm";
 
 
-export async function GET(request: Request, { params }: { params: Promise<{ mailbox: string, mail: string }> }) {
+export async function GET(request: Bun.BunRequest) {
     const origin = request.headers.get("origin");
     const referer = request.headers.get("referer");
     if (!origin || !isValidOrigin(origin)) {
@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ mail
     };
 
     // Get mailbox ID from URL
-    const { mailbox: mailboxId, mail: mailId } = (await params) || (request as any).params;
+    const { mailbox: mailboxId, mail: mailId } = request.params;
 
     const currentUserId = await getSession(request, false, true);
     if (!currentUserId) return Response.json({ message: { error: "Unauthorized" } }, { status: 401, headers });

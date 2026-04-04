@@ -23,7 +23,7 @@ import { encryptString } from "@/utils/encrypt";
 
 const createSmallId = init({ length: 7 });
 
-export async function POST(request: Request, { params }: { params: Promise<{ mailbox: string }> }) {
+export async function POST(request: Bun.BunRequest) {
     const origin = request.headers.get("origin");
     if (!origin || !isValidOrigin(origin)) {
         return new Response("Not allowed", { status: 403 });
@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ mai
     };
 
     // Get mailbox ID from URL
-    const { mailbox: mailboxId } = (await params) || (request as any).params;
+    const { mailbox: mailboxId } = request.params;
 
     // Get type from search param
     const type = new URL(request.url).searchParams.get("type") as keyof MappedPossibleData | null;

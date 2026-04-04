@@ -8,9 +8,10 @@ export async function POST(request: Bun.BunRequest) {
             email_id: string;
         };
     };
-    const emailthingKey = request.params.emailthing_key;
-    const resendKey = request.params.resend_key;
-    const categoryId = request.params.category_id;
+    const params = new URL(request.url).searchParams;
+    const emailthingKey = params.get("emailthing_key");
+    const resendKey = params.get("resend_key");
+    const categoryId = params.get("category_id");
 
     if (event.type === 'email.received') {
         const res = await fetch(`https://api.resend.com/emails/receiving/${event.data.email_id}`, {
@@ -54,7 +55,7 @@ export async function POST(request: Bun.BunRequest) {
                 raw: rawEmail,
                 from: emailData.from,
                 to: emailData.to[0],
-                categoryId,
+                category_id: categoryId,
             }),
         });
 
