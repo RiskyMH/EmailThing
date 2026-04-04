@@ -1,5 +1,6 @@
 import * as api_v0_whoami from "./routes/v0/whoami/route.ts";
 import * as api_v0_send from "./routes/v0/send/route.ts";
+import * as api_v0_receive_email_resend from "./routes/v0/receive-email/resend/route.ts";
 import * as api_v0_receive_email from "./routes/v0/receive-email/route.ts";
 import * as api_v0 from "./routes/v0/route.ts";
 import * as api_invite from "./routes/invite/route.ts";
@@ -24,6 +25,7 @@ import * as api_cron_clean_mail from "./routes/cron/clean-mail/route.ts";
 export default {
     "/api/v0/whoami": api_v0_whoami,
     "/api/v0/send": api_v0_send,
+    "/api/v0/receive-email/resend": api_v0_receive_email_resend,
     "/api/v0/receive-email": api_v0_receive_email,
     "/api/v0": api_v0,
     "/api/invite": api_invite,

@@ -199,7 +199,7 @@ export async function POST(request: Request) {
     }
 
     for (const attachment of email.attachments) {
-        const name = attachment.filename || attachment.mimeType || createId();
+        const name = attachment.filename || attachment.contentId || attachment.mimeType || createId();
 
         const attContent = typeof attachment.content === "string" ? Buffer.from(attachment.content) : attachment.content;
         const attId = createId();
