@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:canary-alpine AS builder
+FROM oven/bun:alpine AS builder
 
 WORKDIR /app
 
@@ -8,10 +8,9 @@ COPY apps ./apps
 COPY packages ./packages
 COPY patches ./patches
 
-RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
+RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile && bunx bun@latest --version
 
-
-RUN cd apps/api && bun run build:standalone
+RUN cd apps/api && bunx bun@latest --bun run build:standalone
 
 # Production stage - minimal alpine
 FROM alpine:latest AS production

@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:canary-alpine AS builder
+FROM oven/bun:alpine AS builder
 
 WORKDIR /app
 
@@ -10,12 +10,12 @@ COPY apps ./apps
 COPY packages ./packages
 COPY patches ./patches
 
-RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
+RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile && bunx bun@latest --version
 
 
 
 RUN cd apps/pwa && GIT_SHA=$GIT_SHA bun run build
-RUN cd apps/pwa && bun build --compile serve-dist.ts --outfile=serve-dist --bytecode --production --format=esm
+RUN cd apps/pwa && bunx bun@latest build --compile serve-dist.ts --outfile=serve-dist --bytecode --production --format=esm
 
 # Production stage - minimal http server
 FROM alpine:latest AS production
