@@ -25,7 +25,7 @@
     "@paralleldrive/cuid2": "3.0.0",
     "@riskymh/aws": "^0.0.9",
     "@simplewebauthn/server": "13.2.2",
-    "drizzle-orm": "beta",
+    "drizzle-orm": "^1.0.0-rc.1",
     "jsdom": "^29.0.1",
     "mailauth": "^4.13.1",
     "marked": "^17.0.5",
@@ -40,7 +40,7 @@
     "@types/jsdom": "^28.0.1",
     "@types/turndown": "^5.0.6",
     "@types/ua-parser-js": "^0.7.39",
-    "drizzle-kit": "beta"
+    "drizzle-kit": "^1.0.0-rc.1"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

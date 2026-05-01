@@ -100,7 +100,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/turndown": "^5.0.6",
     "@types/ua-parser-js": "^0.7.39",
-    "drizzle-orm": "beta",
+    "drizzle-orm": "^1.0.0-rc.1",
     "shiki": "^3.23.0",
     "typescript": "~5.9.3"
   }

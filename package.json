@@ -21,7 +21,7 @@
     "@types/bun": "catalog:"
   },
   "catalog": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.3.13"
   },
   "trustedDependencies": [
     "@emailthing/web-pwa"

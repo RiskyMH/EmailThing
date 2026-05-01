@@ -6,8 +6,8 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "3.0.0",
-    "drizzle-kit": "beta",
-    "drizzle-orm": "beta",
+    "drizzle-kit": "^1.0.0-rc.1",
+    "drizzle-orm": "^1.0.0-rc.1",
     "pg": "^8.20.0"
   },
   "devDependencies": {
