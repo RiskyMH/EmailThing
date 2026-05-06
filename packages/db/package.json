@@ -6,12 +6,12 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "3.0.0",
-    "drizzle-kit": "^1.0.0-rc.1",
-    "drizzle-orm": "^1.0.0-rc.1",
+    "drizzle-kit": "^1.0.0-rc.2-e38a2ba",
+    "drizzle-orm": "^1.0.0-rc.2-e38a2ba",
     "pg": "^8.20.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.18.0"
+    "@types/pg": "^8.20.0"
   },
   "main": "index.ts",
   "typings": "index.ts",
