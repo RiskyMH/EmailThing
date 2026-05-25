@@ -244,6 +244,12 @@ export async function POST(request: Request) {
     });
 }
 
+/** Cleans email addresses: `a.b+c@d.com` -> `ab@d.com` */
+const cleanEmail = (email: string): string =>
+    email.replace(/^[^@]+/, (username) =>
+        username.split('+')[0]?.replace(/\./g, '') || username
+    );
+
 async function getMailbox({ internal, zone, auth, to, headers }: { internal: boolean; zone: string; auth: string; to: string; headers: Headers }) {
     // work out which mailbox to put it in
 
@@ -274,7 +280,7 @@ async function getMailbox({ internal, zone, auth, to, headers }: { internal: boo
             .from(TempAlias)
             .where(
                 and(
-                    eq(sql`lower(${TempAlias.alias})`, sql`lower(${to})`),
+                    eq(sql`lower(${TempAlias.alias})`, sql`lower(${cleanEmail(to)})`),
                     gt(TempAlias.expiresAt, new Date()),
                     eq(TempAlias.isDeleted, false)
                 )
@@ -285,7 +291,7 @@ async function getMailbox({ internal, zone, auth, to, headers }: { internal: boo
             .from(MailboxAlias)
             .where(
                 and(
-                    eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${to})`),
+                    eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${cleanEmail(to)})`),
                     eq(MailboxAlias.isDeleted, false)
                 )
             )
