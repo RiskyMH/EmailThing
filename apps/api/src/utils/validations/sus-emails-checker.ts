@@ -94,6 +94,7 @@ const genericBrandWords = [
     "json",
     "motion",
     "paper",
+    "astro",
 ];
 
 if (import.meta.main) {
