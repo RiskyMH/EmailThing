@@ -134,7 +134,7 @@ export default function OnboardingWelcome() {
                             type="email"
                             required
                             disabled={pending}
-                            defaultValue={currentUser?.backupEmail}
+                            defaultValue={currentUser?.backupEmail || undefined}
                         />
 
                         <Button type="submit" disabled={pending} className="gap-2" variant={showFull ? "default" : "secondary"}>
