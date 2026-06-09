@@ -170,9 +170,11 @@ function MailItem({ mailId }: { mailId?: string }) {
         onUpdateEmail={updateEmail}
       />
       <div className="flex gap-3 flex-col overflow-y-auto rounded-lg pt-3 p-3 [.emailslist_&]:p-0 [.emailslist_&]:pt-3 [.emailslist_&]:rounded-none">
-        <MailboxTitle mailboxId={mailboxId} title={email.subject} />
+        <MailboxTitle mailboxId={mailboxId} title={email.subject || null} />
 
-        <h1 className="mt-3 break-words px-3 font-bold text-2xl @xl:text-3xl">{email.subject}</h1>
+        <h1 className="mt-3 break-words px-3 font-bold text-2xl @xl:text-3xl">
+          {email.subject || <span className="italic">(no subject)</span>}
+        </h1>
         <div className="flex flex-col gap-3 bg-card [.emailslist_&]:rounded-none rounded-md">
           {/* from info and gravatar */}
           <div className="flex gap-2 p-3 pb-0">
