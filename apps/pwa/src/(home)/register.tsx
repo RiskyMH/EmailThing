@@ -122,6 +122,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const searchParams = useSearchParams()[0];
   const inviteCode = searchParams.get("invite");
   const apiUrl = searchParams.get("api") || API_URL;
+  const username = searchParams.get("username");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -234,6 +235,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                   autoCorrect="off"
                   className="w-full bg-transparent focus-visible:outline-none placeholder:text-muted-foreground"
                   disabled={isPending}
+                  defaultValue={username || undefined}
                   required
                 />
                 <span>@emailthing.xyz</span>

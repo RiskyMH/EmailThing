@@ -15,16 +15,20 @@ export async function GET(request: Request) {
 
   const inviteCode = createId();
 
+  const url = new URL(request.url);
+  const bypassUsername = url.searchParams.get("username")?.slice(0, 20) || undefined;
+
   await db
     .insert(InviteCode)
     .values({
       code: inviteCode,
       expiresAt: new Date(Date.now() + 86400000),
       createdBy: "p56vs4esg0tp4pys8l7dyszs",
+      bypassUsername
     })
     .execute();
 
-  return new Response(`https://emailthing.app/register?invite=${inviteCode}`, {
+  return new Response(`https://emailthing.app/register?invite=${inviteCode}${bypassUsername ? `&username=${encodeURIComponent(bypassUsername)}` : ''}`, {
     status: 200,
     headers: { "Content-Type": "text/plain" },
   });

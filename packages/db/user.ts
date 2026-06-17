@@ -134,4 +134,5 @@ export const InviteCode = pgTable("invite_codes", {
     expiresAt: timestamp("expires_at"),
     usedBy: varchar("used_by", { length: 25 }),
     usedAt: timestamp("used_at"),
+    bypassUsername: varchar("bypass_username", { length: 20 }),
 });

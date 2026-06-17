@@ -72,7 +72,7 @@ export async function POST(request: Request) {
 
         // check if invite code is valid
         const [invite] = await db
-            .select({ expiresAt: InviteCode.expiresAt, usedAt: InviteCode.usedAt })
+            .select({ expiresAt: InviteCode.expiresAt, usedAt: InviteCode.usedAt, username: InviteCode.bypassUsername })
             .from(InviteCode)
             .where(and(eq(InviteCode.code, inviteCode), gte(InviteCode.expiresAt, new Date()), isNull(InviteCode.usedAt)))
             .limit(1);
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
         const [existingUser] = await db
             .select()
             .from(User)
-            .where(eq(sql`lower(${User.username})`, sql`lower(${parsedData.data.username})`))
+            .where(eq(sql`lower(${User.username})`, sql`lower(${username})`))
             .limit(1);
 
         if (existingUser) {
@@ -93,17 +93,19 @@ export async function POST(request: Request) {
             return ResponseJson({ error: "Username already taken" }, { status: 401 });
         }
 
-        const validationError = validateAlias(parsedData.data.username);
-        if (validationError) {
-            registerRatelimitLogFailed(ip);
-            return ResponseJson(validationError, { status: 401 });
+        if (!invite.username || invite.username !== username) {
+            const validationError = validateAlias(username);
+            if (validationError) {
+                registerRatelimitLogFailed(ip);
+                return ResponseJson(validationError, { status: 401 });
+            }
         }
 
         // check email alaises too
         const [existingEmail] = await db
             .select()
             .from(MailboxAlias)
-            .where(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${`${parsedData.data.username}@emailthing.xyz`})`))
+            .where(eq(sql`lower(${MailboxAlias.alias})`, sql`lower(${`${username}@emailthing.xyz`})`))
             .limit(1);
 
         if (existingEmail) {
@@ -132,9 +134,9 @@ export async function POST(request: Request) {
         await db.batchUpdate([
             db.insert(User).values({
                 id: userId,
-                username: parsedData.data.username,
-                password: await createPasswordHash(parsedData.data.password),
-                email: `${parsedData.data.username}@emailthing.xyz`,
+                username: username,
+                password: await createPasswordHash(password),
+                email: `${username}@emailthing.xyz`,
             }),
 
             db.insert(Mailbox).values({
@@ -149,9 +151,9 @@ export async function POST(request: Request) {
 
             db.insert(MailboxAlias).values({
                 mailboxId,
-                alias: `${parsedData.data.username}@emailthing.xyz`,
+                alias: `${username}@emailthing.xyz`,
                 default: true,
-                name: parsedData.data.username,
+                name: username,
             }),
 
             // invalidate invite code
@@ -163,7 +165,7 @@ export async function POST(request: Request) {
                 })
                 .where(eq(InviteCode.code, inviteCode)),
 
-            ...emailUser({ userId, mailboxId, username: parsedData.data.username }),
+            ...emailUser({ userId, mailboxId, username }),
 
             db.insert(UserSession).values({
                 userId: userId,
