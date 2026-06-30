@@ -19,8 +19,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       // Initialize DB and load demo data
       try {
         await initializeDB();
-        if (sessionStorage.getItem("demo") !== "v1") await loadDemoData();
-        sessionStorage.setItem("demo", "v1");
+        if (!document.cookie.includes("demo=v1")) await loadDemoData();
+        document.cookie = "demo=v1; path=/; SameSite=Lax";
       } catch (error) {
         console.error("Failed to initialize:", error);
       }

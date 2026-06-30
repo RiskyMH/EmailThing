@@ -265,7 +265,7 @@ const forceIndexDBVersion = "v1.1c";
 
 export async function initializeDB() {
   const v = localStorage.getItem(forceIndexDBKey);
-  if (v === undefined) {
+  if (!v) {
     localStorage.setItem(forceIndexDBKey, forceIndexDBVersion);
   } else if (v !== forceIndexDBVersion) {
     await asyncDeleteIndexDB("EmailDB");
