@@ -123,6 +123,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const inviteCode = searchParams.get("invite");
   const apiUrl = searchParams.get("api") || API_URL;
   const username = searchParams.get("username");
+  const from = searchParams.get("from");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -204,16 +205,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       if (typeof window !== "undefined" && document.cookie.includes("mailboxId=")) {
         const { db, initializeDB } = await import("@/utils/data/db");
         await initializeDB();
+        if (from) {
+          if (from.startsWith("/mail/")) {
+            const mailboxes = (await db.mailboxes.toArray()).map(m => m.id);
+            const id = from.split("/")[2];
+            if (mailboxes.includes(id)) {
+              return void navigate(from);
+            }
+          } else {
+            return void navigate(from);
+          }
+        }
+
         const mailboxId = document.cookie.split("mailboxId=")[1].split(";")[0];
         const mailbox = await db.mailboxes.get(mailboxId);
         if (mailbox) {
-          navigate(`/mail/${mailboxId}`);
+          return void navigate(`/mail/${mailboxId}`);
         }
       }
     }
 
     checkMailboxId();
-  }, [navigate]);
+  }, [navigate, from]);
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
