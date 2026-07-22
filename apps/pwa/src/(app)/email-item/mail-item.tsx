@@ -194,7 +194,7 @@ function MailItem({ mailId }: { mailId?: string }) {
               </div>
               <div className="flex text-muted-foreground text-sm">
                 <p className="self-center overflow-hidden break-words">
-                  to {email.recipients.map((e) => e.name || e.address).join(", ")}
+                  to {email.recipients.map((e) => e.name || e.address || "<unknown>").join(", ")}
                 </p>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -211,7 +211,7 @@ function MailItem({ mailId }: { mailId?: string }) {
                       <div className="grid grid-cols-5 items-center gap-4">
                         <p className="text-end text-muted-foreground">from:</p>
                         <p className="col-span-4 flex gap-1 overflow-y-auto whitespace-nowrap ">
-                          {email.sender?.name || email.sender?.address}
+                          {email.sender?.name || email.sender?.address || "<unknown sender>"}
                           {email.sender?.name && (
                             <span className="text-muted-foreground">
                               &lt;{email.sender.address}
@@ -251,7 +251,7 @@ function MailItem({ mailId }: { mailId?: string }) {
                               .filter((e) => e.cc)
                               .map((e) => (
                                 <p key={e.address} className="flex gap-1 whitespace-nowrap">
-                                  {e.name || e.address}
+                                  {e.name || e.address || "<unknown>"}
                                   {e.name && (
                                     <span className="text-muted-foreground">
                                       &lt;
@@ -275,10 +275,12 @@ function MailItem({ mailId }: { mailId?: string }) {
                       </div>
 
                       {/* subject */}
-                      <div className="grid grid-cols-5 items-center gap-4">
-                        <p className="text-end text-muted-foreground">subject:</p>
-                        <p className="col-span-4 overflow-y-auto">{email.subject}</p>
-                      </div>
+                      {email.subject && (
+                        <div className="grid grid-cols-5 items-center gap-4">
+                          <p className="text-end text-muted-foreground">subject:</p>
+                          <p className="col-span-4 overflow-y-auto">{email.subject}</p>
+                        </div>
+                      )}
 
                       {/* reply to */}
                       {!!email.replyTo && (
