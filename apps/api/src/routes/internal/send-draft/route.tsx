@@ -159,11 +159,17 @@ export async function POST(request: Request) {
         contentType: "text/plain",
         data: body,
     });
-    if (html) email.addMessage({
-        contentType: "text/html",
-        encoding: "base64",
-        data: Buffer.from(html).toString("base64"),
-    });
+    if (html) {
+        const base64 = Buffer.from(html).toString("base64");
+        const chunked = base64.match(/.{1,76}/g)?.join('\r\n');
+        email.addMessage({
+            contentType: "text/html",
+            headers: {
+                "Content-Transfer-Encoding": "base64"
+            },
+            data: chunked || base64,
+        });
+    }
     if (headers)
         email.setHeaders(
             headers.reduce(
