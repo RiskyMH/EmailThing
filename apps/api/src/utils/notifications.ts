@@ -15,7 +15,7 @@ export async function notifyMailbox(
         })
         .from(UserNotification)
         .leftJoin(MailboxForUser, eq(UserNotification.userId, MailboxForUser.userId))
-        .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(UserNotification.isDeleted, false)))
+        .where(and(eq(MailboxForUser.mailboxId, mailboxId), eq(UserNotification.isDeleted, false), eq(MailboxForUser.isDeleted, false)))
         .execute();
 
     await Promise.all(
