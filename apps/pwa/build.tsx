@@ -5,7 +5,6 @@ import twPlugin from "bun-plugin-tailwind";
 import { existsSync } from "node:fs";
 import { cp, readdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { reactCompiler } from "./src/build-plugins/react-compiler";
 
 // Helper function to format file sizes
 const formatFileSize = (bytes: number): string => {
@@ -40,7 +39,8 @@ const entrypoints = [...new Bun.Glob("src/*.html").scanSync(import.meta.dir)]
 const result = await build({
   entrypoints,
   outdir,
-  plugins: [twPlugin, reactCompiler()],
+  plugins: [twPlugin],
+  reactCompiler: true,
   // packages: 'external',
   minify: true,
   target: "browser",
