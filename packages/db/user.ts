@@ -100,7 +100,7 @@ export const UserNotification = pgTable(
             .primaryKey()
             .unique()
             .$defaultFn(() => createId()),
-        endpoint: varchar("endpoint", { length: 512 }).notNull().unique(),
+        endpoint: varchar("endpoint", { length: 512 }).notNull(),
         userId: varchar("user_id", { length: 25 })
             .notNull()
             .references(() => User.id, { onDelete: "cascade" }),
@@ -116,6 +116,7 @@ export const UserNotification = pgTable(
         return {
             userIdx: index("notification_user_id").on(table.userId),
             userCreatedIdx: index("notification_user_created_idx").on(table.userId, table.createdAt),
+            userEndpointUnique: uniqueIndex("notification_user_endpoint_unique").on(table.userId, table.endpoint),
         };
     },
 );
