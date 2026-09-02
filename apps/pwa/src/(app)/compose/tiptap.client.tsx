@@ -137,3 +137,6 @@ function getJSON(data?: string) {
     return data;
   }
 }
+
+// maybe make this more ensured in the bundle
+export { useRef } from "react";
