@@ -1,5 +1,5 @@
 import { db, MailboxForUser, MailboxTokens, PasskeyCredentials, UserSession } from "@/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, lt } from "drizzle-orm";
 import { UAParser } from "ua-parser-js";
 import { getSession, isValidOrigin } from "../tools";
 import { getSessionTokenLastUse } from "@/utils/redis-minor";
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
                 refreshTokenExpiresAt: UserSession.refreshTokenExpiresAt,
             })
             .from(UserSession)
-            .where(eq(UserSession.userId, currentUserid));
+            .where(and(eq(UserSession.userId, currentUserid), gte(UserSession.refreshTokenExpiresAt, new Date())));
 
         const lastUsedSessions = await Promise.all(sessions.map((s) => getSessionTokenLastUse(s.id)));
 
