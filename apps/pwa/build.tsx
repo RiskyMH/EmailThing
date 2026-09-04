@@ -56,6 +56,7 @@ const result = await build({
     chunk: "/_bun/static/[dir]/[name].[hash].[ext]",
     asset: "/[dir]/[name].[hash].[ext]",
   },
+  minChunkSize: 16 * 1024,
 });
 
 await cp(path.join(import.meta.dir, "./public"), path.join(import.meta.dir, "./dist"), {
@@ -189,16 +190,28 @@ async function computeModulePreloadsForHtml(html: string): Promise<string> {
   return Array.from(collected).map((rel) => `<link rel=\"modulepreload\" crossorigin href=\"/_bun/static/${rel}\" fetchpriority="low">`).join("");
 }
 
+// for (const [name, html] of Object.entries(templates)) {
+//   // for now only app.html should get modulepreloads
+//   // for homepage, it scales weirdly and the css doesn't get imported as quickly 
+//   // (so much other files get shared)
+//   if (name !== "app.html") continue;
+//   const links = await computeModulePreloadsForHtml(html);
+//   if (links) {
+//     const updated = html.replace('</head>', `${links}</head>`);
+//     templates[name] = updated;
+//   }
+// }
+
+// same as above, but now that bun does it automatically, we can just add fetchpriority="low" to the modulepreload links 
+// & for same reasons not have homepage with it
 for (const [name, html] of Object.entries(templates)) {
-  // for now only app.html should get modulepreloads
-  // for homepage, it scales weirdly and the css doesn't get imported as quickly 
-  // (so much other files get shared)
-  if (name !== "app.html") continue;
-  const links = await computeModulePreloadsForHtml(html);
-  if (links) {
-    const updated = html.replace('</head>', `${links}</head>`);
+  if (name !== "app.html") {
+    const updated = html.replace(/<link rel="modulepreload"[^>]*>/g, "");
     templates[name] = updated;
+    continue;
   }
+  const updated = html.replace(/<link rel="modulepreload"/g, '<link rel="modulepreload" fetchpriority="low"');
+  templates[name] = updated;
 }
 
 const { query, dataRoutes } = createStaticHandler(routes);

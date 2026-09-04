@@ -64,7 +64,7 @@ export default function UserSettingsEmailthingMe() {
         </div>
         {/* <Switch id="enabled" defaultChecked={emailmeEnabled} /> */}
         <form action={changePublicEmailStatus as any}>
-          <input name="enabled" value={user?.publicContactPage ? "false" : "true"} hidden />
+          <input name="enabled" value={user?.publicContactPage ? "false" : "true"} hidden readOnly />
           <ClientSwitch
             id="enabled"
             checked={!!user?.publicContactPage}
