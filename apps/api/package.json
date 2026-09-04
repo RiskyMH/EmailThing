@@ -33,7 +33,7 @@
     "postal-mime": "^2.7.6",
     "turndown": "^7.2.4",
     "ua-parser-js": "^2.0.10",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
