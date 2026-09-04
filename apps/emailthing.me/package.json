@@ -19,7 +19,7 @@
     "lucide-react": "^0.577.0",
     "marked": "^17.0.6",
     "mimetext": "^3.0.28",
-    "next": "^16.3.1",
+    "next": "^16.3.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "sonner": "^2.0.8",
@@ -28,11 +28,11 @@
   "devDependencies": {
     "@types/node": "^25.9.5",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^19.2.7",
     "@types/turndown": "^5.0.6",
     "@types/ua-parser-js": "^0.7.39",
     "autoprefixer": "^10.5.4",
-    "postcss": "^8.5.26",
+    "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   },
