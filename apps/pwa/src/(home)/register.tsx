@@ -49,7 +49,7 @@ export default function RegisterPage() {
             </p>
           ) : (
             <p className="text-muted-foreground text-sm text">
-              Currently you need an invite code, please{" "}
+              Currently you need an invite link, please{" "}
               <a
                 href="mailto:emailthing@riskymh.dev"
                 className="font-bold hover:underline"
@@ -130,7 +130,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     startTransition(async () => {
       try {
         if (!inviteCode) {
-          return void toast.error("You need an invite code to signup. Join the Discord to get!", {
+          return void toast.error("You need an invite link to signup. Join the Discord to get!", {
             action: (
               <a
                 href={DISCORD_URL}
