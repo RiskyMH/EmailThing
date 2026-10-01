@@ -22,7 +22,7 @@
     "@types/bun": "catalog:"
   },
   "catalog": {
-    "@types/bun": "npm:bun-types@^1.4.1"
+    "@types/bun": "npm:bun-types@^1.4.2"
   },
   "trustedDependencies": [
     "@emailthing/web-pwa"
