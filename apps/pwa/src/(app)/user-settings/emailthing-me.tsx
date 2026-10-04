@@ -49,7 +49,7 @@ export default function UserSettingsEmailthingMe() {
             Enable public page
           </Label>
           <p className="text-muted-foreground text-sm">
-            If you enable this, anyone will be able to send you email easier.
+            If you enable this, anyone will be able to send you emails easier.
           </p>
           {user?.publicContactPage ? (
             <a

@@ -250,7 +250,7 @@ export function AddCustomDomainForm({ mailboxId, initialDomain = "" }: { mailbox
       <>
         <SmartDrawerHeader>
           <SmartDrawerTitle>Add Custom Domain</SmartDrawerTitle>
-          <SmartDrawerDescription>Enter your domain to begin</SmartDrawerDescription>
+          <SmartDrawerDescription>Enter your domain to begin. Note that right now the domain needs to be using Cloudflare DNS.</SmartDrawerDescription>
         </SmartDrawerHeader>
 
         <form
