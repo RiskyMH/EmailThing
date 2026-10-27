@@ -130,10 +130,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     startTransition(async () => {
       try {
         if (!inviteCode) {
-          return void toast.error("You need an invite link to signup. Join the Discord to get!", {
+          return void toast.error(<>You need an invite link to signup. Join the Discord and run <code className="font-semibold">/get-emailthing</code> to get!</>, {
             action: (
               <a
-                href={DISCORD_URL}
+                // href={DISCORD_URL}
+                href="https://discord.gg/9gjpjKZmPM" // separate one to put to bot commands channel to run command
                 target="blank"
                 className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-secondary p-2 hover:bg-secondary/80"
               >
